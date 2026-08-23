@@ -37,6 +37,7 @@ brand/
   此在-路演模板.pptx        六种页型，Keynote / PowerPoint 可直接编辑
   svg/                     标识与小在的矢量（含四种表情、反白、icon）
   成品图/                   路演用的 7 张导出图
+  硬件资源包/               ⭐ 给硬件/工业设计与供应商的交付包（自带 README 与规范页）
 CurrentHRVDemo/            Swift / HealthKit HRV demo（Phase 2 入口）
 ```
 
