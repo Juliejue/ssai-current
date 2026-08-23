@@ -1,0 +1,917 @@
+<title>此在 路演物料</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#F0F3F2; --card:#FFFFFF; --sunk:#E8EDEC;
+  --ink:#122A2E; --ink-soft:#5A6E70; --ink-faint:#8CA0A0;
+  --rule:#D6DEDC; --rule-soft:#E5EBE9;
+  --water:#1E6E72; --water-wash:#DFEBEA;
+  --sun:#C4703C; --sun-wash:#F6E9DF;
+  --shadow:0 1px 2px rgba(18,42,46,.04),0 10px 28px -20px rgba(18,42,46,.30);
+  --board-shadow:0 2px 6px rgba(18,42,46,.06),0 18px 44px -26px rgba(18,42,46,.42);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1A1C; --card:#142428; --sunk:#101E21;
+    --ink:#E6EDEB; --ink-soft:#96AAAA; --ink-faint:#6B8080;
+    --rule:#26383B; --rule-soft:#1C2C2F;
+    --water:#5FA9AC; --water-wash:#153337;
+    --sun:#D98A52; --sun-wash:#33241A;
+    --shadow:0 1px 2px rgba(0,0,0,.34),0 10px 28px -20px rgba(0,0,0,.8);
+    --board-shadow:0 2px 6px rgba(0,0,0,.4),0 18px 44px -26px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1A1C; --card:#142428; --sunk:#101E21;
+  --ink:#E6EDEB; --ink-soft:#96AAAA; --ink-faint:#6B8080;
+  --rule:#26383B; --rule-soft:#1C2C2F;
+  --water:#5FA9AC; --water-wash:#153337;
+  --sun:#D98A52; --sun-wash:#33241A;
+  --shadow:0 1px 2px rgba(0,0,0,.34),0 10px 28px -20px rgba(0,0,0,.8);
+  --board-shadow:0 2px 6px rgba(0,0,0,.4),0 18px 44px -26px rgba(0,0,0,.9);
+}
+
+/* 物料本身永远是浅色的 —— 投影和印刷都在浅底上 */
+.board{
+  --b-paper:#F0F3F2; --b-card:#FFFFFF; --b-sunk:#E8EDEC;
+  --b-ink:#122A2E; --b-soft:#5A6E70; --b-faint:#8CA0A0;
+  --b-rule:#D6DEDC; --b-rule-soft:#E5EBE9;
+  --b-water:#1E6E72; --b-sun:#C4703C; --b-sun-wash:#F6E9DF;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Noto Sans SC","PingFang SC","Hiragino Sans GB",system-ui,sans-serif;
+  font-weight:300;line-height:1.78;-webkit-font-smoothing:antialiased;
+}
+.shell{max-width:1180px;margin:0 auto;padding:0 30px 120px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;
+  letter-spacing:.17em;text-transform:uppercase;color:var(--ink-faint);
+}
+h1,h2,h3{font-family:"Noto Serif SC",serif;font-weight:500;text-wrap:balance}
+
+/* ---------- page chrome ---------- */
+header{padding:76px 0 0;display:grid;gap:34px}
+.mh-top{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  padding-bottom:20px;border-bottom:1px solid var(--rule);
+}
+.mh-lock{display:flex;align-items:center;gap:14px}
+.mh-lock svg{height:40px;width:auto;flex:none}
+.mh-words{display:grid;gap:2px;line-height:1.22}
+.mh-words .cn{font-family:"Noto Serif SC",serif;font-weight:500;font-size:19px;letter-spacing:.28em}
+.mh-words .en{
+  font-family:"Newsreader",serif;font-weight:300;font-size:10px;letter-spacing:.44em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+header h1{font-size:clamp(30px,5vw,46px);line-height:1.3;margin:0;max-width:15em}
+header .lede{max-width:34em;margin:0;font-size:15.5px;color:var(--ink-soft)}
+header .lede strong{font-weight:500;color:var(--ink)}
+
+section.grp{padding-top:88px}
+.grp-head{display:grid;gap:9px;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--rule)}
+.grp-head .n{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;color:var(--water)}
+.grp-head h2{font-size:24px;margin:0}
+.grp-head p{margin:2px 0 0;font-size:14.5px;color:var(--ink-soft);max-width:40em}
+.spec{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-faint);margin:26px 0 10px;
+}
+
+/* ---------- board frame ---------- */
+.board{
+  container-type:inline-size;
+  position:relative;overflow:hidden;
+  background:var(--b-paper);color:var(--b-ink);
+  border:1px solid var(--rule-soft);border-radius:3px;
+  box-shadow:var(--board-shadow);
+}
+.b169{aspect-ratio:16/9}
+.b34{aspect-ratio:3/4}
+.bA{aspect-ratio:1/1.414}
+.bcard{aspect-ratio:5/3}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media (max-width:820px){.three{grid-template-columns:1fr}}
+
+/* ---------- slide interior ---------- */
+.sl{position:absolute;inset:0;padding:6.2cqw 6.4cqw 5.2cqw;display:grid}
+.sl-top{
+  display:flex;align-items:center;justify-content:space-between;gap:2cqw;
+}
+.sl-lock{display:flex;align-items:center;gap:1.4cqw}
+.sl-lock svg{height:2.9cqw;width:auto}
+.sl-lock .cn{font-family:"Noto Serif SC",serif;font-weight:500;font-size:1.55cqw;letter-spacing:.3em}
+.sl-tag{
+  font-family:"IBM Plex Mono",monospace;font-size:1.05cqw;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--b-faint);
+}
+.sl h3{
+  font-family:"Noto Serif SC",serif;font-weight:500;margin:0;
+  font-size:4.4cqw;line-height:1.32;letter-spacing:.01em;
+}
+.sl .kicker{
+  font-family:"IBM Plex Mono",monospace;font-size:1.1cqw;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--b-water);margin-bottom:1.4cqw;
+}
+.sl p{font-size:1.55cqw;line-height:1.85;color:var(--b-soft);margin:0;max-width:36em}
+.sl p b{font-weight:400;color:var(--b-ink)}
+.sl .warm{color:var(--b-sun)}
+
+/* footer wave = progress */
+.sl-foot{align-self:end;display:grid;gap:.9cqw}
+.sl-foot svg{width:100%;height:auto;display:block}
+.sl-foot .meta{
+  display:flex;justify-content:space-between;
+  font-family:"IBM Plex Mono",monospace;font-size:.95cqw;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--b-faint);
+}
+
+/* cover */
+.cover-sl{align-content:center;justify-items:start;gap:2.4cqw}
+.cover-sl .mark{width:22cqw;height:auto}
+.cover-sl .nm{
+  font-family:"Noto Serif SC",serif;font-weight:500;font-size:7.4cqw;
+  letter-spacing:.26em;line-height:1;
+}
+.cover-sl .en{
+  font-family:"Newsreader",serif;font-weight:300;font-size:1.6cqw;
+  letter-spacing:.52em;text-transform:uppercase;color:var(--b-soft);
+}
+.cover-sl .one{font-size:1.85cqw;color:var(--b-soft);max-width:30em}
+
+/* chapter divider */
+.chap-sl{align-content:center;gap:1.4cqw}
+.chap-sl .no{
+  font-family:"IBM Plex Mono",monospace;font-size:1.3cqw;letter-spacing:.2em;color:var(--b-water);
+}
+.chap-sl h3{font-size:5.6cqw}
+
+/* bullets */
+.bul{display:grid;gap:2.1cqw;margin-top:2.6cqw}
+.bul .it{display:grid;grid-template-columns:2.6cqw 1fr;gap:1.6cqw;align-items:start}
+.bul .d{
+  width:.9cqw;height:.9cqw;border-radius:50%;background:var(--b-water);margin-top:.85cqw;
+}
+.bul .it:first-child .d{background:var(--b-sun)}
+.bul h4{
+  font-family:"Noto Serif SC",serif;font-weight:500;font-size:2.05cqw;margin:0 0 .4cqw;
+}
+.bul p{font-size:1.45cqw}
+
+/* loop diagram */
+.loop{display:flex;align-items:center;gap:1.1cqw;flex-wrap:wrap;margin-top:2.4cqw}
+.loop .st{
+  border:1px solid var(--b-rule);border-radius:1.6cqw;padding:.9cqw 1.4cqw;
+  font-size:1.3cqw;color:var(--b-soft);background:var(--b-card);
+}
+.loop .st.hot{border-color:var(--b-sun);color:var(--b-ink);background:var(--b-sun-wash)}
+.loop .ar{color:var(--b-faint);font-size:1.2cqw}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:2.6cqw;margin-top:3cqw}
+.stat .v{
+  font-family:"IBM Plex Mono",monospace;font-size:4.6cqw;color:var(--b-water);
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.stat .v.sun{color:var(--b-sun)}
+.stat .k{font-size:1.3cqw;color:var(--b-soft);margin-top:.7cqw}
+
+/* phones inside slides */
+.phones{display:grid;grid-template-columns:repeat(4,1fr);gap:1.6cqw;margin-top:2.4cqw;align-items:stretch}
+.phones > div{display:grid;grid-template-rows:1fr auto}
+.ph{
+  background:var(--b-card);border:1px solid var(--b-rule-soft);border-radius:1.4cqw;
+  padding:1.3cqw 1.2cqw;display:grid;gap:.9cqw;align-content:start;
+}
+.ph .pt{display:flex;justify-content:space-between;align-items:center}
+.ph .pt svg{height:1.5cqw;width:auto}
+.ph .pl{font-family:"IBM Plex Mono",monospace;font-size:.72cqw;letter-spacing:.1em;color:var(--b-faint)}
+.ph .ph-h{font-family:"Noto Serif SC",serif;font-weight:500;font-size:1.25cqw;line-height:1.5}
+.ph .ph-p{font-size:.92cqw;line-height:1.7;color:var(--b-soft)}
+.ph .art{background:var(--b-sunk);border-radius:.7cqw;padding:.9cqw;display:grid;place-items:center}
+.ph .art svg{width:100%;max-width:9cqw;height:auto}
+.ph .chips{display:flex;gap:.5cqw;flex-wrap:wrap}
+.ph .chip{border:1px solid var(--b-rule);border-radius:.9cqw;padding:.4cqw .7cqw;font-size:.82cqw;color:var(--b-soft)}
+.ph .chip.on{border-color:var(--b-sun);color:var(--b-ink);background:var(--b-sun-wash)}
+.ph .btn{background:var(--b-ink);color:var(--b-paper);border-radius:1.6cqw;text-align:center;padding:.7cqw;font-size:.9cqw}
+.ph .scaleline{display:flex;gap:.18cqw}
+.ph .scaleline i{height:.5cqw;flex:1;border-radius:.1cqw}
+.ph .delta{font-family:"IBM Plex Mono",monospace;font-size:1.7cqw;color:var(--b-water)}
+.ph-cap{
+  text-align:center;font-family:"IBM Plex Mono",monospace;font-size:.8cqw;
+  color:var(--b-faint);margin-top:.7cqw;letter-spacing:.08em;
+}
+
+/* closing */
+.close-sl{align-content:center;justify-items:center;gap:2.2cqw;text-align:center}
+.close-sl .qr{
+  width:13cqw;height:13cqw;background:var(--b-card);border:1px solid var(--b-rule);
+  border-radius:1cqw;display:grid;place-items:center;
+}
+.close-sl .qr svg{width:78%;height:78%}
+.close-sl h3{font-size:3.4cqw}
+
+/* ---------- poster ---------- */
+.po{position:absolute;inset:0;padding:8cqw 7.4cqw 6.4cqw;display:flex;flex-direction:column}
+.po .top{display:flex;justify-content:space-between;align-items:baseline}
+.po .brand{font-family:"Noto Serif SC",serif;font-weight:500;font-size:2.1cqw;letter-spacing:.34em}
+.po .date{font-family:"IBM Plex Mono",monospace;font-size:1.25cqw;letter-spacing:.14em;color:var(--b-faint)}
+.po .hero{margin:9cqw 0 0;display:grid;justify-items:center;gap:4cqw}
+.po .hero svg{width:56cqw;height:auto}
+.po h3{
+  font-family:"Noto Serif SC",serif;font-weight:500;font-size:5.6cqw;
+  line-height:1.42;margin:0;text-align:center;letter-spacing:.02em;
+}
+.po .sub{
+  text-align:center;font-size:2cqw;color:var(--b-soft);margin:2.4cqw 0 0;line-height:1.85;
+}
+.po .rule{height:1px;background:var(--b-rule);margin:7cqw 0 4cqw}
+.po .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:3cqw}
+.po .fact .v{font-family:"IBM Plex Mono",monospace;font-size:3.4cqw;color:var(--b-water);line-height:1}
+.po .fact .v.sun{color:var(--b-sun)}
+.po .fact .k{font-size:1.4cqw;color:var(--b-soft);margin-top:.8cqw;line-height:1.6}
+.po .foot{
+  margin-top:auto;padding-top:6cqw;display:flex;justify-content:space-between;align-items:flex-end;gap:3cqw;
+}
+.po .foot .t{font-size:1.4cqw;color:var(--b-soft);max-width:22em;line-height:1.8}
+.po .qr{width:14cqw;height:14cqw;border:1px solid var(--b-rule);border-radius:1.2cqw;display:grid;place-items:center;background:var(--b-card);flex:none}
+.po .qr svg{width:78%;height:78%}
+
+/* ---------- one-pager ---------- */
+.op{position:absolute;inset:0;padding:6.6cqw 6.4cqw 5.4cqw;display:flex;flex-direction:column;gap:4cqw}
+.op .head{display:flex;justify-content:space-between;align-items:center;padding-bottom:2.2cqw;border-bottom:1px solid var(--b-rule)}
+.op .head .l{display:flex;align-items:center;gap:1.6cqw}
+.op .head svg{height:3.4cqw;width:auto}
+.op .head .cn{font-family:"Noto Serif SC",serif;font-weight:500;font-size:2.2cqw;letter-spacing:.3em}
+.op .head .en{font-family:"Newsreader",serif;font-weight:300;font-size:1.15cqw;letter-spacing:.44em;text-transform:uppercase;color:var(--b-soft)}
+.op .tagline{font-family:"Noto Serif SC",serif;font-weight:500;font-size:3.3cqw;line-height:1.5;margin:0}
+.op .blk{display:grid;gap:1.1cqw}
+.op .blk .lb{font-family:"IBM Plex Mono",monospace;font-size:1.05cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--b-water)}
+.op .blk p{margin:0;font-size:1.5cqw;line-height:1.85;color:var(--b-soft)}
+.op .blk p b{font-weight:400;color:var(--b-ink)}
+.op .cols{display:grid;grid-template-columns:1fr 1fr;gap:3.4cqw}
+.op .loop2{display:flex;flex-wrap:wrap;gap:.8cqw;align-items:center}
+.op .loop2 .st{border:1px solid var(--b-rule);border-radius:1.4cqw;padding:.7cqw 1.2cqw;font-size:1.2cqw;color:var(--b-soft);background:var(--b-card)}
+.op .loop2 .st.hot{border-color:var(--b-sun);background:var(--b-sun-wash);color:var(--b-ink)}
+.op .loop2 .ar{color:var(--b-faint);font-size:1.1cqw}
+.op .bfoot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:2cqw;padding-top:2.4cqw;border-top:1px solid var(--b-rule)}
+.op .bfoot .t{font-size:1.25cqw;color:var(--b-faint);line-height:1.8}
+.op .qr{width:11cqw;height:11cqw;border:1px solid var(--b-rule);border-radius:1cqw;display:grid;place-items:center;flex:none;background:var(--b-card)}
+.op .qr svg{width:78%;height:78%}
+
+/* ---------- social ---------- */
+.xhs{position:absolute;inset:0;padding:9cqw 8cqw;display:grid;align-content:space-between}
+.xhs .t{font-family:"IBM Plex Mono",monospace;font-size:2.4cqw;letter-spacing:.2em;text-transform:uppercase;color:var(--b-faint)}
+.xhs h3{font-family:"Noto Serif SC",serif;font-weight:500;font-size:8.2cqw;line-height:1.44;margin:0}
+.xhs .sub{font-size:3cqw;color:var(--b-soft);margin:3cqw 0 0;line-height:1.8}
+.xhs .bot{display:flex;align-items:center;justify-content:space-between;gap:3cqw}
+.xhs .bot svg{height:7cqw;width:auto}
+.xhs .bot .nm{font-family:"Noto Serif SC",serif;font-weight:500;font-size:3.4cqw;letter-spacing:.3em}
+
+.vcov{position:absolute;inset:0;display:grid;place-items:center;gap:0}
+.vcov .in{display:grid;justify-items:center;gap:2.6cqw}
+.vcov .in svg{width:20cqw;height:auto}
+.vcov h3{font-family:"Noto Serif SC",serif;font-weight:500;font-size:5.2cqw;margin:0;letter-spacing:.02em}
+.vcov .sub{font-family:"IBM Plex Mono",monospace;font-size:1.4cqw;letter-spacing:.3em;text-transform:uppercase;color:var(--b-faint)}
+.vcov .strip{position:absolute;left:0;right:0;bottom:0}
+.vcov .strip svg{width:100%;height:auto;display:block}
+
+/* ---------- name card ---------- */
+.nc{position:absolute;inset:0;padding:7cqw 7.4cqw;display:grid;align-content:space-between}
+.nc .l{display:flex;align-items:center;gap:2.4cqw}
+.nc .l svg{height:8cqw;width:auto}
+.nc .cn{font-family:"Noto Serif SC",serif;font-weight:500;font-size:4.6cqw;letter-spacing:.3em}
+.nc .en{font-family:"Newsreader",serif;font-weight:300;font-size:2.1cqw;letter-spacing:.46em;text-transform:uppercase;color:var(--b-soft)}
+.nc .b{display:flex;justify-content:space-between;align-items:flex-end;gap:3cqw}
+.nc .b .t{font-size:2.6cqw;color:var(--b-soft);line-height:1.7;max-width:16em}
+.nc .qr{width:19cqw;height:19cqw;border:1px solid var(--b-rule);border-radius:1.6cqw;display:grid;place-items:center;flex:none;background:var(--b-card)}
+.nc .qr svg{width:78%;height:78%}
+
+/* ---------- notes ---------- */
+.note{
+  margin-top:22px;padding:16px 20px;border-left:2px solid var(--rule);
+  font-size:13.5px;color:var(--ink-faint);max-width:46em;line-height:1.78;
+}
+.note b{color:var(--ink-soft);font-weight:400}
+footer{margin-top:110px;padding-top:30px;border-top:1px solid var(--rule)}
+footer h3{font-size:17px;margin:0 0 15px}
+.todo{display:grid;gap:10px;margin:0;padding:0;list-style:none;max-width:48em}
+.todo li{display:grid;grid-template-columns:2.6em 1fr;gap:14px;font-size:14.5px;color:var(--ink-soft);align-items:baseline}
+.todo li .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--water)}
+.todo li b{font-weight:400;color:var(--ink)}
+.sig{margin-top:38px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;color:var(--ink-faint);text-transform:uppercase}
+</style>
+
+<div class="shell">
+
+<header>
+  <div class="mh-top">
+    <div class="mh-lock">
+      <svg viewBox="0 0 120 92" fill="none" stroke-width="3" stroke-linecap="round" aria-label="此在标识">
+        <path stroke="var(--ink)" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+        <path stroke="var(--ink)" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+        <circle fill="var(--sun)" cx="60" cy="70" r="3.6"/>
+      </svg>
+      <div class="mh-words"><div class="cn">此在</div><div class="en">Current</div></div>
+    </div>
+    <div class="eyebrow">路演物料 · v1</div>
+  </div>
+
+  <h1>一套能直接上台的物料</h1>
+
+  <p class="lede">
+    全部长在手册那套规则上：浅色、冷色给空间、<strong>只有一处是暖的</strong>。
+    每块板子都按真实交付比例画好了，文案是产品里真有的话，不是占位符。
+    一个贯穿的结构：<strong>页脚是那条流线，页码是流线上的一个暖点</strong> ——
+    翻到第几页，点就落在第几个波峰上。
+  </p>
+</header>
+
+<!-- ============ 01 主视觉 ============ -->
+<section class="grp">
+  <div class="grp-head">
+    <div class="n">01</div>
+    <h2>主视觉</h2>
+    <p>路演开场那一屏。除了名字和一句话，什么都不放。</p>
+  </div>
+
+  <div class="spec">16 : 9 · 1920 × 1080</div>
+  <div class="board b169">
+    <div class="sl cover-sl">
+      <svg class="mark" viewBox="0 26 230 124" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+        <path stroke="var(--b-ink)" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+        <path stroke="var(--b-ink)" d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85"/>
+        <circle fill="var(--b-sun)" cx="115" cy="124" r="5.2"/>
+      </svg>
+      <div>
+        <div class="nm">此在</div>
+        <div class="en" style="margin-top:1.1cqw">Current</div>
+      </div>
+      <p class="one">在说不清的时刻，帮你找到此刻适合你的空间。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 PPT ============ -->
+<section class="grp">
+  <div class="grp-head">
+    <div class="n">02</div>
+    <h2>演示模板</h2>
+    <p>六种页型，覆盖一场 8 分钟路演。页脚的暖点会随页码沿流线往右走。</p>
+  </div>
+
+  <div class="spec">页型 A · 封面</div>
+  <div class="board b169">
+    <div class="sl" style="grid-template-rows:auto 1fr auto">
+      <div class="sl-top">
+        <div class="sl-lock">
+          <svg viewBox="0 0 120 92" fill="none" stroke-width="3.4" stroke-linecap="round" aria-hidden="true">
+            <path stroke="var(--b-ink)" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+            <path stroke="var(--b-ink)" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+            <circle fill="var(--b-sun)" cx="60" cy="70" r="3.6"/>
+          </svg>
+          <span class="cn">此在</span>
+        </div>
+        <div class="sl-tag">SSAI 黑客松 · 2026</div>
+      </div>
+      <div style="align-self:center;display:grid;gap:1.8cqw">
+        <div class="kicker">情绪 × 空间</div>
+        <h3>不问你是什么样的人<br>只问你此刻在哪儿</h3>
+        <p>一个基于 AI 与真实到访反馈的情绪-空间匹配平台。</p>
+      </div>
+      <div class="sl-foot">
+        <svg viewBox="0 0 1200 44" fill="none" aria-hidden="true">
+          <path stroke="var(--b-rule)" stroke-width="2" d="M0 24 C37 24 38 14 75 14 C112 14 113 34 150 34 C187 34 188 14 225 14 C262 14 263 34 300 34 C337 34 338 14 375 14 C412 14 413 34 450 34 C487 34 488 14 525 14 C562 14 563 34 600 34 C637 34 638 14 675 14 C712 14 713 34 750 34 C787 34 788 14 825 14 C862 14 863 34 900 34 C937 34 938 14 975 14 C1012 14 1013 34 1050 34 C1087 34 1088 14 1125 14 C1162 14 1163 34 1200 34"/>
+          <circle fill="var(--b-sun)" cx="75" cy="14" r="7"/>
+        </svg>
+        <div class="meta"><span>此在 · Current</span><span>01 / 08</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec">页型 B · 章节隔页</div>
+  <div class="board b169">
+    <div class="sl" style="grid-template-rows:auto 1fr auto">
+      <div class="sl-top">
+        <div class="sl-lock">
+          <svg viewBox="0 0 120 92" fill="none" stroke-width="3.4" stroke-linecap="round" aria-hidden="true">
+            <path stroke="var(--b-ink)" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+            <path stroke="var(--b-ink)" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+            <circle fill="var(--b-sun)" cx="60" cy="70" r="3.6"/>
+          </svg>
+          <span class="cn">此在</span>
+        </div>
+        <div class="sl-tag">问题</div>
+      </div>
+      <div class="chap-sl">
+        <div class="no">01</div>
+        <h3>言不达意</h3>
+        <p style="font-size:1.75cqw">大脑有时会骗自己，身体不会。</p>
+      </div>
+      <div class="sl-foot">
+        <svg viewBox="0 0 1200 44" fill="none" aria-hidden="true">
+          <path stroke="var(--b-rule)" stroke-width="2" d="M0 24 C37 24 38 14 75 14 C112 14 113 34 150 34 C187 34 188 14 225 14 C262 14 263 34 300 34 C337 34 338 14 375 14 C412 14 413 34 450 34 C487 34 488 14 525 14 C562 14 563 34 600 34 C637 34 638 14 675 14 C712 14 713 34 750 34 C787 34 788 14 825 14 C862 14 863 34 900 34 C937 34 938 14 975 14 C1012 14 1013 34 1050 34 C1087 34 1088 14 1125 14 C1162 14 1163 34 1200 34"/>
+          <circle fill="var(--b-sun)" cx="225" cy="14" r="7"/>
+        </svg>
+        <div class="meta"><span>问题</span><span>02 / 08</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec">页型 C · 要点</div>
+  <div class="board b169">
+    <div class="sl" style="grid-template-rows:auto 1fr auto">
+      <div class="sl-top">
+        <div class="sl-lock">
+          <svg viewBox="0 0 120 92" fill="none" stroke-width="3.4" stroke-linecap="round" aria-hidden="true">
+            <path stroke="var(--b-ink)" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+            <path stroke="var(--b-ink)" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+            <circle fill="var(--b-sun)" cx="60" cy="70" r="3.6"/>
+          </svg>
+          <span class="cn">此在</span>
+        </div>
+        <div class="sl-tag">问题 · 03</div>
+      </div>
+      <div style="align-self:center">
+        <div class="kicker">现在的空间决策工具，缺了一维</div>
+        <h3 style="font-size:3.2cqw">大众点评告诉你好不好吃<br>没人告诉你去了会不会好受一点</h3>
+        <div class="bul">
+          <div class="it"><div class="d"></div><div>
+            <h4>说不清</h4>
+            <p>「不开心」三个字，装下了完全不同的六种状态。语言在这里是失灵的。</p>
+          </div></div>
+          <div class="it"><div class="d"></div><div>
+            <h4>没有维度</h4>
+            <p>评分体系里有环境、口味、服务，唯独没有「情绪恢复」。</p>
+          </div></div>
+          <div class="it"><div class="d"></div><div>
+            <h4>没有回路</h4>
+            <p>去过之后有没有变好，没有任何产品在收这份数据。</p>
+          </div></div>
+        </div>
+      </div>
+      <div class="sl-foot">
+        <svg viewBox="0 0 1200 44" fill="none" aria-hidden="true">
+          <path stroke="var(--b-rule)" stroke-width="2" d="M0 24 C37 24 38 14 75 14 C112 14 113 34 150 34 C187 34 188 14 225 14 C262 14 263 34 300 34 C337 34 338 14 375 14 C412 14 413 34 450 34 C487 34 488 14 525 14 C562 14 563 34 600 34 C637 34 638 14 675 14 C712 14 713 34 750 34 C787 34 788 14 825 14 C862 14 863 34 900 34 C937 34 938 14 975 14 C1012 14 1013 34 1050 34 C1087 34 1088 14 1125 14 C1162 14 1163 34 1200 34"/>
+          <circle fill="var(--b-sun)" cx="375" cy="14" r="7"/>
+        </svg>
+        <div class="meta"><span>问题</span><span>03 / 08</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec">页型 D · 机制与数据</div>
+  <div class="board b169">
+    <div class="sl" style="grid-template-rows:auto 1fr auto">
+      <div class="sl-top">
+        <div class="sl-lock">
+          <svg viewBox="0 0 120 92" fill="none" stroke-width="3.4" stroke-linecap="round" aria-hidden="true">
+            <path stroke="var(--b-ink)" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+            <path stroke="var(--b-ink)" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+            <circle fill="var(--b-sun)" cx="60" cy="70" r="3.6"/>
+          </svg>
+          <span class="cn">此在</span>
+        </div>
+        <div class="sl-tag">机制 · 05</div>
+      </div>
+      <div style="align-self:center">
+        <div class="kicker">闭环</div>
+        <h3 style="font-size:3.2cqw">每一次到访，都在改进下一次推荐</h3>
+        <div class="loop">
+          <span class="st hot">出发前情绪</span><span class="ar">→</span>
+          <span class="st">推荐空间</span><span class="ar">→</span>
+          <span class="st">实际到访</span><span class="ar">→</span>
+          <span class="st">30 秒反馈</span><span class="ar">→</span>
+          <span class="st">私密记录</span><span class="ar">→</span>
+          <span class="st">匿名贡献</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="v sun">+2.4</div><div class="k">江边日落步道的<br>平均情绪变化</div></div>
+          <div class="stat"><div class="v">1,205</div><div class="k">份匿名反馈<br>（原型示例数值）</div></div>
+          <div class="stat"><div class="v">30<span style="font-size:2cqw">s</span></div><div class="k">一次反馈的<br>时间成本</div></div>
+        </div>
+      </div>
+      <div class="sl-foot">
+        <svg viewBox="0 0 1200 44" fill="none" aria-hidden="true">
+          <path stroke="var(--b-rule)" stroke-width="2" d="M0 24 C37 24 38 14 75 14 C112 14 113 34 150 34 C187 34 188 14 225 14 C262 14 263 34 300 34 C337 34 338 14 375 14 C412 14 413 34 450 34 C487 34 488 14 525 14 C562 14 563 34 600 34 C637 34 638 14 675 14 C712 14 713 34 750 34 C787 34 788 14 825 14 C862 14 863 34 900 34 C937 34 938 14 975 14 C1012 14 1013 34 1050 34 C1087 34 1088 14 1125 14 C1162 14 1163 34 1200 34"/>
+          <circle fill="var(--b-sun)" cx="675" cy="14" r="7"/>
+        </svg>
+        <div class="meta"><span>机制</span><span>05 / 08</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec">页型 E · 产品</div>
+  <div class="board b169">
+    <div class="sl" style="grid-template-rows:auto 1fr auto">
+      <div class="sl-top">
+        <div class="sl-lock">
+          <svg viewBox="0 0 120 92" fill="none" stroke-width="3.4" stroke-linecap="round" aria-hidden="true">
+            <path stroke="var(--b-ink)" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+            <path stroke="var(--b-ink)" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+            <circle fill="var(--b-sun)" cx="60" cy="70" r="3.6"/>
+          </svg>
+          <span class="cn">此在</span>
+        </div>
+        <div class="sl-tag">产品 · 06</div>
+      </div>
+      <div style="align-self:center">
+        <div class="kicker">四步，全程不超过一分钟</div>
+        <div class="phones">
+          <div>
+            <div class="ph">
+              <div class="pt">
+                <svg viewBox="0 8 64 46" fill="none" stroke-width="3.4" stroke-linecap="round" aria-hidden="true">
+                  <path stroke="var(--b-ink)" d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+                  <path stroke="var(--b-ink)" d="M39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+                  <circle fill="var(--b-sun)" cx="32" cy="42" r="3"/>
+                </svg>
+                <span class="pl">出发前</span>
+              </div>
+              <div class="ph-h">此刻，你更接近哪一种？</div>
+              <div class="ph-p">选一个就好。不会被公开。</div>
+              <div class="chips"><span class="chip on">低落</span><span class="chip">需要安静</span><span class="chip">脑子停不下来</span></div>
+              <div class="btn">接着走 →</div>
+            </div>
+            <div class="ph-cap">01 · 出发前</div>
+          </div>
+          <div>
+            <div class="ph">
+              <div class="pt"><span class="pl">替我选</span><span class="pl">1 / 8</span></div>
+              <div class="art" id="pa"></div>
+              <div class="ph-h">江边日落步道</div>
+              <div class="ph-p" style="color:var(--b-water)">为什么此刻推荐给你</div>
+              <div class="ph-p">这里不劝你振作，只是把视线拉得比你的念头更远。</div>
+            </div>
+            <div class="ph-cap">02 · 推荐</div>
+          </div>
+          <div>
+            <div class="ph">
+              <div class="pt"><span class="pl">回来之后</span><span class="pl">30 秒</span></div>
+              <div class="ph-h">刚从江边回来吗？</div>
+              <div class="ph-p">出发前你说：<span style="color:var(--b-sun)">低落</span></div>
+              <div class="scaleline">
+                <i style="background:#4E4B63"></i><i style="background:#6B687F"></i><i style="background:#9694A5"></i>
+                <i style="background:#C3C9C7"></i><i style="background:#86ADA8"></i>
+                <i style="background:#4A8F8A;outline:.14cqw solid var(--b-sun);outline-offset:.14cqw"></i><i style="background:#1E6E72"></i>
+              </div>
+              <div class="ph-p" style="font-size:.8cqw">−3　　0　　+3</div>
+              <div class="btn">只存进我的记录</div>
+            </div>
+            <div class="ph-cap">03 · 反馈</div>
+          </div>
+          <div>
+            <div class="ph">
+              <div class="pt"><span class="pl">轨迹</span><span class="pl">14</span></div>
+              <div class="ph-h">小在眼中的你</div>
+              <div class="art" id="pb"></div>
+              <div class="ph-p">你更常去<b style="color:var(--b-ink)">开阔、可以慢慢走</b>的空间。</div>
+              <div class="ph-p" style="font-size:.8cqw;color:var(--b-faint)">来自 7 次记录中的 5 次</div>
+            </div>
+            <div class="ph-cap">04 · 记录</div>
+          </div>
+        </div>
+      </div>
+      <div class="sl-foot">
+        <svg viewBox="0 0 1200 44" fill="none" aria-hidden="true">
+          <path stroke="var(--b-rule)" stroke-width="2" d="M0 24 C37 24 38 14 75 14 C112 14 113 34 150 34 C187 34 188 14 225 14 C262 14 263 34 300 34 C337 34 338 14 375 14 C412 14 413 34 450 34 C487 34 488 14 525 14 C562 14 563 34 600 34 C637 34 638 14 675 14 C712 14 713 34 750 34 C787 34 788 14 825 14 C862 14 863 34 900 34 C937 34 938 14 975 14 C1012 14 1013 34 1050 34 C1087 34 1088 14 1125 14 C1162 14 1163 34 1200 34"/>
+          <circle fill="var(--b-sun)" cx="825" cy="14" r="7"/>
+        </svg>
+        <div class="meta"><span>产品</span><span>06 / 08</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec">页型 F · 结尾</div>
+  <div class="board b169">
+    <div class="sl close-sl">
+      <svg style="width:14cqw;height:auto" viewBox="0 0 200 140" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-label="小在">
+        <path stroke="var(--b-ink)" d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z"/>
+        <circle fill="var(--b-ink)" cx="84" cy="80" r="3.6"/>
+        <circle fill="var(--b-ink)" cx="116" cy="80" r="3.6"/>
+      </svg>
+      <h3>去看看外面的城市吧</h3>
+      <p style="font-size:1.6cqw">扫码试用原型 · heyjue.com/current</p>
+      <div class="qr"><svg viewBox="0 0 100 100" id="qr1" aria-label="二维码占位"></svg></div>
+    </div>
+  </div>
+
+  <p class="note">
+    <b>页脚流线共 8 个波峰</b>，对应 8 页。超过 8 页就换成两行流线或改用 12 峰版本 ——
+    别把点挤在同一个波峰上，那样进度就不成立了。
+  </p>
+</section>
+
+<!-- ============ 03 海报 ============ -->
+<section class="grp">
+  <div class="grp-head">
+    <div class="n">03</div>
+    <h2>海报</h2>
+    <p>贴在会场墙上、或者作为朋友圈单图。远看是一个符号，近看才有字。</p>
+  </div>
+
+  <div class="spec">A3 竖版 · 297 × 420 mm</div>
+  <div style="max-width:560px">
+    <div class="board bA">
+      <div class="po">
+        <div class="top">
+          <div class="brand">此　在</div>
+          <div class="date">SSAI · 2026</div>
+        </div>
+        <div class="hero">
+          <svg viewBox="0 26 230 124" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <path stroke="var(--b-ink)" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+            <path stroke="var(--b-ink)" d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85"/>
+            <circle fill="var(--b-sun)" cx="115" cy="124" r="5.2"/>
+          </svg>
+          <h3>你此刻<br>该待在哪儿</h3>
+        </div>
+        <p class="sub">说不清也没关系。<br>选一个词，剩下的交给它。</p>
+        <div class="rule"></div>
+        <div class="facts">
+          <div class="fact"><div class="v sun">6</div><div class="k">种出发前状态<br>不需要写字</div></div>
+          <div class="fact"><div class="v">30<span style="font-size:2cqw">s</span></div><div class="k">回来之后<br>只花半分钟</div></div>
+          <div class="fact"><div class="v">0</div><div class="k">昵称、人脸、评论<br>默认全部私密</div></div>
+        </div>
+        <div class="foot">
+          <div class="t">此在 / Current　—　基于 AI 与真实到访反馈的情绪-空间匹配平台。不诊断，不评判，不社交。</div>
+          <div class="qr"><svg viewBox="0 0 100 100" id="qr2" aria-label="二维码占位"></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 one-pager ============ -->
+<section class="grp">
+  <div class="grp-head">
+    <div class="n">04</div>
+    <h2>一页纸</h2>
+    <p>路演现场发给评委的那张。信息密度最高，但仍然一分钟能读完。</p>
+  </div>
+
+  <div class="spec">A4 · 210 × 297 mm</div>
+  <div style="max-width:600px">
+    <div class="board bA">
+      <div class="op">
+        <div class="head">
+          <div class="l">
+            <svg viewBox="0 0 120 92" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+              <path stroke="var(--b-ink)" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+              <path stroke="var(--b-ink)" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+              <circle fill="var(--b-sun)" cx="60" cy="70" r="3.6"/>
+            </svg>
+            <div>
+              <div class="cn">此在</div>
+              <div class="en">Current</div>
+            </div>
+          </div>
+          <div class="date" style="font-family:'IBM Plex Mono',monospace;font-size:1.1cqw;letter-spacing:.14em;color:var(--b-faint)">ONE PAGER</div>
+        </div>
+
+        <p class="tagline">在说不清的时刻，<br>帮你找到此刻适合你的空间。</p>
+
+        <div class="cols">
+          <div class="blk">
+            <div class="lb">Problem</div>
+            <p>人类的语言表达有限，<b>言不达意</b>。现有的空间决策工具只回答"好不好"，没有一个维度是<b>"去了会不会好受一点"</b>。</p>
+          </div>
+          <div class="blk">
+            <div class="lb">Insight</div>
+            <p>大脑有时会骗自己，<b>身体不会</b>。心率变异、皮肤电这些指标是诚实的 —— 这是我们第二阶段的入口。</p>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="lb">How it works</div>
+          <div class="loop2">
+            <span class="st hot">出发前情绪</span><span class="ar">→</span>
+            <span class="st">推荐空间</span><span class="ar">→</span>
+            <span class="st">实际到访</span><span class="ar">→</span>
+            <span class="st">30 秒反馈</span><span class="ar">→</span>
+            <span class="st">私密记录</span><span class="ar">→</span>
+            <span class="st">匿名贡献</span><span class="ar">↺</span>
+          </div>
+          <p>同一个江边，在「低落」和「脑子停不下来」两种状态下，给出完全不同的推荐理由。反馈不评价地点好坏，只记录<b>出发前是什么状态、离开时发生了什么变化</b>。</p>
+        </div>
+
+        <div class="cols">
+          <div class="blk">
+            <div class="lb">AI 切入点</div>
+            <p>① 多模态情绪评估（语言 + 生理）<br>② 空间情绪标签提取与推荐<br>③ 情绪陪伴与引导</p>
+          </div>
+          <div class="blk">
+            <div class="lb">Roadmap</div>
+            <p><b>Phase 1</b>　App / 小程序，问卷与对话评估<br><b>Phase 2</b>　接入可穿戴设备，实时感知并主动干预</p>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="lb">三条边界</div>
+          <p><b>不诊断</b> 不给情绪贴标签　·　<b>不评判</b> 变差不是错误，负端不用红　·　<b>不社交</b> 没有昵称、人脸、评论</p>
+        </div>
+
+        <div class="bfoot">
+          <div class="t">原型：heyjue.com/current<br>SSAI 黑客松 · 情绪空间组</div>
+          <div class="qr"><svg viewBox="0 0 100 100" id="qr3" aria-label="二维码占位"></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 社媒 ============ -->
+<section class="grp">
+  <div class="grp-head">
+    <div class="n">05</div>
+    <h2>社媒与视频</h2>
+    <p>小红书封面用大字，视频封面用符号。两种都不解释产品，只抛一句话。</p>
+  </div>
+
+  <div class="two">
+    <div>
+      <div class="spec">小红书封面 · 3 : 4</div>
+      <div class="board b34">
+        <div class="xhs">
+          <div class="t">此在 · Current</div>
+          <div>
+            <h3>不开心的时候<br>你会去哪儿</h3>
+            <p class="sub">我们做了一个 App，<br>专门回答这个问题。</p>
+          </div>
+          <div class="bot">
+            <svg viewBox="0 0 200 140" fill="none" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-label="小在">
+              <path stroke="var(--b-ink)" d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z"/>
+              <circle fill="var(--b-ink)" cx="84" cy="80" r="4.6"/>
+              <circle fill="var(--b-ink)" cx="116" cy="80" r="4.6"/>
+            </svg>
+            <div class="nm">此在</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="spec">Demo 视频封面 · 16 : 9</div>
+      <div class="board b169">
+        <div class="vcov">
+          <div class="in">
+            <svg viewBox="0 26 230 124" fill="none" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+              <path stroke="var(--b-ink)" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+              <path stroke="var(--b-ink)" d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85"/>
+              <circle fill="var(--b-sun)" cx="115" cy="124" r="5.2"/>
+            </svg>
+            <h3>此在 · 三分钟 Demo</h3>
+            <div class="sub">Emotion × Space</div>
+          </div>
+          <div class="strip">
+            <svg viewBox="0 0 1200 44" fill="none" aria-hidden="true">
+              <path stroke="var(--b-rule)" stroke-width="2" d="M0 24 C37 24 38 14 75 14 C112 14 113 34 150 34 C187 34 188 14 225 14 C262 14 263 34 300 34 C337 34 338 14 375 14 C412 14 413 34 450 34 C487 34 488 14 525 14 C562 14 563 34 600 34 C637 34 638 14 675 14 C712 14 713 34 750 34 C787 34 788 14 825 14 C862 14 863 34 900 34 C937 34 938 14 975 14 C1012 14 1013 34 1050 34 C1087 34 1088 14 1125 14 C1162 14 1163 34 1200 34"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 卡片 ============ -->
+<section class="grp">
+  <div class="grp-head">
+    <div class="n">06</div>
+    <h2>二维码卡</h2>
+    <p>名片尺寸，现场发。正面是名字，背面是码。</p>
+  </div>
+
+  <div class="two">
+    <div>
+      <div class="spec">正面 · 90 × 54 mm</div>
+      <div class="board bcard">
+        <div class="nc">
+          <div class="l">
+            <svg viewBox="0 0 120 92" fill="none" stroke-width="3.4" stroke-linecap="round" aria-hidden="true">
+              <path stroke="var(--b-ink)" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+              <path stroke="var(--b-ink)" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+              <circle fill="var(--b-sun)" cx="60" cy="70" r="3.6"/>
+            </svg>
+            <div>
+              <div class="cn">此在</div>
+              <div class="en">Current</div>
+            </div>
+          </div>
+          <div class="b">
+            <div class="t">在说不清的时刻，<br>帮你找到此刻适合你的空间。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="spec">背面 · 90 × 54 mm</div>
+      <div class="board bcard">
+        <div class="nc">
+          <div class="l" style="align-items:flex-start">
+            <svg viewBox="0 0 200 140" style="height:9cqw" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-label="小在">
+              <path stroke="var(--b-ink)" d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z"/>
+              <circle fill="var(--b-ink)" cx="84" cy="80" r="4.4"/>
+              <circle fill="var(--b-ink)" cx="116" cy="80" r="4.4"/>
+            </svg>
+            <div class="t" style="font-size:2.4cqw;color:var(--b-soft);line-height:1.7">我是小在。<br>扫一下，我带你去看看。</div>
+          </div>
+          <div class="b">
+            <div class="t" style="font-size:2.2cqw">heyjue.com/current</div>
+            <div class="qr"><svg viewBox="0 0 100 100" id="qr4" aria-label="二维码占位"></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">
+    四处二维码都是<b>占位图形</b>，不是能扫的码 —— 等真实短链定了，用同色（<span class="mono">#122A2E</span> 深青墨，不要纯黑）重新生成替换即可。
+  </p>
+</section>
+
+<footer>
+  <h3>用之前要知道的</h3>
+  <ul class="todo">
+    <li><span class="n">01</span><span><b>二维码要换。</b>现在四处都是占位图形，扫不出东西。</span></li>
+    <li><span class="n">02</span><span><b>数字要标注来源。</b>「+2.4 / 1,205 份」来自原型示例数据，上台时要说明是模拟值，不能当作实测结果讲。</span></li>
+    <li><span class="n">03</span><span><b>小在已经换掉了猫。</b>手册第 06 章的向导规范我同步更新了，云朵形、名字、表情集、用法都在那边。</span></li>
+    <li><span class="n">04</span><span><b>物料永远浅底。</b>投影和印刷都在浅底上，所以这些板子不跟随深色模式 —— 这是故意的。</span></li>
+  </ul>
+  <p class="sig">此在 · Current　—　路演物料 v1</p>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  // 导出模式：?only=N&w=像素宽 —— 只保留第 N 块板子，按给定宽度输出
+  var q=new URLSearchParams(location.search), only=q.get('only');
+  if(only){
+    var bs=document.querySelectorAll('.board'), b=bs[parseInt(only,10)-1];
+    if(b){
+      var px=parseInt(q.get('w')||'1920',10);
+      document.body.innerHTML='';
+      document.body.style.cssText='margin:0;background:transparent';
+      b.style.cssText+=';width:'+px+'px;border:0;border-radius:0;box-shadow:none';
+      document.body.appendChild(b);
+    }
+  }
+})();
+(function(){
+  "use strict";
+  var W=160,CY=94;
+  function wave(xc,amp,freq){
+    var k=2*Math.PI*freq/W,p=[],n=64;
+    for(var i=0;i<=n;i++){
+      var x=i*W/n,y=CY+amp*(1-Math.cos(k*(x-xc)))/2;
+      p.push((i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1));
+    }
+    return p.join(' ');
+  }
+  var SCALE={'-3':'#4E4B63','-2':'#6B687F','-1':'#9694A5','0':'#C3C9C7',
+             '1':'#86ADA8','2':'#4A8F8A','3':'#1E6E72'};
+  function symbol(p){
+    var xc=W/2+p.shift,R=p.R,cy=CY-R;
+    var a=(90-28)*Math.PI/180,b=(90+28)*Math.PI/180;
+    var x1=(xc+R*Math.cos(a)).toFixed(2),y1=(cy+R*Math.sin(a)).toFixed(2);
+    var x2=(xc+R*Math.cos(b)).toFixed(2),y2=(cy+R*Math.sin(b)).toFixed(2);
+    var dr=(2.2+Math.abs(p.delta)*0.7).toFixed(1);
+    return '<svg viewBox="0 '+(CY-86)+' '+W+' '+120+'" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true">'+
+      '<path stroke="var(--b-ink)" d="'+wave(xc,p.amp,p.freq)+'"/>'+
+      '<path stroke="var(--b-ink)" d="M '+x1+' '+y1+' A '+R+' '+R+' 0 1 0 '+x2+' '+y2+'"/>'+
+      '<circle cx="'+xc.toFixed(1)+'" cy="'+CY+'" r="'+dr+'" fill="'+(SCALE[String(p.delta)]||'#C3C9C7')+'"/></svg>';
+  }
+  var a=document.getElementById('pa');
+  if(a) a.innerHTML=symbol({R:40,amp:5,freq:2,shift:0,delta:3});
+  var b=document.getElementById('pb');
+  if(b) b.innerHTML=symbol({R:35,amp:6,freq:3,shift:2,delta:2});
+
+  // 二维码占位：确定性伪随机模块图 + 三个定位角
+  function qr(el){
+    if(!el) return;
+    var s='',i,j,seed=7;
+    function rnd(){seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;}
+    function corner(x,y){
+      return '<rect x="'+x+'" y="'+y+'" width="21" height="21" fill="none" stroke="#122A2E" stroke-width="4"/>'+
+             '<rect x="'+(x+7)+'" y="'+(y+7)+'" width="7" height="7" fill="#122A2E"/>';
+    }
+    for(i=0;i<20;i++)for(j=0;j<20;j++){
+      var x=i*5,y=j*5;
+      var inCorner=(x<25&&y<25)||(x>70&&y<25)||(x<25&&y>70);
+      if(inCorner) continue;
+      if(rnd()>0.52) s+='<rect x="'+x+'" y="'+y+'" width="5" height="5" fill="#122A2E"/>';
+    }
+    el.innerHTML=s+corner(0,0)+corner(79,0)+corner(0,79);
+  }
+  ['qr1','qr2','qr3','qr4'].forEach(function(id){qr(document.getElementById(id));});
+})();
+</script>

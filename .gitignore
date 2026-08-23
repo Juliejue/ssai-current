@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# 原始素材压缩包（各 5MB，不进仓库；需要就从飞书/网盘取）
+*.zip
+
+# 本地工具目录
+.claude/
+node_modules/
+
+# 渲染产物
+*.pdf

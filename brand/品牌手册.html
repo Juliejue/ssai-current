@@ -1,0 +1,1167 @@
+<title>此在 品牌手册</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  /* ground */
+  --paper:#F0F3F2;
+  --card:#FFFFFF;
+  --sunk:#E8EDEC;
+  /* ink */
+  --ink:#122A2E;
+  --ink-soft:#5A6E70;
+  --ink-faint:#8CA0A0;
+  /* rules */
+  --rule:#D6DEDC;
+  --rule-soft:#E5EBE9;
+  /* brand */
+  --water:#1E6E72;        /* 流 · 空间 · 冷 */
+  --water-wash:#DFEBEA;
+  --sun:#C4703C;          /* 此刻 · 你 · 唯一的暖 */
+  --sun-wash:#F6E9DF;
+  /* manual-only annotation colour, NOT a brand colour */
+  --wrong:#A85A4E;
+  --shadow:0 1px 2px rgba(18,42,46,.04),0 10px 28px -20px rgba(18,42,46,.30);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D1A1C; --card:#142428; --sunk:#101E21;
+    --ink:#E6EDEB; --ink-soft:#96AAAA; --ink-faint:#6B8080;
+    --rule:#26383B; --rule-soft:#1C2C2F;
+    --water:#5FA9AC; --water-wash:#153337;
+    --sun:#D98A52; --sun-wash:#33241A;
+    --wrong:#C87A6C;
+    --shadow:0 1px 2px rgba(0,0,0,.34),0 10px 28px -20px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D1A1C; --card:#142428; --sunk:#101E21;
+  --ink:#E6EDEB; --ink-soft:#96AAAA; --ink-faint:#6B8080;
+  --rule:#26383B; --rule-soft:#1C2C2F;
+  --water:#5FA9AC; --water-wash:#153337;
+  --sun:#D98A52; --sun-wash:#33241A;
+  --wrong:#C87A6C;
+  --shadow:0 1px 2px rgba(0,0,0,.34),0 10px 28px -20px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Noto Sans SC","PingFang SC","Hiragino Sans GB",system-ui,sans-serif;
+  font-weight:300;line-height:1.78;-webkit-font-smoothing:antialiased;
+}
+a{color:var(--water)}
+:focus-visible{outline:2px solid var(--water);outline-offset:3px;border-radius:2px}
+
+.shell{max-width:1240px;margin:0 auto;padding:0 30px 120px}
+
+/* ---------- typography atoms ---------- */
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;
+  letter-spacing:.17em;text-transform:uppercase;color:var(--ink-faint);
+}
+h1,h2,h3,h4{font-family:"Noto Serif SC",serif;font-weight:500;text-wrap:balance}
+.serif-en{font-family:"Newsreader",Georgia,serif}
+
+/* ---------- masthead ---------- */
+.masthead{
+  padding:76px 0 0;display:grid;gap:36px;
+}
+.mh-top{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  padding-bottom:20px;border-bottom:1px solid var(--rule);
+}
+.mh-lock{display:flex;align-items:center;gap:15px}
+.mh-lock svg{height:44px;width:auto;flex:none}
+.mh-words{display:grid;gap:2px;line-height:1.22}
+.mh-words .cn{font-family:"Noto Serif SC",serif;font-weight:500;font-size:21px;letter-spacing:.28em}
+.mh-words .en{
+  font-family:"Newsreader",serif;font-weight:300;font-size:10.5px;
+  letter-spacing:.44em;text-transform:uppercase;color:var(--ink-soft);
+}
+.masthead h1{
+  font-size:clamp(32px,5.4vw,52px);line-height:1.3;margin:0;max-width:14em;
+}
+.masthead .lede{
+  max-width:33em;margin:0;font-size:16px;color:var(--ink-soft);
+}
+.masthead .lede strong{font-weight:500;color:var(--ink)}
+
+/* ---------- layout with TOC ---------- */
+.layout{display:grid;grid-template-columns:1fr;gap:0}
+@media (min-width:1020px){
+  .layout{grid-template-columns:186px minmax(0,1fr);gap:60px;align-items:start}
+}
+nav.toc{display:none}
+@media (min-width:1020px){
+  nav.toc{
+    display:block;position:sticky;top:40px;padding-top:96px;
+  }
+  nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+  nav.toc a{
+    display:grid;grid-template-columns:2.1em 1fr;gap:6px;
+    text-decoration:none;color:var(--ink-soft);font-size:13px;padding:5px 0;
+    border-left:1px solid transparent;padding-left:12px;margin-left:-13px;
+  }
+  nav.toc a:hover{color:var(--ink);border-left-color:var(--water)}
+  nav.toc a .n{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-faint)}
+}
+
+/* ---------- sections ---------- */
+section.ch{padding-top:96px;scroll-margin-top:28px}
+.ch-head{display:grid;gap:10px;margin-bottom:34px;padding-bottom:18px;border-bottom:1px solid var(--rule)}
+.ch-head .n{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;color:var(--water);
+}
+.ch-head h2{font-size:27px;margin:0;letter-spacing:.02em}
+.ch-head p{margin:4px 0 0;font-size:15px;color:var(--ink-soft);max-width:40em}
+
+h3.sub{
+  font-size:16px;margin:44px 0 16px;letter-spacing:.03em;
+  display:flex;align-items:baseline;gap:11px;
+}
+h3.sub::before{
+  content:"";width:14px;height:1px;background:var(--water);flex:none;transform:translateY(-4px);
+}
+p.body{max-width:38em;font-size:14.5px;color:var(--ink-soft);margin:0 0 14px}
+p.body strong{font-weight:400;color:var(--ink)}
+p.body em{font-style:normal;color:var(--sun);font-weight:400}
+
+.card{
+  background:var(--card);border:1px solid var(--rule-soft);border-radius:3px;
+  box-shadow:var(--shadow);
+}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.grid3,.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+.cap{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-faint);
+}
+
+/* ---------- 01 core ---------- */
+.namecard{padding:30px 32px;display:grid;gap:16px}
+.namecard .big{
+  font-family:"Noto Serif SC",serif;font-weight:500;font-size:40px;letter-spacing:.2em;line-height:1;
+}
+.namecard .big.en{font-family:"Newsreader",serif;font-weight:300;font-size:34px;letter-spacing:.18em;text-transform:uppercase}
+.namecard dl{margin:0;display:grid;gap:9px}
+.namecard dt{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-faint);
+}
+.namecard dd{margin:0;font-size:14.5px;color:var(--ink-soft)}
+.namecard dd b{font-weight:400;color:var(--ink)}
+.tri{display:grid;gap:7px;margin:0;padding:0;list-style:none}
+.tri li{display:grid;grid-template-columns:auto 1fr;gap:11px;font-size:14.5px;color:var(--ink-soft);align-items:baseline}
+.tri li .w{font-family:"Newsreader",serif;font-style:italic;color:var(--water);font-size:15px}
+
+.bounds{display:grid;gap:0}
+.bounds div{
+  padding:18px 24px;border-bottom:1px solid var(--rule-soft);
+  display:grid;grid-template-columns:6.5em 1fr;gap:18px;align-items:baseline;font-size:14.5px;
+}
+.bounds div:last-child{border-bottom:none}
+.bounds .k{font-family:"Noto Serif SC",serif;font-weight:500;font-size:15px;color:var(--ink)}
+.bounds .v{color:var(--ink-soft)}
+@media (max-width:560px){.bounds div{grid-template-columns:1fr;gap:3px}}
+
+/* ---------- 02 mark ---------- */
+.hero-mark{
+  padding:64px 30px 54px;display:grid;place-items:center;background:var(--card);
+  border:1px solid var(--rule-soft);border-radius:3px;box-shadow:var(--shadow);
+}
+.hero-mark svg{width:100%;max-width:390px;height:auto}
+.mk-ring{stroke:var(--ink)}
+.mk-wave{stroke:var(--ink)}
+.mk-dot{fill:var(--sun)}
+
+.constr text{
+  font-family:"IBM Plex Mono",monospace;font-size:8px;fill:var(--ink-faint);letter-spacing:.06em;
+}
+.constr .guide{stroke:var(--water);stroke-width:.7;stroke-dasharray:3 3;fill:none;opacity:.85}
+.constr .guide-solid{stroke:var(--water);stroke-width:.7;fill:none;opacity:.85}
+
+.lockbox{padding:26px 24px 22px;display:grid;gap:16px;align-content:start}
+.lockrow{display:flex;align-items:center;gap:16px;min-height:56px}
+.lockrow svg{height:48px;width:auto;flex:none}
+.lockcol{display:grid;justify-items:center;gap:10px;min-height:56px}
+.lockcol svg{height:42px;width:auto}
+.wd{display:grid;gap:2px;line-height:1.22}
+.wd .cn{font-family:"Noto Serif SC",serif;font-weight:500;font-size:22px;letter-spacing:.28em}
+.wd .en{
+  font-family:"Newsreader",serif;font-weight:300;font-size:11px;letter-spacing:.45em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+
+.sizerow{display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap}
+.sizerow figure{margin:0;display:grid;gap:8px;justify-items:center}
+.sizerow figcaption{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--ink-faint)}
+
+.iconset{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.appicon{border-radius:23%;display:grid;place-items:center;flex:none}
+.appicon svg{width:76%;height:76%}
+.ic-ink{background:var(--ink)}
+.ic-paper{background:var(--paper);border:1px solid var(--rule)}
+.ic-water{background:var(--water)}
+
+.dont{padding:20px 20px 16px;display:grid;gap:12px;align-content:start}
+.dont .stage{
+  background:var(--sunk);border-radius:2px;display:grid;place-items:center;padding:20px 12px;
+}
+.dont .stage svg{width:100%;max-width:132px;height:auto}
+.dont .t{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:baseline}
+.dont .x{color:var(--wrong);font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:500}
+.dont .t span:last-child{font-size:13.5px;color:var(--ink-soft)}
+
+/* ---------- 03 colour ---------- */
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:16px}
+.sw{border:1px solid var(--rule-soft);border-radius:3px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+.sw .chip{height:88px}
+.sw .meta{padding:13px 15px 15px;display:grid;gap:3px}
+.sw .nm{font-family:"Noto Serif SC",serif;font-weight:500;font-size:14.5px}
+.sw .hex{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.04em}
+.sw .use{font-size:12.5px;color:var(--ink-faint);line-height:1.6}
+
+.scale{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:0;
+  border:1px solid var(--rule-soft);border-radius:3px;overflow:hidden;box-shadow:var(--shadow);
+}
+@media (max-width:640px){.scale{grid-template-columns:repeat(4,1fr)}}
+.scale div{display:grid;grid-template-rows:74px auto;align-content:start}
+.scale .band{height:74px}
+.scale .lb{
+  min-height:54px;padding:10px 6px 12px;text-align:center;background:var(--card);
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink);
+}
+.scale .lb small{display:block;font-size:9px;color:var(--ink-faint);letter-spacing:.04em;margin-top:3px}
+
+.ratio{display:flex;height:44px;border-radius:3px;overflow:hidden;border:1px solid var(--rule-soft)}
+.ratio div{display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:10px}
+
+table.data{
+  width:100%;border-collapse:collapse;font-size:13.5px;
+}
+.tablewrap{overflow-x:auto;border:1px solid var(--rule-soft);border-radius:3px;background:var(--card);box-shadow:var(--shadow)}
+table.data th,table.data td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--rule-soft);white-space:nowrap}
+table.data th{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-faint);font-weight:400;
+}
+table.data tr:last-child td{border-bottom:none}
+table.data td{color:var(--ink-soft)}
+table.data td.k{color:var(--ink)}
+table.data .num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.pass{color:var(--water)}
+
+/* ---------- 04 type ---------- */
+.typepair{padding:26px 28px;display:grid;gap:18px}
+.typepair .spec{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-faint);letter-spacing:.1em}
+.typepair .demo-cn-s{font-family:"Noto Serif SC",serif;font-weight:500;font-size:30px;line-height:1.4}
+.typepair .demo-en-s{font-family:"Newsreader",serif;font-weight:300;font-size:30px;line-height:1.4}
+.typepair .demo-cn-b{font-family:"Noto Sans SC",sans-serif;font-weight:300;font-size:15px;line-height:1.85;color:var(--ink-soft)}
+.typepair .demo-mono{font-family:"IBM Plex Mono",monospace;font-size:14px;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+
+.stack{border:1px solid var(--rule-soft);border-radius:3px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+.stack .row{
+  display:grid;grid-template-columns:8.5em 1fr;gap:20px;align-items:baseline;
+  padding:15px 20px;border-bottom:1px solid var(--rule-soft);
+}
+.stack .row:last-child{border-bottom:none}
+.stack .row .lab{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ink-faint);letter-spacing:.1em}
+@media (max-width:640px){.stack .row{grid-template-columns:1fr;gap:5px}}
+
+/* ---------- 05 symbols ---------- */
+.symgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.symgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.symgrid{grid-template-columns:1fr}}
+.symcard{
+  background:var(--card);border:1px solid var(--rule-soft);border-radius:3px;
+  box-shadow:var(--shadow);padding:18px 18px 16px;display:grid;gap:12px;
+}
+.symcard .art{background:var(--sunk);border-radius:2px;padding:14px 8px;display:grid;place-items:center}
+.symcard .art svg{width:100%;max-width:150px;height:auto}
+.symcard .nm{font-family:"Noto Serif SC",serif;font-weight:500;font-size:14.5px}
+.symcard .pr{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ink-faint);
+  display:grid;gap:2px;letter-spacing:.03em;
+}
+.paramtable td.k{font-family:"Noto Serif SC",serif;font-weight:500}
+
+/* ---------- 06 voice ---------- */
+.voice{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--rule-soft);border-radius:3px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+@media (max-width:700px){.voice{grid-template-columns:1fr}}
+.voice > div{padding:22px 24px;display:grid;gap:14px;align-content:start}
+.voice > div:first-child{border-right:1px solid var(--rule-soft)}
+@media (max-width:700px){.voice > div:first-child{border-right:none;border-bottom:1px solid var(--rule-soft)}}
+.voice .hd{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+}
+.voice .yes .hd{color:var(--water)}
+.voice .no .hd{color:var(--wrong)}
+.voice ul{margin:0;padding:0;list-style:none;display:grid;gap:11px}
+.voice li{font-size:14px;color:var(--ink-soft);padding-left:16px;position:relative;line-height:1.7}
+.voice li::before{content:"";position:absolute;left:0;top:.7em;width:6px;height:1px;background:var(--ink-faint)}
+.voice li b{font-weight:400;color:var(--ink)}
+
+.catcard{padding:26px 28px;display:grid;gap:16px}
+.catname{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.catname .big{font-family:"Noto Serif SC",serif;font-weight:500;font-size:34px;letter-spacing:.1em}
+.catname .pin{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--sun);background:var(--sun-wash);padding:3px 8px;border-radius:2px;
+}
+.alt{display:grid;gap:9px;margin:0;padding:0;list-style:none}
+.alt li{display:grid;grid-template-columns:3.4em 1fr;gap:14px;font-size:14px;color:var(--ink-soft);align-items:baseline}
+.alt li .c{font-family:"Noto Serif SC",serif;font-weight:500;font-size:17px;color:var(--ink)}
+
+.expr{padding:16px 18px 18px;display:grid;gap:11px;align-content:start}
+.expr .art{background:var(--sunk);border-radius:2px;padding:16px 10px;display:grid;place-items:center}
+.expr .art svg{width:100%;max-width:126px;height:auto}
+.expr .nm,.expr .nm2{font-family:"Noto Serif SC",serif;font-weight:500;font-size:14.5px;color:var(--ink)}
+.expr .ux{font-size:12.5px;color:var(--ink-soft);line-height:1.68}
+.expr .ux strong{font-weight:400;color:var(--ink)}
+
+/* ---------- 07 apps ---------- */
+.screens{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+@media (max-width:900px){.screens{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.screens{grid-template-columns:1fr}}
+.phone{
+  background:var(--card);border:1px solid var(--rule-soft);border-radius:12px;
+  box-shadow:var(--shadow);padding:14px 13px;display:grid;gap:11px;align-content:start;
+  min-height:250px;
+}
+.phone .ph-top{display:flex;align-items:center;justify-content:space-between}
+.phone .ph-top svg{height:15px;width:auto}
+.phone .ph-top .t{font-family:"IBM Plex Mono",monospace;font-size:7.5px;color:var(--ink-faint);letter-spacing:.1em}
+.phone .ph-h{font-family:"Noto Serif SC",serif;font-weight:500;font-size:14px;line-height:1.5}
+.phone .ph-p{font-size:10.5px;color:var(--ink-soft);line-height:1.7}
+.phone .chip{
+  border:1px solid var(--rule);border-radius:9px;padding:6px 9px;font-size:10px;color:var(--ink-soft);
+}
+.phone .chip.on{border-color:var(--sun);color:var(--ink);background:var(--sun-wash)}
+.phone .chips{display:flex;gap:6px;flex-wrap:wrap}
+.phone .btn{
+  background:var(--ink);color:var(--paper);border-radius:20px;text-align:center;
+  padding:8px;font-size:10.5px;margin-top:auto;
+}
+.phone .art{background:var(--sunk);border-radius:6px;padding:12px;display:grid;place-items:center}
+.phone .art svg{width:100%;max-width:110px;height:auto}
+.phone .lbl{font-family:"IBM Plex Mono",monospace;font-size:7.5px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase}
+.phone .delta{font-family:"IBM Plex Mono",monospace;font-size:19px;color:var(--water);font-variant-numeric:tabular-nums}
+.phone .scaleline{display:flex;gap:2px}
+.phone .scaleline i{height:5px;flex:1;border-radius:1px}
+.phone-cap{
+  text-align:center;font-family:"IBM Plex Mono",monospace;font-size:9.5px;
+  color:var(--ink-faint);margin-top:9px;letter-spacing:.06em;
+}
+
+.social{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+@media (max-width:760px){.social{grid-template-columns:1fr}}
+.avatar{
+  aspect-ratio:1;border-radius:50%;display:grid;place-items:center;
+}
+.avatar svg{width:64%;height:64%}
+.social .card{align-content:start}
+.cover{
+  width:100%;aspect-ratio:16/9;border-radius:3px;display:grid;place-items:center;padding:20px;
+  border:1px solid var(--rule-soft);
+}
+.cover .inner{display:grid;justify-items:center;gap:11px}
+.cover svg{height:38px;width:auto}
+
+/* ---------- footer ---------- */
+footer{margin-top:110px;padding-top:32px;border-top:1px solid var(--rule)}
+footer h3{font-size:17px;margin:0 0 16px}
+.todo{display:grid;gap:11px;margin:0;padding:0;list-style:none;max-width:48em}
+.todo li{display:grid;grid-template-columns:2.6em 1fr;gap:14px;font-size:14.5px;color:var(--ink-soft);align-items:baseline}
+.todo li .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--water)}
+.todo li b{font-weight:400;color:var(--ink)}
+.sig{
+  margin-top:40px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  letter-spacing:.11em;color:var(--ink-faint);text-transform:uppercase;
+}
+.note{
+  margin-top:26px;padding:16px 20px;border-left:2px solid var(--rule);
+  font-size:13.5px;color:var(--ink-faint);max-width:44em;line-height:1.75;
+}
+</style>
+
+<div class="shell">
+
+<!-- ================= masthead ================= -->
+<div class="masthead">
+  <div class="mh-top">
+    <div class="mh-lock">
+      <svg viewBox="0 0 120 92" fill="none" stroke-width="3" stroke-linecap="round" aria-label="此在标识">
+        <path class="mk-wave" stroke="currentColor" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+        <path class="mk-ring" stroke="currentColor" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+        <circle class="mk-dot" cx="60" cy="70" r="3.6" stroke="none"/>
+      </svg>
+      <div class="mh-words"><div class="cn">此在</div><div class="en">Current</div></div>
+    </div>
+    <div class="eyebrow">品牌手册 · v1 · 2026</div>
+  </div>
+
+  <h1>一套只有一处是暖的视觉</h1>
+
+  <p class="lede">
+    这份手册规定「此在 / Current」怎么被看见。所有东西长在同一个几何上：<strong>一条流、一个围合、一个交点</strong>。
+    冷色给空间和时间，<strong>唯一的暖色只给那个点 —— 也就是人</strong>。这条规则贯穿标识、色彩、符号与界面，
+    删掉它，整套视觉就散了。
+  </p>
+</div>
+
+<div class="layout">
+
+<!-- ================= TOC ================= -->
+<nav class="toc" aria-label="目录">
+  <ol>
+    <li><a href="#c1"><span class="n">01</span><span>核心</span></a></li>
+    <li><a href="#c2"><span class="n">02</span><span>标识</span></a></li>
+    <li><a href="#c3"><span class="n">03</span><span>色彩</span></a></li>
+    <li><a href="#c4"><span class="n">04</span><span>字体</span></a></li>
+    <li><a href="#c5"><span class="n">05</span><span>符号系统</span></a></li>
+    <li><a href="#c6"><span class="n">06</span><span>语气</span></a></li>
+    <li><a href="#c7"><span class="n">07</span><span>应用</span></a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ================= 01 ================= -->
+<section class="ch" id="c1">
+  <div class="ch-head">
+    <div class="n">01</div>
+    <h2>核心</h2>
+    <p>名字要能被讲清楚，否则后面每一个视觉决定都没有落点。</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card namecard">
+      <div class="big">此　在</div>
+      <dl>
+        <dt>出处</dt>
+        <dd>海德格尔的 <b>Dasein</b>，通译「此在」——<b>在此处存在</b>。不是抽象的"人"，是<b>这个时间、这个地点、正在经历着的这一个</b>。</dd>
+        <dt>为什么是它</dt>
+        <dd>产品不问"你是什么样的人"，只问"你此刻在哪儿、需要什么"。名字本身就划了这条界。</dd>
+      </dl>
+    </div>
+
+    <div class="card namecard">
+      <div class="big en">Current</div>
+      <dl>
+        <dt>一词三义</dt>
+        <dd>
+          <ul class="tri">
+            <li><span class="w">adj.</span><span><b>此刻的</b> —— 当下，正在发生</span></li>
+            <li><span class="w">n.</span><span><b>电流</b> —— 心率变异、皮肤电，身体不说谎的那部分</span></li>
+            <li><span class="w">n.</span><span><b>水流</b> —— 江边、河岸，产品里最常被推荐的那类空间</span></li>
+          </ul>
+        </dd>
+        <dt>与中文名的关系</dt>
+        <dd>Current 是那条<b>流</b>，此在是流上的<b>那一点</b>。标识画的就是这句话。</dd>
+      </dl>
+    </div>
+  </div>
+
+  <h3 class="sub">一句话</h3>
+  <p class="body" style="font-family:'Noto Serif SC',serif;font-size:19px;color:var(--ink);font-weight:400;line-height:1.8;max-width:24em">
+    在说不清的时刻，帮你找到此刻适合你的空间。
+  </p>
+
+  <h3 class="sub">三条边界</h3>
+  <p class="body">这三条不是价值观标语，是<strong>会否决设计方案的硬约束</strong>。任何一版视觉或文案，先过这三关。</p>
+  <div class="card bounds">
+    <div><span class="k">不诊断</span><span class="v">不给情绪贴标签，不暗示病理。可以说"你 7 次里有 5 次选了人少的地方"，不能说"你是高敏感人群"。</span></div>
+    <div><span class="k">不评判</span><span class="v">变化分数的负端<strong>不能用红色</strong>。情绪变差不是错误，只是一次没接住。</span></div>
+    <div><span class="k">不社交</span><span class="v">没有昵称、人脸、主页、评论、关注、私信。只有用户主动匿名贡献的记录会露出。</span></div>
+  </div>
+</section>
+
+<!-- ================= 02 ================= -->
+<section class="ch" id="c2">
+  <div class="ch-head">
+    <div class="n">02</div>
+    <h2>标识</h2>
+    <p>一条流、一个开口的围合、一个交点。三个元素，一句话。</p>
+  </div>
+
+  <div class="hero-mark">
+    <svg viewBox="0 26 230 124" fill="none" stroke-width="2.2" stroke-linecap="round" role="img" aria-label="此在主标：开口的环坐在一条流线的波峰上，波峰处一个暖色的点">
+      <path class="mk-wave" stroke="currentColor" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+      <path class="mk-ring" stroke="currentColor" d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85"/>
+      <circle class="mk-dot" cx="115" cy="124" r="5.2" stroke="none"/>
+    </svg>
+  </div>
+
+  <h3 class="sub">构造</h3>
+  <p class="body">
+    环与流<strong>严格相切</strong>：切点同时是环的最低点与流线的波峰。这不是画着好看 ——
+    相切意味着<strong>交集只有一个点</strong>，"此刻"没有第二个落处。如果改成穿过，交点会变成两个，意思就散了。
+  </p>
+
+  <div class="card" style="padding:38px 24px 30px;display:grid;place-items:center;margin-top:22px">
+    <svg class="constr" viewBox="0 20 230 142" fill="none" stroke-width="1.9" stroke-linecap="round" style="width:100%;max-width:440px;height:auto" role="img" aria-label="标识构造图，标注相切点、缺口角度与比例">
+      <!-- guides -->
+      <circle class="guide" cx="115" cy="80" r="44"/>
+      <line class="guide" x1="115" y1="30" x2="115" y2="150"/>
+      <line class="guide" x1="0" y1="124" x2="230" y2="124"/>
+      <line class="guide-solid" x1="115" y1="80" x2="135.66" y2="118.85"/>
+      <line class="guide-solid" x1="115" y1="80" x2="94.34" y2="118.85"/>
+      <path class="guide-solid" d="M 122.5 91.5 A 15 15 0 0 1 107.5 91.5"/>
+      <text x="118" y="102">56°</text>
+      <text x="120" y="60">R</text>
+      <line class="guide-solid" x1="115" y1="80" x2="159" y2="80"/>
+      <text x="4" y="120">波峰 = 切点</text>
+      <!-- mark -->
+      <path class="mk-wave" stroke="currentColor" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+      <path class="mk-ring" stroke="currentColor" d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85"/>
+      <circle class="mk-dot" cx="115" cy="124" r="5.2" stroke="none"/>
+    </svg>
+  </div>
+
+  <div class="tablewrap" style="margin-top:20px">
+    <table class="data">
+      <thead><tr><th>参数</th><th>规定</th><th>为什么</th></tr></thead>
+      <tbody>
+        <tr><td class="k">相切</td><td class="num">环最低点 = 流波峰</td><td>交集只有一个点</td></tr>
+        <tr><td class="k">缺口</td><td class="num">以切点为心，对称展开 56°</td><td>小于 40° 在 32px 下会闭合，读不出开口</td></tr>
+        <tr><td class="k">环 : 流</td><td class="num">环直径 : 流线全长 = 1 : 2.4</td><td>流要明显长过环，否则读成"球放在地上"</td></tr>
+        <tr><td class="k">点</td><td class="num">直径 ≈ 环直径的 1/8.5</td><td>能被看见，但不与环争主体</td></tr>
+        <tr><td class="k">线重</td><td class="num">环与流<strong>等粗</strong>，≈ 环直径的 1/40</td><td>两者是同级的，谁重了都会压掉另一个</td></tr>
+        <tr><td class="k">安全边距</td><td class="num">四周 ≥ 0.4 R</td><td>R 为环半径，随标识缩放</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="sub">组合</h3>
+  <div class="grid3">
+    <div class="card lockbox">
+      <div class="cap">横版 · 默认</div>
+      <div class="lockrow">
+        <svg viewBox="0 0 120 92" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+          <path class="mk-wave" stroke="currentColor" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+          <path class="mk-ring" stroke="currentColor" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+          <circle class="mk-dot" cx="60" cy="70" r="3.6" stroke="none"/>
+        </svg>
+        <div class="wd"><div class="cn">此在</div><div class="en">Current</div></div>
+      </div>
+    </div>
+    <div class="card lockbox">
+      <div class="cap">竖版 · 窄空间</div>
+      <div class="lockcol">
+        <svg viewBox="0 0 120 92" fill="none" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+          <path class="mk-wave" stroke="currentColor" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+          <path class="mk-ring" stroke="currentColor" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+          <circle class="mk-dot" cx="60" cy="70" r="3.6" stroke="none"/>
+        </svg>
+        <div class="wd" style="justify-items:center;text-align:center">
+          <div class="cn" style="font-size:18px">此在</div>
+          <div class="en" style="font-size:9.5px">Current</div>
+        </div>
+      </div>
+    </div>
+    <div class="card lockbox">
+      <div class="cap">纯标 · 已建立认知后</div>
+      <div class="lockrow" style="justify-content:center">
+        <svg viewBox="0 0 120 92" fill="none" stroke-width="3" stroke-linecap="round" style="height:52px" aria-hidden="true">
+          <path class="mk-wave" stroke="currentColor" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+          <path class="mk-ring" stroke="currentColor" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+          <circle class="mk-dot" cx="60" cy="70" r="3.6" stroke="none"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">最小尺寸</h3>
+  <p class="body">流线是最先损失的部分。<strong>24px 是带流线的下限</strong>；再小只保留环与点，此时缺口要加宽到 70° 才读得出来。</p>
+  <div class="card" style="padding:26px 28px">
+    <div class="sizerow">
+      <figure>
+        <svg width="64" height="46" viewBox="0 8 64 46" fill="none" stroke-width="2.6" stroke-linecap="round" aria-hidden="true">
+          <path class="mk-wave" stroke="currentColor" d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+          <path class="mk-ring" stroke="currentColor" d="M39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+          <circle class="mk-dot" cx="32" cy="42" r="2.6" stroke="none"/>
+        </svg>
+        <figcaption>64</figcaption>
+      </figure>
+      <figure>
+        <svg width="40" height="29" viewBox="0 8 64 46" fill="none" stroke-width="3.6" stroke-linecap="round" aria-hidden="true">
+          <path class="mk-wave" stroke="currentColor" d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+          <path class="mk-ring" stroke="currentColor" d="M39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+          <circle class="mk-dot" cx="32" cy="42" r="3" stroke="none"/>
+        </svg>
+        <figcaption>40</figcaption>
+      </figure>
+      <figure>
+        <svg width="24" height="18" viewBox="0 8 64 46" fill="none" stroke-width="5" stroke-linecap="round" aria-hidden="true">
+          <path class="mk-wave" stroke="currentColor" d="M3 47 C 9 44 13 49 19 49 C 26 49 27 43 32 43 C 37 43 39 49 46 49 C 52 49 57 45 61 46"/>
+          <path class="mk-ring" stroke="currentColor" d="M39.04 41.24 A 15 15 0 1 0 24.96 41.24"/>
+          <circle class="mk-dot" cx="32" cy="43" r="4" stroke="none"/>
+        </svg>
+        <figcaption>24 · 下限</figcaption>
+      </figure>
+      <figure>
+        <svg width="16" height="16" viewBox="14 12 36 32" fill="none" stroke-width="5.5" stroke-linecap="round" aria-hidden="true">
+          <path class="mk-ring" stroke="currentColor" d="M36.6 37.1 A 15 15 0 1 0 27.4 37.1"/>
+          <circle class="mk-dot" cx="32" cy="40" r="4.4" stroke="none"/>
+        </svg>
+        <figcaption>16 · 去流线</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <h3 class="sub">App Icon 与反白</h3>
+  <div class="card" style="padding:26px 28px;display:grid;gap:20px">
+    <div class="iconset">
+      <div class="appicon ic-ink" style="width:76px;height:76px">
+        <svg viewBox="0 8 64 46" fill="none" stroke-width="2.9" stroke-linecap="round" aria-hidden="true">
+          <path stroke="var(--paper)" d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+          <path stroke="var(--paper)" d="M39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+          <circle fill="var(--sun)" cx="32" cy="42" r="2.8" stroke="none"/>
+        </svg>
+      </div>
+      <div class="appicon ic-paper" style="width:76px;height:76px">
+        <svg viewBox="0 8 64 46" fill="none" stroke-width="2.9" stroke-linecap="round" aria-hidden="true">
+          <path stroke="var(--ink)" d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+          <path stroke="var(--ink)" d="M39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+          <circle fill="var(--sun)" cx="32" cy="42" r="2.8" stroke="none"/>
+        </svg>
+      </div>
+      <div class="appicon ic-water" style="width:76px;height:76px">
+        <svg viewBox="0 8 64 46" fill="none" stroke-width="2.9" stroke-linecap="round" aria-hidden="true">
+          <path stroke="#FFFFFF" d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+          <path stroke="#FFFFFF" d="M39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+          <circle fill="#F6D9C2" cx="32" cy="42" r="2.8" stroke="none"/>
+        </svg>
+      </div>
+      <div class="appicon ic-ink" style="width:44px;height:44px">
+        <svg viewBox="0 8 64 46" fill="none" stroke-width="4.2" stroke-linecap="round" aria-hidden="true">
+          <path stroke="var(--paper)" d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+          <path stroke="var(--paper)" d="M39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+          <circle fill="var(--sun)" cx="32" cy="42" r="3.4" stroke="none"/>
+        </svg>
+      </div>
+    </div>
+    <p class="body" style="margin:0">
+      三种底都成立。<strong>点始终是暖的</strong> —— 在水青底上换成更浅的暖（<span class="mono">#F6D9C2</span>）以保住对比，但绝不换成冷色。
+    </p>
+  </div>
+
+  <h3 class="sub">禁用</h3>
+  <div class="grid3">
+    <div class="card dont">
+      <div class="stage">
+        <svg viewBox="0 26 230 124" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path stroke="var(--ink-faint)" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+          <circle stroke="var(--ink-faint)" cx="115" cy="80" r="44"/>
+          <circle fill="var(--ink-faint)" cx="115" cy="124" r="5.2" stroke="none"/>
+        </svg>
+      </div>
+      <div class="t"><span class="x">✕</span><span>不要闭合环。缺口是"可以离开"这层意思，不是失误。</span></div>
+    </div>
+    <div class="card dont">
+      <div class="stage">
+        <svg viewBox="0 26 230 124" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path stroke="var(--ink-faint)" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+          <path fill="var(--ink-faint)" stroke="none" d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85 Z"/>
+          <circle fill="var(--paper)" cx="115" cy="124" r="5.2" stroke="none"/>
+        </svg>
+      </div>
+      <div class="t"><span class="x">✕</span><span>不要填充环。环是空间的边界，不是实体。</span></div>
+    </div>
+    <div class="card dont">
+      <div class="stage">
+        <svg viewBox="0 26 230 124" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path stroke="var(--ink-faint)" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 112 115 112 C 138 112 148 140 170 140 C 188 140 200 126 222 130"/>
+          <path stroke="var(--ink-faint)" d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85"/>
+          <circle fill="var(--ink-faint)" cx="115" cy="124" r="5.2" stroke="none"/>
+        </svg>
+      </div>
+      <div class="t"><span class="x">✕</span><span>不要破坏相切。环浮空或陷入流线，交集就不再是一个点。</span></div>
+    </div>
+    <div class="card dont">
+      <div class="stage">
+        <svg viewBox="0 26 230 124" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path stroke="var(--ink-faint)" stroke-width="5" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+          <path stroke="var(--ink-faint)" stroke-width="1.4" d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85"/>
+          <circle fill="var(--ink-faint)" cx="115" cy="124" r="5.2" stroke="none"/>
+        </svg>
+      </div>
+      <div class="t"><span class="x">✕</span><span>不要让环与流线不等粗。两者是同级的。</span></div>
+    </div>
+    <div class="card dont">
+      <div class="stage">
+        <svg viewBox="0 26 230 124" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path stroke="var(--ink-faint)" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+          <path stroke="var(--ink-faint)" d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85"/>
+          <circle fill="var(--water)" cx="115" cy="124" r="5.2" stroke="none"/>
+        </svg>
+      </div>
+      <div class="t"><span class="x">✕</span><span>不要把点改成冷色。全套视觉里只有它是暖的。</span></div>
+    </div>
+    <div class="card dont">
+      <div class="stage">
+        <svg viewBox="0 26 230 124" fill="none" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <g transform="rotate(-16 115 105)">
+            <path stroke="var(--ink-faint)" d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+            <path stroke="var(--ink-faint)" d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85"/>
+            <circle fill="var(--ink-faint)" cx="115" cy="124" r="5.2" stroke="none"/>
+          </g>
+        </svg>
+      </div>
+      <div class="t"><span class="x">✕</span><span>不要旋转。流是水平的，倾斜之后就不是"流"了。</span></div>
+    </div>
+  </div>
+  <p class="note">禁用示例里的砖红 ✕ 是<strong>手册的批注色</strong>，不属于品牌色板，不要出现在任何产品界面里。</p>
+</section>
+
+<!-- ================= 03 ================= -->
+<section class="ch" id="c3">
+  <div class="ch-head">
+    <div class="n">03</div>
+    <h2>色彩</h2>
+    <p>浅色为主。冷色承担空间与时间，暖色只标记人。</p>
+  </div>
+
+  <h3 class="sub">主色板</h3>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#F0F3F2"></div><div class="meta">
+      <div class="nm">日光白</div><div class="hex">#F0F3F2</div><div class="use">页面底色。带一点点青，不是暖奶油，也不是冷科技灰。</div></div></div>
+    <div class="sw"><div class="chip" style="background:#FFFFFF;box-shadow:inset 0 0 0 1px #E5EBE9"></div><div class="meta">
+      <div class="nm">纸</div><div class="hex">#FFFFFF</div><div class="use">卡片与内容承载面。</div></div></div>
+    <div class="sw"><div class="chip" style="background:#122A2E"></div><div class="meta">
+      <div class="nm">深青墨</div><div class="hex">#122A2E</div><div class="use">主文字与标识主色。不用纯黑 —— 黑太硬。</div></div></div>
+    <div class="sw"><div class="chip" style="background:#5A6E70"></div><div class="meta">
+      <div class="nm">次墨</div><div class="hex">#5A6E70</div><div class="use">正文、说明、次级信息。</div></div></div>
+    <div class="sw"><div class="chip" style="background:#1E6E72"></div><div class="meta">
+      <div class="nm">水青</div><div class="hex">#1E6E72</div><div class="use">主强调。流、空间、链接、可交互。</div></div></div>
+    <div class="sw"><div class="chip" style="background:#C4703C"></div><div class="meta">
+      <div class="nm">日光赭</div><div class="hex">#C4703C</div><div class="use"><strong>唯一的暖色。</strong>只用在代表「你 / 此刻」的元素上。</div></div></div>
+  </div>
+
+  <h3 class="sub">用色比例</h3>
+  <p class="body">赭色的稀缺就是它的力量。<strong>一屏之内出现超过两处赭色，就该重新想。</strong></p>
+  <div class="ratio">
+    <div style="background:#F0F3F2;color:#122A2E;flex:70">70 · 底</div>
+    <div style="background:#122A2E;color:#F0F3F2;flex:22">22 · 墨</div>
+    <div style="background:#1E6E72;color:#FFFFFF;flex:6">6</div>
+    <div style="background:#C4703C;color:#FFFFFF;flex:2">2</div>
+  </div>
+
+  <h3 class="sub">情绪变化色阶</h3>
+  <p class="body">
+    用户在反馈里用 <span class="mono">−3 … +3</span> 记录到访前后的变化。这条色阶是全产品最敏感的用色，规矩只有一条：
+    <strong>负端不能用红。</strong>情绪变差不是错误、不是警告、不是失败，只是这个空间这次没接住你。
+    所以负端走<strong>低饱和灰紫</strong>（安静地收回去），正端走<strong>水青</strong>（打开），中间是几乎无色的灰。
+  </p>
+  <div class="scale">
+    <div><div class="band" style="background:#4E4B63"></div><div class="lb">−3<small>没接住</small></div></div>
+    <div><div class="band" style="background:#6B687F"></div><div class="lb">−2</div></div>
+    <div><div class="band" style="background:#9694A5"></div><div class="lb">−1</div></div>
+    <div><div class="band" style="background:#C3C9C7"></div><div class="lb">0<small>没变化</small></div></div>
+    <div><div class="band" style="background:#86ADA8"></div><div class="lb">+1</div></div>
+    <div><div class="band" style="background:#4A8F8A"></div><div class="lb">+2</div></div>
+    <div><div class="band" style="background:#1E6E72"></div><div class="lb">+3<small>接住了</small></div></div>
+  </div>
+
+  <h3 class="sub">深色模式</h3>
+  <p class="body">产品大量在傍晚和夜里被打开，深色不是可选项。整套 token 同名替换，语义不变。</p>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:#0D1A1C"></div><div class="meta"><div class="nm">夜底</div><div class="hex">#0D1A1C</div><div class="use">对应日光白</div></div></div>
+    <div class="sw"><div class="chip" style="background:#142428"></div><div class="meta"><div class="nm">夜纸</div><div class="hex">#142428</div><div class="use">对应纸</div></div></div>
+    <div class="sw"><div class="chip" style="background:#E6EDEB"></div><div class="meta"><div class="nm">夜墨</div><div class="hex">#E6EDEB</div><div class="use">对应深青墨</div></div></div>
+    <div class="sw"><div class="chip" style="background:#5FA9AC"></div><div class="meta"><div class="nm">夜水青</div><div class="hex">#5FA9AC</div><div class="use">提亮以保住对比</div></div></div>
+    <div class="sw"><div class="chip" style="background:#D98A52"></div><div class="meta"><div class="nm">夜赭</div><div class="hex">#D98A52</div><div class="use">依旧是唯一的暖</div></div></div>
+  </div>
+
+  <h3 class="sub">对比度</h3>
+  <div class="tablewrap">
+    <table class="data">
+      <thead><tr><th>组合</th><th>比值</th><th>WCAG</th><th>可用于</th></tr></thead>
+      <tbody>
+        <tr><td class="k">深青墨 / 日光白</td><td class="num">13.47:1</td><td class="num pass">AAA</td><td>正文、标题</td></tr>
+        <tr><td class="k">次墨 / 日光白</td><td class="num">4.82:1</td><td class="num pass">AA</td><td>正文、说明</td></tr>
+        <tr><td class="k">水青 / 日光白</td><td class="num">5.33:1</td><td class="num pass">AA</td><td>链接、强调文字</td></tr>
+        <tr><td class="k">日光赭 / 日光白</td><td class="num">3.28:1</td><td class="num">AA Large</td><td>仅 18px+ 或图形，<strong>不用于小字</strong></td></tr>
+        <tr><td class="k">夜墨 / 夜底</td><td class="num">14.96:1</td><td class="num pass">AAA</td><td>正文、标题</td></tr>
+        <tr><td class="k">夜赭 / 夜底</td><td class="num">6.52:1</td><td class="num pass">AA</td><td>深色下赭色可用于小字</td></tr>
+        <tr><td class="k">日光赭 / 深青墨</td><td class="num">4.10:1</td><td class="num">图形 ✓</td><td>深底 App icon 上的点。图形对比要求 3:1，通过</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= 04 ================= -->
+<section class="ch" id="c4">
+  <div class="ch-head">
+    <div class="n">04</div>
+    <h2>字体</h2>
+    <p>标题用宋，正文用黑，数字用等宽。三种角色，不越界。</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card typepair">
+      <div class="spec">NOTO SERIF SC · 500 · 中文标题</div>
+      <div class="demo-cn-s">此刻，你更接近哪一种？</div>
+      <p class="body" style="margin:0">
+        宋体的横细竖粗有停顿感，读起来是"想一想"而不是"快点选"。用于标题、地点名、金句。<strong>不用于正文</strong> —— 长段落宋体在手机上会累。
+      </p>
+    </div>
+    <div class="card typepair">
+      <div class="spec">NEWSREADER · 300 · 西文显示</div>
+      <div class="demo-en-s serif-en">Current</div>
+      <p class="body" style="margin:0">
+        气质是读物而不是科技产品，和思源宋体的骨架搭得住。品牌名固定<strong>大写 + 0.44em 字距</strong>，其余西文正常排。
+      </p>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:20px">
+    <div class="card typepair">
+      <div class="spec">NOTO SANS SC · 300 / 400 · 中文正文</div>
+      <div class="demo-cn-b">
+        选一个就好。它只用来决定接下来给你看什么，不会被公开，也不构成任何评估。
+      </div>
+      <p class="body" style="margin:0">默认 300 字重 —— 更轻，压迫感更低。强调用 400，不用 500 以上。</p>
+    </div>
+    <div class="card typepair">
+      <div class="spec">IBM PLEX MONO · 400 / 500 · 数据与标签</div>
+      <div class="demo-mono">+2.4　·　1,205 份　·　20–40 min　·　1.4 km</div>
+      <p class="body" style="margin:0">
+        所有会对齐成列的数字都用等宽，并开 <span class="mono">tabular-nums</span>。小标签统一大写 + 0.14em 字距。
+      </p>
+    </div>
+  </div>
+
+  <h3 class="sub">字阶</h3>
+  <div class="stack">
+    <div class="row"><span class="lab">显示 / 40</span><span style="font-family:'Noto Serif SC',serif;font-weight:500;font-size:32px;line-height:1.3">此刻，你在哪儿</span></div>
+    <div class="row"><span class="lab">标题 / 28</span><span style="font-family:'Noto Serif SC',serif;font-weight:500;font-size:24px;line-height:1.35">江边日落步道</span></div>
+    <div class="row"><span class="lab">小标题 / 20</span><span style="font-family:'Noto Serif SC',serif;font-weight:500;font-size:18px">为什么此刻推荐给你</span></div>
+    <div class="row"><span class="lab">正文 / 15</span><span style="font-size:15px;color:var(--ink-soft)">这里不劝你振作，只是把视线拉得比你的念头更远。</span></div>
+    <div class="row"><span class="lab">次要 / 13</span><span style="font-size:13px;color:var(--ink-soft)">来自 1,205 份匿名反馈的平均值</span></div>
+    <div class="row"><span class="lab">标签 / 10.5</span><span class="mono" style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)">出发前 · 第一步</span></div>
+  </div>
+</section>
+
+<!-- ================= 05 ================= -->
+<section class="ch" id="c5">
+  <div class="ch-head">
+    <div class="n">05</div>
+    <h2>符号系统</h2>
+    <p>每个空间有一张自己的符号封面。它不是插画，是把数据画出来。</p>
+  </div>
+
+  <p class="body">
+    原型里已经有一套「环 / 星芒 / 光点」的抽象封面，用来避免图片与地点错配。现在把它<strong>接到标识的同一套几何上</strong>：
+    每个空间的封面，都是主标的一个参数变体。这样 logo 和产品内容不再是两套东西 —— 标识只是<strong>参数全部取中间值时的那一张</strong>。
+  </p>
+
+  <div class="tablewrap" style="margin-top:20px">
+    <table class="data paramtable">
+      <thead><tr><th>参数</th><th>编码什么</th><th>取值</th></tr></thead>
+      <tbody>
+        <tr><td class="k">环直径</td><td>空间的<strong>开阔度</strong></td><td class="num">小 = 围合的角落　→　大 = 开阔的江边</td></tr>
+        <tr><td class="k">流线振幅</td><td>环境的<strong>刺激强度</strong></td><td class="num">平 = 安静　→　起伏大 = 热闹</td></tr>
+        <tr><td class="k">流线频率</td><td>刺激的<strong>密度</strong></td><td class="num">疏 = 缓慢　→　密 = 密集</td></tr>
+        <tr><td class="k">切点位置</td><td>你与这个空间的<strong>关系</strong></td><td class="num">居中 = 正好在其中　→　偏移 = 从旁边经过</td></tr>
+        <tr><td class="k">点的大小</td><td>本次<strong>变化分数</strong>的绝对值</td><td class="num">随 −3…+3 缩放，颜色取情绪色阶</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="sub">八个地点</h3>
+  <p class="body">原型里的 8 个 PlaceProfile，用同一套规则生成。参数写在每张卡下面，可以直接对照实现。</p>
+  <div class="symgrid" id="symgrid"></div>
+
+  <p class="note">
+    这些符号由页面里的一段函数实时生成，不是画好的图 —— 说明这套规则真的能跑，接上真实数据就能给任意数量的空间出封面。
+  </p>
+</section>
+
+<!-- ================= 06 ================= -->
+<section class="ch" id="c6">
+  <div class="ch-head">
+    <div class="n">06</div>
+    <h2>语气</h2>
+    <p>文案是设计的一部分。这一章比色板更容易被做坏。</p>
+  </div>
+
+  <div class="voice">
+    <div class="yes">
+      <div class="hd">该说</div>
+      <ul>
+        <li><b>有出处的观察。</b>「你过去 7 次记录中，有 5 次选了『人不多』。」</li>
+        <li><b>具体的物理事实。</b>「没有消费，也没有人问你要待多久。」</li>
+        <li><b>把选择权交回去。</b>「选一个就好，它只用来决定接下来给你看什么。」</li>
+        <li><b>承认不确定。</b>「这个地方有没有接住你？」而不是「这个地方很治愈」。</li>
+        <li><b>短。</b>推荐理由不超过两句，反馈提示不超过一句。</li>
+      </ul>
+    </div>
+    <div class="no">
+      <div class="hd">不该说</div>
+      <ul>
+        <li><b>给人下定义。</b>「你是一个内向 / 高敏感 / 焦虑型的人。」</li>
+        <li><b>暗示疗效。</b>「治愈」「疗愈」「缓解焦虑」——这是医疗主张，我们没有资格。</li>
+        <li><b>劝导与鼓励。</b>「加油」「你可以的」「打起精神来」。</li>
+        <li><b>把数字说成结论。</b>「+2.4」是别人的平均值，不是对你的承诺。</li>
+        <li><b>社交化措辞。</b>「大家都在去」「热门打卡」「已有 300 人关注」。</li>
+      </ul>
+    </div>
+  </div>
+
+    <h3 class="sub">小在 · 向导</h3>
+  <p class="body">
+    原型里那只黑猫叫「栖」，配套文案是「栖眼中的这里」「栖眼中的你」「某个人的栖」。
+    改名之后这套全部失效。现在向导是一朵云，叫<strong>小在</strong>。
+  </p>
+  <p class="body">
+    <strong>小在不是外来的吉祥物，是标识里那个环松开之后长出来的。</strong>
+    环坐在流上，小在浮在流上 —— 同一套语言，同样的等粗线条，同样只有一处暖色。
+    云这个形也刚好对：它有形状但没有边界，会变，不评判任何东西，从你上方经过而不落下来。
+  </p>
+
+  <div class="card" style="padding:44px 30px 34px;display:grid;place-items:center;gap:22px">
+    <div style="width:100%;max-width:300px"><svg viewBox="0 24 200 96" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z" stroke="var(--ink)"/><circle cx="84" cy="80" r="3.6" fill="var(--ink)"/><circle cx="116" cy="80" r="3.6" fill="var(--ink)"/></svg></div>
+    <div class="cap">小在 · 默认状态</div>
+  </div>
+
+  <h3 class="sub">表情</h3>
+  <p class="body">
+    只靠眼睛，<strong>没有嘴</strong>。有嘴就会有情绪表演，而小在的职责是陪着，不是替你高兴或难过。
+    四种够用，不要再加。
+  </p>
+  <div class="grid4">
+    <div class="card expr"><div class="art"><svg viewBox="0 24 200 96" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z" stroke="var(--ink)"/><circle cx="84" cy="80" r="3.6" fill="var(--ink)"/><circle cx="116" cy="80" r="3.6" fill="var(--ink)"/></svg></div><div class="nm">平静</div><div class="ux">默认。首屏、导航、任何没在发生什么的时候。</div></div>
+    <div class="card expr"><div class="art"><svg viewBox="0 24 200 96" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z" stroke="var(--ink)"/><circle cx="91" cy="80" r="3.6" fill="var(--ink)"/><circle cx="123" cy="80" r="3.6" fill="var(--ink)"/></svg></div><div class="nm">看向你</div><div class="ux">你正在选、正在填的时候。眼睛偏向内容那一侧。</div></div>
+    <div class="card expr"><div class="art"><svg viewBox="0 24 200 96" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z" stroke="var(--ink)"/><path d="M78 82 A7 7 0 0 1 90 82" stroke="var(--ink)" stroke-width="3.4"/><path d="M110 82 A7 7 0 0 1 122 82" stroke="var(--ink)" stroke-width="3.4"/></svg></div><div class="nm">闭眼</div><div class="ux">记录保存、切到私密时。表示「我不看了」。</div></div>
+    <div class="card expr"><div class="art"><svg viewBox="0 24 200 96" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z" stroke="var(--ink)"/><circle cx="84" cy="80" r="3.6" fill="var(--ink)"/><circle cx="116" cy="80" r="3.6" fill="var(--ink)"/><circle cx="168" cy="106" r="5" fill="var(--sun)"/></svg></div><div class="nm">陪着</div><div class="ux">旁边那个暖点是<strong>你</strong>，不是小在的一部分。用于到访卡与轨迹页。</div></div>
+  </div>
+
+  <h3 class="sub">文案</h3>
+  <div class="card bounds">
+    <div><span class="k">署名</span><span class="v">推荐卡：<strong>小在眼中的这里</strong>　·　记录页：<strong>小在眼中的你</strong></span></div>
+    <div><span class="k">自称</span><span class="v">「我先记着：低落。不会告诉任何人。」—— 第一人称，短句，不追问。</span></div>
+    <div><span class="k">匿名流</span><span class="v">用<strong>「某个人的此在」</strong>，不是「某个人的小在」。小在是向导，此在是那个人的此刻。</span></div>
+    <div><span class="k">不做</span><span class="v">不打招呼、不说早安、不用感叹号、不主动开启对话。它出现是因为你正在做一件事。</span></div>
+  </div>
+
+  <h3 class="sub">禁用</h3>
+  <div class="grid3">
+    <div class="card dont"><div class="stage"><svg viewBox="0 24 200 96" fill="none" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z" stroke="var(--ink-faint)"/><circle cx="84" cy="76" r="3.6" fill="var(--ink-faint)"/><circle cx="116" cy="76" r="3.6" fill="var(--ink-faint)"/><path d="M92 90 A9 9 0 0 0 110 90" stroke="var(--ink-faint)" stroke-width="2.8"/></svg></div>
+      <div class="t"><span class="x">✕</span><span>不要加嘴。表情只在眼睛上做。</span></div></div>
+    <div class="card dont"><div class="stage"><svg viewBox="0 24 200 96" fill="none" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z" fill="var(--ink-faint)" stroke="var(--ink-faint)"/><circle cx="84" cy="80" r="3.6" fill="var(--card)"/><circle cx="116" cy="80" r="3.6" fill="var(--card)"/></svg></div>
+      <div class="t"><span class="x">✕</span><span>不要填充。小在和标识一样是线，不是实体。</span></div></div>
+    <div class="card dont"><div class="stage"><svg viewBox="0 24 200 96" fill="none" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z" stroke="var(--ink-faint)"/><circle cx="84" cy="80" r="3.6" fill="var(--sun)"/><circle cx="116" cy="80" r="3.6" fill="var(--sun)"/></svg></div>
+      <div class="t"><span class="x">✕</span><span>不要把眼睛改成暖色。暖色永远只代表你。</span></div></div>
+  </div>
+</section>
+
+<!-- ================= 07 ================= -->
+<section class="ch" id="c7">
+  <div class="ch-head">
+    <div class="n">07</div>
+    <h2>应用</h2>
+    <p>把前面六章合起来用一遍，验证它们互相不打架。</p>
+  </div>
+
+  <h3 class="sub">App 关键页</h3>
+  <div class="screens">
+    <div>
+      <div class="phone">
+        <div class="ph-top">
+          <svg viewBox="0 8 64 46" fill="none" stroke-width="3.4" stroke-linecap="round" aria-hidden="true">
+            <path class="mk-wave" stroke="currentColor" d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+            <path class="mk-ring" stroke="currentColor" d="M39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+            <circle class="mk-dot" cx="32" cy="42" r="3" stroke="none"/>
+          </svg>
+          <span class="t">出发前</span>
+        </div>
+        <div class="ph-h">此刻，你更接近哪一种？</div>
+        <div class="ph-p">选一个就好。不会被公开，也不构成任何评估。</div>
+        <div class="chips">
+          <span class="chip on">低落</span><span class="chip">需要安静</span>
+          <span class="chip">脑子停不下来</span><span class="chip">空落落的</span>
+        </div>
+        <div class="btn">接着走 →</div>
+      </div>
+      <div class="phone-cap">01 · 出发前</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="ph-top"><span class="t">替我选</span><span class="t">1 / 8</span></div>
+        <div class="art" id="ph-riverside"></div>
+        <div class="ph-h">江边日落步道</div>
+        <div class="ph-p" style="color:var(--water)">为什么此刻推荐给你</div>
+        <div class="ph-p">这里不劝你振作，只是把视线拉得比你的念头更远。</div>
+        <div style="display:flex;gap:9px;align-items:baseline;margin-top:auto">
+          <span class="delta">+2.4</span><span class="ph-p" style="font-size:9px">1,205 份匿名反馈</span>
+        </div>
+      </div>
+      <div class="phone-cap">02 · 推荐卡</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="ph-top"><span class="t">回来之后</span><span class="t">30 秒</span></div>
+        <div class="ph-h">刚从江边回来吗？</div>
+        <div class="ph-p">出发前你说：<span style="color:var(--sun)">低落</span></div>
+        <div class="lbl">现在的变化</div>
+        <div class="scaleline">
+          <i style="background:#4E4B63"></i><i style="background:#6B687F"></i><i style="background:#9694A5"></i>
+          <i style="background:#C3C9C7"></i><i style="background:#86ADA8"></i>
+          <i style="background:#4A8F8A;outline:2px solid var(--sun);outline-offset:1px"></i><i style="background:#1E6E72"></i>
+        </div>
+        <div class="ph-p" style="font-size:9.5px">−3　　　　　0　　　　　+3</div>
+        <div class="chips"><span class="chip on">视野开阔</span><span class="chip">能一直走</span><span class="chip">江风</span></div>
+        <div class="btn">只存进我的记录</div>
+      </div>
+      <div class="phone-cap">03 · 反馈</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="ph-top"><span class="t">情绪空间轨迹</span><span class="t">14</span></div>
+        <div class="ph-h">小在眼中的你</div>
+        <div class="art" id="ph-you"></div>
+        <div class="ph-p">近期你更常去<b style="color:var(--ink);font-weight:400">开阔、可以慢慢走</b>的空间。</div>
+        <div class="ph-p" style="font-size:9.5px;color:var(--ink-faint)">来自 7 次记录中的 5 次 · 只有你能看到</div>
+      </div>
+      <div class="phone-cap">04 · 记录</div>
+    </div>
+  </div>
+
+  <h3 class="sub">社媒</h3>
+  <div class="social">
+    <div class="card" style="padding:20px;display:grid;gap:12px">
+      <div class="cap">头像 · 深底</div>
+      <div class="avatar ic-ink">
+        <svg viewBox="0 8 64 46" fill="none" stroke-width="3.2" stroke-linecap="round" aria-hidden="true">
+          <path stroke="var(--paper)" d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+          <path stroke="var(--paper)" d="M39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+          <circle fill="var(--sun)" cx="32" cy="42" r="2.9" stroke="none"/>
+        </svg>
+      </div>
+    </div>
+    <div class="card" style="padding:20px;display:grid;gap:12px">
+      <div class="cap">头像 · 浅底</div>
+      <div class="avatar" style="background:var(--paper);border:1px solid var(--rule)">
+        <svg viewBox="0 8 64 46" fill="none" stroke-width="3.2" stroke-linecap="round" aria-hidden="true">
+          <path stroke="var(--ink)" d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+          <path stroke="var(--ink)" d="M39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+          <circle fill="var(--sun)" cx="32" cy="42" r="2.9" stroke="none"/>
+        </svg>
+      </div>
+    </div>
+    <div class="card" style="padding:20px;display:grid;gap:12px">
+      <div class="cap">封面</div>
+      <div class="cover" style="background:var(--paper)">
+        <div class="inner">
+          <svg viewBox="0 0 120 92" fill="none" stroke-width="2.6" stroke-linecap="round" aria-hidden="true">
+            <path class="mk-wave" stroke="currentColor" d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+            <path class="mk-ring" stroke="currentColor" d="M71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+            <circle class="mk-dot" cx="60" cy="70" r="3.4" stroke="none"/>
+          </svg>
+          <div style="font-family:'Noto Serif SC',serif;font-size:13px;letter-spacing:.24em;font-weight:500">此在</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= footer ================= -->
+<footer>
+  <h3>还欠着的</h3>
+  <ul class="todo">
+    <li><span class="n">01</span><span><b>小在要接进原型。</b>现有原型里还是黑猫和「栖」的文案，需要按第 06 章替换一遍。</span></li>
+    <li><span class="n">02</span><span><b>路演物料。</b>PPT 模板、一页海报、封面图、Demo 视频封面、二维码卡 —— 你排的下一批。</span></li>
+    <li><span class="n">03</span><span><b>动效规范。</b>标识的生长动画、情绪色阶的过渡、符号封面的重新落位。</span></li>
+    <li><span class="n">04</span><span><b>字体授权。</b>思源宋体 / 黑体与 IBM Plex Mono 都是 OFL，商用免费；Newsreader 同为 OFL。<b>无需采购</b>。</span></li>
+  </ul>
+  <p class="sig">此在 · Current　—　品牌手册 v1</p>
+</footer>
+
+</main>
+</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var W=160,H=120,CY=94;
+
+  // 生成一条以 (xc, CY) 为波峰的流线；波峰处 y 恰为 CY，其余位置都在其下方
+  function wave(xc,amp,freq){
+    var k=2*Math.PI*freq/W,pts=[],n=72;
+    for(var i=0;i<=n;i++){
+      var x=i*W/n;
+      var y=CY+amp*(1-Math.cos(k*(x-xc)))/2;
+      pts.push((i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1));
+    }
+    return pts.join(' ');
+  }
+
+  // 情绪色阶
+  var SCALE={'-3':'#4E4B63','-2':'#6B687F','-1':'#9694A5','0':'#C3C9C7',
+             '1':'#86ADA8','2':'#4A8F8A','3':'#1E6E72'};
+
+  function symbol(p){
+    var xc=W/2+p.shift, R=p.R, cy=CY-R;
+    // 缺口 56°，以最低点为中心
+    var a=(90-28)*Math.PI/180, b=(90+28)*Math.PI/180;
+    var x1=(xc+R*Math.cos(a)).toFixed(2), y1=(cy+R*Math.sin(a)).toFixed(2);
+    var x2=(xc+R*Math.cos(b)).toFixed(2), y2=(cy+R*Math.sin(b)).toFixed(2);
+    var dotR=(2.2+Math.abs(p.delta)*0.7).toFixed(1);
+    var dotC=SCALE[String(p.delta)]||'#C3C9C7';
+    return '<svg viewBox="0 '+(CY-2*40-6)+' '+W+' '+(2*40+6+34)+'" fill="none" '+
+      'stroke-width="2" stroke-linecap="round" role="img" aria-label="'+p.name+' 的空间符号">'+
+      '<path stroke="var(--ink)" d="'+wave(xc,p.amp,p.freq)+'"/>'+
+      '<path stroke="var(--ink)" d="M '+x1+' '+y1+' A '+R+' '+R+' 0 1 0 '+x2+' '+y2+'"/>'+
+      '<circle cx="'+xc.toFixed(1)+'" cy="'+CY+'" r="'+dotR+'" fill="'+dotC+'"/>'+
+      '</svg>';
+  }
+
+  var PLACES=[
+    {name:'江边日落步道', R:40, amp:5,  freq:2, shift:0,   delta:3, note:'最开阔，流最缓'},
+    {name:'独立书店',     R:22, amp:4,  freq:3, shift:-14, delta:2, note:'围合，你在边上'},
+    {name:'屋顶植物园',   R:34, amp:3,  freq:2, shift:4,   delta:2, note:'开阔但安静'},
+    {name:'社区美术馆',   R:29, amp:11, freq:4, shift:-8,  delta:1, note:'视觉刺激密'},
+    {name:'城市公园',     R:38, amp:7,  freq:3, shift:0,   delta:2, note:'开阔，有人声'},
+    {name:'咖啡馆',       R:20, amp:13, freq:6, shift:-16, delta:0, note:'小且吵，看运气'},
+    {name:'图书馆',       R:26, amp:2,  freq:2, shift:0,   delta:3, note:'最安静'},
+    {name:'城市慢跑道',   R:36, amp:9,  freq:2, shift:10,  delta:1, note:'长波长，持续用力'}
+  ];
+
+  var grid=document.getElementById('symgrid');
+  if(grid){
+    grid.innerHTML=PLACES.map(function(p){
+      return '<div class="symcard">'+
+        '<div class="art">'+symbol(p)+'</div>'+
+        '<div class="nm">'+p.name+'</div>'+
+        '<div class="pr">'+
+          '<span>R '+p.R+'　振幅 '+p.amp+'　频 '+p.freq+'</span>'+
+          '<span>偏移 '+(p.shift>0?'+':'')+p.shift+'　Δ '+(p.delta>0?'+':'')+p.delta+'</span>'+
+        '</div>'+
+        '<div class="pr" style="color:var(--ink-soft);font-family:inherit;font-size:12px;letter-spacing:0">'+p.note+'</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  // 界面示意里的两张封面
+  var a=document.getElementById('ph-riverside');
+  if(a) a.innerHTML=symbol({name:'江边',R:40,amp:5,freq:2,shift:0,delta:3});
+  var b=document.getElementById('ph-you');
+  if(b) b.innerHTML=symbol({name:'你',R:35,amp:6,freq:3,shift:2,delta:2});
+})();
+</script>

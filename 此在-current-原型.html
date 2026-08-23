@@ -1,0 +1,2244 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>此在 · 情绪空间闭环</title>
+<style>
+:root{
+  /* ── 品牌浅色体系 · 与品牌手册 / 路演物料同源 ── */
+  --paper:#F0F3F2;        /* 日光白 · 页面底 */
+  --card:#FFFFFF;         /* 纸 · 内容承载面 */
+  --sunk:#E8EDEC;         /* 下沉面 */
+  --ink:#122A2E;          /* 深青墨 */
+  --ink-dim:#5A6E70;      /* 次墨 */
+  --ink-faint:#8CA0A0;
+  --line:rgba(18,42,46,.12);
+  --line-2:rgba(18,42,46,.20);
+  --water:#1E6E72;        /* 流 · 空间 · 冷 */
+  --water-wash:#DFEBEA;
+  --sun:#C4703C;          /* 此刻 · 你 · 唯一的暖 */
+  --sun-wash:#F6E9DF;
+
+  /* ── 情绪变化色阶 −3…+3 · 负端走低饱和灰紫，绝不用红 ── */
+  --d-n3:#4E4B63; --d-n2:#6B687F; --d-n1:#9694A5;
+  --d-0:#C3C9C7;
+  --d-p1:#86ADA8; --d-p2:#4A8F8A; --d-p3:#1E6E72;
+
+  /* ── 旧名兼容（逐步淘汰）── */
+  --ground:var(--paper);
+  --ground-2:var(--card);
+  --raise:var(--sunk);
+  --sage:var(--water);
+  --gold:var(--sun);
+  --terracotta:var(--water);
+
+  --serif:"Songti SC","Songti TC","Source Han Serif SC",Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+}
+button,input,textarea{font:inherit;color:inherit}
+button{background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--water);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- stage & phone ---------- */
+.stage{display:flex;flex-direction:column;align-items:center;padding:26px 16px 44px;gap:14px}
+.phone{
+  width:390px;height:844px;flex:none;
+  background:var(--paper);
+  border:1px solid rgba(18,42,46,.10);
+  border-radius:34px;
+  box-shadow:0 18px 50px rgba(18,42,46,.14);
+  overflow:hidden;display:flex;flex-direction:column;position:relative;
+}
+.stage-note{font:11px/1.7 var(--mono);color:var(--ink-faint);letter-spacing:.06em;text-align:center;max-width:390px}
+.stage-note a{color:var(--ink-dim)}
+@media (max-width:430px){
+  .stage{padding:0;gap:0}
+  .phone{width:100%;height:100dvh;border-radius:0;border:none;box-shadow:none}
+  .stage-note{display:none}
+}
+
+/* ---------- chrome ---------- */
+.top{
+  flex:none;height:54px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--line);
+}
+.top .lead{display:flex;align-items:center;gap:9px;min-width:0}
+.top h2{margin:0;font:500 14px/1 var(--serif);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .k{font:10px var(--mono);letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+.back{width:30px;height:30px;margin-left:-6px;display:grid;place-items:center;color:var(--ink-dim);font-size:17px;flex:none}
+.back:hover{color:var(--ink)}
+
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.pad{padding:20px 18px 26px}
+
+.dock{
+  flex:none;border-top:1px solid var(--line);padding:10px 16px 12px;
+  display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.86)
+}
+.dock .cat{width:21px;height:21px;flex:none;opacity:.8}
+.dock p{margin:0;font:12px/1.5 var(--sans);color:var(--ink-dim);min-width:0}
+.dock p b{color:var(--ink);font-weight:500}
+.dock .to-records{margin-left:auto;flex:none;font:10px var(--mono);letter-spacing:.1em;color:var(--ink-faint);border:1px solid var(--line);border-radius:20px;padding:6px 10px}
+.dock .to-records:hover{color:var(--ink-dim);border-color:var(--line-2)}
+
+/* ---------- type ---------- */
+.eyebrow{font:10px var(--mono);letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase;margin:0 0 10px}
+h1.title{margin:0 0 8px;font:400 27px/1.42 var(--serif);letter-spacing:.01em;text-wrap:balance}
+h1.title.sm{font-size:23px}
+.lead{margin:0 0 20px;font:13.5px/1.75 var(--sans);color:var(--ink-dim);max-width:31ch}
+.rule{height:1px;background:var(--line);margin:22px 0;border:none}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  height:50px;border-radius:26px;background:var(--ink);color:var(--paper);
+  font:500 15px var(--sans);letter-spacing:.04em;transition:opacity .16s
+}
+.btn:hover{opacity:.88}
+.btn:disabled{background:rgba(18,42,46,.08);color:var(--ink-faint);cursor:not-allowed}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line-2)}
+.btn.ghost:hover{border-color:var(--ink-dim);opacity:1}
+.btn.sm{height:42px;font-size:13.5px}
+.btn-text{display:block;width:100%;text-align:center;padding:12px 0;font:13px var(--sans);color:var(--ink-dim)}
+.btn-text:hover{color:var(--ink)}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{flex:1}
+.actions{display:flex;flex-direction:column;gap:2px;margin-top:22px}
+
+/* ---------- sigil cover ---------- */
+.cover{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--ground-2)}
+.cover .grad{position:absolute;inset:0}
+.cover .grain{display:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+.cover svg.sig{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:66%;height:66%}
+.cover .cat-badge{position:absolute;left:11px;top:11px;width:17px;height:17px;opacity:.45}
+.cover .cap{position:absolute;left:0;right:0;bottom:0;padding:14px 14px 12px;
+  background:linear-gradient(transparent,rgba(255,255,255,.94))}
+.cover .cap small{display:block;font:9.5px var(--mono);letter-spacing:.14em;color:var(--ink-dim);margin-bottom:4px}
+.cover .cap strong{display:block;font:400 18px/1.3 var(--serif);color:var(--ink)}
+
+.need-dir{margin:20px 0 9px;font:10px var(--mono);letter-spacing:.18em;color:var(--water);text-transform:uppercase}
+.need-grid{display:flex;flex-wrap:wrap;gap:8px}
+.need{
+  border:1px solid var(--line);border-radius:20px;padding:9px 14px;
+  font:13px var(--sans);color:var(--ink-dim);background:var(--card);transition:all .16s
+}
+.need:hover{border-color:var(--line-2);color:var(--ink)}
+.need.on{border-color:var(--sun);background:var(--sun-wash);color:var(--ink)}
+.place-sub{margin:2px 0 12px;font:12.5px var(--sans);color:var(--ink-faint);letter-spacing:.02em}
+.place-sub.sm{margin:1px 0 7px;font-size:10.5px}
+.detail-rows{margin:12px 0 0;display:grid;gap:7px}
+.detail-rows div{display:grid;grid-template-columns:5.6em 1fr;gap:10px;align-items:baseline}
+.detail-rows i{font:9.5px var(--mono);letter-spacing:.12em;color:var(--ink-faint);font-style:normal}
+.detail-rows span{font:12.5px/1.7 var(--sans);color:var(--ink-dim)}
+
+/* ---------- place card (mode A) ---------- */
+.deck{position:relative}
+.deck .slide{transition:transform .22s ease,opacity .22s ease}
+.deck .slide.out-l{transform:translateX(-16px);opacity:0}
+.deck .slide.out-r{transform:translateX(16px);opacity:0}
+.pcard{background:var(--ground-2);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.pcard .cover{border:none;border-radius:0;aspect-ratio:4/3.05}
+.pcard .body{padding:15px 16px 17px}
+.meta-row{display:flex;flex-wrap:wrap;gap:6px 14px;font:11.5px var(--mono);color:var(--ink-dim);font-variant-numeric:tabular-nums}
+.meta-row span{display:inline-flex;gap:5px;align-items:baseline}
+.meta-row i{font-style:normal;color:var(--ink-faint)}
+.why{margin:13px 0 0;padding:12px 13px;border-radius:12px;background:var(--sun-wash);border:1px solid rgba(196,112,60,.28)}
+.why .k{display:block;font:9.5px var(--mono);letter-spacing:.14em;color:var(--sun);margin-bottom:6px}
+.why p{margin:0;font:13px/1.7 var(--sans);color:var(--ink)}
+
+.insights{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
+.insights .head{padding:11px 14px 9px;font:11px var(--sans);color:var(--ink-faint);border-bottom:1px solid var(--line);display:flex;gap:7px;align-items:center}
+.insights .head b{color:var(--ink-dim);font-weight:500}
+.insights .row{display:flex;gap:11px;padding:11px 14px;align-items:flex-start}
+.insights .row + .row{border-top:1px solid var(--line)}
+.insights .row .dot{flex:none;width:22px;height:22px;margin-top:1px}
+.insights .row div{min-width:0}
+.insights .row strong{display:block;font:500 13.5px/1.4 var(--sans);color:var(--ink);margin-bottom:3px}
+.insights .row small{display:block;font:12px/1.6 var(--sans);color:var(--ink-dim)}
+
+.avg{display:flex;align-items:center;gap:11px;margin-top:14px;padding:12px 13px;border-radius:12px;border:1px solid var(--line);background:var(--water-wash)}
+.avg b{font:500 21px var(--mono);color:var(--sage);font-variant-numeric:tabular-nums;flex:none}
+.avg p{margin:0;font:11.5px/1.6 var(--sans);color:var(--ink-dim)}
+.avg p em{display:block;font-style:normal;color:var(--ink-faint);font-size:10.5px;margin-top:2px}
+
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px}
+.tag{font:11px var(--sans);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:4px 10px}
+.tag.pos{color:var(--sage);border-color:rgba(30,110,114,.35)}
+.tag.neg{color:var(--d-n2);border-color:rgba(107,104,127,.34)}
+
+.deck-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px}
+.deck-nav button{width:40px;height:40px;border-radius:50%;border:1px solid var(--line-2);color:var(--ink-dim);display:grid;place-items:center;font-size:15px;flex:none}
+.deck-nav button:hover{color:var(--ink);border-color:var(--ink-dim)}
+.deck-nav .dots{display:flex;gap:6px;flex:1;justify-content:center;flex-wrap:wrap}
+.deck-nav .dots i{width:5px;height:5px;border-radius:50%;background:var(--ink-faint);opacity:.45}
+.deck-nav .dots i.on{background:var(--water);opacity:1;width:16px;border-radius:3px}
+
+/* ---------- mood ---------- */
+.mood-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.mood{
+  text-align:left;padding:15px 14px 14px;border-radius:15px;border:1px solid var(--line);
+  background:var(--card);transition:border-color .16s,background .16s
+}
+.mood:hover{border-color:var(--line-2)}
+.mood.on{border-color:var(--sun);background:var(--sun-wash)}
+.mood strong{display:block;font:400 17px/1.3 var(--serif);margin-bottom:5px}
+.mood small{display:block;font:11.5px/1.55 var(--sans);color:var(--ink-faint)}
+.mood.on small{color:var(--ink-dim)}
+
+/* ---------- mode entry ---------- */
+.mode-card{
+  display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:18px;
+  overflow:hidden;background:var(--ground-2);transition:border-color .16s
+}
+.mode-card:hover{border-color:var(--line-2)}
+.mode-card .visual{height:112px;position:relative;border-bottom:1px solid var(--line)}
+.mode-card .txt{padding:14px 15px 16px}
+.mode-card h3{margin:0 0 5px;font:400 19px/1.3 var(--serif)}
+.mode-card p{margin:0;font:12.5px/1.7 var(--sans);color:var(--ink-dim)}
+.mode-card .go{margin-top:11px;font:11px var(--mono);letter-spacing:.12em;color:var(--water)}
+.mock-one{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:82px;border-radius:8px;border:1px solid var(--line-2);background:var(--water-wash)}
+.mock-one:before,.mock-one:after{content:"";position:absolute;top:8px;width:52px;height:66px;border-radius:8px;border:1px solid var(--line);opacity:.5}
+.mock-one:before{left:-30px}.mock-one:after{right:-30px}
+.mock-grid{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:14px 46px;align-content:center}
+.mock-grid i{border-radius:6px;border:1px solid var(--line);background:var(--sunk)}
+.mock-grid i:nth-child(1){height:34px}.mock-grid i:nth-child(2){height:48px}
+.mock-grid i:nth-child(3){height:48px}.mock-grid i:nth-child(4){height:34px}
+
+/* ---------- filters ---------- */
+.filterbar{display:flex;gap:7px;overflow-x:auto;padding:2px 18px 12px;scrollbar-width:none;border-bottom:1px solid var(--line)}
+.filterbar::-webkit-scrollbar{display:none}
+.chip{flex:none;font:11.5px var(--sans);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:6px 12px;white-space:nowrap}
+.chip:hover{border-color:var(--line-2)}
+.chip.on{color:var(--paper);background:var(--ink);border-color:var(--ink)}
+.mood-strip{padding:14px 18px 10px;display:flex;align-items:center;gap:9px}
+.mood-strip .k{font:10px var(--mono);letter-spacing:.14em;color:var(--ink-faint)}
+.mood-strip b{font:400 16px var(--serif);color:var(--ink)}
+.mood-strip .swap{margin-left:auto;font:11px var(--sans);color:var(--ink-faint);border-bottom:1px solid var(--line-2);padding-bottom:1px}
+.mood-strip .swap:hover{color:var(--ink-dim)}
+
+/* ---------- waterfall ---------- */
+.falls{columns:2;column-gap:10px;padding:14px 18px 24px}
+.fcard{break-inside:avoid;margin-bottom:10px;width:100%;text-align:left;border:1px solid var(--line);
+  border-radius:14px;overflow:hidden;background:var(--ground-2);display:block;transition:border-color .16s}
+.fcard:hover{border-color:var(--line-2)}
+.fcard .cover{border:none;border-radius:0}
+.fcard .b{padding:10px 11px 12px}
+.fcard h4{margin:0 0 5px;font:400 15px/1.35 var(--serif)}
+.fcard .rsn{margin:0 0 8px;font:11.5px/1.6 var(--sans);color:var(--ink-dim)}
+.fcard .foot{display:flex;align-items:center;gap:7px;font:10.5px var(--mono);color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.fcard .foot b{color:var(--sage);font-weight:500}
+.mini-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.mini-tags span{font:10px/1.5 var(--sans);color:var(--ink-faint);border:1px solid var(--line);border-radius:14px;padding:2px 7px}
+.empty{padding:44px 20px;text-align:center;font:12.5px/1.9 var(--sans);color:var(--ink-faint)}
+
+/* ---------- detail ---------- */
+.detail-cover{aspect-ratio:16/11;border-radius:0;border:none;border-bottom:1px solid var(--line)}
+.sec-k{font:10px var(--mono);letter-spacing:.16em;color:var(--ink-faint);margin:22px 0 10px}
+
+/* ---------- score scale ---------- */
+.beforeafter{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:14px;border:1px solid var(--line);background:var(--card);margin-bottom:20px}
+.beforeafter div{min-width:0}
+.beforeafter small{display:block;font:9.5px var(--mono);letter-spacing:.13em;color:var(--ink-faint);margin-bottom:4px}
+.beforeafter strong{display:block;font:400 17px var(--serif);white-space:nowrap}
+.beforeafter strong.dim{color:var(--ink-faint)}
+.beforeafter strong.hit{color:var(--sun)}
+.beforeafter .arrow{color:var(--ink-faint);flex:none;font-size:13px}
+.beforeafter .sc{margin-left:auto;flex:none;font:500 22px var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+
+.scale{display:flex;gap:5px}
+.scale button{
+  position:relative;
+  flex:1;height:54px;border-radius:11px;border:1px solid var(--line);background:var(--card);
+  font:14px var(--mono);color:var(--ink-dim);font-variant-numeric:tabular-nums;transition:all .14s
+}
+/* 整条色阶始终可见：负端灰紫、中间灰、正端水青。不用红——变差不是错误。 */
+.scale button:after{
+  content:"";position:absolute;left:9px;right:9px;bottom:8px;height:3px;border-radius:2px;
+  background:var(--dc);opacity:.45;transition:opacity .14s
+}
+.scale button:hover{border-color:var(--line-2);color:var(--ink)}
+.scale button:hover:after{opacity:.75}
+.scale button.on{background:var(--dc);color:#FFFFFF;border-color:var(--dc);font-weight:600}
+.scale button.on:after{opacity:0}
+.scale-lab{display:flex;justify-content:space-between;margin-top:9px;font:10px var(--mono);letter-spacing:.06em;color:var(--ink-faint)}
+.hint{margin:16px 0 0;font:12px/1.7 var(--sans);color:var(--ink-faint);min-height:20px}
+.hint.on{color:var(--ink-dim)}
+
+/* ---------- factors ---------- */
+.fac-grid{display:flex;flex-wrap:wrap;gap:8px}
+.fac{font:13px var(--sans);color:var(--ink-dim);border:1px solid var(--line);border-radius:22px;padding:9px 14px;transition:all .14s}
+.fac:hover{border-color:var(--line-2);color:var(--ink)}
+.fac.on{color:var(--ink);border-color:var(--sage);background:var(--water-wash)}
+.fac.on.neg{border-color:var(--d-n2);background:rgba(107,104,127,.12)}
+
+.note-wrap{margin-top:24px}
+.note-wrap label{display:flex;justify-content:space-between;align-items:baseline;font:12.5px var(--sans);color:var(--ink-dim);margin-bottom:9px}
+.note-wrap label em{font-style:normal;font:10.5px var(--mono);color:var(--ink-faint)}
+.note-wrap textarea{
+  width:100%;min-height:84px;resize:none;padding:13px 14px;border-radius:13px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);
+  font:14px/1.75 var(--serif)
+}
+.note-wrap textarea::placeholder{color:var(--ink-faint);font-family:var(--sans);font-size:12.5px}
+.note-wrap textarea:focus{border-color:var(--line-2);outline:none}
+
+.priv{display:flex;flex-direction:column;gap:9px;margin-top:24px}
+.priv .opt{display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:13px;border:1px solid var(--line);text-align:left;transition:all .14s}
+.priv .opt:hover{border-color:var(--line-2)}
+.priv .opt.on{border-color:var(--water);background:var(--water-wash)}
+.priv .mark{flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--ink-faint);margin-top:2px;position:relative}
+.priv .opt.on .mark{border-color:var(--water)}
+.priv .opt.on .mark:after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--water)}
+.priv .opt div{min-width:0}
+.priv .opt strong{display:block;font:500 13.5px var(--sans);margin-bottom:3px}
+.priv .opt small{display:block;font:11.5px/1.6 var(--sans);color:var(--ink-faint)}
+
+.steps{display:flex;gap:4px;padding:0 18px 0;flex:none;margin-top:12px}
+.steps i{flex:1;height:2px;border-radius:2px;background:var(--line)}
+.steps i.on{background:var(--water)}
+
+/* ---------- visit card (flip) ---------- */
+.flip-stage{perspective:1200px;margin-top:4px}
+.face{border-radius:20px;overflow:hidden;border:1px solid var(--line-2);background:var(--ground-2);
+  animation:flipIn .34s cubic-bezier(.3,.1,.25,1) both}
+@keyframes flipIn{from{transform:rotateY(-70deg);opacity:.1}to{transform:rotateY(0);opacity:1}}
+@media (prefers-reduced-motion:reduce){.face{animation:none}}
+.face-front .cover{border:none;border-radius:0;aspect-ratio:1/1}
+.face-front .b{padding:14px 16px 16px}
+.face-front h3{margin:0 0 8px;font:400 20px/1.3 var(--serif)}
+.face .rear-b{padding:18px 16px 18px}
+.stamp{display:inline-flex;align-items:center;gap:6px;font:9.5px var(--mono);letter-spacing:.14em;color:var(--ink-faint);
+  border:1px solid var(--line);border-radius:20px;padding:4px 9px}
+.stamp.anon{color:var(--sage);border-color:rgba(30,110,114,.35)}
+.rear-line{display:flex;gap:10px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line)}
+.rear-line .k{flex:none;width:56px;font:10px var(--mono);letter-spacing:.1em;color:var(--ink-faint)}
+.rear-line .v{font:13.5px/1.6 var(--sans);color:var(--ink);min-width:0}
+.rear-line .v.serif{font-family:var(--serif);font-size:15px}
+blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terracotta);
+  background:var(--water-wash);border-radius:0 10px 10px 0;font:15px/1.8 var(--serif);color:var(--ink)}
+.flip-btn{margin-top:12px}
+
+/* ---------- records ---------- */
+.rec-head{padding:20px 18px 4px}
+.rec-stat{display:flex;gap:10px;margin:14px 18px 0}
+.rec-stat div{flex:1;border:1px solid var(--line);border-radius:13px;padding:11px 12px;background:var(--card)}
+.rec-stat b{display:block;font:500 20px var(--mono);color:var(--water);font-variant-numeric:tabular-nums;margin-bottom:3px}
+.rec-stat small{font:10.5px/1.5 var(--sans);color:var(--ink-faint)}
+.rcard{break-inside:avoid;margin-bottom:10px;width:100%;text-align:left;border:1px solid var(--line);
+  border-radius:14px;overflow:hidden;background:var(--ground-2);display:block;transition:border-color .16s}
+.rcard.fresh{border-color:var(--sun)}
+.rcard:hover{border-color:var(--line-2)}
+.rcard .b{padding:10px 11px 12px}
+.rcard .date{font:9.5px var(--mono);letter-spacing:.1em;color:var(--ink-faint);display:block;margin-bottom:5px}
+.rcard h4{margin:0 0 7px;font:400 14.5px/1.35 var(--serif)}
+.rcard .shift{display:flex;align-items:center;gap:5px;font:10.5px var(--mono);color:var(--ink-dim);font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.rcard .shift b{font-weight:600;font-size:13px}
+.rcard .shift b.up{color:var(--d-p2)}.rcard .shift b.down{color:var(--d-n2)}.rcard .shift b.flat{color:var(--ink-dim)}
+.rcard q{display:block;margin-top:8px;font:12.5px/1.7 var(--serif);color:var(--ink-dim);quotes:"「" "」"}
+.rcard .fresh-tag{display:inline-block;font:9px var(--mono);letter-spacing:.12em;color:#FFFFFF;background:var(--sun);border-radius:12px;padding:2px 7px;margin-bottom:6px}
+
+/* ---------- 我们的此在 / 个人页 ---------- */
+.profile{position:relative;border-bottom:1px solid var(--line)}
+.profile .hero{position:relative;height:212px;overflow:hidden}
+.profile .hero .grad{position:absolute;inset:0}
+.profile .hero svg.sig{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:212px;height:212px}
+.profile .hero .scrim{position:absolute;inset:0;background:linear-gradient(transparent 34%,rgba(240,243,242,.66) 62%,rgba(240,243,242,.96) 100%)}
+.profile .hero .grain{display:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n2)' opacity='.5'/%3E%3C/svg%3E")}
+.profile .hero .who{position:absolute;left:18px;bottom:14px;right:96px}
+.profile .hero .who h1{margin:0 0 4px;font:400 30px/1.2 var(--serif)}
+.profile .hero .who p{margin:0;font:12px/1.6 var(--sans);color:var(--ink-dim)}
+.profile .hero .who p b{color:var(--ink);font-weight:500;border-bottom:1px dashed rgba(30,110,114,.5);padding-bottom:1px}
+.profile .hero .av{position:absolute;right:18px;bottom:14px;width:62px;height:62px;border-radius:50%;
+  border:1.5px solid var(--line-2);display:grid;place-items:center;background:var(--card)}
+.profile .hero .av span{width:32px;height:32px;display:block}
+.eye{margin:14px 18px 0;border:1px solid var(--line);border-radius:15px;background:var(--card);overflow:hidden}
+.eye .head{padding:11px 14px;display:flex;gap:8px;align-items:baseline;font:11.5px var(--sans);color:var(--ink-faint);border-bottom:1px solid var(--line)}
+.eye .head b{color:var(--ink);font-weight:400;font-family:var(--serif);font-size:13.5px}
+.eye .row{display:flex;gap:11px;padding:12px 14px;align-items:flex-start}
+.eye .row + .row{border-top:1px solid var(--line)}
+.eye .row .dot{flex:none;width:22px;height:22px;margin-top:2px}
+.eye .row div{min-width:0}
+.eye .row strong{display:block;font:500 13.5px/1.4 var(--sans);margin-bottom:3px}
+.eye .row small{display:block;font:12px/1.65 var(--sans);color:var(--ink-dim)}
+.eye .row em{display:block;font:10.5px/1.6 var(--mono);color:var(--ink-faint);margin-top:5px;font-style:normal}
+
+/* ---------- 匿名到访流 ---------- */
+.feed{padding:6px 18px 22px;display:flex;flex-direction:column}
+.frow{padding:16px 0;border-bottom:1px solid var(--line);display:flex;gap:11px;align-items:flex-start;text-align:left;width:100%}
+.frow .av{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-2)}
+.frow .av span{width:18px;height:18px;display:block;opacity:.75}
+.frow .body{min-width:0;flex:1}
+.frow .who{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+.frow .who b{font:12px var(--sans);color:var(--ink-dim);font-weight:500}
+.frow .who i{font-style:normal;font:10px var(--mono);color:var(--ink-faint)}
+.frow .place{display:block;font:400 15px/1.4 var(--serif);margin-bottom:6px}
+.frow q{display:block;font:14px/1.8 var(--serif);color:var(--ink);margin:8px 0 0;quotes:"「" "」"}
+.perch-say{display:flex;gap:8px;align-items:flex-start;margin-top:11px;padding:9px 11px;border-radius:11px;
+  background:var(--water-wash);border:1px solid rgba(30,110,114,.18)}
+.perch-say span{flex:none;width:15px;height:15px;margin-top:1px;opacity:.8}
+.perch-say p{margin:0;font:12px/1.65 var(--sans);color:var(--ink-dim)}
+.perch-say p b{color:var(--ink);font-weight:500}
+.here{margin-top:10px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.here .h{padding:10px 13px;font:11px var(--sans);color:var(--ink-faint);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px}
+.here .h b{color:var(--ink-dim);font-weight:500}
+.here .h button{margin-left:auto;font:10px var(--mono);letter-spacing:.1em;color:var(--ink-faint)}
+.here .h button:hover{color:var(--water)}
+.here .e{padding:11px 13px;font:12.5px/1.7 var(--sans);color:var(--ink-dim)}
+.here .e + .e{border-top:1px solid var(--line)}
+.here .e u{text-decoration:none;font:10.5px var(--mono);color:var(--ink-faint);display:block;margin-top:4px}
+
+/* ---------- compare canvas ---------- */
+.compare{max-width:1180px;margin:0 auto;padding:44px 22px 70px}
+.compare header{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:30px}
+.compare header .k{font:10px var(--mono);letter-spacing:.2em;color:var(--ink-faint);margin-bottom:10px}
+.compare h1{margin:0 0 8px;font:400 32px/1.3 var(--serif)}
+.compare header p{margin:0;font:13.5px/1.8 var(--sans);color:var(--ink-dim);max-width:64ch}
+.cmp-sec{margin-bottom:38px}
+.cmp-sec > h2{margin:0 0 4px;font:400 19px/1.4 var(--serif)}
+.cmp-sec > .sub{margin:0 0 18px;font:12.5px/1.7 var(--sans);color:var(--ink-faint);max-width:70ch}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.duo .box{border:1px solid var(--line);border-radius:16px;padding:18px 18px 20px;background:var(--ground-2)}
+.duo .box h3{margin:0 0 6px;font:400 18px var(--serif)}
+.duo .box p{margin:0 0 14px;font:12.5px/1.75 var(--sans);color:var(--ink-dim)}
+.duo .box ul{margin:0 0 16px;padding-left:16px;font:12px/1.9 var(--sans);color:var(--ink-faint)}
+.mini-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:14px}
+.mini-wrap{display:flex;flex-direction:column;gap:8px}
+.mini-wrap .cap{font:10px var(--mono);letter-spacing:.08em;color:var(--ink-faint);line-height:1.6}
+.mini-wrap .cap b{display:block;color:var(--ink-dim);font-weight:500;font-size:11px;margin-bottom:3px;letter-spacing:.1em}
+.mini{width:100%;aspect-ratio:390/844;position:relative;overflow:hidden;border-radius:16px;
+  border:1px solid var(--line);background:var(--paper)}
+.mini .inner{position:absolute;left:0;top:0;width:390px;height:844px;transform-origin:0 0;pointer-events:none;
+  display:flex;flex-direction:column;background:var(--paper)}
+.mini .inner .screen{overflow:hidden}
+.note-box{border:1px solid var(--line);border-left:2px solid var(--terracotta);border-radius:0 14px 14px 0;
+  padding:16px 18px;background:var(--sunk)}
+.note-box h3{margin:0 0 8px;font:500 13px var(--sans);letter-spacing:.04em}
+.note-box ul{margin:0;padding-left:16px;font:12.5px/1.9 var(--sans);color:var(--ink-dim)}
+.jump{display:inline-flex;align-items:center;gap:7px;font:12px var(--sans);color:var(--ink);
+  border:1px solid var(--line-2);border-radius:22px;padding:9px 16px;transition:all .16s}
+.jump:hover{border-color:var(--water);color:var(--water)}
+.disclaimer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font:11.5px/1.9 var(--mono);color:var(--ink-faint)}
+</style>
+
+<div id="root"></div>
+
+<script>
+/* ============================================================
+   此在 · Current — 情绪空间闭环原型
+   情绪 → 推荐（卡片 / 瀑布流）→ 详情 → 到访 → 反馈 → 情绪空间轨迹
+   纯前端演示：无后端、无地图、无定位、无账号
+   ============================================================ */
+
+/* ---------- 情绪 ---------- */
+const MOODS = [
+  {id:"low",   name:"低落",        desc:"没什么力气，也不想解释"},
+  {id:"quiet", name:"需要安静",    desc:"不想再被声音和人挤着"},
+  {id:"noisy", name:"脑子停不下来",desc:"念头一直转，坐不住"},
+  {id:"spark", name:"想要点灵感",  desc:"有力气，只是没方向"},
+  {id:"tired", name:"累但静不下来",desc:"身体想躺，脑子不肯"},
+  {id:"empty", name:"空落落的",    desc:"不难过，就是没着落"},
+  /* 以下四个按组员建议补充。刻意不用「焦虑 / 疲惫」这类临床标签——
+     手册第一条边界是不诊断，情绪要用白话和身体感来说。 */
+  {id:"tight", name:"心里发紧",    desc:"说不上为什么，就是绷着"},
+  {id:"near",  name:"想有人在旁边",desc:"不用说话，有人就行"},
+  {id:"fresh", name:"想换个地方",  desc:"待腻了，想看点没见过的"},
+  {id:"okay",  name:"状态还行",    desc:"不用被接住，想出去走走"}
+];
+const moodById = id => MOODS.find(m => m.id === id) || MOODS[0];
+
+/* ---------- PlaceProfile ----------
+   coverImage 使用生成符号（sigil:<id>），不使用实拍图：
+   6+ 个地点无法拿到稳定合规的匹配图源，错配图片比抽象符号更糟。
+   sig 的参数带语义：ring=开阔度，rays=刺激密度，nodeDist=你在空间里的位置。
+------------------------------------ */
+/* ============================================================
+   北京空间库 · 标签字典 · 匹配算法
+   —— 写法上只有一条规矩：讲「你到了做什么」，不讲「这个地方是什么」。
+      没有评分、没有必去、没有氛围感。代价（挤、贵、要social）照实写。
+   —— 内容来自真实的人的一手经验，原话保留在 quote 里，不洗成产品腔。
+   ============================================================ */
+
+/* ---------- 12 个标准化标签（0–1）。组员那 10 个 + 消费压力 + 能一直走 ---------- */
+const TAGS = {
+  q :"安静",     g :"绿意",     c :"拥挤",     s :"独自自在",
+  co:"生活气",   e :"新鲜感",   r :"恢复",     cr:"创作刺激",
+  l :"热闹",     st:"可久待",   cp:"消费压力", w :"能一直走"
+};
+
+/* ---------- 统一因素字典（组员 #10）：影响因素不再每个地点各写一套 ---------- */
+const FACTORS = {
+  quiet:      {label:"声音舒服",   tone:"pos", insight:"你选了声音舒服。安静不是没有声音，是声音跟你无关。"},
+  fewpeople:  {label:"人不多",     tone:"pos", insight:"人少的时候，你不需要表演正常。"},
+  seat:       {label:"坐得住",     tone:"pos", insight:"能坐得住，停留时间才由你决定。"},
+  light:      {label:"光线",       tone:"pos", insight:"光线合适的地方，眼睛先松下来。"},
+  solo:       {label:"独处感",     tone:"pos", insight:"你选了独处感——这里允许你一个人，不觉得奇怪。"},
+  nopressure: {label:"不必消费",   tone:"pos", insight:"不用点单也能待着，这件事本身就减轻了一部分压力。"},
+  handbusy:   {label:"手上有事做", tone:"pos", insight:"翻书、翻唱片，手忙着的时候脑子会松一点。"},
+  keepwalk:   {label:"能一直走",   tone:"pos", insight:"你选了能一直走——身体在动，就不必逼自己想清楚。"},
+  openview:   {label:"视野开阔",   tone:"pos", insight:"远处替你接管了一部分注意力。"},
+  water:      {label:"有水",       tone:"pos", insight:"水面一直在动，不需要你去推动它。"},
+  green:      {label:"有树",       tone:"pos", insight:"绿色是少数不要求你回应的东西。"},
+  dusk:       {label:"天色刚好",   tone:"pos", insight:"天色是这里唯一会自己变化的东西。"},
+  staff:      {label:"店员舒服",   tone:"pos", insight:"被好好对待过的人，出门时会松一点。"},
+  newthing:   {label:"看到没见过的", tone:"pos", insight:"你选了新鲜。注意力被外面勾住，就不在自己身上了。"},
+  people:     {label:"有人但不打扰", tone:"pos", insight:"周围有人、但没人看你——这是很难得的配比。"},
+  music:      {label:"声音好",     tone:"pos", insight:"好的声音会占满耳朵，这时候想事情会变慢。"},
+  energy:     {label:"跟着动起来", tone:"pos", insight:"身体先动，脑子后停——顺序反过来更容易。"},
+  /* 负向：只是没接住，不是失败 */
+  toocrowd:   {label:"太挤",       tone:"neg", insight:"你标了太挤。换个时段，同一个地方可能是另一回事。"},
+  toonoisy:   {label:"太吵",       tone:"neg", insight:"你标了太吵。这条会让安静的地方排得更靠前。"},
+  toopricey:  {label:"太贵",       tone:"neg", insight:"花掉的钱也算这次到访的成本，会记进去。"},
+  needsocial: {label:"得跟人周旋", tone:"neg", insight:"你标了要social。有些地方的门槛不是钱，是力气。"},
+  faraway:    {label:"路上太远",   tone:"neg", insight:"路上消耗掉的力气，也算这次到访的成本。"},
+  toobright:  {label:"太晒 / 太亮", tone:"neg", insight:"这条会让傍晚之后的时段排得更靠前。"},
+  unsafe:     {label:"不安全",     tone:"neg", insight:"安全感不够时，其它条件都不成立。"},
+  nothing:    {label:"没什么用",   tone:"neg", insight:"你说没什么用。这条一样会被记下来，不会被算成失败。"}
+};
+
+/* ---------- 情绪 → 目标标签向量。只写在意的维度，没写的不参与打分 ---------- */
+const MOOD_TARGET = {
+  low:   {q:.75, g:.7,  c:.15, s:.9,  r:.9,  st:.8, cp:.15, w:.65},
+  quiet: {q:.95, c:.1,  s:.9,  r:.8,  st:.85, l:.1, cp:.25},
+  noisy: {w:.9,  g:.75, q:.6,  e:.45, st:.5, c:.25},
+  spark: {cr:.95, e:.8, l:.5,  c:.45, st:.6},
+  tired: {r:.85, st:.9, q:.7,  s:.8,  cp:.25, w:.2},
+  empty: {co:.75, l:.5, w:.7,  s:.7,  e:.5},
+  tight: {q:.8,  g:.85, r:.9,  c:.1,  w:.6,  cp:.2},
+  near:  {co:.9, l:.6,  c:.5,  s:.75, st:.7},
+  fresh: {e:.95, cr:.6, l:.6,  w:.5},
+  okay:  {e:.7,  l:.6,  co:.6, w:.6,  cr:.5}
+};
+
+/* ---------- 加权匹配：只在情绪在意的维度上算距离 ---------- */
+function matchScore(place, moodId, needKeys){
+  const target = Object.assign({}, MOOD_TARGET[moodId] || MOOD_TARGET.low);
+  /* 用户明确选中的维度要额外加权 —— 否则当诉求和情绪默认值重合时，
+     选了等于没选，用户会觉得这一步是摆设。 */
+  const boost = {};
+  (needKeys || []).forEach(k => {
+    if (!NEEDS[k]) return;
+    Object.keys(NEEDS[k].target).forEach(d => {
+      target[d] = NEEDS[k].target[d];
+      boost[d] = (boost[d] || 0) + 1;
+    });
+  });
+  const keys = Object.keys(target);
+  if (!keys.length) return 0;
+  let sum = 0, wsum = 0;
+  keys.forEach(k => {
+    const want = target[k], got = place.tags[k];
+    if (got === undefined) return;
+    const w = (Math.abs(want - 0.5) + 0.5) * (1 + (boost[k] || 0) * 1.8);
+    sum  += (1 - Math.abs(want - got)) * w;
+    wsum += w;
+  });
+  return wsum ? sum / wsum : 0;
+}
+/* 命中了哪些诉求：用来在卡片上说清「为什么是它」 */
+function matchHits(place, moodId){
+  const t = MOOD_TARGET[moodId] || {};
+  return Object.keys(t)
+    .filter(k => Math.abs(t[k] - place.tags[k]) < 0.25 && (t[k] > 0.6 || t[k] < 0.25))
+    .map(k => TAGS[k]);
+}
+
+/* ---------- 符号参数不再手写，从标签推导：形和数据同源 ---------- */
+const SIG_PAL = [["#1E6E72","#4A8F8A"],["#3D6E80","#7FA3B0"],["#2F7F76","#6FA79C"],
+                 ["#4F7F84","#8BABAE"],["#25716B","#7BA9A0"],["#5A8A93","#8FB0B6"]];
+function sigFromTags(p){
+  const t = p.tags, h = p.placeId.split("").reduce((a,ch) => a + ch.charCodeAt(0), 0);
+  const open = (t.g + t.w + (1 - t.c)) / 3;                    /* 开阔度 → 环大小 */
+  const stim = (t.l + t.cr + t.e) / 3;                          /* 刺激密度 → 星芒数 */
+  const belong = (t.st + t.s) / 2;                              /* 你在里面还是路过 → 光点距离 */
+  return {
+    rings:  1 + Math.round((1 - open) * 2),
+    ringR:  Math.round(46 + open * 38),
+    rays:   3 + Math.round(stim * 5),
+    nodeAngle: ((h % 62) / 10) - 3.1,
+    nodeDist:  Math.round(96 - belong * 62),
+    a: SIG_PAL[h % 6][0], b: SIG_PAL[h % 6][1]
+  };
+}
+
+/* ---------- 路线：朋友给的是「从哪走到哪」，不是一个点 ---------- */
+const ROUTES = [
+  {id:"xxt", name:"小西天一路走到东四", walk:"约 3 小时 · 可随时下车",
+   line:"电影资料馆 → 云南小厨 → 西海 → 什刹海 → 北锣鼓巷 → 东四",
+   note:"上午看场电影，中午一碗米线，然后顺着水一直往东。累了地铁口买杯东西坐着，还有力气就走到东四的书店。",
+   stops:["ziliaoguan","yunnanxiaochu","shichahai","sanlian"], moods:["noisy","empty","okay"]},
+  {id:"gulou", name:"鼓楼东大街那一带", walk:"约 2 小时 · 集中在几条街里",
+   line:"水果店 → 北平机器 → school",
+   note:"白天翻唱片，天黑了喝一杯，再晚一点楼下就有演出。全程步行，随时可以退出。",
+   stops:["fruityshop","beipingjiqi","school"], moods:["spark","fresh","okay"]},
+  {id:"sanlitun", name:"三里屯的顺序", walk:"约 3 小时 · 晚上才成立",
+   line:"postpost → 机电院 qmex → la social",
+   note:"先在 postpost 把感官喂饱，再去院子里站着喝。la social 隔壁有日料，进场前可以先垫一顿。",
+   stops:["postpost","qmex","lasocial"], moods:["fresh","okay","near"]},
+  {id:"liangma", name:"黄昏的亮马河", walk:"约 1.5 小时 · 傍晚最好",
+   line:"朗园 → 亮马河 → 鸟州力",
+   note:"从园区绕出来，沿着河边走。一个人黄昏的时候在河边，很适合边走边想很多事情。",
+   stops:["langyuan","liangmahe","niaozhouli"], moods:["low","noisy","tight","empty"]}
+];
+
+/* ---------- 需求发现（组员 #2c）：围绕空间 / 刺激 / 恢复 三个方向 ---------- */
+const NEEDS = {
+  hide:    {label:"不被人看见",   dir:"空间", target:{c:.1,  s:.95, q:.8}},
+  sit:     {label:"能坐很久",     dir:"空间", target:{st:.95, cp:.2}},
+  walk:    {label:"能一直走",     dir:"空间", target:{w:.95, g:.6}},
+  free:    {label:"不用花钱",     dir:"空间", target:{cp:.1}},
+  green:   {label:"想看见绿色",   dir:"刺激", target:{g:.95, q:.7}},
+  new:     {label:"想看没见过的", dir:"刺激", target:{e:.9, cr:.7}},
+  sound:   {label:"想听点声音",   dir:"刺激", target:{l:.65, cr:.7}},
+  people:  {label:"周围有人就行", dir:"刺激", target:{co:.85, c:.45}},
+  loud:    {label:"想要吵一点",   dir:"刺激", target:{l:.95, c:.8, q:.1}},
+  slow:    {label:"想慢下来",     dir:"恢复", target:{q:.85, r:.9, l:.15}},
+  hands:   {label:"想手上有事做", dir:"恢复", target:{cr:.6, st:.7}},
+  breathe: {label:"想喘口气",     dir:"恢复", target:{g:.8, r:.85, c:.2}},
+  nothing: {label:"什么都不想决定", dir:"恢复", target:{w:.85, cp:.15, s:.8}}
+};
+
+/* ---------- 26 个北京空间。标题是「你到了做什么」，地名是副标题 ---------- */
+const PLACES = [
+{placeId:"fruityshop", placeName:"水果店 fRUITYSHOP", action:"让店员放给你听", area:"鼓楼",
+ category:"唱片店 · 室内", city:"北京", coverImage:"sigil:fruityshop", ratio:"4/5",
+ distance:"—", distanceKm:2.1, transport:"地铁 8 号线 什刹海", suggestedDuration:"20–60 分钟",
+ indoor:true, free:true, crowd:"low",
+ see:"一整面墙的黑胶，一套很好的音响",
+ cost:"低。可以只听不买，店员不会催",
+ environmentTags:["可以试听","不必消费","声音好","偏爵士/电子/摇滚"],
+ tags:{q:.7,g:.05,c:.2,s:.85,co:.5,e:.8,r:.6,cr:.85,l:.35,st:.7,cp:.25,w:.1},
+ matchReason:{
+   spark:"想要点灵感的时候，别人放给你听比自己找更省力——说一张他就放一张。",
+   fresh:"这里的货和你在流媒体里刷到的不是一批。翻十分钟就能碰到没听过的。",
+   low:"不用说话也不用买。站着听完一面，就算这一趟没白来。",
+   _:"手上有事做、耳朵有东西听，这两件事同时成立的地方不多。"},
+ placeInsights:[
+   {t:"可以只听不买",d:"说一张放一张，店员如数家珍。这件事本身就减轻了压力。"},
+   {t:"价格是公道的",d:"同一张全新 Aphex Twin，这儿 320，朝悦五楼那家 588。"}],
+ factors:["music","staff","handbusy","newthing","nopressure","quiet","toocrowd","toopricey","faraway","nothing"],
+ quote:"在北京逛过的最棒的唱片店🥺 每张唱片都可以让店员放试听，店员很好，如数家珍。",
+ averageChange:2.1, feedbackCount:86},
+
+{placeId:"postpost", placeName:"postpost", action:"抽一本开架的书坐下", area:"三里屯幸福村",
+ category:"书店 · 买手店 · 咖啡", city:"北京", coverImage:"sigil:postpost", ratio:"1/1",
+ distance:"—", distanceKm:3.4, transport:"地铁 10 号线 团结湖", suggestedDuration:"60–120 分钟",
+ indoor:true, free:false, crowd:"mid",
+ see:"整墙可借阅的开架书、全套真力音响、自有品牌和代理的衣服",
+ cost:"中。可以只坐着看书，但咖喱饭和手冲值得点",
+ environmentTags:["开架可借阅","音响很好","选书品味","坐得住"],
+ tags:{q:.55,g:.1,c:.4,s:.8,co:.6,e:.85,r:.75,cr:.9,l:.45,st:.9,cp:.5,w:.05},
+ matchReason:{
+   spark:"选书和上新的频率都很好，翻一小时基本能撞到点什么。",
+   tired:"一楼每个角落听感都不错，坐下不用想去哪儿，待到不想待为止。",
+   fresh:"书、衣服、咖喱、酒在同一个屋檐下，转一圈感官是满的。",
+   _:"开架的书全部可以借阅——不用买就能读完，这在书店里很少见。"},
+ placeInsights:[
+   {t:"开架全部可借",d:"作为书店，这是最重要的一件事。不用先付钱才能读。"},
+   {t:"音响是 club 水准",d:"全套真力，一楼每个角落都有很好的聆听体验。"}],
+ factors:["music","seat","handbusy","newthing","staff","light","toopricey","toocrowd","faraway","nothing"],
+ quote:"在 postpost 呆上一小时，所有感官都会被滋养得很好！！哇塞想念 postpost 的蘑菇能量 TT",
+ averageChange:2.6, feedbackCount:143},
+
+{placeId:"fusheng", placeName:"福声唱片", action:"看完电影顺路翻一轮", area:"小西天",
+ category:"唱片店 · 室内", city:"北京", coverImage:"sigil:fusheng", ratio:"4/5",
+ distance:"—", distanceKm:1.2, transport:"地铁 4 号线 新街口", suggestedDuration:"20–40 分钟",
+ indoor:true, free:true, crowd:"low",
+ see:"堆得很满的架子，老板在的时候会聊两句",
+ cost:"低。翻完不买也没关系",
+ environmentTags:["资料馆旁边","可以一条龙","不必消费"],
+ tags:{q:.7,g:.05,c:.25,s:.85,co:.55,e:.7,r:.55,cr:.75,l:.3,st:.55,cp:.3,w:.15},
+ matchReason:{
+   spark:"和电影资料馆、豆仔咖啡在一条线上，一个下午能串完，不用另做决定。",
+   noisy:"翻唱片是个重复动作，手一直在动，念头会跟着慢下来。",
+   _:"顺路的地方比专程去的地方更容易开始。"},
+ placeInsights:[
+   {t:"可以一条龙",d:"资料馆看完电影、豆仔喝杯咖啡、这里翻唱片，三件事在一条街上。"},
+   {t:"翻找本身是件事",d:"不需要目的，翻到什么算什么。"}],
+ factors:["handbusy","quiet","nopressure","newthing","staff","toocrowd","faraway","nothing"],
+ averageChange:1.7, feedbackCount:41},
+
+{placeId:"kule", placeName:"酷乐唱片", action:"挤进摇滚区抢同一格", area:"东四",
+ category:"唱片店 · 室内", city:"北京", coverImage:"sigil:kule", ratio:"1/1",
+ distance:"—", distanceKm:2.8, transport:"地铁 5 号线 张自忠路", suggestedDuration:"20–40 分钟",
+ indoor:true, free:true, crowd:"high",
+ see:"很窄的过道，摇滚分区永远站着人",
+ cost:"低。但空间小，久待会有点局促",
+ environmentTags:["很挤","货全","东四书店线上"],
+ tags:{q:.3,g:.05,c:.85,s:.4,co:.7,e:.75,r:.25,cr:.7,l:.6,st:.3,cp:.3,w:.1},
+ matchReason:{
+   fresh:"货是全的，代价是挤。想找点没见过的、又不介意跟人挨着，就是这儿。",
+   okay:"状态还行的时候，挤一挤反而有意思。",
+   _:"东四那一片书店和唱片店挨着，可以连着逛。"},
+ placeInsights:[
+   {t:"真的很挤",d:"摇滚分区经常被人堵着，看不全。这点得先知道。"},
+   {t:"在东四那条线上",d:"三联、纸上声音、可能有书都在附近，可以连成一趟。"}],
+ factors:["newthing","handbusy","people","toocrowd","toonoisy","faraway","nothing"],
+ quote:"酷乐超级挤，每次都被长发男挤得看不到摇滚分区",
+ averageChange:1.2, feedbackCount:57},
+
+{placeId:"wansheng", placeName:"万圣书园", action:"从社科一路翻到打烊", area:"成府路",
+ category:"书店 · 室内", city:"北京", coverImage:"sigil:wansheng", ratio:"4/5",
+ distance:"—", distanceKm:5.6, transport:"地铁 4 号线 北京大学东门", suggestedDuration:"60–150 分钟",
+ indoor:true, free:true, crowd:"low",
+ see:"一排排到顶的社科书架，旁边有咖啡区",
+ cost:"低。可以只看不买，坐咖啡区要点单",
+ environmentTags:["安静","坐得住","学术向","可以不买"],
+ tags:{q:.9,g:.05,c:.2,s:.95,co:.4,e:.65,r:.8,cr:.8,l:.1,st:.95,cp:.25,w:.05},
+ matchReason:{
+   quiet:"这里的安静不靠运气，是这个空间本来的规矩。",
+   tired:"坐下不会有人看你，也不会有人问你要待多久。",
+   tight:"书架高、过道窄，视线被收住的时候人反而会松。",
+   _:"一个人待在这里，不需要向任何人解释。"},
+ placeInsights:[
+   {t:"允许待很久",d:"从下午待到打烊都不算奇怪，这是这里的默认。"},
+   {t:"隔壁有披萨",d:"火鬼 paro 走几步就到，周二披萨买一送一。"}],
+ factors:["quiet","seat","solo","handbusy","light","nopressure","faraway","toobright","nothing"],
+ averageChange:2.3, feedbackCount:112},
+
+{placeId:"sanlian", placeName:"三联韬奋书店", action:"坐台阶上把一本读完", area:"东四",
+ category:"书店 · 室内", city:"北京", coverImage:"sigil:sanlian", ratio:"1/1",
+ distance:"—", distanceKm:2.6, transport:"地铁 5 号线 张自忠路", suggestedDuration:"40–90 分钟",
+ indoor:true, free:true, crowd:"mid",
+ see:"能坐人的台阶，下沉的阅读区",
+ cost:"低。坐台阶看书不用消费",
+ environmentTags:["可以坐地上","不必消费","东四线上"],
+ tags:{q:.6,g:.05,c:.5,s:.8,co:.6,e:.55,r:.7,cr:.65,l:.25,st:.85,cp:.2,w:.1},
+ matchReason:{
+   low:"不用坐直，台阶上怎么坐都行。翻两页就够了。",
+   tired:"这里的坐不是消费换来的，是本来就允许的。",
+   _:"手上有本书的时候，一个人待着就有了正当理由。"},
+ placeInsights:[
+   {t:"坐着不用买",d:"台阶和下沉区是给人坐的，不是摆设。"},
+   {t:"在东四书店线上",d:"和纸上声音、可能有书、做書挨着，可以连成半天。"}],
+ factors:["seat","handbusy","solo","nopressure","quiet","toocrowd","toonoisy","nothing"],
+ averageChange:1.9, feedbackCount:96},
+
+{placeId:"zhishang", placeName:"纸上声音", action:"翻到没见过的独立出版", area:"东四",
+ category:"书店 · 室内", city:"北京", coverImage:"sigil:zhishang", ratio:"4/5",
+ distance:"—", distanceKm:2.7, transport:"地铁 5 号线 张自忠路", suggestedDuration:"20–50 分钟",
+ indoor:true, free:true, crowd:"low",
+ see:"独立出版物、小册子、不太常见的印刷品",
+ cost:"低。翻看不用买",
+ environmentTags:["独立出版","小而安静","东四线上"],
+ tags:{q:.8,g:.05,c:.2,s:.9,co:.45,e:.85,r:.65,cr:.9,l:.15,st:.6,cp:.3,w:.05},
+ matchReason:{
+   spark:"这里的东西大多不在算法推荐里，翻着翻着容易撞到点什么。",
+   fresh:"独立出版的好处是没见过的比例高。",
+   _:"小店的安静是另一种安静——不是没人，是没人管你。"},
+ placeInsights:[
+   {t:"没见过的比例高",d:"这些东西不太会出现在你的信息流里。"},
+   {t:"店很小",d:"人一多就转不开身，工作日下午更合适。"}],
+ factors:["quiet","newthing","handbusy","solo","nopressure","toocrowd","faraway","nothing"],
+ averageChange:2.0, feedbackCount:38},
+
+{placeId:"zuoshu", placeName:"做書 · 隆福寺", action:"在女性主义那一架前站很久", area:"隆福寺",
+ category:"书店 · 咖啡 · 市集", city:"北京", coverImage:"sigil:zuoshu", ratio:"1/1",
+ distance:"—", distanceKm:2.4, transport:"地铁 6 号线 东四", suggestedDuration:"40–90 分钟",
+ indoor:true, free:false, crowd:"mid",
+ see:"女性主义、非虚构、小众哲学的架子，本身也是咖啡厅",
+ cost:"中。看书不用买，坐下喝东西要点单",
+ environmentTags:["选书品味好","有咖啡","偶尔办市集"],
+ tags:{q:.6,g:.05,c:.4,s:.8,co:.7,e:.85,r:.7,cr:.9,l:.35,st:.85,cp:.45,w:.1},
+ matchReason:{
+   spark:"选书是有立场的——女性主义、非虚构、比较小众的哲学书都有。",
+   near:"周围有人在读同样的东西，但没有人会来搭话。",
+   _:"能读、能坐、能喝一杯，一个下午的三件事都在这儿。"},
+ placeInsights:[
+   {t:"选书是有立场的",d:"不是畅销榜的排列，是有人认真挑过的。"},
+   {t:"也是咖啡厅",d:"看累了不用换地方，这减少了一次决定。"}],
+ factors:["handbusy","seat","newthing","people","staff","quiet","toopricey","toocrowd","nothing"],
+ quote:"朋友带我去看了隆福寺那边的「做書」市集，本身也是书店和咖啡厅，选书品味很好，女性主义，还有新的文学作品，非虚构，或者比较小众的哲学书都有。",
+ averageChange:2.4, feedbackCount:64},
+
+{placeId:"soloist", placeName:"soloist coffee", action:"看夕阳落在灰瓦上", area:"杨梅竹斜街",
+ category:"咖啡 · 胡同", city:"北京", coverImage:"sigil:soloist", ratio:"4/5",
+ distance:"—", distanceKm:4.2, transport:"地铁 2 号线 前门", suggestedDuration:"40–80 分钟",
+ indoor:true, free:false, crowd:"mid",
+ see:"窗外是灰色的瓦砾和胡同，傍晚有光",
+ cost:"中。一杯咖啡的价格",
+ environmentTags:["能看夕阳","市井气","傍晚最好"],
+ tags:{q:.65,g:.2,c:.35,s:.85,co:.8,e:.6,r:.85,cr:.6,l:.3,st:.85,cp:.5,w:.55},
+ matchReason:{
+   low:"坐着看天色变，不用你做任何事情。",
+   tight:"窗外是慢的：瓦、胡同、走过去的人。绷着的东西会自己松一点。",
+   empty:"周围有生活在进行，你不用参与，看着就行。",
+   _:"傍晚去。这里的好有一半在天色上。"},
+ placeInsights:[
+   {t:"天色是主角",d:"夕阳落在灰瓦上，这件事不需要你配合。"},
+   {t:"这条街还没被修整过",d:"比较有市井气，走进去和走出来是两种节奏。"}],
+ factors:["dusk","seat","light","quiet","people","solo","toopricey","toocrowd","toobright","nothing"],
+ quote:"散步我喜欢杨梅竹斜街那边，比较有市井气，也有一些咖啡馆很舒服，我推 soloist，可以看夕阳看灰色的瓦砾和胡同。",
+ averageChange:2.5, feedbackCount:78},
+
+{placeId:"douzai", placeName:"豆仔咖啡", action:"等一场电影开场", area:"小西天",
+ category:"咖啡 · 室内", city:"北京", coverImage:"sigil:douzai", ratio:"1/1",
+ distance:"—", distanceKm:1.1, transport:"地铁 4 号线 新街口", suggestedDuration:"30–60 分钟",
+ indoor:true, free:false, crowd:"low",
+ see:"来的人大多是等电影的，很多人自己坐着",
+ cost:"中。一杯的价格",
+ environmentTags:["资料馆旁边","一个人来的多","安静"],
+ tags:{q:.75,g:.05,c:.25,s:.95,co:.5,e:.4,r:.75,cr:.5,l:.2,st:.8,cp:.45,w:.1},
+ matchReason:{
+   quiet:"来的人多半也是一个人，没人觉得你一个人坐着奇怪。",
+   tired:"有个明确的等待理由，坐着就不需要别的借口。",
+   _:"和电影资料馆、福声唱片在一条线上，可以一条龙。"},
+ placeInsights:[
+   {t:"独自来是默认",d:"这里一个人坐着不需要解释。"},
+   {t:"有个正当的等待",d:"等开场是个刚好的理由，让停留变得合理。"}],
+ factors:["quiet","solo","seat","light","nopressure","toopricey","faraway","nothing"],
+ averageChange:1.8, feedbackCount:52},
+
+{placeId:"beipingjiqi", placeName:"北平机器", action:"一个人坐吧台喝一杯", area:"鼓楼",
+ category:"精酿 · 室内", city:"北京", coverImage:"sigil:beipingjiqi", ratio:"4/5",
+ distance:"—", distanceKm:2.0, transport:"地铁 8 号线 鼓楼大街", suggestedDuration:"40–90 分钟",
+ indoor:true, free:false, crowd:"mid",
+ see:"长吧台，很多人自己来，酒单换得勤",
+ cost:"中高。一杯精酿的价格",
+ environmentTags:["可以一个人坐吧台","不用social","鼓楼线上"],
+ tags:{q:.4,g:.05,c:.5,s:.85,co:.75,e:.6,r:.6,cr:.45,l:.6,st:.75,cp:.6,w:.2},
+ matchReason:{
+   empty:"吧台的好处是旁边有人，但没人要求你说话。",
+   near:"想有人在旁边、又不想应付人，吧台是最省力的位置。",
+   okay:"状态还行的时候，一杯就够，不必待到很晚。",
+   _:"一个人坐吧台在这里是常态，不是需要被解释的事。"},
+ placeInsights:[
+   {t:"独自来不奇怪",d:"吧台一半的位置都是一个人坐的。"},
+   {t:"随时能走",d:"一杯喝完就可以结账，没有非待到几点不可的压力。"}],
+ factors:["people","seat","solo","music","staff","toonoisy","toopricey","needsocial","nothing"],
+ averageChange:1.9, feedbackCount:88},
+
+{placeId:"liangmahe", placeName:"亮马河", action:"沿着河一直走，边走边想事", area:"朝阳",
+ category:"河岸 · 户外", city:"北京", coverImage:"sigil:liangmahe", ratio:"4/5",
+ distance:"—", distanceKm:4.8, transport:"地铁 10 号线 亮马桥", suggestedDuration:"30–90 分钟",
+ indoor:false, free:true, crowd:"mid",
+ see:"沿河的步道、对岸的灯、傍晚遛弯的人",
+ cost:"无。不用花钱",
+ environmentTags:["能一直走","有水","傍晚最好","免费"],
+ tags:{q:.6,g:.75,c:.35,s:.9,co:.7,e:.45,r:.9,cr:.35,l:.35,st:.5,cp:.05,w:.95},
+ matchReason:{
+   noisy:"水面一直在动，脑子里那些反复的东西会有点跟不上它。",
+   low:"这里不劝你振作，只是把视线拉得比你的念头更远。",
+   tight:"走着走着呼吸会自己变长，不用你去调。",
+   empty:"一条不用做选择的长线，走多远都算数。",
+   _:"不用消费，也没有人问你要待多久。"},
+ placeInsights:[
+   {t:"能一直走",d:"身体在动的时候，就不必逼自己想清楚。"},
+   {t:"傍晚是它最好的时候",d:"天色和灯换班的那半小时，值得专门赶过去。"}],
+ factors:["keepwalk","water","dusk","openview","people","fewpeople","toobright","unsafe","faraway","nothing"],
+ quote:"我喜欢去朗园那边，然后亮马桥散步也很舒服，一个人黄昏的时候在河边边走边想很多事情。",
+ averageChange:2.7, feedbackCount:204},
+
+{placeId:"shichahai", placeName:"什刹海", action:"绕着水走一圈，不用绕完", area:"西城",
+ category:"水边 · 户外", city:"北京", coverImage:"sigil:shichahai", ratio:"4/5",
+ distance:"—", distanceKm:2.3, transport:"地铁 8 号线 什刹海", suggestedDuration:"40–120 分钟",
+ indoor:false, free:true, crowd:"mid",
+ see:"沿岸的柳树、划船的人、后半段安静下来的岸",
+ cost:"无。除非你想买杯东西坐着",
+ environmentTags:["能一直走","有水","免费","可以走很长"],
+ tags:{q:.5,g:.8,c:.5,s:.85,co:.8,e:.5,r:.85,cr:.3,l:.45,st:.55,cp:.1,w:.95},
+ matchReason:{
+   noisy:"绕水走是个不用想的动作，走到哪算哪。",
+   empty:"岸边一直有生活在发生，你不用加入，路过就行。",
+   low:"累了热了地铁口就有底商，坐下歇会儿再走。",
+   _:"从西海一路顺着水过来，是这条线最舒服的一段。"},
+ placeInsights:[
+   {t:"随时可以停",d:"不用绕完整圈，走到不想走就退出。"},
+   {t:"往北人会变少",d:"越靠近西海那侧越安静。"}],
+ factors:["keepwalk","water","green","people","dusk","toocrowd","toobright","nothing"],
+ averageChange:2.2, feedbackCount:167},
+
+{placeId:"beihai", placeName:"北海公园", action:"坐在岸边看白塔", area:"西城",
+ category:"公园 · 户外", city:"北京", coverImage:"sigil:beihai", ratio:"1/1",
+ distance:"—", distanceKm:3.1, transport:"地铁 6 号线 北海北", suggestedDuration:"60–120 分钟",
+ indoor:false, free:false, crowd:"mid",
+ see:"水面、白塔、长椅，冬天有人在冰上",
+ cost:"低。门票几块钱",
+ environmentTags:["有水","有长椅","可以坐很久"],
+ tags:{q:.7,g:.9,c:.4,s:.85,co:.55,e:.4,r:.9,cr:.25,l:.25,st:.85,cp:.15,w:.8},
+ matchReason:{
+   tight:"水和树都是不要求你回应的东西。",
+   tired:"有长椅，坐下就行，不用一直走。",
+   low:"视线能推得很远，这时候念头会显得小一点。",
+   _:"和什刹海挨着，可以接着走。"},
+ placeInsights:[
+   {t:"有地方坐",d:"不像有些公园只能一直走，这里能停下来。"},
+   {t:"视线推得远",d:"远处替你接管了一部分注意力。"}],
+ factors:["water","green","openview","seat","fewpeople","dusk","toocrowd","toobright","faraway","nothing"],
+ averageChange:2.4, feedbackCount:131},
+
+{placeId:"tiantan", placeName:"天坛", action:"在柏树林里走到没人的那头", area:"东城",
+ category:"公园 · 户外", city:"北京", coverImage:"sigil:tiantan", ratio:"4/5",
+ distance:"—", distanceKm:6.2, transport:"地铁 5 号线 天坛东门", suggestedDuration:"60–150 分钟",
+ indoor:false, free:false, crowd:"mid",
+ see:"成片的老柏树，走远一点几乎没人",
+ cost:"低。门票几块钱",
+ environmentTags:["大片树林","可以走很远","人会变少"],
+ tags:{q:.85,g:.95,c:.3,s:.9,co:.4,e:.35,r:.95,cr:.2,l:.15,st:.7,cp:.15,w:.9},
+ matchReason:{
+   quiet:"往西北角走，人会明显变少，安静是靠距离换来的。",
+   tight:"柏树林里的空气是凉的，呼吸会自己慢下来。",
+   noisy:"够大，可以走到累，不用中途做决定。",
+   _:"黄昏的时候很漂亮，而且那时候人最少。"},
+ placeInsights:[
+   {t:"安静靠走出来",d:"主路一直有人，往里走十分钟就换了个世界。"},
+   {t:"树是老的",d:"成片的柏树林，抬头这件事在这里成立。"}],
+ factors:["green","quiet","keepwalk","fewpeople","openview","dusk","faraway","toocrowd","nothing"],
+ averageChange:2.6, feedbackCount:98},
+
+{placeId:"langyuan", placeName:"朗园", action:"在园区里没有目的地地绕", area:"朝阳",
+ category:"园区 · 半户外", city:"北京", coverImage:"sigil:langyuan", ratio:"1/1",
+ distance:"—", distanceKm:5.1, transport:"地铁 1 号线 大望路", suggestedDuration:"40–90 分钟",
+ indoor:false, free:true, crowd:"low",
+ see:"改造过的老厂房、书店、偶尔有展和市集",
+ cost:"低。逛不花钱",
+ environmentTags:["免费","有展","人不多","接着能去亮马河"],
+ tags:{q:.65,g:.5,c:.25,s:.85,co:.6,e:.75,r:.7,cr:.8,l:.35,st:.65,cp:.25,w:.7},
+ matchReason:{
+   spark:"厂房改的空间里经常有展和市集，撞到什么算什么。",
+   fresh:"每次去内容都不太一样，不用担心已经看过了。",
+   okay:"绕一圈再往亮马河走，是个完整的傍晚。",
+   _:"不用买票、不用预约，走进去就行。"},
+ placeInsights:[
+   {t:"内容会换",d:"展和市集轮着来，同一个地方不会看腻。"},
+   {t:"能接着走",d:"从这儿绕出来往亮马河，是一条顺的路线。"}],
+ factors:["newthing","keepwalk","fewpeople","nopressure","light","faraway","nothing"],
+ averageChange:2.0, feedbackCount:73},
+
+{placeId:"yangmeizhu", placeName:"杨梅竹斜街", action:"走一条还没被修整过的胡同", area:"大栅栏",
+ category:"胡同 · 户外", city:"北京", coverImage:"sigil:yangmeizhu", ratio:"4/5",
+ distance:"—", distanceKm:4.3, transport:"地铁 2 号线 前门", suggestedDuration:"30–60 分钟",
+ indoor:false, free:true, crowd:"low",
+ see:"住人的院子、几家小店、灰砖和电线",
+ cost:"无。走不花钱",
+ environmentTags:["市井气","人不多","免费","有咖啡馆"],
+ tags:{q:.6,g:.25,c:.3,s:.85,co:.9,e:.7,r:.7,cr:.6,l:.35,st:.4,cp:.15,w:.85},
+ matchReason:{
+   empty:"这里还有人真的住着，生活在旁边进行，你路过就好。",
+   fresh:"和被修整过的商业街不一样，走进去是另一种密度。",
+   _:"一条能慢慢走完的街，尽头有咖啡馆可以坐。"},
+ placeInsights:[
+   {t:"还没被整过",d:"比较有市井气——这件事在北京越来越少。"},
+   {t:"尽头有得坐",d:"soloist 在这条线上，走累了正好。"}],
+ factors:["keepwalk","people","fewpeople","newthing","dusk","toocrowd","unsafe","nothing"],
+ averageChange:2.2, feedbackCount:69},
+
+{placeId:"wudaoying", placeName:"国子监 · 五道营", action:"从银杏那条街走到五道营", area:"安定门",
+ category:"胡同 · 户外", city:"北京", coverImage:"sigil:wudaoying", ratio:"1/1",
+ distance:"—", distanceKm:2.9, transport:"地铁 2 号线 雍和宫", suggestedDuration:"40–90 分钟",
+ indoor:false, free:true, crowd:"mid",
+ see:"国子监的老树，五道营两侧的小店",
+ cost:"低。逛不花钱，坐下要点单",
+ environmentTags:["有老树","小店多","能一直走"],
+ tags:{q:.55,g:.7,c:.45,s:.8,co:.75,e:.7,r:.7,cr:.55,l:.4,st:.5,cp:.35,w:.85},
+ matchReason:{
+   fresh:"两条街的密度不一样，一条安静一条热闹，走一趟能换两次状态。",
+   okay:"街不长，走完刚好，不会累。",
+   _:"和鼓楼那一带挨着，可以连起来走。"},
+ placeInsights:[
+   {t:"两种节奏",d:"国子监那侧是树和安静，五道营那侧是店和人。"},
+   {t:"可以接着往鼓楼",d:"从这儿走过去不远，两片能连成一趟。"}],
+ factors:["keepwalk","green","people","newthing","dusk","toocrowd","toopricey","nothing"],
+ averageChange:1.9, feedbackCount:84},
+
+{placeId:"ziliaoguan", placeName:"中国电影资料馆", action:"买一张下午场，把手机关掉", area:"小西天",
+ category:"影院 · 室内", city:"北京", coverImage:"sigil:ziliaoguan", ratio:"4/5",
+ distance:"—", distanceKm:1.0, transport:"地铁 4 号线 新街口", suggestedDuration:"120–180 分钟",
+ indoor:true, free:false, crowd:"mid",
+ see:"排片不按院线来，来的人大多一个人",
+ cost:"低。票价不贵",
+ environmentTags:["排片好","一个人来的多","两小时不用做决定"],
+ tags:{q:.9,g:.02,c:.4,s:.95,co:.5,e:.8,r:.85,cr:.85,l:.15,st:.9,cp:.3,w:.05},
+ matchReason:{
+   noisy:"两个小时里你什么都不用决定，这是这个地方最实在的功能。",
+   tired:"黑下来之后不用维持任何表情。",
+   low:"不用跟人说话，也不用假装在做正事。",
+   _:"看完出来还能顺着走：云南小厨、福声唱片、豆仔咖啡都在附近。"},
+ placeInsights:[
+   {t:"两小时不用做选择",d:"灯一黑，决定权就交出去了。"},
+   {t:"是一条线的起点",d:"从这儿开始往东走，一整天都排得满。"}],
+ factors:["quiet","solo","seat","newthing","toocrowd","faraway","nothing"],
+ quote:"昨天实践出了北京最舒服的一条 citywalk 路线。从小西天开始，上午先去资料馆看电影……",
+ averageChange:2.5, feedbackCount:156},
+
+{placeId:"yunnanxiaochu", placeName:"云南小厨", action:"一碗臭豆腐米线，二十分钟解决", area:"小西天",
+ category:"吃 · 室内", city:"北京", coverImage:"sigil:yunnanxiaochu", ratio:"1/1",
+ distance:"—", distanceKm:1.0, transport:"资料馆对面", suggestedDuration:"20–40 分钟",
+ indoor:true, free:false, crowd:"mid",
+ see:"很小的馆子，中午满座",
+ cost:"低。一碗米线的价格",
+ environmentTags:["便宜","快","资料馆对面"],
+ tags:{q:.3,g:.02,c:.7,s:.7,co:.85,e:.4,r:.5,cr:.15,l:.6,st:.25,cp:.15,w:.05},
+ matchReason:{
+   tired:"吃点热的比想清楚有用，二十分钟就能解决。",
+   empty:"店小人多，有热气，不用你参与。",
+   _:"在资料馆对面。看完电影不用再做一次「去哪吃」的决定。"},
+ placeInsights:[
+   {t:"决定成本低",d:"就在对面，不用再挑一次。"},
+   {t:"人多是常态",d:"中午会满，赶时间的话错开。"}],
+ factors:["people","staff","toocrowd","toonoisy","nothing"],
+ averageChange:1.5, feedbackCount:47},
+
+{placeId:"huogui", placeName:"火鬼 paro", action:"周二去，披萨买一送一", area:"成府路",
+ category:"吃 · 室内", city:"北京", coverImage:"sigil:huogui", ratio:"1/1",
+ distance:"—", distanceKm:5.4, transport:"地铁 4 号线 北京大学东门", suggestedDuration:"40–80 分钟",
+ indoor:true, free:false, crowd:"mid",
+ see:"披萨炉，周二人会多一些",
+ cost:"中。周二买一送一，其它时候正常价",
+ environmentTags:["周二买一送一","万圣旁边","适合两个人"],
+ tags:{q:.35,g:.02,c:.6,s:.55,co:.8,e:.5,r:.55,cr:.2,l:.65,st:.6,cp:.4,w:.05},
+ matchReason:{
+   near:"两个人来更划算，周二买一送一。",
+   okay:"逛完万圣走几步就到，不用另做安排。",
+   _:"有个具体的理由出门，有时候比理由本身重要。"},
+ placeInsights:[
+   {t:"周二有说法",d:"买一送一，这是个出门的理由。"},
+   {t:"挨着万圣书园",d:"翻完书吃一顿，一个下午就完整了。"}],
+ factors:["people","staff","seat","toocrowd","toonoisy","toopricey","faraway","nothing"],
+ averageChange:1.6, feedbackCount:35},
+
+{placeId:"niaozhouli", placeName:"鸟州力", action:"黄昏后在亮马桥吃串烧鸟", area:"亮马桥",
+ category:"吃 · 室内", city:"北京", coverImage:"sigil:niaozhouli", ratio:"4/5",
+ distance:"—", distanceKm:5.0, transport:"地铁 10 号线 亮马桥", suggestedDuration:"60–90 分钟",
+ indoor:true, free:false, crowd:"mid",
+ see:"吧台能看到烤台，一个人坐也不奇怪",
+ cost:"中高。日料的价格",
+ environmentTags:["可以坐吧台","河边散步后","一个人也行"],
+ tags:{q:.4,g:.02,c:.5,s:.8,co:.7,e:.55,r:.6,cr:.3,l:.55,st:.7,cp:.65,w:.05},
+ matchReason:{
+   near:"吧台正对烤台，有事看、不用聊天。",
+   okay:"沿着亮马河走完，顺路吃一顿，是完整的一晚。",
+   _:"一个人坐吧台在这里是常见的，不用解释。"},
+ placeInsights:[
+   {t:"吧台有得看",d:"烤台就在眼前，一个人吃不会尴尬。"},
+   {t:"接在河边散步之后",d:"走完再吃，顺序比反过来舒服。"}],
+ factors:["seat","solo","staff","people","toopricey","toonoisy","faraway","nothing"],
+ averageChange:1.8, feedbackCount:58},
+
+{placeId:"qmex", placeName:"机电院 qmex", action:"在院子里站着喝，随时能走", area:"三里屯",
+ category:"酒吧 · 半户外", city:"北京", coverImage:"sigil:qmex", ratio:"1/1",
+ distance:"—", distanceKm:3.6, transport:"地铁 10 号线 团结湖", suggestedDuration:"60–120 分钟",
+ indoor:false, free:false, crowd:"high",
+ see:"院子里站着的人，音乐不算太吵",
+ cost:"中高。酒水价格",
+ environmentTags:["半户外","随时能走","晚上才成立","要social"],
+ tags:{q:.15,g:.15,c:.8,s:.5,co:.85,e:.7,r:.35,cr:.5,l:.9,st:.6,cp:.65,w:.15},
+ matchReason:{
+   fresh:"院子里人来人往，密度高，待一会儿状态就换了。",
+   okay:"站着喝的好处是随时能走，不用陷进去。",
+   near:"周围全是人，但你可以只站着不说话。",
+   _:"晚上才成立的地方。白天去是另一回事。"},
+ placeInsights:[
+   {t:"随时能退出",d:"站着喝不用结束一场，走就走了。"},
+   {t:"人是真的多",d:"想安静的话这里不合适，这点得先知道。"}],
+ factors:["people","energy","music","toocrowd","toonoisy","toopricey","needsocial","unsafe","nothing"],
+ averageChange:1.4, feedbackCount:92},
+
+{placeId:"lasocial", placeName:"la social", action:"先在隔壁日料垫一顿再进去", area:"三里屯",
+ category:"酒吧 · 室内", city:"北京", coverImage:"sigil:lasocial", ratio:"4/5",
+ distance:"—", distanceKm:3.6, transport:"地铁 10 号线 团结湖", suggestedDuration:"90–150 分钟",
+ indoor:true, free:false, crowd:"high",
+ see:"人挨着人，隔壁就是日料可以先垫",
+ cost:"高。酒水加一顿的价格",
+ environmentTags:["很热闹","要social","隔壁能predrink"],
+ tags:{q:.1,g:.02,c:.85,s:.35,co:.8,e:.7,r:.25,cr:.4,l:.95,st:.65,cp:.75,w:.05},
+ matchReason:{
+   fresh:"想换个状态、而且愿意花力气应付人的时候，这里换得最快。",
+   okay:"状态还行才适合来。不太行的时候这里会更累。",
+   _:"隔壁有家日料，进场前可以先垫一顿——这是本地人的顺序。"},
+ placeInsights:[
+   {t:"要花力气",d:"这里的门槛不是钱，是应付人的力气。"},
+   {t:"先吃再喝",d:"隔壁日料 predrink，比空腹进去舒服。"}],
+ factors:["people","energy","music","needsocial","toocrowd","toonoisy","toopricey","unsafe","nothing"],
+ averageChange:1.1, feedbackCount:76},
+
+{placeId:"school", placeName:"school", action:"站在最后排听完一整场", area:"鼓楼",
+ category:"livehouse · 室内", city:"北京", coverImage:"sigil:school", ratio:"1/1",
+ distance:"—", distanceKm:2.2, transport:"地铁 8 号线 鼓楼大街", suggestedDuration:"90–180 分钟",
+ indoor:true, free:false, crowd:"high",
+ see:"很小的场地，站得满，声音很大",
+ cost:"中。票价加酒",
+ environmentTags:["有演出","声音大","站着看","鼓楼线上"],
+ tags:{q:.05,g:.02,c:.9,s:.6,co:.85,e:.8,r:.3,cr:.75,l:.95,st:.7,cp:.5,w:.05},
+ matchReason:{
+   fresh:"现场的声音会把别的东西盖过去，这是它最实在的作用。",
+   spark:"演出的阵容不按热度排，撞到没听过的乐队是常事。",
+   _:"站最后排也能听完整场，不用挤到前面去。"},
+ placeInsights:[
+   {t:"声音会盖过念头",d:"音量足够大的时候，脑子里的东西排不上队。"},
+   {t:"可以站后面",d:"不用挤到前排，最后排一样听得完。"}],
+ factors:["music","energy","people","newthing","toonoisy","toocrowd","needsocial","nothing"],
+ averageChange:1.7, feedbackCount:104},
+
+{placeId:"zhaodai", placeName:"zhaodai", action:"跳到脑子彻底停下来", area:"工体一带",
+ category:"club · 室内", city:"北京", coverImage:"sigil:zhaodai", ratio:"4/5",
+ distance:"—", distanceKm:4.0, transport:"地铁 10 号线 团结湖", suggestedDuration:"120–240 分钟",
+ indoor:true, free:false, crowd:"high",
+ see:"深夜才热，声音系统很好",
+ cost:"高。门票加酒水",
+ environmentTags:["深夜","电子乐","身体先动"],
+ tags:{q:.02,g:.02,c:.9,s:.55,co:.7,e:.85,r:.3,cr:.6,l:1,st:.8,cp:.75,w:.05},
+ matchReason:{
+   fresh:"想彻底换个环境的时候，这里是最远的那一端。",
+   okay:"有力气再来。没力气的时候这里会加倍消耗。",
+   _:"身体先动，脑子后停——顺序反过来更容易。"},
+ placeInsights:[
+   {t:"身体先动",d:"不需要你先想通，动起来就行。"},
+   {t:"很消耗",d:"第二天的状态也算这次到访的成本。"}],
+ factors:["music","energy","people","toonoisy","toocrowd","toopricey","unsafe","needsocial","nothing"],
+ averageChange:1.3, feedbackCount:67}
+];
+/* 符号参数从标签推导，不再手写 */
+PLACES.forEach(p => {
+  p.sig = sigFromTags(p);
+  p.factorOptions = p.factors.map(k => FACTORS[k]);
+  p.distance = p.distanceKm.toFixed(1) + " km";
+});
+const placeById = id => PLACES.find(p => p.placeId === id) || PLACES[0];
+const reasonFor = (p, moodId) => p.matchReason[moodId] || p.matchReason._;
+/* 按当前情绪（以及已选诉求）给全部空间打分排序 */
+function rankedPlaces(list){
+  return (list || PLACES).slice().sort((a, b) =>
+    matchScore(b, state.mood, state.needs) - matchScore(a, state.mood, state.needs));
+}
+
+/* ---------- 匿名到访流 ----------
+   借 Tara 的代理逻辑：你看到的不是某个人，是「某个人的此在」替他留下的一条。
+   没有昵称、没有人脸、没有主页、没有评论、没有关注。
+   只有主动选择了「匿名分享」的记录会出现在这里。以下为原型示例数据。
+--------------------------------- */
+const COMMUNITY = [
+  {id:"c1", placeId:"river-sunset-walk", preMood:"低落", changeScore:2, hue:22, ago:"3 小时前",
+   factors:["江风","能一直走"], note:"走到第三个桥洞的时候，突然不想哭了。"},
+  {id:"c2", placeId:"city-library-3f", preMood:"脑子停不下来", changeScore:2, hue:48, ago:"5 小时前",
+   factors:["安静程度","有电源"], note:""},
+  {id:"c3", placeId:"corner-cafe", preMood:"空落落的", changeScore:1, hue:8, ago:"昨天",
+   factors:["声音舒服","独处感"], note:"旁边两个人一直在聊装修，居然听得挺安心。"},
+  {id:"c4", placeId:"community-gallery", preMood:"想要点灵感", changeScore:3, hue:200, ago:"昨天",
+   factors:["视觉刺激","休息区域"], note:"在二楼那张画前面站了十五分钟，没人管我。"},
+  {id:"c5", placeId:"riverbank-jog", preMood:"累但静不下来", changeScore:2, hue:160, ago:"昨天",
+   factors:["运动强度","通风"], note:"跑完那一段，脑子里那句话终于停了。"},
+  {id:"c6", placeId:"tree-lined-park", preMood:"低落", changeScore:0, hue:120, ago:"2 天前",
+   factors:["人太多"], note:"周末去的，人太多了，没坐下来。"},
+  {id:"c7", placeId:"indie-bookstore", preMood:"需要安静", changeScore:2, hue:32, ago:"2 天前",
+   factors:["独处感","书的密度"], note:""},
+  {id:"c8", placeId:"rooftop-garden", preMood:"空落落的", changeScore:2, hue:96, ago:"3 天前",
+   factors:["绿意","气味"], note:"闻到栀子花的时候愣了一下。"},
+  {id:"c9", placeId:"river-sunset-walk", preMood:"脑子停不下来", changeScore:-1, hue:14, ago:"3 天前",
+   factors:["太吵","人不多"], note:"那天在放广场舞，跟我想的完全不一样。"},
+  {id:"c10", placeId:"corner-cafe", preMood:"低落", changeScore:1, hue:340, ago:"4 天前",
+   factors:["座位舒适","消费压力"], note:""},
+  {id:"c11", placeId:"community-gallery", preMood:"低落", changeScore:1, hue:212, ago:"5 天前",
+   factors:["安静","看不懂"], note:"没看懂，但坐了很久。"},
+  {id:"c12", placeId:"city-library-3f", preMood:"累但静不下来", changeScore:1, hue:60, ago:"5 天前",
+   factors:["座位舒适","太压抑"], note:""}
+];
+/* 小在在流里插的一句：只做同类连接，不评价发帖的人 */
+function perchSay(entry, i){
+  if (entry.self) return "这条是你贡献的。<b>不带昵称、头像和主页</b>，别人只看得到这些。";
+  const mine = state.records.filter(r => r.placeId === entry.placeId);
+  if (mine.length) return "你也在这里留过一条，那次是 <b>" + signed(mine[0].changeScore) + "</b>。";
+  const same = state.records.filter(r => r.preMood === entry.preMood);
+  if (same.length) return "这条的出发前状态和你上次一样，都是「<b>" + entry.preMood + "</b>」。";
+  if (entry.changeScore <= 0) return "这条是没接住的记录。<b>它一样被留下来了。</b>";
+  if (i % 3 === 0) return "这类空间在你现在的状态下排得比较靠前。";
+  return null;
+}
+function avatarCat(hue){
+  return '<span class="av" style="border-color:hsla(' + hue + ',34%,62%,.45);background:hsla(' + hue + ',30%,20%,.5)">' +
+         '<span>' + catSVG() + '</span></span>';
+}
+
+/* ---------- 你的合成符号：每条记录长一个节点 ---------- */
+function selfSigil(recs){
+  let out = '<svg class="sig" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
+  const seen = [];
+  recs.forEach(r => { if (seen.indexOf(r.placeId) < 0) seen.push(r.placeId); });
+  seen.slice(0, 4).forEach((id, i) => {
+    const p = placeById(id), r = 96 - i * 17;
+    out += '<circle cx="121" cy="120" r="' + r + '" fill="none" stroke="' + p.sig.a + '" stroke-width="1" opacity="0.3"/>';
+    out += '<circle cx="119" cy="120" r="' + r + '" fill="none" stroke="' + p.sig.b + '" stroke-width="1" opacity="0.3"/>';
+  });
+  if (!seen.length) out += '<circle cx="120" cy="120" r="80" fill="none" stroke="#122A2E" stroke-width="0.9" opacity="0.22" stroke-dasharray="4 8"/>';
+  out += '<g stroke="#122A2E" stroke-width="1" opacity="0.4">';
+  for (let i = 0; i < 5; i++){
+    const q = i / 5 * Math.PI * 2 + 0.4;
+    out += '<line x1="' + (120 + Math.cos(q)*7).toFixed(1) + '" y1="' + (120 + Math.sin(q)*7).toFixed(1) +
+           '" x2="' + (120 + Math.cos(q)*17).toFixed(1) + '" y2="' + (120 + Math.sin(q)*17).toFixed(1) + '"/>';
+  }
+  out += '</g>';
+  recs.slice(0, 9).forEach((r, i) => {
+    const a = i / Math.max(recs.length, 5) * Math.PI * 2 - 0.7;
+    const d = Math.max(24, 92 - r.changeScore * 13);
+    const x = 120 + Math.cos(a) * d, y = 120 + Math.sin(a) * d;
+    out += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="8.5" fill="none" stroke="#C4703C" stroke-width="0.9" opacity="0.55"/>';
+    out += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.4" fill="#C4703C"/>';
+  });
+  out += '<circle cx="120" cy="120" r="2.4" fill="#122A2E" opacity="0.9"/>';
+  return out + '</svg>';
+}
+
+/* ---------- 我们的此在 ----------
+   只说行为模式，并且每条都带出处；不说这个人是什么样的人，不判断情绪状态。
+--------------------------------- */
+function selfRead(recs){
+  if (recs.length < 2){
+    return {line:"还需要一两次记录，我才敢说。", rows:[
+      {t:"证据不够", d:"我只用你自己打过的分和勾过的因素说话。现在这些还太少，凑不出一条站得住的观察。",
+       e:"当前 " + recs.length + " 条记录"}
+    ]};
+  }
+  // 身份行：偏好的空间类型 + 平均变化
+  const outdoor = recs.filter(r => !placeById(r.placeId).indoor).length;
+  const kind = outdoor * 2 > recs.length ? "户外偏多" : (outdoor * 2 === recs.length ? "室内户外各半" : "室内偏多");
+  const avg = recs.reduce((s, r) => s + r.changeScore, 0) / recs.length;
+  const line = "去过 " + new Set(recs.map(r => r.placeId)).size + " 个空间，" + kind + "；平均变化 <b>" +
+               (avg >= 0 ? "+" : "") + avg.toFixed(1) + "</b>";
+  // 观察一：最常勾选的因素
+  const tally = {};
+  recs.forEach(r => r.factors.forEach(f => { tally[f] = (tally[f] || 0) + 1; }));
+  const top = Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0];
+  const rows = [];
+  if (top && tally[top] >= 2){
+    const p = recs.map(r => placeById(r.placeId)).find(pp => pp.factorOptions.some(o => o.label === top));
+    const o = p && p.factorOptions.find(x => x.label === top);
+    rows.push({t:"你反复在选「" + top + "」", d:(o ? o.insight : "这一条你选了不止一次。"),
+               e:tally[top] + " / " + recs.length + " 次记录里出现"});
+  }
+  // 观察二：变化最大的一次 或 最没用的一次
+  const best = recs.slice().sort((a, b) => b.changeScore - a.changeScore)[0];
+  const worst = recs.slice().sort((a, b) => a.changeScore - b.changeScore)[0];
+  if (worst.changeScore <= 0 && recs.length > 2){
+    rows.push({t:"「" + worst.placeName.replace(/ · .*/, "") + "」那次没接住", d:"出发前是「" + worst.preMood +
+      "」，离开时 " + signed(worst.changeScore) + "。这条会让同类空间在你的推荐里往后退。",
+      e:fmtDate(worst.createdAt) + " · " + worst.placeName});
+  } else {
+    rows.push({t:"变化最大的一次在「" + best.placeName.replace(/ · .*/, "") + "」", d:"出发前是「" + best.preMood +
+      "」，离开时 " + signed(best.changeScore) + "。同类空间会被排得靠前一点。",
+      e:fmtDate(best.createdAt) + " · " + best.placeName});
+  }
+  if (rows.length < 2){
+    const kinds = Object.keys(tally).length;
+    rows.push(kinds
+      ? {t:"还没有反复出现的因素", d:"你勾过的每一条都只出现过一次。再记几次，我才能说清是什么在稳定地起作用。",
+         e:kinds + " 种因素各出现 1 次"}
+      : {t:"目前只有分数，没有因素", d:"你还没勾过影响因素。只有分数也能用，但有因素之后我才能说清是什么在起作用。",
+         e:"已勾选因素 0 种"});
+  }
+  return {line, rows:rows.slice(0, 2)};
+}
+
+/* ---------- 符号生成 ----------
+   同一个 placeId 永远长出同一枚符号；nodeDist 可被覆盖，用于反馈后"重新长一次"。
+------------------------------- */
+function sigil(p, opts){
+  opts = opts || {};
+  const s = p.sig;
+  const R = s.ringR;
+  const dist = opts.nodeDist != null ? opts.nodeDist : s.nodeDist;
+  const nx = 100 + Math.cos(s.nodeAngle) * dist;
+  const ny = 100 + Math.sin(s.nodeAngle) * dist;
+  let out = '<svg class="sig" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
+  for (let i = 0; i < s.rings; i++){
+    const r = R * (1 - i * 0.27);
+    out += '<circle cx="102.5" cy="100" r="' + r.toFixed(1) + '" fill="none" stroke="' + s.a + '" stroke-width="1" opacity="0.42"/>';
+    out += '<circle cx="97.5" cy="100" r="' + r.toFixed(1) + '" fill="none" stroke="' + s.b + '" stroke-width="1" opacity="0.42"/>';
+    out += '<circle cx="100" cy="100" r="' + r.toFixed(1) + '" fill="none" stroke="#122A2E" stroke-width="0.9" opacity="0.5"/>';
+  }
+  out += '<g stroke="' + s.a + '" stroke-width="1.1" opacity="0.72">';
+  for (let i = 0; i < s.rays; i++){
+    const q = i / s.rays * Math.PI * 2 + 0.3;
+    const inner = 6, outer = 15 + (i % 3) * 4;
+    out += '<line x1="' + (100 + Math.cos(q)*inner).toFixed(1) + '" y1="' + (100 + Math.sin(q)*inner).toFixed(1) +
+           '" x2="' + (100 + Math.cos(q)*outer).toFixed(1) + '" y2="' + (100 + Math.sin(q)*outer).toFixed(1) + '"/>';
+  }
+  out += '</g>';
+  out += '<path d="M192 14 Q150 128 ' + nx.toFixed(1) + ' ' + ny.toFixed(1) + '" fill="none" stroke="' + s.b +
+         '" stroke-width="1" stroke-dasharray="3 6" opacity="0.7"/>';
+  out += '<circle cx="' + nx.toFixed(1) + '" cy="' + ny.toFixed(1) + '" r="13" fill="none" stroke="#C4703C" stroke-width="1" opacity="0.8"/>';
+  out += '<circle cx="' + nx.toFixed(1) + '" cy="' + ny.toFixed(1) + '" r="4.6" fill="#C4703C"/>';
+  out += '<circle cx="100" cy="100" r="2.4" fill="#122A2E" opacity="0.9"/>';
+  return out + '</svg>';
+}
+function coverHTML(p, o){
+  o = o || {};
+  const style = o.style ? ' style="' + o.style + '"' : '';
+  const grad = 'background:radial-gradient(120% 100% at 50% 42%, ' + hexA(p.sig.a,.20) + ', ' + hexA(p.sig.b,.09) +
+               ' 52%, rgba(234,240,239,.92) 100%), linear-gradient(160deg,#EAF0EF,#DDE6E4)';
+  let h = '<div class="cover ' + (o.cls||'') + '"' + style + '>';
+  h += '<div class="grad" style="' + grad + '"></div><div class="grain"></div>';
+  h += sigil(p, o);
+  if (o.badge) h += '<span class="cat-badge">' + catSVG() + '</span>';
+  if (o.caption) h += '<div class="cap"><small>' + p.area + ' · ' + p.category + '</small><strong>' + p.action + '</strong></div>';
+  return h + '</div>';
+}
+function hexA(hex, a){
+  const n = parseInt(hex.slice(1), 16);
+  return 'rgba(' + (n>>16&255) + ',' + (n>>8&255) + ',' + (n&255) + ',' + a + ')';
+}
+
+/* ---------- 小在：此在的向导（云），说话短、不动画、不抢屏 ---------- */
+function cloudSVG(mood){
+  /* 小在：标识里那个环松开之后的形。只靠眼睛做表情，没有嘴。 */
+  const D='M52 100 C36 100 28 86 38 76 C32 60 50 48 64 56 C72 38 100 36 108 52 C124 42 144 52 142 70 C158 72 160 92 146 100 Z';
+  let eyes;
+  if (mood === 'closed'){                    /* 记录保存 / 切私密：我不看了 */
+    eyes = '<path d="M74 82 A9 9 0 0 1 90 82" fill="none" stroke="#122A2E" stroke-width="9" stroke-linecap="round"/>' +
+           '<path d="M110 82 A9 9 0 0 1 126 82" fill="none" stroke="#122A2E" stroke-width="9" stroke-linecap="round"/>';
+  } else {
+    const dx = (mood === 'look') ? 7 : 0;    /* 你正在选：看向内容那一侧 */
+    eyes = '<circle cx="' + (84+dx) + '" cy="80" r="6" fill="#122A2E"/>' +
+           '<circle cx="' + (116+dx) + '" cy="80" r="6" fill="#122A2E"/>';
+  }
+  const you = (mood === 'withyou')            /* 旁边那个暖点是「你」，不是小在的一部分 */
+    ? '<circle cx="170" cy="104" r="8" fill="#C4703C"/>' : '';
+  return '<svg viewBox="0 22 200 100" width="100%" height="100%" aria-hidden="true">' +
+    '<path d="' + D + '" fill="none" stroke="#122A2E" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>' +
+    eyes + you + '</svg>';
+}
+function catSVG(mood){ return cloudSVG(mood); }
+function dock(line, opts){
+  opts = opts || {};
+  return '<div class="dock"><span class="cat">' + catSVG() + '</span><p>' + line + '</p>' +
+    (opts.records === false ? '' : '<button class="to-records" data-go="#/records">记录</button>') + '</div>';
+}
+
+/* ---------- 状态 ---------- */
+const state = {
+  route: "#/mood",
+  mood: "low",
+  needs: [],
+  cardIndex: 0,
+  favs: new Set(),
+  filters: {dist:"all", place:"all", crowd:"all", cost:"all"},
+  recFilter: "all",
+  flipped: false,
+  draft: null,        // 反馈草稿：返回上一步保留
+  records: [],        // FeedbackRecord[]
+  lastRecordId: null
+};
+
+/* 演示用的既往记录（原型示例数据，非真实用户数据） */
+function seed(){
+  state.records = [
+    {id:"seed-2", placeId:"tree-lined-park", placeName:"林荫城市公园", placeCategory:"公园 · 户外",
+     coverImage:"sigil:tree-lined-park", preMood:"累但静不下来", changeScore:2,
+     factors:["长椅","能慢慢走"], note:"坐了二十分钟，什么都没想。", visibility:"anonymous",
+     visitStartedAt:"2026-08-17T16:40:00", createdAt:"2026-08-17T17:24:00", demo:true},
+    {id:"seed-1", placeId:"corner-cafe", placeName:"街角的旧咖啡馆", placeCategory:"咖啡馆 · 室内",
+     coverImage:"sigil:corner-cafe", preMood:"空落落的", changeScore:1,
+     factors:["声音舒服","独处感"], note:"", visibility:"private",
+     visitStartedAt:"2026-08-12T19:05:00", createdAt:"2026-08-12T20:10:00", demo:true},
+    {id:"seed-0", placeId:"community-gallery", placeName:"社区美术馆 · 二层", placeCategory:"美术馆 · 室内",
+     coverImage:"sigil:community-gallery", preMood:"低落", changeScore:-1,
+     factors:["拥挤程度","看不懂"], note:"人太多了，没看进去。", visibility:"private",
+     visitStartedAt:"2026-08-05T14:20:00", createdAt:"2026-08-05T15:36:00", demo:true}
+  ];
+}
+seed();
+
+function newDraft(placeId){
+  return {placeId, step:0, score:null, factors:[], note:"", visibility:"private",
+          reminder:false, visitStartedAt:new Date().toISOString()};
+}
+
+/* ---------- 文案 ---------- */
+function scoreLabel(s){
+  if (s === null || s === undefined) return "还没选";
+  if (s <= -2) return "更难受了";
+  if (s === -1) return "还是有点沉";
+  if (s === 0)  return "差不多";
+  if (s === 1)  return "松了一点";
+  if (s === 2)  return "明显轻了";
+  return "明亮了许多";
+}
+const signed = s => (s > 0 ? "+" + s : "" + s);
+const scoreCls = s => (s > 0 ? "up" : s < 0 ? "down" : "flat");
+/* 情绪变化色阶 −3…+3：负端走低饱和灰紫（安静地收回去），正端走水青（打开）。
+   不用红——情绪变差不是错误，只是这次没接住。 */
+const DELTA_SCALE = {"-3":"#4E4B63","-2":"#6B687F","-1":"#9694A5","0":"#C3C9C7",
+                     "1":"#86ADA8","2":"#4A8F8A","3":"#1E6E72"};
+function deltaColor(sc){
+  if (sc === null || sc === undefined) return "var(--ink-faint)";
+  return DELTA_SCALE[String(Math.max(-3, Math.min(3, Math.round(sc))))] || "#C3C9C7";
+}
+function fmtDate(iso){
+  const d = new Date(iso);
+  return (d.getMonth()+1) + "月" + d.getDate() + "日 " +
+    String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+}
+function stayMinutes(rec){
+  const a = new Date(rec.visitStartedAt).getTime(), b = new Date(rec.createdAt).getTime();
+  const m = Math.round((b - a) / 60000);
+  return m > 0 && m < 600 ? m : 34;
+}
+
+/* 「小在眼中的这次到访」：只由本次的分数与所选因素推出，不做人格或状态判断 */
+function visitInsights(rec){
+  const p = placeById(rec.placeId);
+  const opts = p.factorOptions;
+  const picked = rec.factors.map(f => opts.find(o => o.label === f)).filter(Boolean);
+  const pos = picked.filter(o => o.tone === "pos");
+  const neg = picked.filter(o => o.tone === "neg");
+  const s = rec.changeScore;
+  let first;
+  if (s >= 2)      first = {t:"这里接住了你", d:"出发前是「" + rec.preMood + "」，离开时你给了 " + signed(s) + "。变化不小，值得记下来是哪一次。"};
+  else if (s === 1)first = {t:"松了一点", d:"不是解决，是松了一格。这一格也算数。"};
+  else if (s === 0)first = {t:"没有变化", d:"你给了 0。没变也是一条有用的记录——它会让下次的推荐避开同类。"};
+  else             first = {t:"这次没接住", d:"出发前是「" + rec.preMood + "」，离开时更沉了。这条会让这里在你的推荐里往后退。"};
+  let second;
+  if (pos.length)      second = {t:pos[0].label, d:pos[0].insight};
+  else if (neg.length) second = {t:neg[0].label, d:neg[0].insight};
+  else if (rec.note)   second = {t:"你留下的一句", d:"你没有勾选因素，但写了一句话。原话会被原样保存，不做改写。"};
+  else                 second = {t:"只留下了分数", d:"没有选因素也可以。下次想说的时候再说。"};
+  return [first, second];
+}
+
+/* ---------- 路由 ---------- */
+function go(hash){
+  state.route = hash;
+  try { location.hash = hash; } catch(e){}
+  render();
+  const sc = document.querySelector(".screen");
+  if (sc) sc.scrollTop = 0;
+}
+window.addEventListener("hashchange", () => {
+  const h = location.hash || "#/mood";
+  if (h !== state.route){ state.route = h; render(); }
+});
+
+/* ============================================================
+   屏幕渲染：每个 render* 返回 phone 内部完整 HTML
+   ============================================================ */
+
+function topbar(title, kicker, backTo){
+  return '<div class="top"><div class="lead">' +
+    (backTo ? '<button class="back" data-go="' + backTo + '" aria-label="返回">←</button>' : '') +
+    '<div><div class="k">' + kicker + '</div></div><h2>' + title + '</h2></div>' +
+    '<button class="k" data-go="#/compare" style="letter-spacing:.14em">总览</button></div>';
+}
+
+/* --- 1. 情绪 --- */
+function renderMood(){
+  let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div>' +
+          '<button class="k" data-go="#/compare" style="letter-spacing:.14em">总览</button></div>';
+  h += '<div class="screen"><div class="pad">';
+  h += '<p class="eyebrow">第一步 · 出发前</p>';
+  h += '<h1 class="title">此刻，你更接近<br>哪一种？</h1>';
+  h += '<p class="lead">选一个就好。它只用来决定接下来给你看什么，不会被公开，也不构成任何评估。</p>';
+  h += '<div class="mood-grid">';
+  MOODS.forEach(m => {
+    h += '<button class="mood' + (state.mood === m.id ? " on" : "") + '" data-mood="' + m.id + '">' +
+         '<strong>' + m.name + '</strong><small>' + m.desc + '</small></button>';
+  });
+  h += '</div><div class="actions"><button class="btn" data-go="#/needs">接着走 <span>→</span></button></div>';
+  h += '</div></div>';
+  h += dock('我先记着：<b>' + moodById(state.mood).name + '</b>。不会告诉任何人。', {records:false});
+  return h;
+}
+
+/* --- 2. 需求发现：不问你想去哪，问你需要什么样的环境 --- */
+/* 诉求按情绪动态排序：和当前情绪目标向量越接近的排越前，同一方向内保持随机性 */
+function needsForMood(){
+  const t = MOOD_TARGET[state.mood] || {};
+  const score = k => {
+    const tg = NEEDS[k].target;
+    let n = 0;
+    Object.keys(tg).forEach(d => { if (t[d] !== undefined) n += 1 - Math.abs(t[d] - tg[d]); });
+    return n;
+  };
+  const by = {};
+  Object.keys(NEEDS).forEach(k => { (by[NEEDS[k].dir] = by[NEEDS[k].dir] || []).push(k); });
+  Object.keys(by).forEach(d => by[d].sort((a, b) => score(b) - score(a)));
+  return by;
+}
+function renderNeeds(){
+  const m = moodById(state.mood);
+  const by = needsForMood();
+  let h = topbar("需要什么样的环境", "第二步 · 出发前", "#/mood");
+  h += '<div class="screen"><div class="pad">';
+  h += '<p class="eyebrow">你说：' + m.name + '</p>';
+  h += '<h1 class="title sm">那你现在<br>需要什么样的地方？</h1>';
+  h += '<p class="lead">可以多选，也可以一个都不选。这一步不是问你想去哪，是问你需要什么样的环境。</p>';
+  ["空间", "刺激", "恢复"].forEach(dir => {
+    h += '<p class="need-dir">' + dir + '</p><div class="need-grid">';
+    (by[dir] || []).forEach(k => {
+      h += '<button class="need' + (state.needs.indexOf(k) >= 0 ? " on" : "") + '" data-need="' + k + '">' +
+           NEEDS[k].label + '</button>';
+    });
+    h += '</div>';
+  });
+  const n = state.needs.length;
+  h += '<div class="actions"><button class="btn" data-go="#/mode">' +
+       (n ? '按这 ' + n + ' 条找 ' : '跳过，只按情绪找 ') + '<span>→</span></button></div>';
+  h += '</div></div>';
+  h += dock(n ? '记着了：<b>' + state.needs.map(k => NEEDS[k].label).join('、') + '</b>。'
+             : '一条都不选也可以，我就只按「<b>' + m.name + '</b>」来找。', {records:false});
+  return h;
+}
+
+/* --- 3. 两种推荐入口 --- */
+function renderMode(){
+  const m = moodById(state.mood);
+  let h = topbar("怎么找", "第二步 · 挑一种方式", "#/mood");
+  h += '<div class="screen"><div class="pad">';
+  h += '<p class="eyebrow">现在需要</p><h1 class="title sm">' + m.name + '</h1>';
+  h += '<p class="lead">两种模式共用同一批空间、同一个详情页、同一套到访反馈。只是翻找的方式不一样。</p>';
+  h += '<div style="display:flex;flex-direction:column;gap:12px">';
+  h += '<button class="mode-card" data-go="#/pick"><div class="visual"><div class="mock-one"></div></div>' +
+       '<div class="txt"><h3>替我选</h3><p>一次只给你一个空间。没力气比较的时候，用这个。</p>' +
+       '<div class="go">卡片模式 →</div></div></button>';
+  h += '<button class="mode-card" data-go="#/browse"><div class="visual"><div class="mock-grid"><i></i><i></i><i></i><i></i></div></div>' +
+       '<div class="txt"><h3>自己逛逛</h3><p>八个空间一起铺开，自己比。还有力气挑的时候，用这个。</p>' +
+       '<div class="go">瀑布流模式 →</div></div></button>';
+  h += '</div>';
+  h += '<div class="actions"><button class="btn-text" data-go="#/records">先看看我的情绪空间轨迹</button></div>';
+  h += '</div></div>';
+  h += dock('两条路都会回到同一个地方：你走之后的那 30 秒。');
+  return h;
+}
+
+/* --- 3A. 卡片推荐 --- */
+function renderPick(){
+  const list = rankedPlaces();
+  const i = ((state.cardIndex % list.length) + list.length) % list.length;
+  const p = list[i];
+  const m = moodById(state.mood);
+  let h = topbar("替我选", "卡片模式", "#/mode");
+  h += '<div class="screen"><div class="pad" style="padding-top:14px">';
+  h += '<div class="deck"><div class="slide" id="slide">';
+  h += '<div class="pcard">' + coverHTML(p, {caption:true, badge:true});
+  h += '<div class="body">';
+  h += '<p class="place-sub">' + p.placeName + '</p>';
+  h += '<div class="meta-row"><span><i>距离</i>' + p.distance + '</span><span><i>到达</i>' + p.transport +
+       '</span><span><i>建议停留</i>' + p.suggestedDuration + '</span></div>';
+  h += '<div class="detail-rows"><div><i>会看到什么</i><span>' + p.see + '</span></div>' +
+       '<div><i>消费压力</i><span>' + p.cost + '</span></div></div>';
+  h += '<div class="why"><span class="k">为什么此刻推荐给你</span><p>' + reasonFor(p, state.mood) + '</p></div>';
+  h += '<div class="insights"><div class="head"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
+       '</span><b>小在眼中的这里</b></div>';
+  p.placeInsights.forEach(x => {
+    h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong><small>' + x.d + '</small></div></div>';
+  });
+  h += '</div>';
+  h += '<div class="avg"><b>' + signed(p.averageChange) + '</b><p>到访前后的平均心情变化' +
+       '<em>来自 ' + p.feedbackCount.toLocaleString() + ' 份匿名反馈的平均值 · 原型示例数值，不代表疗效</em></p></div>';
+  h += '<div class="tags">' + p.environmentTags.map(t => '<span class="tag">' + t + '</span>').join("") + '</div>';
+  h += '</div></div>';
+  h += '</div>';
+  h += '<div class="deck-nav"><button data-card="-1" aria-label="上一个">←</button><div class="dots">' +
+       list.map((_, k) => '<i class="' + (k === i ? "on" : "") + '"></i>').join("") +
+       '</div><button data-card="1" aria-label="下一个">→</button></div>';
+  h += '</div>';
+  h += '<div class="actions"><button class="btn" data-go="#/place/' + p.placeId + '">就去这里 <span>→</span></button>' +
+       '<div class="btn-row" style="margin-top:10px">' +
+       '<button class="btn ghost sm" data-fav="' + p.placeId + '">' + (state.favs.has(p.placeId) ? "已收藏" : "收藏") + '</button>' +
+       '<button class="btn ghost sm" data-card="1">换一个</button></div></div>';
+  h += '</div></div>';
+  h += dock('你说「' + m.name + '」，我先把这个放在最上面。左右滑，或者用按钮。');
+  return h;
+}
+function catDot(p){
+  return '<svg viewBox="0 0 24 24" width="100%" height="100%" aria-hidden="true">' +
+    '<circle cx="12" cy="12" r="9" fill="none" stroke="' + p.sig.a + '" stroke-width="1" opacity=".65"/>' +
+    '<circle cx="12" cy="12" r="2.6" fill="' + p.sig.b + '" opacity=".9"/></svg>';
+}
+
+/* --- 3B. 瀑布流推荐 --- */
+function filtered(){
+  const f = state.filters;
+  return PLACES.filter(p => {
+    if (f.dist === "1km" && p.distanceKm > 1) return false;
+    if (f.dist === "3km" && p.distanceKm > 3) return false;
+    if (f.place === "in" && !p.indoor) return false;
+    if (f.place === "out" && p.indoor) return false;
+    if (f.crowd === "low" && p.crowd !== "low") return false;
+    if (f.cost === "free" && !p.free) return false;
+    return true;
+  });
+}
+function renderBrowse(){
+  const m = moodById(state.mood);
+  const list = rankedPlaces(filtered());
+  const f = state.filters;
+  let h = topbar("自己逛逛", "瀑布流模式", "#/mode");
+  h += '<div class="mood-strip"><span class="k">现在需要</span><b>' + m.name + '</b>' +
+       '<button class="swap" data-go="#/mood">换一个状态</button></div>';
+  h += '<div class="filterbar">';
+  h += chip("dist","all","不限距离") + chip("dist","1km","1km 内") + chip("dist","3km","3km 内");
+  h += chip("place","in","室内") + chip("place","out","户外");
+  h += chip("crowd","low","人少") + chip("cost","free","免费");
+  h += '</div>';
+  h += '<div class="screen">';
+  if (!list.length){
+    h += '<div class="empty">这几个条件叠起来，暂时没有空间。<br>去掉一个再试试。</div>';
+  } else {
+    h += '<div class="falls">';
+    list.forEach(p => {
+      h += '<button class="fcard" data-go="#/place/' + p.placeId + '">';
+      h += coverHTML(p, {style:"aspect-ratio:" + p.ratio});
+      h += '<div class="b"><h4>' + p.action + '</h4><p class="place-sub sm">' + p.placeName + '</p>' +
+           '<p class="rsn">' + reasonFor(p, state.mood) + '</p>';
+      h += '<div class="foot"><b>' + signed(p.averageChange) + '</b><span>' + p.distance + '</span><span>' + p.category.split(" · ")[0] + '</span></div>';
+      h += '<div class="mini-tags">' + p.environmentTags.slice(0,3).map(t => '<span>' + t + '</span>').join("") + '</div>';
+      h += '</div></button>';
+    });
+    h += '</div>';
+  }
+  h += '</div>';
+  h += dock('数字是匿名反馈的平均变化，不是评分，也不是疗效。');
+  return h;
+}
+function chip(group, val, label){
+  const on = state.filters[group] === val;
+  return '<button class="chip' + (on ? " on" : "") + '" data-filter="' + group + ':' + val + '">' + label + '</button>';
+}
+
+/* --- 4. 共享地点详情 --- */
+function renderPlace(id){
+  const p = placeById(id);
+  const back = state.route.indexOf("browse") > -1 ? "#/browse" : (state.lastMode || "#/pick");
+  let h = topbar(p.placeName, "地点详情", back);
+  h += '<div class="screen">';
+  h += coverHTML(p, {cls:"detail-cover", caption:true, badge:true});
+  h += '<div class="pad" style="padding-top:16px">';
+  h += '<div class="meta-row"><span><i>距离</i>' + p.distance + '</span><span><i>到达</i>' + p.transport +
+       '</span><span><i>建议停留</i>' + p.suggestedDuration + '</span></div>';
+  h += '<p class="sec-k">小在眼中的这里</p>';
+  h += '<div class="insights" style="margin-top:0">';
+  p.placeInsights.forEach(x => {
+    h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong><small>' + x.d + '</small></div></div>';
+  });
+  h += '</div>';
+  h += '<div class="why" style="margin-top:16px"><span class="k">为什么此刻推荐给你</span><p>' + reasonFor(p, state.mood) + '</p></div>';
+  h += '<p class="sec-k">匿名汇总</p>';
+  h += '<div class="avg" style="margin-top:0"><b>' + signed(p.averageChange) + '</b><p>到访前后的平均心情变化' +
+       '<em>' + p.feedbackCount.toLocaleString() + ' 份匿名反馈的平均值。它描述已发生的记录，不承诺你会好起来，也不是医学结论。</em></p></div>';
+  h += '<div class="tags">' + p.environmentTags.map(t => '<span class="tag">' + t + '</span>').join("") + '</div>';
+  // 其他人在这里留下的：比一个平均分更能回答「为什么这里适合我」
+  const here = COMMUNITY.filter(e => e.placeId === p.placeId).slice(0, 2);
+  h += '<p class="sec-k">其他人在这里留下的</p>';
+  h += '<div class="here" style="margin-top:0"><div class="h"><span style="width:14px;height:14px;display:inline-block">' +
+       catSVG() + '</span><b>都是匿名记录</b><button data-go="#/nearby/' + p.placeId + '">全部 →</button></div>';
+  if (!here.length){
+    h += '<div class="e">这里还没有人选择匿名分享。第一条可以是你的。</div>';
+  } else {
+    here.forEach(e => {
+      h += '<div class="e">' + (e.note ? '「' + escapeHTML(e.note) + '」' : e.factors.join("、") + '，没有留话。') +
+           '<u>' + e.preMood + ' → ' + scoreLabel(e.changeScore) + ' ' + signed(e.changeScore) + ' · ' + e.ago + '</u></div>';
+    });
+  }
+  h += '</div>';
+  h += '<div class="actions"><button class="btn" data-visit="' + p.placeId + '">就去这里 <span>→</span></button>' +
+       '<button class="btn-text" data-go="' + back + '">回到' + (back === "#/browse" ? "瀑布流" : "卡片推荐") + '</button></div>';
+  h += '</div></div>';
+  h += dock('你到了之后我不打扰。等你走了，再问你三十秒。');
+  return h;
+}
+
+/* --- 5. 到访提醒（反馈 step 0）--- */
+function renderVisit(id){
+  const p = placeById(id);
+  const d = state.draft;
+  const short = p.placeName.replace(/ · .*/, "").slice(0, 5);
+  let h = topbar("到访反馈", "第三步 · 你刚离开", "#/place/" + p.placeId);
+  h += '<div class="steps"><i class="on"></i><i></i><i></i><i></i></div>';
+  h += '<div class="screen"><div class="pad">';
+  h += '<p class="eyebrow">一次轻轻的回望</p>';
+  h += '<h1 class="title">刚从' + short + '回来吗？</h1>';
+  h += '<p class="lead">花 30 秒，看看这个地方有没有接住你。不想现在说也可以。</p>';
+  h += coverHTML(p, {caption:true, style:"aspect-ratio:16/10"});
+  h += '<div class="beforeafter" style="margin-top:16px"><div><small>本次停留</small><strong>约 ' + d.stayMin + ' 分钟</strong></div>' +
+       '<span class="arrow">·</span><div><small>出发前</small><strong>' + moodById(state.mood).name + '</strong></div></div>';
+  h += '<div class="actions"><button class="btn" data-step="1">记录现在 <span>→</span></button>' +
+       '<button class="btn-text" data-remind="1">稍后提醒</button>';
+  if (d.reminder) h += '<p class="hint on" style="text-align:center">好，先去过你的生活。这条会留在记录里等你。</p>';
+  h += '</div></div></div>';
+  h += dock('我不评价这个地方。我只想知道它对<b>你</b>做了什么。');
+  return h;
+}
+
+/* --- 6. 变化测量（step 1）--- */
+function renderScore(id){
+  const p = placeById(id);
+  const d = state.draft;
+  let h = topbar("到访反馈", "01 · 心情变化", "#/visit/" + p.placeId);
+  h += '<div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>';
+  h += '<div class="screen"><div class="pad">';
+  h += '<h1 class="title sm">现在，心里松了一点吗？</h1>';
+  h += '<p class="lead">这不是给' + p.placeName + '打分，是记录你自己从出发到现在的变化。没有标准答案。</p>';
+  h += '<div class="beforeafter"><div><small>出发前</small><strong>' + moodById(state.mood).name + '</strong></div>' +
+       '<span class="arrow">→</span><div><small>现在</small><strong class="' + (d.score === null ? "dim" : "hit") + '">' +
+       scoreLabel(d.score) + '</strong></div>' +
+       (d.score !== null ? '<span class="sc" style="color:' + deltaColor(d.score) + '">' + signed(d.score) + '</span>' : '') + '</div>';
+  h += '<div class="scale">';
+  [-3,-2,-1,0,1,2,3].forEach(s => {
+    h += '<button class="' + (d.score === s ? "on" : "") + '" data-score="' + s + '" style="--dc:' + deltaColor(s) + '" aria-pressed="' + (d.score === s) +
+         '" aria-label="' + signed(s) + '，' + scoreLabel(s) + '">' + signed(s) + '</button>';
+  });
+  h += '</div><div class="scale-lab"><span>明显更难受</span><span>差不多</span><span>明显变好</span></div>';
+  h += '<p class="hint' + (d.score !== null ? " on" : "") + '">' +
+       (d.score === null ? "选一个之后才能继续。初始不预选，是为了不给你暗示。" : "记下了：" + scoreLabel(d.score) + "。随时可以改。") + '</p>';
+  h += '<div class="actions"><button class="btn" data-step="2"' + (d.score === null ? " disabled" : "") + '>继续 <span>→</span></button></div>';
+  h += '</div></div>';
+  h += dock('这是同一个人前后的差，不是这个地方的星级。');
+  return h;
+}
+
+/* --- 7. 因素 + 一句话 + 隐私（step 2）--- */
+function renderFactors(id){
+  const p = placeById(id);
+  const d = state.draft;
+  let h = topbar("到访反馈", "02 · 发生了什么", "#/feedback/" + p.placeId + "?s=1");
+  h += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>';
+  h += '<div class="screen"><div class="pad">';
+  h += '<h1 class="title sm">是什么参与了这次变化？</h1>';
+  h += '<p class="lead">下面这些是' + p.category.split(" · ")[0] + '类空间常见的影响因素。可以多选，也可以一个都不选。</p>';
+  h += '<div class="fac-grid">';
+  p.factorOptions.forEach(o => {
+    const on = d.factors.indexOf(o.label) > -1;
+    h += '<button class="fac' + (on ? " on" : "") + (o.tone === "neg" ? " neg" : "") + '" data-fac="' + o.label +
+         '" aria-pressed="' + on + '">' + (on ? "✓ " : "") + o.label + '</button>';
+  });
+  h += '</div>';
+  h += '<div class="note-wrap"><label><span>如果愿意，留下一句话（可跳过）</span><em class="num">' + d.note.length + ' / 80</em></label>' +
+       '<textarea id="note" maxlength="80" placeholder="比如：风吹过来的时候，脑子终于安静了一点。">' + escapeHTML(d.note) + '</textarea></div>';
+  h += '<p class="sec-k">这条记录放在哪里</p>';
+  h += '<div class="priv" style="margin-top:0">';
+  h += '<button class="opt' + (d.visibility === "private" ? " on" : "") + '" data-vis="private"><span class="mark"></span>' +
+       '<div><strong>只存进我的记录</strong><small>默认。不进入这个地点的公开统计，也不会被任何人看到。</small></div></button>';
+  h += '<button class="opt' + (d.visibility === "anonymous" ? " on" : "") + '" data-vis="anonymous"><span class="mark"></span>' +
+       '<div><strong>匿名分享给需要的人</strong><small>变化分和因素进入地点汇总；如果你留了一句话，它会匿名出现在别人的到访流里。不带昵称、头像、主页，别人也无法回复或找到你。</small></div></button>';
+  h += '</div>';
+  h += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">保存这次感受 <span>→</span></button>' +
+       '<button class="btn-text" data-step="1">回上一步改分数</button></div>';
+  h += '</div></div>';
+  h += dock('你不选匿名，它就只是你的。这一步不会自动往前走。');
+  return h;
+}
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+/* --- 8. 到访卡（可翻面）--- */
+function renderCard(recId, backTo){
+  const rec = state.records.find(r => r.id === recId) || state.records[0];
+  if (!rec) return renderRecords();
+  const p = placeById(rec.placeId);
+  const ins = visitInsights(rec);
+  const isNew = rec.id === state.lastRecordId;
+  // 反馈后符号"重新长一次"：光点按分数向环内 / 环外移动
+  const moved = Math.max(12, p.sig.nodeDist - rec.changeScore * 11);
+  let h = topbar("到访卡", isNew ? "第四步 · 已保存" : "历史记录", backTo || "#/records");
+  if (isNew) h += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>';
+  h += '<div class="screen"><div class="pad">';
+  if (isNew){
+    h += '<p class="eyebrow">记录完成</p><h1 class="title sm">这次到访，已经<br>收进你的轨迹。</h1>' +
+         '<p class="lead">卡片有两面。正面是你去过的地方，背面是这个地方对你做了什么。</p>';
+  }
+  h += '<div class="flip-stage">';
+  if (!state.flipped){
+  // 正面：你去过的地方
+  h += '<div class="face face-front">';
+  h += coverHTML(p, {badge:true, nodeDist:moved, tag:"f"});
+  h += '<div class="b"><h3>' + rec.placeName + '</h3>' +
+       '<div class="meta-row"><span><i>到访</i>' + fmtDate(rec.visitStartedAt) + '</span>' +
+       '<span><i>停留</i>约 ' + stayMinutes(rec) + ' 分钟</span></div>' +
+       '<div style="margin-top:11px">' + '<span class="stamp' + (rec.visibility === "anonymous" ? " anon" : "") + '">' +
+       (rec.visibility === "anonymous" ? "已匿名贡献" : "仅自己可见") + '</span></div></div></div>';
+  } else {
+  // 背面：这个地方对你做了什么
+  h += '<div class="face rear"><div class="rear-b">';
+  h += '<p class="eyebrow" style="margin-bottom:14px">这次到访 · 背面</p>';
+  h += '<div class="rear-line"><span class="k">出发前</span><span class="v serif">' + rec.preMood + '</span></div>';
+  h += '<div class="rear-line"><span class="k">现在</span><span class="v serif">' + scoreLabel(rec.changeScore) +
+       ' <b class="num" style="color:' + deltaColor(rec.changeScore) + '">' + signed(rec.changeScore) + '</b></span></div>';
+  h += '<div class="rear-line"><span class="k">因素</span><span class="v">' +
+       (rec.factors.length ? rec.factors.map(f => {
+          const o = p.factorOptions.find(x => x.label === f);
+          return '<span class="tag ' + (o && o.tone === "neg" ? "neg" : "pos") + '" style="margin:0 4px 4px 0;display:inline-block">' + f + '</span>';
+       }).join("") : '<span style="color:var(--ink-faint)">没有勾选</span>') + '</span></div>';
+  h += '<div class="rear-line" style="border:none"><span class="k">可见性</span><span class="v">' +
+       (rec.visibility === "anonymous"
+         ? "匿名贡献 · 变化分和因素进入地点汇总" + (rec.note ? "，这句话匿名出现在到访流里" : "，不带任何可识别信息")
+         : "仅自己可见 · 不进入汇总，也不进入到访流") + '</span></div>';
+  if (rec.note) h += '<blockquote>' + escapeHTML(rec.note) + '</blockquote>';
+  h += '<div class="insights" style="margin-top:16px"><div class="head"><span style="width:14px;height:14px;display:inline-block">' +
+       catSVG() + '</span><b>小在眼中的这次到访</b></div>';
+  ins.forEach(x => {
+    h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong><small>' + x.d + '</small></div></div>';
+  });
+  h += '</div></div></div>';
+  }
+  h += '</div>';
+  h += '<button class="btn ghost flip-btn" data-flip="1">' + (state.flipped ? "← 翻回正面" : "翻到背面 · 看这次的变化 →") + '</button>';
+  if (rec.visibility === "anonymous"){
+    h += '<div class="avg" style="margin-top:14px"><b>' + signed(p.averageChange) + '</b><p>' + p.placeName + ' · 平均心情变化' +
+         '<em>' + p.feedbackCount.toLocaleString() + ' 份匿名反馈的平均值。你这条也加了进去。它不是疗效，也不是治愈率。</em></p></div>';
+  } else {
+    h += '<div class="avg" style="margin-top:14px;background:var(--card)"><b style="color:var(--ink-dim)">—</b>' +
+         '<p>这条没有进入 ' + p.placeName + ' 的汇总<em>你选了只存进自己的记录。地点的平均分里没有你。</em></p></div>';
+  }
+  h += '<div class="actions"><button class="btn" data-go="#/records">进入情绪空间轨迹 <span>→</span></button>' +
+       '<button class="btn-text" data-reset="1">重新体验</button></div>';
+  h += '</div></div>';
+  h += dock('我替你记住了这里。');
+  return h;
+}
+
+/* --- 9. 情绪空间轨迹 --- */
+const REC_FILTERS = [
+  {id:"all",   label:"全部"},
+  {id:"calm",  label:"让我安静下来"},
+  {id:"power", label:"给我能量"},
+  {id:"none",  label:"没有帮助"},
+  {id:"private",  label:"私密记录"},
+  {id:"anonymous",label:"匿名贡献"}
+];
+function recMatches(r){
+  const f = state.recFilter;
+  if (f === "all") return true;
+  if (f === "private" || f === "anonymous") return r.visibility === f;
+  const p = placeById(r.placeId);
+  if (f === "none")  return r.changeScore <= 0;
+  if (f === "calm")  return r.changeScore > 0 && (p.indoor || p.category.indexOf("公园") > -1 || p.category.indexOf("植物园") > -1);
+  if (f === "power") return r.changeScore > 0 && !p.indoor;
+  return true;
+}
+function renderRecords(){
+  const list = state.records.filter(recMatches);
+  const all = state.records;
+  const avg = all.length ? (all.reduce((s,r) => s + r.changeScore, 0) / all.length) : 0;
+  const anon = all.filter(r => r.visibility === "anonymous").length;
+  let h = topbar("情绪空间轨迹", "长期记录", "#/mode");
+  h += '<div class="screen">';
+  // 封面 + 身份：Tara 个人页的结构，对象换成「你自己的记录」
+  const read = selfRead(all);
+  h += '<div class="profile"><div class="hero">' +
+       '<div class="grad" style="background:radial-gradient(120% 100% at 50% 40%, rgba(30,110,114,.12), rgba(30,110,114,.05) 55%, rgba(234,240,239,.92) 100%),linear-gradient(160deg,#EAF0EF,#DDE6E4)"></div>' +
+       '<div class="grain"></div>' + selfSigil(all) + '<div class="scrim"></div>' +
+       '<div class="who"><h1>你的轨迹</h1><p>' + read.line + '</p></div>' +
+       '<div class="av"><span>' + catSVG() + '</span></div></div>';
+  h += '<div class="eye"><div class="head"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
+       '</span><b>我们的此在</b><span style="margin-left:auto;font:10px var(--mono);color:var(--ink-faint)">只用你打过的分说话</span></div>';
+  read.rows.forEach(r => {
+    h += '<div class="row"><span class="dot">' + catDot(placeById(all.length ? all[0].placeId : "river-sunset-walk")) +
+         '</span><div><strong>' + r.t + '</strong><small>' + r.d + '</small><em>依据 · ' + r.e + '</em></div></div>';
+  });
+  h += '</div>';
+  h += '<div style="padding:13px 18px 16px"><button class="btn ghost sm" data-go="#/nearby">看别人在这些地方留下的 →</button></div></div>';
+  h += '<div class="rec-head" style="padding-top:18px"><p class="eyebrow">你去过的地方</p>' +
+       '<h1 class="title sm">' + all.length + ' 次到访，<br>攒成了一片。</h1></div>';
+  h += '<div class="rec-stat"><div><b class="num">' + (avg >= 0 ? "+" : "") + avg.toFixed(1) + '</b><small>你的平均变化<br>只算你的记录</small></div>' +
+       '<div><b class="num">' + anon + '</b><small>匿名贡献<br>进入了地点汇总</small></div>' +
+       '<div><b class="num">' + (all.length - anon) + '</b><small>私密记录<br>只有你能看到</small></div></div>';
+  h += '<div class="filterbar" style="margin-top:14px">';
+  REC_FILTERS.forEach(f => {
+    h += '<button class="chip' + (state.recFilter === f.id ? " on" : "") + '" data-recf="' + f.id + '">' + f.label + '</button>';
+  });
+  h += '</div>';
+  if (!list.length){
+    h += '<div class="empty">这个筛选下还没有记录。<br>换一个看看。</div>';
+  } else {
+    h += '<div class="falls">';
+    list.forEach(r => {
+      const p = placeById(r.placeId);
+      const moved = Math.max(12, p.sig.nodeDist - r.changeScore * 11);
+      const fresh = r.id === state.lastRecordId;
+      h += '<button class="rcard' + (fresh ? " fresh" : "") + '" data-rec="' + r.id + '">';
+      h += coverHTML(p, {nodeDist:moved, style:"aspect-ratio:" + (r.note ? "1/1" : "4/3"), tag:"r" + r.id});
+      h += '<div class="b">';
+      if (fresh) h += '<span class="fresh-tag">刚刚保存</span>';
+      h += '<span class="date num">' + fmtDate(r.createdAt) + '</span>';
+      h += '<h4>' + r.placeName + '</h4>';
+      h += '<div class="shift">' + r.preMood + ' <span style="color:var(--ink-faint)">→</span> ' + scoreLabel(r.changeScore) +
+           ' <b class="' + scoreCls(r.changeScore) + ' num">' + signed(r.changeScore) + '</b></div>';
+      if (r.factors.length) h += '<div class="mini-tags">' + r.factors.slice(0,3).map(f => '<span>' + f + '</span>').join("") + '</div>';
+      if (r.note) h += '<q>' + escapeHTML(r.note) + '</q>';
+      h += '<div style="margin-top:9px"><span class="stamp' + (r.visibility === "anonymous" ? " anon" : "") + '">' +
+           (r.visibility === "anonymous" ? "匿名" : "私密") + '</span></div>';
+      h += '</div></button>';
+    });
+    h += '</div>';
+  }
+  h += '<p style="padding:0 18px 22px;margin:0;font:11px/1.8 var(--mono);color:var(--ink-faint)">' +
+       '前三条为原型示例记录。所有内容只存在本页运行时内存中，刷新即清空：没有后端、没有账号、没有定位。</p>';
+  h += '</div>';
+  h += dock('这些是你的。要不要给别人看，每一条你都单独决定过。');
+  return h;
+}
+
+/* --- 10. 匿名到访流 ---
+   借 Tara 的代理逻辑：一条一条读别人的此在留下的话，而不是读某个人。
+   进入这里的只有主动选了「匿名分享」的记录，没有昵称、人脸、主页、评论、关注。 */
+function renderNearby(placeFilter){
+  const p = placeFilter ? placeById(placeFilter) : null;
+  // 用户自己选择了匿名的记录，也会以同样的形态出现在流里
+  const mine = state.records.filter(r => r.visibility === "anonymous").map(r => ({
+    id:r.id, placeId:r.placeId, preMood:r.preMood, changeScore:r.changeScore, factors:r.factors,
+    note:r.note, hue:44, ago:(r.id === state.lastRecordId ? "刚刚" : fmtDate(r.createdAt)), self:true
+  }));
+  let list = mine.concat(COMMUNITY);
+  if (p) list = list.filter(e => e.placeId === p.placeId);
+  let h = topbar(p ? p.placeName : "匿名到访流", p ? "其他人在这里" : "别人留下的", p ? "#/place/" + p.placeId : "#/records");
+  h += '<div class="screen">';
+  h += '<div class="pad" style="padding-bottom:2px">';
+  h += '<p class="eyebrow">' + (p ? "同一个空间" : "同一批空间") + '</p>';
+  h += '<h1 class="title sm">' + (p ? "别人在这里，<br>发生了什么" : "别人在这些地方，<br>发生了什么") + '</h1>';
+  h += '<p class="lead">你看到的不是某个人，是他的此在替他留下的一条。没有昵称、没有头像、没有主页，也不能评论或关注——只有主动选择匿名的记录会到这里来。</p>';
+  h += '</div>';
+  if (!list.length){
+    h += '<div class="empty">这个空间还没有人选择匿名分享。<br>第一条可以是你的。</div>';
+  } else {
+    h += '<div class="feed">';
+    list.forEach((e, i) => {
+      const pp = placeById(e.placeId);
+      const opt = f => pp.factorOptions.find(x => x.label === f);
+      h += '<div class="frow">' + avatarCat(e.hue);
+      h += '<div class="body"><div class="who"><b>' + (e.self ? "你的此在" : "某个人的此在") + '</b><i>' + e.ago + '</i>' +
+           (e.self ? '<i style="color:var(--ink)">这是你的记录</i>' : '') + '</div>';
+      if (!p) h += '<span class="place">' + pp.placeName + '</span>';
+      h += '<div class="shift" style="display:flex;align-items:center;gap:6px;font:11.5px var(--mono);color:var(--ink-dim);flex-wrap:wrap">' +
+           e.preMood + ' <span style="color:var(--ink-faint)">→</span> ' + scoreLabel(e.changeScore) +
+           ' <b class="' + scoreCls(e.changeScore) + ' num" style="font-size:14px;font-weight:600">' + signed(e.changeScore) + '</b></div>';
+      if (e.factors.length){
+        h += '<div class="tags" style="margin-top:9px">' + e.factors.map(f => {
+          const o = opt(f);
+          return '<span class="tag ' + (o && o.tone === "neg" ? "neg" : "pos") + '">' + f + '</span>';
+        }).join("") + '</div>';
+      }
+      if (e.note) h += '<q>' + escapeHTML(e.note) + '</q>';
+      const say = perchSay(e, i);
+      if (say) h += '<div class="perch-say"><span>' + catSVG() + '</span><p>' + say + '</p></div>';
+      h += '</div></div>';
+    });
+    h += '</div>';
+  }
+  h += '<p style="padding:4px 18px 22px;margin:0;font:11px/1.8 var(--mono);color:var(--ink-faint)">' +
+       '原型示例数据。这里只显示变化分、因素和用户自愿留下的一句话，不显示身份信息，也不能回复。</p>';
+  h += '</div>';
+  h += dock(p ? '这些人和你去的是同一个地方，状态不一定一样。' : '每一条的作者都单独同意过。不同意的那些，你永远看不到。');
+  return h;
+}
+
+/* ============================================================
+   比较页 / 会议总览
+   ============================================================ */
+function miniOf(html, cap, sub){
+  return '<div class="mini-wrap"><div class="mini"><div class="inner" data-mini>' + html + '</div></div>' +
+         '<div class="cap"><b>' + cap + '</b>' + (sub || "") + '</div></div>';
+}
+function snapshot(fn){
+  const keep = {mood:state.mood, cardIndex:state.cardIndex, flipped:state.flipped,
+                draft:state.draft, recFilter:state.recFilter, lastRecordId:state.lastRecordId,
+                filters:Object.assign({}, state.filters)};
+  const html = fn();
+  Object.assign(state, keep);
+  state.filters = keep.filters;
+  return html;
+}
+function renderCompare(){
+  // 为总览准备一条示例记录（不写入用户的真实记录）
+  const demoRec = state.records.find(r => r.id === state.lastRecordId) || {
+    id:"cmp", placeId:"river-sunset-walk", placeName:"江边日落步道", placeCategory:"江边 · 户外",
+    coverImage:"sigil:river-sunset-walk", preMood:"低落", changeScore:2,
+    factors:["江风","视野开阔","能一直走"], note:"风吹过来的时候，脑子终于安静了一点。",
+    visibility:"anonymous", visitStartedAt:"2026-08-21T17:52:00", createdAt:"2026-08-21T18:26:00"
+  };
+  const injected = !state.records.some(r => r.id === demoRec.id);
+  if (injected) state.records.unshift(demoRec);
+
+  const s = {};
+  s.mood    = snapshot(() => renderMood());
+  s.mode    = snapshot(() => renderMode());
+  s.pick    = snapshot(() => { state.cardIndex = 0; return renderPick(); });
+  s.browse  = snapshot(() => renderBrowse());
+  s.place   = snapshot(() => renderPlace("river-sunset-walk"));
+  s.score   = snapshot(() => { state.draft = Object.assign(newDraft("river-sunset-walk"), {score:2, stayMin:34}); return renderScore("river-sunset-walk"); });
+  s.factors = snapshot(() => { state.draft = Object.assign(newDraft("river-sunset-walk"), {score:2, factors:["江风","视野开阔"], note:"风吹过来的时候，脑子终于安静了一点。", stayMin:34}); return renderFactors("river-sunset-walk"); });
+  s.cardF   = snapshot(() => { state.flipped = false; state.lastRecordId = demoRec.id; return renderCard(demoRec.id); });
+  s.cardB   = snapshot(() => { state.flipped = true;  state.lastRecordId = demoRec.id; return renderCard(demoRec.id); });
+  s.records = snapshot(() => { state.lastRecordId = demoRec.id; return renderRecords(); });
+  s.pickB   = snapshot(() => { state.cardIndex = 1; return renderPick(); });
+  s.browseB = snapshot(() => renderBrowse());
+  s.nearby  = snapshot(() => renderNearby(null));
+  s.nearby1 = snapshot(() => renderNearby("river-sunset-walk"));
+  s.me      = snapshot(() => { state.lastRecordId = null; return renderRecords(); });
+
+  if (injected) state.records = state.records.filter(r => r.id !== demoRec.id);
+
+  let h = '<div class="compare"><header><div class="k">此在 · Current ／ 2026-08-21 ／ 会议总览</div>' +
+    '<h1>两种推荐模式，一套反馈闭环</h1>' +
+    '<p>同一批空间数据、同一个地点详情页、同一套到访反馈。两种模式只改变「怎么翻找」，不改变「记录什么」。' +
+    '本页所有数字均为原型示例值，不代表真实统计；产品不提供诊断、治疗或情绪改善保证。</p></header>';
+
+  h += '<section class="cmp-sec"><h2>一、两种模式的定位</h2>' +
+    '<p class="sub">分歧点只有一个：用户此刻还剩多少做选择的力气。</p><div class="duo">';
+  h += '<div class="box"><h3>替我选 · 卡片模式</h3><p>一次只展示一个空间，减少低能量状态下的比较负担。</p>' +
+    '<ul><li>真实匹配的地点封面、距离、交通、建议停留</li><li>「为什么此刻推荐给你」随情绪变化</li>' +
+    '<li>「小在眼中的这里」两条空间观察</li><li>左右滑动，同时提供上一个／下一个按钮</li></ul>' +
+    '<button class="jump" data-go="#/pick">打开卡片模式 →</button></div>';
+  h += '<div class="box"><h3>自己逛逛 · 瀑布流模式</h3><p>八个空间一起铺开，让还有探索意愿的用户自己比较。</p>' +
+    '<ul><li>手机端双列、封面比例不等高</li><li>顶部显示当前情绪，四组轻量筛选</li>' +
+    '<li>每张卡只保留够做判断的信息</li><li>点进去和卡片模式共用同一个详情页</li></ul>' +
+    '<button class="jump" data-go="#/browse">打开瀑布流模式 →</button></div></div></section>';
+
+  h += '<section class="cmp-sec"><h2>二、同一个地点在两版中的表现</h2>' +
+    '<p class="sub">江边日落步道。左边是卡片模式的一屏一个，右边是瀑布流里的同一条。信息取舍不同，数据同源。</p>' +
+    '<div class="mini-row">' +
+    miniOf(s.pick,   "卡片模式", "完整信息：封面 + 推荐理由 + 两条空间观察 + 匿名汇总") +
+    miniOf(s.browse, "瀑布流模式", "扫读信息：封面 + 一句理由 + 距离 + 平均变化 + 三个标签") +
+    miniOf(s.pickB,  "卡片模式 · 下一张", "换一个空间，因素与封面符号随类型变化") +
+    miniOf(s.place,  "共享详情页", "两种模式点进来都是这一页，「就去这里」是唯一出口") +
+    '</div></section>';
+
+  h += '<section class="cmp-sec"><h2>三、六屏完整旅程</h2>' +
+    '<p class="sub">情绪选择 → 两种推荐入口 → 地点详情 → 到访反馈 → 保存结果 → 情绪空间轨迹。两条推荐路径在第四屏合流。</p>' +
+    '<div class="mini-row">' +
+    miniOf(s.mood,   "1 · 记录情绪", "六选一。只决定接下来看什么，不公开、不评估") +
+    miniOf(s.mode,   "2 · 两种入口", "共用地点数据与反馈流程，只改变翻找方式") +
+    miniOf(s.place,  "3 · 地点详情", "小在眼中的这里 + 匿名汇总 + 就去这里") +
+    miniOf(s.score,  "4 · 到访反馈", "−3 至 +3，初始不预选；这是同一个人前后的差") +
+    miniOf(s.cardB,  "5 · 保存结果", "到访卡背面：前后变化、因素、原话、可见性") +
+    miniOf(s.records,"6 · 情绪空间轨迹", "新记录置顶；六种筛选；私密与匿名分开统计") +
+    '</div></section>';
+
+  h += '<section class="cmp-sec"><h2>四、反馈闭环的三个关键屏</h2>' +
+    '<p class="sub">影响因素随地点类型变化——江边是江风与视野，书店是声音、座位与消费压力，美术馆是拥挤、动线与休息区，步道是运动强度与照明。同一套表单，八套因素。</p>' +
+    '<div class="mini-row">' +
+    miniOf(s.factors,"影响因素 + 一句话 + 隐私", "默认私密；不主动选择不会公开；返回上一步保留全部输入") +
+    miniOf(s.cardF,  "到访卡 · 正面", "去过的地方：封面、时间、停留时长、可见性印章") +
+    miniOf(s.cardB,  "到访卡 · 背面", "这个地方做了什么：小在眼中的这次到访由本次选择生成") +
+    miniOf(s.browseB,"瀑布流回到推荐", "反馈完成后可继续，闭环不终止在结果页") +
+    '</div></section>';
+
+  h += '<section class="cmp-sec"><h2>五、Tara 的人格逻辑与代理逻辑，怎么落到 Current</h2>' +
+    '<p class="sub">Tara 有两件事我们真正想要：把散落的行为归纳成一张有出处的身份卡；以及「你先跟对方的 Tara 聊，不是跟对方聊」的代理层。' +
+    '这两件事在 Current 里都成立，前提是换掉它们的依据和身份载体。</p>' +
+    '<div class="mini-row">' +
+    miniOf(s.me,      "我们的此在", "封面是你所有记录长成的合成符号；两条观察各带一行「依据」") +
+    miniOf(s.nearby,  "匿名到访流", "小在头像 + 「某个人的此在」；小在偶尔插一句，只做同类连接") +
+    miniOf(s.nearby1, "单个空间的流", "从地点详情进来，只看这一个空间别人的前后变化") +
+    miniOf(s.place,   "地点详情里的两条", "「其他人在这里留下的」比一个 +2.4 更能回答为什么是这里") +
+    '</div>' +
+    '<div class="note-box" style="margin-top:18px"><h3>翻译规则，以及守住的线</h3><ul>' +
+    '<li><b>人格判断 → 行为归纳。</b>Tara 读的是帖子，读出来是「3D动画与视频创作爱好者」。Current 读的是你自己前后打的分，读出来是「你 5 / 7 次记录都勾了『人不多』」。每条观察下面挂一行依据，点得到具体是哪几次。说行为模式，不说这个人是什么样的人，不判断情绪状态。</li>' +
+    '<li><b>头像社交流 → 代理流。</b>Tara 的机制是你先跟对方的 Tara 聊。Current 里代理就是小在：你看到的是「某个人的此在」留下的一条，头像是云不是脸。</li>' +
+    '<li><b>没有的东西：</b>昵称、人脸、个人主页、评论区、关注、私信、点赞排行。只有主动选择「匿名分享」的记录进流，用户自己的匿名记录也以同样形态出现在里面。</li>' +
+    '<li><b>记录不够时不编。</b>少于两条记录，「我们的此在」会直说「还需要一两次记录，我才敢说」，不生成任何观察。</li>' +
+    '</ul></div></section>';
+
+  h += '<section class="cmp-sec"><h2>六、封面为什么是符号而不是照片</h2>' +
+    '<div class="note-box"><h3>三条理由</h3><ul>' +
+    '<li>八个地点拿不到稳定合规的匹配实拍图源。错配的图片（拿山景配咖啡馆）比抽象符号更伤信任。</li>' +
+    '<li>照片承诺「这个地方长这样」，符号承诺「这个地方对你意味着什么」。Current 卖的是后者。</li>' +
+    '<li>符号参数带语义：环 = 开阔度，星芒 = 刺激密度，游走的光点 = 你在这个空间里的位置。反馈保存后光点会按 ±分数重新落位——记录页那一片，就是你自己的符号。</li>' +
+    '</ul></div></section>';
+
+  h += '<div class="disclaimer">边界：不是心理治疗或诊断工具，不提供情绪改善保证。「平均心情变化」是匿名反馈的算术平均，不是疗效或治愈率。' +
+    '本原型无后端、无账号、无定位、无地图，数据只存在页面运行时内存中。<br>' +
+    '<button class="jump" data-go="#/mood" style="margin-top:16px">从第一屏走一遍 →</button></div>';
+  return h + '</div>';
+}
+
+/* ============================================================
+   主渲染
+   ============================================================ */
+function render(){
+  const root = document.getElementById("root");
+  const r = state.route;
+  let inner = "", isCompare = false;
+
+  if (r === "#/compare"){ isCompare = true; inner = renderCompare(); }
+  else if (r === "#/mood")   inner = renderMood();
+  else if (r === "#/needs")  inner = renderNeeds();
+  else if (r === "#/mode")   inner = renderMode();
+  else if (r === "#/pick")  { state.lastMode = "#/pick";   inner = renderPick(); }
+  else if (r === "#/browse"){ state.lastMode = "#/browse"; inner = renderBrowse(); }
+  else if (r.indexOf("#/place/") === 0) inner = renderPlace(r.slice(8));
+  else if (r.indexOf("#/visit/") === 0){
+    const id = r.slice(8);
+    if (!state.draft || state.draft.placeId !== id){ state.draft = newDraft(id); state.draft.stayMin = 28 + Math.floor(Math.random()*22); }
+    inner = renderVisit(id);
+  }
+  else if (r.indexOf("#/feedback/") === 0){
+    const raw = r.slice(11), id = raw.split("?")[0];
+    const step = raw.indexOf("s=1") > -1 ? 1 : 2;
+    if (!state.draft || state.draft.placeId !== id){ state.draft = newDraft(id); state.draft.stayMin = 34; }
+    inner = step === 1 ? renderScore(id) : renderFactors(id);
+  }
+  else if (r.indexOf("#/card/") === 0)   inner = renderCard(r.slice(7), "#/records");
+  else if (r.indexOf("#/nearby/") === 0) inner = renderNearby(r.slice(9));
+  else if (r === "#/nearby")             inner = renderNearby(null);
+  else if (r === "#/records")            inner = renderRecords();
+  else { state.route = "#/mood"; inner = renderMood(); }
+
+  root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + '</div>' +
+    '<p class="stage-note">390 × 844 · 原型演示，无后端 · <a href="#/compare" data-go="#/compare">会议总览页</a></p></div>';
+
+  if (isCompare) scaleMinis();
+  bind();
+}
+function scaleMinis(){
+  document.querySelectorAll(".mini").forEach(m => {
+    const inner = m.querySelector("[data-mini]");
+    if (!inner) return;
+    const k = m.clientWidth / 390;
+    inner.style.transform = "scale(" + k + ")";
+  });
+}
+window.addEventListener("resize", () => { if (state.route === "#/compare") scaleMinis(); });
+
+/* ---------- 事件绑定 ---------- */
+function bind(){
+  const root = document.getElementById("root");
+
+  root.querySelectorAll("[data-go]").forEach(el => el.onclick = e => { e.preventDefault(); go(el.dataset.go); });
+
+  root.querySelectorAll("[data-mood]").forEach(el => el.onclick = () => { state.mood = el.dataset.mood; state.needs = []; render(); });
+  root.querySelectorAll("[data-need]").forEach(el => el.onclick = () => {
+    const k = el.dataset.need, i = state.needs.indexOf(k);
+    if (i >= 0) state.needs.splice(i, 1); else state.needs.push(k);
+    render();
+  });
+
+  root.querySelectorAll("[data-card]").forEach(el => el.onclick = () => shift(parseInt(el.dataset.card, 10)));
+
+  root.querySelectorAll("[data-fav]").forEach(el => el.onclick = () => {
+    const id = el.dataset.fav;
+    state.favs.has(id) ? state.favs.delete(id) : state.favs.add(id);
+    render();
+  });
+
+  root.querySelectorAll("[data-filter]").forEach(el => el.onclick = () => {
+    const [g, v] = el.dataset.filter.split(":");
+    state.filters[g] = (state.filters[g] === v) ? "all" : v;
+    render();
+  });
+
+  root.querySelectorAll("[data-recf]").forEach(el => el.onclick = () => { state.recFilter = el.dataset.recf; render(); });
+
+  root.querySelectorAll("[data-visit]").forEach(el => el.onclick = () => {
+    const id = el.dataset.visit;
+    state.draft = newDraft(id);
+    state.draft.stayMin = 28 + Math.floor(Math.random() * 22);
+    go("#/visit/" + id);
+  });
+
+  root.querySelectorAll("[data-remind]").forEach(el => el.onclick = () => { state.draft.reminder = true; render(); });
+
+  root.querySelectorAll("[data-step]").forEach(el => el.onclick = () => {
+    const s = parseInt(el.dataset.step, 10);
+    const id = state.draft.placeId;
+    go(s === 1 ? "#/feedback/" + id + "?s=1" : "#/feedback/" + id);
+  });
+
+  root.querySelectorAll("[data-score]").forEach(el => el.onclick = () => {
+    state.draft.score = parseInt(el.dataset.score, 10);
+    render();
+  });
+
+  root.querySelectorAll("[data-fac]").forEach(el => el.onclick = () => {
+    const f = el.dataset.fac, i = state.draft.factors.indexOf(f);
+    i > -1 ? state.draft.factors.splice(i, 1) : state.draft.factors.push(f);
+    syncNote(); render();
+  });
+
+  root.querySelectorAll("[data-vis]").forEach(el => el.onclick = () => { syncNote(); state.draft.visibility = el.dataset.vis; render(); });
+
+  const note = root.querySelector("#note");
+  if (note){
+    note.oninput = () => {
+      state.draft.note = note.value.slice(0, 80);
+      const c = root.querySelector(".note-wrap em");
+      if (c) c.textContent = state.draft.note.length + " / 80";
+    };
+  }
+
+  root.querySelectorAll("[data-save]").forEach(el => el.onclick = () => { syncNote(); save(el.dataset.save); });
+
+  root.querySelectorAll("[data-flip]").forEach(el => el.onclick = () => { state.flipped = !state.flipped; render(); });
+
+  root.querySelectorAll("[data-rec]").forEach(el => el.onclick = () => { state.flipped = false; go("#/card/" + el.dataset.rec); });
+
+  root.querySelectorAll("[data-reset]").forEach(el => el.onclick = () => {
+    state.draft = null; state.flipped = false; state.lastRecordId = null;
+    state.cardIndex = 0; state.recFilter = "all"; state.mood = "low";
+    state.filters = {dist:"all", place:"all", crowd:"all", cost:"all"};
+    seed();
+    go("#/mood");
+  });
+
+  // 卡片模式滑动（按钮始终可用，手势只是补充）
+  const slide = root.querySelector("#slide");
+  if (slide){
+    let x0 = null;
+    slide.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, {passive:true});
+    slide.addEventListener("touchend", e => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      x0 = null;
+      if (Math.abs(dx) > 45) shift(dx < 0 ? 1 : -1);
+    }, {passive:true});
+  }
+}
+function syncNote(){
+  const n = document.getElementById("note");
+  if (n && state.draft) state.draft.note = n.value.slice(0, 80);
+}
+function shift(d){
+  const slide = document.getElementById("slide");
+  if (slide){
+    slide.classList.add(d > 0 ? "out-l" : "out-r");
+    setTimeout(() => { state.cardIndex += d; render(); }, 170);
+  } else {
+    state.cardIndex += d; render();
+  }
+}
+document.addEventListener("keydown", e => {
+  if (state.route !== "#/pick") return;
+  if (e.key === "ArrowRight") shift(1);
+  if (e.key === "ArrowLeft")  shift(-1);
+});
+
+/* ---------- 保存 FeedbackRecord ---------- */
+function save(placeId){
+  const d = state.draft;
+  if (d.score === null) return;
+  const p = placeById(placeId);
+  const rec = {
+    id: "r" + Date.now(),
+    placeId: p.placeId,
+    placeName: p.placeName,
+    placeCategory: p.category,
+    coverImage: p.coverImage,
+    preMood: moodById(state.mood).name,
+    changeScore: d.score,
+    factors: d.factors.slice(),
+    note: d.note.trim(),
+    visibility: d.visibility,
+    visitStartedAt: d.visitStartedAt,
+    createdAt: new Date().toISOString()
+  };
+  state.records.unshift(rec);
+  state.lastRecordId = rec.id;
+  state.flipped = false;
+  go("#/card/" + rec.id);
+}
+
+/* ---------- 启动 ---------- */
+state.route = location.hash || "#/mood";
+render();
+</script>

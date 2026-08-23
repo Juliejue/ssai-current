@@ -1,0 +1,391 @@
+<title>此在 · A 稿收敛</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Serif+SC:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,500;1,300&display=swap">
+
+<style>
+:root{
+  --paper:#EFF2F3; --card:#FFFFFF;
+  --ink:#16202B; --ink-soft:#63727D; --ink-faint:#8D9AA3;
+  --rule:#D8DEE1; --rule-soft:#E6EBED;
+  --accent:#1F6B7A; --accent-wash:#E2EDEF;
+  --shadow:0 1px 2px rgba(22,32,43,.04),0 8px 24px -16px rgba(22,32,43,.22);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E161C; --card:#16212A;
+    --ink:#E4EBEE; --ink-soft:#93A3AD; --ink-faint:#6B7B85;
+    --rule:#2A3A45; --rule-soft:#1F2E38;
+    --accent:#5BAEBF; --accent-wash:#17323A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E161C; --card:#16212A;
+  --ink:#E4EBEE; --ink-soft:#93A3AD; --ink-faint:#6B7B85;
+  --rule:#2A3A45; --rule-soft:#1F2E38;
+  --accent:#5BAEBF; --accent-wash:#17323A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Noto Sans SC","PingFang SC","Hiragino Sans GB",system-ui,sans-serif;
+  font-weight:300;line-height:1.75;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1040px;margin:0 auto;padding:0 28px 96px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);
+}
+
+header{padding:72px 0 0}
+.masthead{
+  display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  padding-bottom:18px;border-bottom:1px solid var(--rule);
+}
+.brandline{font-family:"Noto Serif SC",serif;font-weight:500;font-size:17px;letter-spacing:.34em}
+.brandline em{
+  font-family:"Spectral",serif;font-style:normal;font-weight:300;letter-spacing:.28em;
+  font-size:14px;color:var(--ink-soft);margin-left:.7em;text-transform:uppercase;
+}
+h1{
+  font-family:"Noto Serif SC",serif;font-weight:500;
+  font-size:clamp(29px,5vw,44px);line-height:1.34;margin:52px 0 0;
+  text-wrap:balance;max-width:16em;
+}
+.lede{max-width:34em;margin:22px 0 0;font-size:15.5px;color:var(--ink-soft)}
+.lede strong{font-weight:500;color:var(--ink)}
+
+/* geometry note */
+.geo{
+  margin-top:46px;border:1px solid var(--rule);border-radius:3px;background:var(--card);
+  display:grid;grid-template-columns:1fr 1fr;
+}
+@media (max-width:760px){.geo{grid-template-columns:1fr}}
+.geo > div{padding:26px 28px 24px;border-right:1px solid var(--rule-soft);display:grid;gap:14px}
+.geo > div:last-child{border-right:none}
+@media (max-width:760px){
+  .geo > div{border-right:none;border-bottom:1px solid var(--rule-soft)}
+  .geo > div:last-child{border-bottom:none}
+}
+.geo svg{width:100%;max-width:230px;height:auto;color:var(--ink)}
+.geo .cap{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-faint);
+}
+.geo p{margin:0;font-size:14px;color:var(--ink-soft)}
+.geo p b{font-weight:400;color:var(--ink)}
+.mark-x{color:var(--ink-faint)}
+.mark-hit{color:var(--accent)}
+
+/* variants */
+.grid{
+  margin-top:64px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px;
+}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.card{
+  background:var(--card);border:1px solid var(--rule-soft);border-radius:3px;
+  box-shadow:var(--shadow);display:grid;grid-template-rows:auto auto 1fr;
+}
+.card.pick{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),var(--shadow)}
+.card .head{
+  display:flex;align-items:baseline;gap:11px;padding:16px 22px 0;flex-wrap:wrap;
+}
+.card .id{
+  font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:11px;letter-spacing:.1em;
+  color:var(--accent);background:var(--accent-wash);border-radius:2px;padding:3px 8px;
+}
+.card .nm{font-family:"Noto Serif SC",serif;font-weight:500;font-size:17px}
+.card .strokes{
+  margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  color:var(--ink-faint);letter-spacing:.06em;
+}
+.stage{display:grid;place-items:center;padding:34px 24px 18px}
+.stage svg{width:100%;max-width:250px;height:auto;color:var(--ink)}
+.foot{
+  padding:0 22px 20px;display:grid;gap:12px;align-content:start;
+}
+.foot p{margin:0;font-size:14px;color:var(--ink-soft)}
+.foot p b{font-weight:400;color:var(--ink)}
+.mini{
+  display:flex;align-items:flex-end;gap:15px;padding-top:12px;
+  border-top:1px solid var(--rule-soft);
+}
+.mini figure{margin:0;display:grid;gap:6px;justify-items:center}
+.mini svg{color:var(--ink);display:block}
+.mini figcaption{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--ink-faint)}
+
+/* recommendation */
+.rec{margin-top:76px;padding-top:34px;border-top:1px solid var(--rule)}
+.rec h2{font-family:"Noto Serif SC",serif;font-weight:500;font-size:24px;margin:0 0 8px}
+.rec .sub{margin:0 0 34px;font-size:15px;color:var(--ink-soft);max-width:38em}
+.apps{
+  border:1px solid var(--rule-soft);border-radius:3px;background:var(--card);
+  display:grid;grid-template-columns:1.35fr 1fr 1fr;
+}
+@media (max-width:860px){.apps{grid-template-columns:1fr}}
+.app{padding:24px 24px 22px;border-right:1px solid var(--rule-soft);display:grid;gap:16px;align-content:start}
+.app:last-child{border-right:none}
+@media (max-width:860px){
+  .app{border-right:none;border-bottom:1px solid var(--rule-soft)}
+  .app:last-child{border-bottom:none}
+}
+.app .cap{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-faint);
+}
+.lockup{display:flex;align-items:center;gap:16px;min-height:52px}
+.lockup svg{height:46px;width:auto;color:var(--ink);flex:none}
+.words{display:grid;gap:2px;line-height:1.24}
+.words .cn{font-family:"Noto Serif SC",serif;font-weight:500;font-size:21px;letter-spacing:.26em}
+.words .en{
+  font-family:"Spectral",serif;font-weight:300;font-size:10.5px;letter-spacing:.44em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+.stackup{display:grid;justify-items:center;gap:9px;min-height:52px}
+.stackup svg{height:40px;width:auto;color:var(--ink)}
+.iconrow{display:flex;align-items:flex-end;gap:16px;min-height:52px}
+.appicon{border-radius:23%;display:grid;place-items:center;flex:none}
+.appicon.dark{background:var(--ink)}
+.appicon.dark svg{color:var(--card)}
+.appicon.light{background:var(--paper);border:1px solid var(--rule)}
+.appicon.light svg{color:var(--ink)}
+.appicon svg{width:74%;height:74%}
+
+.specs{
+  margin-top:26px;border:1px solid var(--rule-soft);border-radius:3px;background:var(--card);
+  padding:24px 26px;display:grid;gap:11px;
+}
+.specs div{display:grid;grid-template-columns:7.5em 1fr;gap:16px;font-size:14px;align-items:baseline}
+@media (max-width:560px){.specs div{grid-template-columns:1fr;gap:2px}}
+.specs .lab{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-faint);
+}
+.specs .val{color:var(--ink-soft)}
+.specs .val b{font-weight:400;color:var(--ink)}
+
+footer{margin-top:80px;padding-top:28px;border-top:1px solid var(--rule)}
+footer h3{font-family:"Noto Serif SC",serif;font-weight:500;font-size:17px;margin:0 0 14px}
+.next{display:grid;gap:10px;margin:0;padding:0;list-style:none;max-width:46em}
+.next li{display:grid;grid-template-columns:2.4em 1fr;gap:14px;font-size:14.5px;color:var(--ink-soft);align-items:baseline}
+.next li span{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent)}
+.sig{
+  margin-top:34px;font-family:"IBM Plex Mono",monospace;font-size:11px;
+  letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="masthead">
+    <div class="brandline">此　在<em>Current</em></div>
+    <div class="eyebrow">标识提案 · A 稿收敛 · v2</div>
+  </div>
+
+  <h1>把 A 减到只剩交集</h1>
+
+  <p class="lede">
+    你说得对，A 该更简。但真正该改的不是删线条，是<strong>几何本身</strong> ——
+    原稿里流线穿过环，其实有<strong>两个</strong>交点，"此刻"落在哪个是模糊的。
+    改成<strong>相切</strong>之后，交集在数学上就只剩一个点，形和意思才对上。
+    下面四档是从这个新几何往下减。
+  </p>
+
+  <div class="geo">
+    <div>
+      <div class="cap">v1 · 穿过 — 交集是两个点</div>
+      <svg viewBox="0 0 240 150" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" role="img" aria-label="旧几何：流线穿过圆环，产生两个交点">
+        <path d="M12 104 C 48 104 62 74 100 72 C 136 70 158 82 228 76" opacity=".9"/>
+        <circle cx="100" cy="72" r="40"/>
+        <g class="mark-x">
+          <circle cx="61.6" cy="84.8" r="5" stroke-width="1.4" stroke-dasharray="2.2 2.4"/>
+          <circle cx="140.4" cy="74.3" r="5" stroke-width="1.4" stroke-dasharray="2.2 2.4"/>
+        </g>
+      </svg>
+      <p>线从环的一侧进、另一侧出。<b>哪一点是"此刻"？说不清。</b></p>
+    </div>
+    <div>
+      <div class="cap">v2 · 相切 — 交集是一个点</div>
+      <svg viewBox="0 0 240 150" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" role="img" aria-label="新几何：圆环与流线相切，只有一个交点">
+        <path d="M8 118 C 28 110 40 126 56 126 C 78 126 88 112 110 112 C 132 112 142 126 164 126 C 182 126 196 114 216 118"/>
+        <circle cx="110" cy="70" r="42"/>
+        <circle class="mark-hit" cx="110" cy="112" r="4.4" fill="currentColor" stroke="none"/>
+      </svg>
+      <p>空间恰好落在流经的那一点上。<b>那一点没有别的选择。</b></p>
+    </div>
+  </div>
+</header>
+
+<!-- ============ variants ============ -->
+<div class="grid">
+
+  <!-- A1 -->
+  <div class="card">
+    <div class="head"><span class="id">A·1</span><span class="nm">留点</span><span class="strokes">3 个元素</span></div>
+    <div class="stage">
+      <svg viewBox="0 0 230 165" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" role="img" aria-label="A1：圆环与流线相切，切点上一个实心点">
+        <path d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+        <circle cx="115" cy="80" r="44"/>
+        <circle cx="115" cy="124" r="5.2" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <div class="foot">
+      <p>相切，切点上留一个实心点。<b>点是唯一在说"你"的元素</b>，删掉它，标志就只剩几何。</p>
+      <div class="mini">
+        <figure><svg width="44" height="44" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" aria-hidden="true"><path d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/><circle cx="32" cy="27" r="15"/><circle cx="32" cy="42" r="2.6" fill="currentColor" stroke="none"/></svg><figcaption>44</figcaption></figure>
+        <figure><svg width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.9" stroke-linecap="round" aria-hidden="true"><path d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/><circle cx="32" cy="27" r="15"/><circle cx="32" cy="42" r="3.2" fill="currentColor" stroke="none"/></svg><figcaption>32</figcaption></figure>
+        <figure><svg width="24" height="24" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" aria-hidden="true"><path d="M3 47 C 9 44 13 49 19 49 C 26 49 27 43 32 43 C 37 43 39 49 46 49 C 52 49 57 45 61 46"/><circle cx="32" cy="28" r="15"/><circle cx="32" cy="43" r="4.2" fill="currentColor" stroke="none"/></svg><figcaption>24</figcaption></figure>
+      </div>
+    </div>
+  </div>
+
+  <!-- A2 -->
+  <div class="card pick">
+    <div class="head"><span class="id">A·2</span><span class="nm">开口留点</span><span class="strokes">3 个元素 · 建议</span></div>
+    <div class="stage">
+      <svg viewBox="0 0 230 165" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" role="img" aria-label="A2：底部开口的圆环坐在流线上，开口中间一个实心点">
+        <path d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+        <path d="M 135.66 118.85 A 44 44 0 1 0 94.34 118.85"/>
+        <circle cx="115" cy="124" r="5.2" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <div class="foot">
+      <p>环在切点处<b>断开一个小口</b>，让点落进缺口里。三个元素不变，但环不再压着线，形更透气，也接上了"接住你、不留住你"这层意思。</p>
+      <div class="mini">
+        <figure><svg width="44" height="44" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" aria-hidden="true"><path d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/><path d="M 39.04 40.24 A 15 15 0 1 0 24.96 40.24"/><circle cx="32" cy="42" r="2.6" fill="currentColor" stroke="none"/></svg><figcaption>44</figcaption></figure>
+        <figure><svg width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.9" stroke-linecap="round" aria-hidden="true"><path d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/><path d="M 39.04 40.24 A 15 15 0 1 0 24.96 40.24"/><circle cx="32" cy="42" r="3.2" fill="currentColor" stroke="none"/></svg><figcaption>32</figcaption></figure>
+        <figure><svg width="24" height="24" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" aria-hidden="true"><path d="M3 47 C 9 44 13 49 19 49 C 26 49 27 43 32 43 C 37 43 39 49 46 49 C 52 49 57 45 61 46"/><path d="M 39.04 41.24 A 15 15 0 1 0 24.96 41.24"/><circle cx="32" cy="43" r="4.2" fill="currentColor" stroke="none"/></svg><figcaption>24</figcaption></figure>
+      </div>
+    </div>
+  </div>
+
+  <!-- A3 -->
+  <div class="card">
+    <div class="head"><span class="id">A·3</span><span class="nm">两笔</span><span class="strokes">2 个元素</span></div>
+    <div class="stage">
+      <svg viewBox="0 0 230 165" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" role="img" aria-label="A3：圆环与流线相切，不画点">
+        <path d="M8 130 C 30 120 44 140 60 140 C 84 140 92 124 115 124 C 138 124 148 140 170 140 C 188 140 200 126 222 130"/>
+        <circle cx="115" cy="80" r="44"/>
+      </svg>
+    </div>
+    <div class="foot">
+      <p>不画点，交集由两笔相交自己产生。<b>这是能做到的最少。</b>代价是"你"被隐掉了 —— 读到的是"一个空间挨着一条线"，此刻的那个人得靠讲解补上。</p>
+      <div class="mini">
+        <figure><svg width="44" height="44" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" aria-hidden="true"><path d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/><circle cx="32" cy="27" r="15"/></svg><figcaption>44</figcaption></figure>
+        <figure><svg width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.9" stroke-linecap="round" aria-hidden="true"><path d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/><circle cx="32" cy="27" r="15"/></svg><figcaption>32</figcaption></figure>
+        <figure><svg width="24" height="24" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" aria-hidden="true"><path d="M3 47 C 9 44 13 49 19 49 C 26 49 27 43 32 43 C 37 43 39 49 46 49 C 52 49 57 45 61 46"/><circle cx="32" cy="28" r="15"/></svg><figcaption>24</figcaption></figure>
+      </div>
+    </div>
+  </div>
+
+  <!-- A4 -->
+  <div class="card">
+    <div class="head"><span class="id">A·4</span><span class="nm">只是交集</span><span class="strokes">3 段 · 全截断</span></div>
+    <div class="stage">
+      <svg viewBox="0 0 230 165" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" role="img" aria-label="A4：只保留切点附近的一段弧和一段线">
+        <path d="M52 134 C 70 134 82 124 115 124 C 148 124 160 134 178 134"/>
+        <path d="M 140.24 116.04 A 44 44 0 0 1 89.76 116.04"/>
+        <circle cx="115" cy="124" r="5.6" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <div class="foot">
+      <p>字面执行"只是交集"：环和线都裁到只剩接触附近的一小段。<b>最独特，也最不稳</b> —— 单看认不出是环，得靠动效或者反复出现才建立记忆。</p>
+      <div class="mini">
+        <figure><svg width="44" height="44" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" aria-hidden="true"><path d="M14 46 C 22 46 26 42 32 42 C 38 42 42 46 50 46"/><path d="M 40.60 39.29 A 15 15 0 0 1 23.40 39.29"/><circle cx="32" cy="42" r="2.8" fill="currentColor" stroke="none"/></svg><figcaption>44</figcaption></figure>
+        <figure><svg width="32" height="32" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linecap="round" aria-hidden="true"><path d="M14 46 C 22 46 26 42 32 42 C 38 42 42 46 50 46"/><path d="M 40.60 39.29 A 15 15 0 0 1 23.40 39.29"/><circle cx="32" cy="42" r="3.4" fill="currentColor" stroke="none"/></svg><figcaption>32</figcaption></figure>
+        <figure><svg width="24" height="24" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5.6" stroke-linecap="round" aria-hidden="true"><path d="M14 47 C 22 47 26 43 32 43 C 38 43 42 47 50 47"/><path d="M 40.60 40.29 A 15 15 0 0 1 23.40 40.29"/><circle cx="32" cy="43" r="4.4" fill="currentColor" stroke="none"/></svg><figcaption>24</figcaption></figure>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ recommendation ============ -->
+<section class="rec">
+  <h2>我选 A·2</h2>
+  <p class="sub">
+    减法不该减掉唯一在说"人"的那一笔。A·2 元素数和 A·1 一样，但环上的缺口让它读起来更轻，
+    也顺手把产品的立场写进了形里：接住你，不留住你。下面是它铺开的样子。
+  </p>
+
+  <div class="apps">
+    <div class="app">
+      <div class="cap">横版组合</div>
+      <div class="lockup">
+        <svg viewBox="0 0 120 92" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+          <path d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+          <path d="M 71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+          <circle cx="60" cy="70" r="3.4" fill="currentColor" stroke="none"/>
+        </svg>
+        <div class="words"><div class="cn">此在</div><div class="en">Current</div></div>
+      </div>
+    </div>
+    <div class="app">
+      <div class="cap">竖版组合</div>
+      <div class="stackup">
+        <svg viewBox="0 0 120 92" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+          <path d="M2 76 C 10 71 16 78 26 78 C 40 78 46 70 60 70 C 74 70 80 78 94 78 C 104 78 112 72 118 74"/>
+          <path d="M 71.27 67.19 A 24 24 0 1 0 48.73 67.19"/>
+          <circle cx="60" cy="70" r="3.4" fill="currentColor" stroke="none"/>
+        </svg>
+        <div class="words" style="justify-items:center;text-align:center">
+          <div class="cn" style="font-size:18px">此在</div>
+          <div class="en" style="font-size:9.5px">Current</div>
+        </div>
+      </div>
+    </div>
+    <div class="app">
+      <div class="cap">App Icon · 正 / 反</div>
+      <div class="iconrow">
+        <div class="appicon dark" style="width:52px;height:52px">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.1" stroke-linecap="round" aria-hidden="true">
+            <path d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+            <path d="M 39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+            <circle cx="32" cy="42" r="2.8" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+        <div class="appicon light" style="width:52px;height:52px">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.1" stroke-linecap="round" aria-hidden="true">
+            <path d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+            <path d="M 39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+            <circle cx="32" cy="42" r="2.8" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+        <div class="appicon dark" style="width:32px;height:32px">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linecap="round" aria-hidden="true">
+            <path d="M2 46 C 8 43 12 48 18 48 C 25 48 27 42 32 42 C 37 42 39 48 46 48 C 52 48 56 44 62 45"/>
+            <path d="M 39.04 40.24 A 15 15 0 1 0 24.96 40.24"/>
+            <circle cx="32" cy="42" r="3.4" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="specs">
+    <div><span class="lab">几何</span><span class="val">环与流线<b>严格相切</b>，切点同时是<b>环的最低点</b>与<b>流线的波峰</b>；缺口以切点为中心对称展开 <b>56°</b></span></div>
+    <div><span class="lab">比例</span><span class="val">环直径 : 流线全长 ≈ <b>1 : 2.4</b>；点直径 ≈ 环直径的 <b>1/8.5</b></span></div>
+    <div><span class="lab">线重</span><span class="val">环与流线<b>等粗</b>；线重 ≈ 环直径的 <b>1/46</b>，小尺寸按 24 / 32 / 44 三档加粗</span></div>
+    <div><span class="lab">最小尺寸</span><span class="val">带流线 <b>24px</b>；再小只保留环与点</span></div>
+    <div><span class="lab">动效</span><span class="val">流线从左侧生长 → 环落下 → 点在切点亮起。用于启动页与反馈保存</span></div>
+  </div>
+</section>
+
+<footer>
+  <h3>接下来</h3>
+  <ul class="next">
+    <li><span>01</span><span>A·2 定稿后，出主标的完整规范：安全边距、最小尺寸、单色与反白、禁用示例</span></li>
+    <li><span>02</span><span>浅色体系：色板（含情绪变化 −3 → +3 的语义色阶）、中英字体配对、图形语言</span></li>
+    <li><span>03</span><span>符号系统：把原型里的环／星芒／光点接到这套新几何上，规则化成可生成参数</span></li>
+    <li><span>04</span><span>品牌手册（可交互网页）</span></li>
+    <li><span>05</span><span>路演物料：PPT 模板、一页海报、封面图、二维码卡</span></li>
+  </ul>
+  <p class="sig">此在 · Current　—　A 稿收敛 v2　—　结构线稿，未定色</p>
+</footer>
+
+</div>
