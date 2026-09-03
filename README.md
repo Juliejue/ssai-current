@@ -88,3 +88,7 @@ CurrentHRVDemo/            Swift / HealthKit HRV demo（Phase 2 入口）
   若当事人希望撤下，改成转述即可（搜索 `quote:` 定位）。
 - 路演数字 `+2.4 / 1,205 份` 是**原型示例值**，上台必须说明是模拟数据。
 - 物料里的二维码是占位图形，扫不出东西。
+
+## 项目成员
+- **组长**：Estelle Ma
+- **核心组员**：Jue Chen, Camille Yu, PuffyFish Yang
