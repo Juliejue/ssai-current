@@ -11,10 +11,37 @@
 
 ## 怎么跑
 
-**不用装任何东西。** 单文件、无构建、无后端、无外部依赖。
+原视觉原型仍可直接双击打开；AI 自然语言、语音和闭环事件需要同时运行后端。
 
 ```
 双击 此在-current-原型.html
+```
+
+### AI 后端开发
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt pytest
+.venv/bin/uvicorn backend_app.main:app --port 8001
+python3 -m http.server 8000
+```
+
+然后打开 `http://127.0.0.1:8000/此在-current-原型.html`。
+
+环境变量参照 `.env.example`：
+
+- 未配置大模型时，使用可测试的本地规则解析，不影响开发。
+- 配置 OpenAI-compatible 模型后，模型只负责把自然语言转换为受约束的需求结构。
+- 配置腾讯云 ASR 后，音频由浏览器直传腾讯；Current 后端只生成两分钟有效的签名。
+- 配置 PostgreSQL 后，行为事件和到访结果进入闭环数据库；不配置时只写隐私安全的运行日志。
+- 原始语音和用户倾诉原文均不写入数据库或分析事件。
+
+运行检查：
+
+```bash
+.venv/bin/pytest -q
+node --check current-client.js
+node scripts/extract_place_data.mjs
 ```
 
 断网也能跑。手机上看用这个链接（私有，问 Julie 要）：

@@ -7,6 +7,11 @@
 # 本地工具目录
 .claude/
 node_modules/
+.venv/
+__pycache__/
+*.pyc
+.env
+.vercel/
 
 # 渲染产物
 *.pdf

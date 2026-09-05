@@ -1,0 +1,3517 @@
+{
+  "TAGS": {
+    "q": "安静",
+    "g": "绿意",
+    "c": "拥挤",
+    "s": "独自自在",
+    "co": "生活气",
+    "e": "新鲜感",
+    "r": "恢复",
+    "cr": "创作刺激",
+    "l": "热闹",
+    "st": "可久待",
+    "cp": "消费压力",
+    "w": "能一直走"
+  },
+  "FACTORS": {
+    "quiet": {
+      "label": "声音舒服",
+      "tone": "pos",
+      "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+    },
+    "fewpeople": {
+      "label": "人不多",
+      "tone": "pos",
+      "insight": "人少的时候，你不需要表演正常。"
+    },
+    "seat": {
+      "label": "坐得住",
+      "tone": "pos",
+      "insight": "能坐得住，停留时间才由你决定。"
+    },
+    "light": {
+      "label": "光线",
+      "tone": "pos",
+      "insight": "光线合适的地方，眼睛先松下来。"
+    },
+    "solo": {
+      "label": "独处感",
+      "tone": "pos",
+      "insight": "你选了独处感——这里允许你一个人，不觉得奇怪。"
+    },
+    "nopressure": {
+      "label": "不必消费",
+      "tone": "pos",
+      "insight": "不用点单也能待着，这件事本身就减轻了一部分压力。"
+    },
+    "handbusy": {
+      "label": "手上有事做",
+      "tone": "pos",
+      "insight": "翻书、翻唱片，手忙着的时候脑子会松一点。"
+    },
+    "keepwalk": {
+      "label": "能一直走",
+      "tone": "pos",
+      "insight": "你选了能一直走——身体在动，就不必逼自己想清楚。"
+    },
+    "openview": {
+      "label": "视野开阔",
+      "tone": "pos",
+      "insight": "远处替你接管了一部分注意力。"
+    },
+    "water": {
+      "label": "有水",
+      "tone": "pos",
+      "insight": "水面一直在动，不需要你去推动它。"
+    },
+    "green": {
+      "label": "有树",
+      "tone": "pos",
+      "insight": "绿色是少数不要求你回应的东西。"
+    },
+    "dusk": {
+      "label": "天色刚好",
+      "tone": "pos",
+      "insight": "天色是这里唯一会自己变化的东西。"
+    },
+    "staff": {
+      "label": "店员舒服",
+      "tone": "pos",
+      "insight": "被好好对待过的人，出门时会松一点。"
+    },
+    "newthing": {
+      "label": "看到没见过的",
+      "tone": "pos",
+      "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+    },
+    "people": {
+      "label": "有人但不打扰",
+      "tone": "pos",
+      "insight": "周围有人、但没人看你——这是很难得的配比。"
+    },
+    "music": {
+      "label": "声音好",
+      "tone": "pos",
+      "insight": "好的声音会占满耳朵，这时候想事情会变慢。"
+    },
+    "energy": {
+      "label": "跟着动起来",
+      "tone": "pos",
+      "insight": "身体先动，脑子后停——顺序反过来更容易。"
+    },
+    "toocrowd": {
+      "label": "太挤",
+      "tone": "neg",
+      "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+    },
+    "toonoisy": {
+      "label": "太吵",
+      "tone": "neg",
+      "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+    },
+    "toopricey": {
+      "label": "太贵",
+      "tone": "neg",
+      "insight": "花掉的钱也算这次到访的成本，会记进去。"
+    },
+    "needsocial": {
+      "label": "得跟人周旋",
+      "tone": "neg",
+      "insight": "你标了要social。有些地方的门槛不是钱，是力气。"
+    },
+    "faraway": {
+      "label": "路上太远",
+      "tone": "neg",
+      "insight": "路上消耗掉的力气，也算这次到访的成本。"
+    },
+    "toobright": {
+      "label": "太晒 / 太亮",
+      "tone": "neg",
+      "insight": "这条会让傍晚之后的时段排得更靠前。"
+    },
+    "unsafe": {
+      "label": "不安全",
+      "tone": "neg",
+      "insight": "安全感不够时，其它条件都不成立。"
+    },
+    "nothing": {
+      "label": "没什么用",
+      "tone": "neg",
+      "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+    }
+  },
+  "MOOD_TARGET": {
+    "low": {
+      "q": 0.75,
+      "g": 0.7,
+      "c": 0.15,
+      "s": 0.9,
+      "r": 0.9,
+      "st": 0.8,
+      "cp": 0.15,
+      "w": 0.65
+    },
+    "quiet": {
+      "q": 0.95,
+      "c": 0.1,
+      "s": 0.9,
+      "r": 0.8,
+      "st": 0.85,
+      "l": 0.1,
+      "cp": 0.25
+    },
+    "noisy": {
+      "w": 0.9,
+      "g": 0.75,
+      "q": 0.6,
+      "e": 0.45,
+      "st": 0.5,
+      "c": 0.25
+    },
+    "spark": {
+      "cr": 0.95,
+      "e": 0.8,
+      "l": 0.5,
+      "c": 0.45,
+      "st": 0.6
+    },
+    "tired": {
+      "r": 0.85,
+      "st": 0.9,
+      "q": 0.7,
+      "s": 0.8,
+      "cp": 0.25,
+      "w": 0.2
+    },
+    "empty": {
+      "co": 0.75,
+      "l": 0.5,
+      "w": 0.7,
+      "s": 0.7,
+      "e": 0.5
+    },
+    "tight": {
+      "q": 0.8,
+      "g": 0.85,
+      "r": 0.9,
+      "c": 0.1,
+      "w": 0.6,
+      "cp": 0.2
+    },
+    "near": {
+      "co": 0.9,
+      "l": 0.6,
+      "c": 0.5,
+      "s": 0.75,
+      "st": 0.7
+    },
+    "fresh": {
+      "e": 0.95,
+      "cr": 0.6,
+      "l": 0.6,
+      "w": 0.5
+    },
+    "okay": {
+      "e": 0.7,
+      "l": 0.6,
+      "co": 0.6,
+      "w": 0.6,
+      "cr": 0.5
+    }
+  },
+  "NEEDS": {
+    "hide": {
+      "label": "不被人看见",
+      "dir": "空间",
+      "target": {
+        "c": 0.1,
+        "s": 0.95,
+        "q": 0.8
+      }
+    },
+    "sit": {
+      "label": "能坐很久",
+      "dir": "空间",
+      "target": {
+        "st": 0.95,
+        "cp": 0.2
+      }
+    },
+    "walk": {
+      "label": "能一直走",
+      "dir": "空间",
+      "target": {
+        "w": 0.95,
+        "g": 0.6
+      }
+    },
+    "free": {
+      "label": "不用花钱",
+      "dir": "空间",
+      "target": {
+        "cp": 0.1
+      }
+    },
+    "green": {
+      "label": "想看见绿色",
+      "dir": "刺激",
+      "target": {
+        "g": 0.95,
+        "q": 0.7
+      }
+    },
+    "new": {
+      "label": "想看没见过的",
+      "dir": "刺激",
+      "target": {
+        "e": 0.9,
+        "cr": 0.7
+      }
+    },
+    "sound": {
+      "label": "想听点声音",
+      "dir": "刺激",
+      "target": {
+        "l": 0.65,
+        "cr": 0.7
+      }
+    },
+    "people": {
+      "label": "周围有人就行",
+      "dir": "刺激",
+      "target": {
+        "co": 0.85,
+        "c": 0.45
+      }
+    },
+    "loud": {
+      "label": "想要吵一点",
+      "dir": "刺激",
+      "target": {
+        "l": 0.95,
+        "c": 0.8,
+        "q": 0.1
+      }
+    },
+    "slow": {
+      "label": "想慢下来",
+      "dir": "恢复",
+      "target": {
+        "q": 0.85,
+        "r": 0.9,
+        "l": 0.15
+      }
+    },
+    "hands": {
+      "label": "想手上有事做",
+      "dir": "恢复",
+      "target": {
+        "cr": 0.6,
+        "st": 0.7
+      }
+    },
+    "breathe": {
+      "label": "想喘口气",
+      "dir": "恢复",
+      "target": {
+        "g": 0.8,
+        "r": 0.85,
+        "c": 0.2
+      }
+    },
+    "nothing": {
+      "label": "什么都不想决定",
+      "dir": "恢复",
+      "target": {
+        "w": 0.85,
+        "cp": 0.15,
+        "s": 0.8
+      }
+    }
+  },
+  "ROUTES": [
+    {
+      "id": "xxt",
+      "name": "小西天一路走到东四",
+      "walk": "约 3 小时 · 可随时下车",
+      "line": "电影资料馆 → 云南小厨 → 西海 → 什刹海 → 北锣鼓巷 → 东四",
+      "note": "上午看场电影，中午一碗米线，然后顺着水一直往东。累了地铁口买杯东西坐着，还有力气就走到东四的书店。",
+      "stops": [
+        "ziliaoguan",
+        "yunnanxiaochu",
+        "shichahai",
+        "sanlian"
+      ],
+      "moods": [
+        "noisy",
+        "empty",
+        "okay"
+      ]
+    },
+    {
+      "id": "gulou",
+      "name": "鼓楼东大街那一带",
+      "walk": "约 2 小时 · 集中在几条街里",
+      "line": "水果店 → 北平机器 → school",
+      "note": "白天翻唱片，天黑了喝一杯，再晚一点楼下就有演出。全程步行，随时可以退出。",
+      "stops": [
+        "fruityshop",
+        "beipingjiqi",
+        "school"
+      ],
+      "moods": [
+        "spark",
+        "fresh",
+        "okay"
+      ]
+    },
+    {
+      "id": "sanlitun",
+      "name": "三里屯的顺序",
+      "walk": "约 3 小时 · 晚上才成立",
+      "line": "postpost → 机电院 qmex → la social",
+      "note": "先在 postpost 把感官喂饱，再去院子里站着喝。la social 隔壁有日料，进场前可以先垫一顿。",
+      "stops": [
+        "postpost",
+        "qmex",
+        "lasocial"
+      ],
+      "moods": [
+        "fresh",
+        "okay",
+        "near"
+      ]
+    },
+    {
+      "id": "liangma",
+      "name": "黄昏的亮马河",
+      "walk": "约 1.5 小时 · 傍晚最好",
+      "line": "朗园 → 亮马河 → 鸟州力",
+      "note": "从园区绕出来，沿着河边走。一个人黄昏的时候在河边，很适合边走边想很多事情。",
+      "stops": [
+        "langyuan",
+        "liangmahe",
+        "niaozhouli"
+      ],
+      "moods": [
+        "low",
+        "noisy",
+        "tight",
+        "empty"
+      ]
+    }
+  ],
+  "PLACES": [
+    {
+      "placeId": "fruityshop",
+      "placeName": "水果店 fRUITYSHOP",
+      "action": "让店员放给你听",
+      "area": "鼓楼",
+      "category": "唱片店 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:fruityshop",
+      "ratio": "4/5",
+      "distance": "2.1 km",
+      "distanceKm": 2.1,
+      "transport": "地铁 8 号线 什刹海",
+      "suggestedDuration": "20–60 分钟",
+      "indoor": true,
+      "free": true,
+      "crowd": "low",
+      "see": "一整面墙的黑胶，一套很好的音响",
+      "cost": "低。可以只听不买，店员不会催",
+      "environmentTags": [
+        "可以试听",
+        "不必消费",
+        "声音好",
+        "偏爵士/电子/摇滚"
+      ],
+      "tags": {
+        "q": 0.7,
+        "g": 0.05,
+        "c": 0.2,
+        "s": 0.85,
+        "co": 0.5,
+        "e": 0.8,
+        "r": 0.6,
+        "cr": 0.85,
+        "l": 0.35,
+        "st": 0.7,
+        "cp": 0.25,
+        "w": 0.1
+      },
+      "matchReason": {
+        "spark": "想要点灵感的时候，别人放给你听比自己找更省力——说一张他就放一张。",
+        "fresh": "这里的货和你在流媒体里刷到的不是一批。翻十分钟就能碰到没听过的。",
+        "low": "不用说话也不用买。站着听完一面，就算这一趟没白来。",
+        "_": "手上有事做、耳朵有东西听，这两件事同时成立的地方不多。"
+      },
+      "placeInsights": [
+        {
+          "t": "可以只听不买",
+          "d": "说一张放一张，店员如数家珍。这件事本身就减轻了压力。"
+        },
+        {
+          "t": "价格是公道的",
+          "d": "同一张全新 Aphex Twin，这儿 320，朝悦五楼那家 588。"
+        }
+      ],
+      "factors": [
+        "music",
+        "staff",
+        "handbusy",
+        "newthing",
+        "nopressure",
+        "quiet",
+        "toocrowd",
+        "toopricey",
+        "faraway",
+        "nothing"
+      ],
+      "quote": "在北京逛过的最棒的唱片店🥺 每张唱片都可以让店员放试听，店员很好，如数家珍。",
+      "averageChange": 2.1,
+      "feedbackCount": 86,
+      "sig": {
+        "rings": 2,
+        "ringR": 58,
+        "rays": 6,
+        "nodeAngle": -3,
+        "nodeDist": 48,
+        "a": "#3D6E80",
+        "b": "#7FA3B0"
+      },
+      "factorOptions": [
+        {
+          "label": "声音好",
+          "tone": "pos",
+          "insight": "好的声音会占满耳朵，这时候想事情会变慢。"
+        },
+        {
+          "label": "店员舒服",
+          "tone": "pos",
+          "insight": "被好好对待过的人，出门时会松一点。"
+        },
+        {
+          "label": "手上有事做",
+          "tone": "pos",
+          "insight": "翻书、翻唱片，手忙着的时候脑子会松一点。"
+        },
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "不必消费",
+          "tone": "pos",
+          "insight": "不用点单也能待着，这件事本身就减轻了一部分压力。"
+        },
+        {
+          "label": "声音舒服",
+          "tone": "pos",
+          "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "postpost",
+      "placeName": "postpost",
+      "action": "抽一本开架的书坐下",
+      "area": "三里屯幸福村",
+      "category": "书店 · 买手店 · 咖啡",
+      "city": "北京",
+      "coverImage": "sigil:postpost",
+      "ratio": "1/1",
+      "distance": "3.4 km",
+      "distanceKm": 3.4,
+      "transport": "地铁 10 号线 团结湖",
+      "suggestedDuration": "60–120 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "mid",
+      "see": "整墙可借阅的开架书、全套真力音响、自有品牌和代理的衣服",
+      "cost": "中。可以只坐着看书，但咖喱饭和手冲值得点",
+      "environmentTags": [
+        "开架可借阅",
+        "音响很好",
+        "选书品味",
+        "坐得住"
+      ],
+      "tags": {
+        "q": 0.55,
+        "g": 0.1,
+        "c": 0.4,
+        "s": 0.8,
+        "co": 0.6,
+        "e": 0.85,
+        "r": 0.75,
+        "cr": 0.9,
+        "l": 0.45,
+        "st": 0.9,
+        "cp": 0.5,
+        "w": 0.05
+      },
+      "matchReason": {
+        "spark": "选书和上新的频率都很好，翻一小时基本能撞到点什么。",
+        "tired": "一楼每个角落听感都不错，坐下不用想去哪儿，待到不想待为止。",
+        "fresh": "书、衣服、咖喱、酒在同一个屋檐下，转一圈感官是满的。",
+        "_": "开架的书全部可以借阅——不用买就能读完，这在书店里很少见。"
+      },
+      "placeInsights": [
+        {
+          "t": "开架全部可借",
+          "d": "作为书店，这是最重要的一件事。不用先付钱才能读。"
+        },
+        {
+          "t": "音响是 club 水准",
+          "d": "全套真力，一楼每个角落都有很好的聆听体验。"
+        }
+      ],
+      "factors": [
+        "music",
+        "seat",
+        "handbusy",
+        "newthing",
+        "staff",
+        "light",
+        "toopricey",
+        "toocrowd",
+        "faraway",
+        "nothing"
+      ],
+      "quote": "在 postpost 呆上一小时，所有感官都会被滋养得很好！！哇塞想念 postpost 的蘑菇能量 TT",
+      "averageChange": 2.6,
+      "feedbackCount": 143,
+      "sig": {
+        "rings": 3,
+        "ringR": 56,
+        "rays": 7,
+        "nodeAngle": 0.8999999999999999,
+        "nodeDist": 43,
+        "a": "#2F7F76",
+        "b": "#6FA79C"
+      },
+      "factorOptions": [
+        {
+          "label": "声音好",
+          "tone": "pos",
+          "insight": "好的声音会占满耳朵，这时候想事情会变慢。"
+        },
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "手上有事做",
+          "tone": "pos",
+          "insight": "翻书、翻唱片，手忙着的时候脑子会松一点。"
+        },
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "店员舒服",
+          "tone": "pos",
+          "insight": "被好好对待过的人，出门时会松一点。"
+        },
+        {
+          "label": "光线",
+          "tone": "pos",
+          "insight": "光线合适的地方，眼睛先松下来。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "fusheng",
+      "placeName": "福声唱片",
+      "action": "看完电影顺路翻一轮",
+      "area": "小西天",
+      "category": "唱片店 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:fusheng",
+      "ratio": "4/5",
+      "distance": "1.2 km",
+      "distanceKm": 1.2,
+      "transport": "地铁 4 号线 新街口",
+      "suggestedDuration": "20–40 分钟",
+      "indoor": true,
+      "free": true,
+      "crowd": "low",
+      "see": "堆得很满的架子，老板在的时候会聊两句",
+      "cost": "低。翻完不买也没关系",
+      "environmentTags": [
+        "资料馆旁边",
+        "可以一条龙",
+        "不必消费"
+      ],
+      "tags": {
+        "q": 0.7,
+        "g": 0.05,
+        "c": 0.25,
+        "s": 0.85,
+        "co": 0.55,
+        "e": 0.7,
+        "r": 0.55,
+        "cr": 0.75,
+        "l": 0.3,
+        "st": 0.55,
+        "cp": 0.3,
+        "w": 0.15
+      },
+      "matchReason": {
+        "spark": "和电影资料馆、豆仔咖啡在一条线上，一个下午能串完，不用另做决定。",
+        "noisy": "翻唱片是个重复动作，手一直在动，念头会跟着慢下来。",
+        "_": "顺路的地方比专程去的地方更容易开始。"
+      },
+      "placeInsights": [
+        {
+          "t": "可以一条龙",
+          "d": "资料馆看完电影、豆仔喝杯咖啡、这里翻唱片，三件事在一条街上。"
+        },
+        {
+          "t": "翻找本身是件事",
+          "d": "不需要目的，翻到什么算什么。"
+        }
+      ],
+      "factors": [
+        "handbusy",
+        "quiet",
+        "nopressure",
+        "newthing",
+        "staff",
+        "toocrowd",
+        "faraway",
+        "nothing"
+      ],
+      "averageChange": 1.7,
+      "feedbackCount": 41,
+      "sig": {
+        "rings": 2,
+        "ringR": 58,
+        "rays": 6,
+        "nodeAngle": -2.3,
+        "nodeDist": 53,
+        "a": "#2F7F76",
+        "b": "#6FA79C"
+      },
+      "factorOptions": [
+        {
+          "label": "手上有事做",
+          "tone": "pos",
+          "insight": "翻书、翻唱片，手忙着的时候脑子会松一点。"
+        },
+        {
+          "label": "声音舒服",
+          "tone": "pos",
+          "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+        },
+        {
+          "label": "不必消费",
+          "tone": "pos",
+          "insight": "不用点单也能待着，这件事本身就减轻了一部分压力。"
+        },
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "店员舒服",
+          "tone": "pos",
+          "insight": "被好好对待过的人，出门时会松一点。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "kule",
+      "placeName": "酷乐唱片",
+      "action": "挤进摇滚区抢同一格",
+      "area": "东四",
+      "category": "唱片店 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:kule",
+      "ratio": "1/1",
+      "distance": "2.8 km",
+      "distanceKm": 2.8,
+      "transport": "地铁 5 号线 张自忠路",
+      "suggestedDuration": "20–40 分钟",
+      "indoor": true,
+      "free": true,
+      "crowd": "high",
+      "see": "很窄的过道，摇滚分区永远站着人",
+      "cost": "低。但空间小，久待会有点局促",
+      "environmentTags": [
+        "很挤",
+        "货全",
+        "东四书店线上"
+      ],
+      "tags": {
+        "q": 0.3,
+        "g": 0.05,
+        "c": 0.85,
+        "s": 0.4,
+        "co": 0.7,
+        "e": 0.75,
+        "r": 0.25,
+        "cr": 0.7,
+        "l": 0.6,
+        "st": 0.3,
+        "cp": 0.3,
+        "w": 0.1
+      },
+      "matchReason": {
+        "fresh": "货是全的，代价是挤。想找点没见过的、又不介意跟人挨着，就是这儿。",
+        "okay": "状态还行的时候，挤一挤反而有意思。",
+        "_": "东四那一片书店和唱片店挨着，可以连着逛。"
+      },
+      "placeInsights": [
+        {
+          "t": "真的很挤",
+          "d": "摇滚分区经常被人堵着，看不全。这点得先知道。"
+        },
+        {
+          "t": "在东四那条线上",
+          "d": "三联、纸上声音、可能有书都在附近，可以连成一趟。"
+        }
+      ],
+      "factors": [
+        "newthing",
+        "handbusy",
+        "people",
+        "toocrowd",
+        "toonoisy",
+        "faraway",
+        "nothing"
+      ],
+      "quote": "酷乐超级挤，每次都被长发男挤得看不到摇滚分区",
+      "averageChange": 1.2,
+      "feedbackCount": 57,
+      "sig": {
+        "rings": 3,
+        "ringR": 50,
+        "rays": 6,
+        "nodeAngle": 2.9999999999999996,
+        "nodeDist": 74,
+        "a": "#3D6E80",
+        "b": "#7FA3B0"
+      },
+      "factorOptions": [
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "手上有事做",
+          "tone": "pos",
+          "insight": "翻书、翻唱片，手忙着的时候脑子会松一点。"
+        },
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太吵",
+          "tone": "neg",
+          "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "wansheng",
+      "placeName": "万圣书园",
+      "action": "从社科一路翻到打烊",
+      "area": "成府路",
+      "category": "书店 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:wansheng",
+      "ratio": "4/5",
+      "distance": "5.6 km",
+      "distanceKm": 5.6,
+      "transport": "地铁 4 号线 北京大学东门",
+      "suggestedDuration": "60–150 分钟",
+      "indoor": true,
+      "free": true,
+      "crowd": "low",
+      "see": "一排排到顶的社科书架，旁边有咖啡区",
+      "cost": "低。可以只看不买，坐咖啡区要点单",
+      "environmentTags": [
+        "安静",
+        "坐得住",
+        "学术向",
+        "可以不买"
+      ],
+      "tags": {
+        "q": 0.9,
+        "g": 0.05,
+        "c": 0.2,
+        "s": 0.95,
+        "co": 0.4,
+        "e": 0.65,
+        "r": 0.8,
+        "cr": 0.8,
+        "l": 0.1,
+        "st": 0.95,
+        "cp": 0.25,
+        "w": 0.05
+      },
+      "matchReason": {
+        "quiet": "这里的安静不靠运气，是这个空间本来的规矩。",
+        "tired": "坐下不会有人看你，也不会有人问你要待多久。",
+        "tight": "书架高、过道窄，视线被收住的时候人反而会松。",
+        "_": "一个人待在这里，不需要向任何人解释。"
+      },
+      "placeInsights": [
+        {
+          "t": "允许待很久",
+          "d": "从下午待到打烊都不算奇怪，这是这里的默认。"
+        },
+        {
+          "t": "隔壁有披萨",
+          "d": "火鬼 paro 走几步就到，周二披萨买一送一。"
+        }
+      ],
+      "factors": [
+        "quiet",
+        "seat",
+        "solo",
+        "handbusy",
+        "light",
+        "nopressure",
+        "faraway",
+        "toobright",
+        "nothing"
+      ],
+      "averageChange": 2.3,
+      "feedbackCount": 112,
+      "sig": {
+        "rings": 2,
+        "ringR": 57,
+        "rays": 6,
+        "nodeAngle": 2.1999999999999997,
+        "nodeDist": 37,
+        "a": "#3D6E80",
+        "b": "#7FA3B0"
+      },
+      "factorOptions": [
+        {
+          "label": "声音舒服",
+          "tone": "pos",
+          "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+        },
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "独处感",
+          "tone": "pos",
+          "insight": "你选了独处感——这里允许你一个人，不觉得奇怪。"
+        },
+        {
+          "label": "手上有事做",
+          "tone": "pos",
+          "insight": "翻书、翻唱片，手忙着的时候脑子会松一点。"
+        },
+        {
+          "label": "光线",
+          "tone": "pos",
+          "insight": "光线合适的地方，眼睛先松下来。"
+        },
+        {
+          "label": "不必消费",
+          "tone": "pos",
+          "insight": "不用点单也能待着，这件事本身就减轻了一部分压力。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "太晒 / 太亮",
+          "tone": "neg",
+          "insight": "这条会让傍晚之后的时段排得更靠前。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "sanlian",
+      "placeName": "三联韬奋书店",
+      "action": "坐台阶上把一本读完",
+      "area": "东四",
+      "category": "书店 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:sanlian",
+      "ratio": "1/1",
+      "distance": "2.6 km",
+      "distanceKm": 2.6,
+      "transport": "地铁 5 号线 张自忠路",
+      "suggestedDuration": "40–90 分钟",
+      "indoor": true,
+      "free": true,
+      "crowd": "mid",
+      "see": "能坐人的台阶，下沉的阅读区",
+      "cost": "低。坐台阶看书不用消费",
+      "environmentTags": [
+        "可以坐地上",
+        "不必消费",
+        "东四线上"
+      ],
+      "tags": {
+        "q": 0.6,
+        "g": 0.05,
+        "c": 0.5,
+        "s": 0.8,
+        "co": 0.6,
+        "e": 0.55,
+        "r": 0.7,
+        "cr": 0.65,
+        "l": 0.25,
+        "st": 0.85,
+        "cp": 0.2,
+        "w": 0.1
+      },
+      "matchReason": {
+        "low": "不用坐直，台阶上怎么坐都行。翻两页就够了。",
+        "tired": "这里的坐不是消费换来的，是本来就允许的。",
+        "_": "手上有本书的时候，一个人待着就有了正当理由。"
+      },
+      "placeInsights": [
+        {
+          "t": "坐着不用买",
+          "d": "台阶和下沉区是给人坐的，不是摆设。"
+        },
+        {
+          "t": "在东四书店线上",
+          "d": "和纸上声音、可能有书、做書挨着，可以连成半天。"
+        }
+      ],
+      "factors": [
+        "seat",
+        "handbusy",
+        "solo",
+        "nopressure",
+        "quiet",
+        "toocrowd",
+        "toonoisy",
+        "nothing"
+      ],
+      "averageChange": 1.9,
+      "feedbackCount": 96,
+      "sig": {
+        "rings": 3,
+        "ringR": 54,
+        "rays": 5,
+        "nodeAngle": 2.9,
+        "nodeDist": 45,
+        "a": "#25716B",
+        "b": "#7BA9A0"
+      },
+      "factorOptions": [
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "手上有事做",
+          "tone": "pos",
+          "insight": "翻书、翻唱片，手忙着的时候脑子会松一点。"
+        },
+        {
+          "label": "独处感",
+          "tone": "pos",
+          "insight": "你选了独处感——这里允许你一个人，不觉得奇怪。"
+        },
+        {
+          "label": "不必消费",
+          "tone": "pos",
+          "insight": "不用点单也能待着，这件事本身就减轻了一部分压力。"
+        },
+        {
+          "label": "声音舒服",
+          "tone": "pos",
+          "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太吵",
+          "tone": "neg",
+          "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "zhishang",
+      "placeName": "纸上声音",
+      "action": "翻到没见过的独立出版",
+      "area": "东四",
+      "category": "书店 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:zhishang",
+      "ratio": "4/5",
+      "distance": "2.7 km",
+      "distanceKm": 2.7,
+      "transport": "地铁 5 号线 张自忠路",
+      "suggestedDuration": "20–50 分钟",
+      "indoor": true,
+      "free": true,
+      "crowd": "low",
+      "see": "独立出版物、小册子、不太常见的印刷品",
+      "cost": "低。翻看不用买",
+      "environmentTags": [
+        "独立出版",
+        "小而安静",
+        "东四线上"
+      ],
+      "tags": {
+        "q": 0.8,
+        "g": 0.05,
+        "c": 0.2,
+        "s": 0.9,
+        "co": 0.45,
+        "e": 0.85,
+        "r": 0.65,
+        "cr": 0.9,
+        "l": 0.15,
+        "st": 0.6,
+        "cp": 0.3,
+        "w": 0.05
+      },
+      "matchReason": {
+        "spark": "这里的东西大多不在算法推荐里，翻着翻着容易撞到点什么。",
+        "fresh": "独立出版的好处是没见过的比例高。",
+        "_": "小店的安静是另一种安静——不是没人，是没人管你。"
+      },
+      "placeInsights": [
+        {
+          "t": "没见过的比例高",
+          "d": "这些东西不太会出现在你的信息流里。"
+        },
+        {
+          "t": "店很小",
+          "d": "人一多就转不开身，工作日下午更合适。"
+        }
+      ],
+      "factors": [
+        "quiet",
+        "newthing",
+        "handbusy",
+        "solo",
+        "nopressure",
+        "toocrowd",
+        "faraway",
+        "nothing"
+      ],
+      "averageChange": 2,
+      "feedbackCount": 38,
+      "sig": {
+        "rings": 2,
+        "ringR": 57,
+        "rays": 6,
+        "nodeAngle": 2.3000000000000003,
+        "nodeDist": 50,
+        "a": "#2F7F76",
+        "b": "#6FA79C"
+      },
+      "factorOptions": [
+        {
+          "label": "声音舒服",
+          "tone": "pos",
+          "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+        },
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "手上有事做",
+          "tone": "pos",
+          "insight": "翻书、翻唱片，手忙着的时候脑子会松一点。"
+        },
+        {
+          "label": "独处感",
+          "tone": "pos",
+          "insight": "你选了独处感——这里允许你一个人，不觉得奇怪。"
+        },
+        {
+          "label": "不必消费",
+          "tone": "pos",
+          "insight": "不用点单也能待着，这件事本身就减轻了一部分压力。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "zuoshu",
+      "placeName": "做書 · 隆福寺",
+      "action": "在女性主义那一架前站很久",
+      "area": "隆福寺",
+      "category": "书店 · 咖啡 · 市集",
+      "city": "北京",
+      "coverImage": "sigil:zuoshu",
+      "ratio": "1/1",
+      "distance": "2.4 km",
+      "distanceKm": 2.4,
+      "transport": "地铁 6 号线 东四",
+      "suggestedDuration": "40–90 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "mid",
+      "see": "女性主义、非虚构、小众哲学的架子，本身也是咖啡厅",
+      "cost": "中。看书不用买，坐下喝东西要点单",
+      "environmentTags": [
+        "选书品味好",
+        "有咖啡",
+        "偶尔办市集"
+      ],
+      "tags": {
+        "q": 0.6,
+        "g": 0.05,
+        "c": 0.4,
+        "s": 0.8,
+        "co": 0.7,
+        "e": 0.85,
+        "r": 0.7,
+        "cr": 0.9,
+        "l": 0.35,
+        "st": 0.85,
+        "cp": 0.45,
+        "w": 0.1
+      },
+      "matchReason": {
+        "spark": "选书是有立场的——女性主义、非虚构、比较小众的哲学书都有。",
+        "near": "周围有人在读同样的东西，但没有人会来搭话。",
+        "_": "能读、能坐、能喝一杯，一个下午的三件事都在这儿。"
+      },
+      "placeInsights": [
+        {
+          "t": "选书是有立场的",
+          "d": "不是畅销榜的排列，是有人认真挑过的。"
+        },
+        {
+          "t": "也是咖啡厅",
+          "d": "看累了不用换地方，这减少了一次决定。"
+        }
+      ],
+      "factors": [
+        "handbusy",
+        "seat",
+        "newthing",
+        "people",
+        "staff",
+        "quiet",
+        "toopricey",
+        "toocrowd",
+        "nothing"
+      ],
+      "quote": "朋友带我去看了隆福寺那边的「做書」市集，本身也是书店和咖啡厅，选书品味很好，女性主义，还有新的文学作品，非虚构，或者比较小众的哲学书都有。",
+      "averageChange": 2.4,
+      "feedbackCount": 64,
+      "sig": {
+        "rings": 3,
+        "ringR": 56,
+        "rays": 7,
+        "nodeAngle": -2.7,
+        "nodeDist": 45,
+        "a": "#2F7F76",
+        "b": "#6FA79C"
+      },
+      "factorOptions": [
+        {
+          "label": "手上有事做",
+          "tone": "pos",
+          "insight": "翻书、翻唱片，手忙着的时候脑子会松一点。"
+        },
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "店员舒服",
+          "tone": "pos",
+          "insight": "被好好对待过的人，出门时会松一点。"
+        },
+        {
+          "label": "声音舒服",
+          "tone": "pos",
+          "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "soloist",
+      "placeName": "soloist coffee",
+      "action": "看夕阳落在灰瓦上",
+      "area": "杨梅竹斜街",
+      "category": "咖啡 · 胡同",
+      "city": "北京",
+      "coverImage": "sigil:soloist",
+      "ratio": "4/5",
+      "distance": "4.2 km",
+      "distanceKm": 4.2,
+      "transport": "地铁 2 号线 前门",
+      "suggestedDuration": "40–80 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "mid",
+      "see": "窗外是灰色的瓦砾和胡同，傍晚有光",
+      "cost": "中。一杯咖啡的价格",
+      "environmentTags": [
+        "能看夕阳",
+        "市井气",
+        "傍晚最好"
+      ],
+      "tags": {
+        "q": 0.65,
+        "g": 0.2,
+        "c": 0.35,
+        "s": 0.85,
+        "co": 0.8,
+        "e": 0.6,
+        "r": 0.85,
+        "cr": 0.6,
+        "l": 0.3,
+        "st": 0.85,
+        "cp": 0.5,
+        "w": 0.55
+      },
+      "matchReason": {
+        "low": "坐着看天色变，不用你做任何事情。",
+        "tight": "窗外是慢的：瓦、胡同、走过去的人。绷着的东西会自己松一点。",
+        "empty": "周围有生活在进行，你不用参与，看着就行。",
+        "_": "傍晚去。这里的好有一半在天色上。"
+      },
+      "placeInsights": [
+        {
+          "t": "天色是主角",
+          "d": "夕阳落在灰瓦上，这件事不需要你配合。"
+        },
+        {
+          "t": "这条街还没被修整过",
+          "d": "比较有市井气，走进去和走出来是两种节奏。"
+        }
+      ],
+      "factors": [
+        "dusk",
+        "seat",
+        "light",
+        "quiet",
+        "people",
+        "solo",
+        "toopricey",
+        "toocrowd",
+        "toobright",
+        "nothing"
+      ],
+      "quote": "散步我喜欢杨梅竹斜街那边，比较有市井气，也有一些咖啡馆很舒服，我推 soloist，可以看夕阳看灰色的瓦砾和胡同。",
+      "averageChange": 2.5,
+      "feedbackCount": 78,
+      "sig": {
+        "rings": 2,
+        "ringR": 64,
+        "rays": 6,
+        "nodeAngle": 0.6000000000000001,
+        "nodeDist": 43,
+        "a": "#3D6E80",
+        "b": "#7FA3B0"
+      },
+      "factorOptions": [
+        {
+          "label": "天色刚好",
+          "tone": "pos",
+          "insight": "天色是这里唯一会自己变化的东西。"
+        },
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "光线",
+          "tone": "pos",
+          "insight": "光线合适的地方，眼睛先松下来。"
+        },
+        {
+          "label": "声音舒服",
+          "tone": "pos",
+          "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+        },
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "独处感",
+          "tone": "pos",
+          "insight": "你选了独处感——这里允许你一个人，不觉得奇怪。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太晒 / 太亮",
+          "tone": "neg",
+          "insight": "这条会让傍晚之后的时段排得更靠前。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "douzai",
+      "placeName": "豆仔咖啡",
+      "action": "等一场电影开场",
+      "area": "小西天",
+      "category": "咖啡 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:douzai",
+      "ratio": "1/1",
+      "distance": "1.1 km",
+      "distanceKm": 1.1,
+      "transport": "地铁 4 号线 新街口",
+      "suggestedDuration": "30–60 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "low",
+      "see": "来的人大多是等电影的，很多人自己坐着",
+      "cost": "中。一杯的价格",
+      "environmentTags": [
+        "资料馆旁边",
+        "一个人来的多",
+        "安静"
+      ],
+      "tags": {
+        "q": 0.75,
+        "g": 0.05,
+        "c": 0.25,
+        "s": 0.95,
+        "co": 0.5,
+        "e": 0.4,
+        "r": 0.75,
+        "cr": 0.5,
+        "l": 0.2,
+        "st": 0.8,
+        "cp": 0.45,
+        "w": 0.1
+      },
+      "matchReason": {
+        "quiet": "来的人多半也是一个人，没人觉得你一个人坐着奇怪。",
+        "tired": "有个明确的等待理由，坐着就不需要别的借口。",
+        "_": "和电影资料馆、福声唱片在一条线上，可以一条龙。"
+      },
+      "placeInsights": [
+        {
+          "t": "独自来是默认",
+          "d": "这里一个人坐着不需要解释。"
+        },
+        {
+          "t": "有个正当的等待",
+          "d": "等开场是个刚好的理由，让停留变得合理。"
+        }
+      ],
+      "factors": [
+        "quiet",
+        "solo",
+        "seat",
+        "light",
+        "nopressure",
+        "toopricey",
+        "faraway",
+        "nothing"
+      ],
+      "averageChange": 1.8,
+      "feedbackCount": 52,
+      "sig": {
+        "rings": 2,
+        "ringR": 57,
+        "rays": 5,
+        "nodeAngle": 0.10000000000000009,
+        "nodeDist": 42,
+        "a": "#25716B",
+        "b": "#7BA9A0"
+      },
+      "factorOptions": [
+        {
+          "label": "声音舒服",
+          "tone": "pos",
+          "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+        },
+        {
+          "label": "独处感",
+          "tone": "pos",
+          "insight": "你选了独处感——这里允许你一个人，不觉得奇怪。"
+        },
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "光线",
+          "tone": "pos",
+          "insight": "光线合适的地方，眼睛先松下来。"
+        },
+        {
+          "label": "不必消费",
+          "tone": "pos",
+          "insight": "不用点单也能待着，这件事本身就减轻了一部分压力。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "beipingjiqi",
+      "placeName": "北平机器",
+      "action": "一个人坐吧台喝一杯",
+      "area": "鼓楼",
+      "category": "精酿 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:beipingjiqi",
+      "ratio": "4/5",
+      "distance": "2.0 km",
+      "distanceKm": 2,
+      "transport": "地铁 8 号线 鼓楼大街",
+      "suggestedDuration": "40–90 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "mid",
+      "see": "长吧台，很多人自己来，酒单换得勤",
+      "cost": "中高。一杯精酿的价格",
+      "environmentTags": [
+        "可以一个人坐吧台",
+        "不用social",
+        "鼓楼线上"
+      ],
+      "tags": {
+        "q": 0.4,
+        "g": 0.05,
+        "c": 0.5,
+        "s": 0.85,
+        "co": 0.75,
+        "e": 0.6,
+        "r": 0.6,
+        "cr": 0.45,
+        "l": 0.6,
+        "st": 0.75,
+        "cp": 0.6,
+        "w": 0.2
+      },
+      "matchReason": {
+        "empty": "吧台的好处是旁边有人，但没人要求你说话。",
+        "near": "想有人在旁边、又不想应付人，吧台是最省力的位置。",
+        "okay": "状态还行的时候，一杯就够，不必待到很晚。",
+        "_": "一个人坐吧台在这里是常态，不是需要被解释的事。"
+      },
+      "placeInsights": [
+        {
+          "t": "独自来不奇怪",
+          "d": "吧台一半的位置都是一个人坐的。"
+        },
+        {
+          "t": "随时能走",
+          "d": "一杯喝完就可以结账，没有非待到几点不可的压力。"
+        }
+      ],
+      "factors": [
+        "people",
+        "seat",
+        "solo",
+        "music",
+        "staff",
+        "toonoisy",
+        "toopricey",
+        "needsocial",
+        "nothing"
+      ],
+      "averageChange": 1.9,
+      "feedbackCount": 88,
+      "sig": {
+        "rings": 3,
+        "ringR": 56,
+        "rays": 6,
+        "nodeAngle": 1.6,
+        "nodeDist": 46,
+        "a": "#5A8A93",
+        "b": "#8FB0B6"
+      },
+      "factorOptions": [
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "独处感",
+          "tone": "pos",
+          "insight": "你选了独处感——这里允许你一个人，不觉得奇怪。"
+        },
+        {
+          "label": "声音好",
+          "tone": "pos",
+          "insight": "好的声音会占满耳朵，这时候想事情会变慢。"
+        },
+        {
+          "label": "店员舒服",
+          "tone": "pos",
+          "insight": "被好好对待过的人，出门时会松一点。"
+        },
+        {
+          "label": "太吵",
+          "tone": "neg",
+          "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "得跟人周旋",
+          "tone": "neg",
+          "insight": "你标了要social。有些地方的门槛不是钱，是力气。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "liangmahe",
+      "placeName": "亮马河",
+      "action": "沿着河一直走，边走边想事",
+      "area": "朝阳",
+      "category": "河岸 · 户外",
+      "city": "北京",
+      "coverImage": "sigil:liangmahe",
+      "ratio": "4/5",
+      "distance": "4.8 km",
+      "distanceKm": 4.8,
+      "transport": "地铁 10 号线 亮马桥",
+      "suggestedDuration": "30–90 分钟",
+      "indoor": false,
+      "free": true,
+      "crowd": "mid",
+      "see": "沿河的步道、对岸的灯、傍晚遛弯的人",
+      "cost": "无。不用花钱",
+      "environmentTags": [
+        "能一直走",
+        "有水",
+        "傍晚最好",
+        "免费"
+      ],
+      "tags": {
+        "q": 0.6,
+        "g": 0.75,
+        "c": 0.35,
+        "s": 0.9,
+        "co": 0.7,
+        "e": 0.45,
+        "r": 0.9,
+        "cr": 0.35,
+        "l": 0.35,
+        "st": 0.5,
+        "cp": 0.05,
+        "w": 0.95
+      },
+      "matchReason": {
+        "noisy": "水面一直在动，脑子里那些反复的东西会有点跟不上它。",
+        "low": "这里不劝你振作，只是把视线拉得比你的念头更远。",
+        "tight": "走着走着呼吸会自己变长，不用你去调。",
+        "empty": "一条不用做选择的长线，走多远都算数。",
+        "_": "不用消费，也没有人问你要待多久。"
+      },
+      "placeInsights": [
+        {
+          "t": "能一直走",
+          "d": "身体在动的时候，就不必逼自己想清楚。"
+        },
+        {
+          "t": "傍晚是它最好的时候",
+          "d": "天色和灯换班的那半小时，值得专门赶过去。"
+        }
+      ],
+      "factors": [
+        "keepwalk",
+        "water",
+        "dusk",
+        "openview",
+        "people",
+        "fewpeople",
+        "toobright",
+        "unsafe",
+        "faraway",
+        "nothing"
+      ],
+      "quote": "我喜欢去朗园那边，然后亮马桥散步也很舒服，一个人黄昏的时候在河边边走边想很多事情。",
+      "averageChange": 2.7,
+      "feedbackCount": 204,
+      "sig": {
+        "rings": 1,
+        "ringR": 76,
+        "rays": 5,
+        "nodeAngle": -2.7,
+        "nodeDist": 53,
+        "a": "#25716B",
+        "b": "#7BA9A0"
+      },
+      "factorOptions": [
+        {
+          "label": "能一直走",
+          "tone": "pos",
+          "insight": "你选了能一直走——身体在动，就不必逼自己想清楚。"
+        },
+        {
+          "label": "有水",
+          "tone": "pos",
+          "insight": "水面一直在动，不需要你去推动它。"
+        },
+        {
+          "label": "天色刚好",
+          "tone": "pos",
+          "insight": "天色是这里唯一会自己变化的东西。"
+        },
+        {
+          "label": "视野开阔",
+          "tone": "pos",
+          "insight": "远处替你接管了一部分注意力。"
+        },
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "人不多",
+          "tone": "pos",
+          "insight": "人少的时候，你不需要表演正常。"
+        },
+        {
+          "label": "太晒 / 太亮",
+          "tone": "neg",
+          "insight": "这条会让傍晚之后的时段排得更靠前。"
+        },
+        {
+          "label": "不安全",
+          "tone": "neg",
+          "insight": "安全感不够时，其它条件都不成立。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "shichahai",
+      "placeName": "什刹海",
+      "action": "绕着水走一圈，不用绕完",
+      "area": "西城",
+      "category": "水边 · 户外",
+      "city": "北京",
+      "coverImage": "sigil:shichahai",
+      "ratio": "4/5",
+      "distance": "2.3 km",
+      "distanceKm": 2.3,
+      "transport": "地铁 8 号线 什刹海",
+      "suggestedDuration": "40–120 分钟",
+      "indoor": false,
+      "free": true,
+      "crowd": "mid",
+      "see": "沿岸的柳树、划船的人、后半段安静下来的岸",
+      "cost": "无。除非你想买杯东西坐着",
+      "environmentTags": [
+        "能一直走",
+        "有水",
+        "免费",
+        "可以走很长"
+      ],
+      "tags": {
+        "q": 0.5,
+        "g": 0.8,
+        "c": 0.5,
+        "s": 0.85,
+        "co": 0.8,
+        "e": 0.5,
+        "r": 0.85,
+        "cr": 0.3,
+        "l": 0.45,
+        "st": 0.55,
+        "cp": 0.1,
+        "w": 0.95
+      },
+      "matchReason": {
+        "noisy": "绕水走是个不用想的动作，走到哪算哪。",
+        "empty": "岸边一直有生活在发生，你不用加入，路过就行。",
+        "low": "累了热了地铁口就有底商，坐下歇会儿再走。",
+        "_": "从西海一路顺着水过来，是这条线最舒服的一段。"
+      },
+      "placeInsights": [
+        {
+          "t": "随时可以停",
+          "d": "不用绕完整圈，走到不想走就退出。"
+        },
+        {
+          "t": "往北人会变少",
+          "d": "越靠近西海那侧越安静。"
+        }
+      ],
+      "factors": [
+        "keepwalk",
+        "water",
+        "green",
+        "people",
+        "dusk",
+        "toocrowd",
+        "toobright",
+        "nothing"
+      ],
+      "averageChange": 2.2,
+      "feedbackCount": 167,
+      "sig": {
+        "rings": 2,
+        "ringR": 75,
+        "rays": 5,
+        "nodeAngle": -3.1,
+        "nodeDist": 53,
+        "a": "#1E6E72",
+        "b": "#4A8F8A"
+      },
+      "factorOptions": [
+        {
+          "label": "能一直走",
+          "tone": "pos",
+          "insight": "你选了能一直走——身体在动，就不必逼自己想清楚。"
+        },
+        {
+          "label": "有水",
+          "tone": "pos",
+          "insight": "水面一直在动，不需要你去推动它。"
+        },
+        {
+          "label": "有树",
+          "tone": "pos",
+          "insight": "绿色是少数不要求你回应的东西。"
+        },
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "天色刚好",
+          "tone": "pos",
+          "insight": "天色是这里唯一会自己变化的东西。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太晒 / 太亮",
+          "tone": "neg",
+          "insight": "这条会让傍晚之后的时段排得更靠前。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "beihai",
+      "placeName": "北海公园",
+      "action": "坐在岸边看白塔",
+      "area": "西城",
+      "category": "公园 · 户外",
+      "city": "北京",
+      "coverImage": "sigil:beihai",
+      "ratio": "1/1",
+      "distance": "3.1 km",
+      "distanceKm": 3.1,
+      "transport": "地铁 6 号线 北海北",
+      "suggestedDuration": "60–120 分钟",
+      "indoor": false,
+      "free": false,
+      "crowd": "mid",
+      "see": "水面、白塔、长椅，冬天有人在冰上",
+      "cost": "低。门票几块钱",
+      "environmentTags": [
+        "有水",
+        "有长椅",
+        "可以坐很久"
+      ],
+      "tags": {
+        "q": 0.7,
+        "g": 0.9,
+        "c": 0.4,
+        "s": 0.85,
+        "co": 0.55,
+        "e": 0.4,
+        "r": 0.9,
+        "cr": 0.25,
+        "l": 0.25,
+        "st": 0.85,
+        "cp": 0.15,
+        "w": 0.8
+      },
+      "matchReason": {
+        "tight": "水和树都是不要求你回应的东西。",
+        "tired": "有长椅，坐下就行，不用一直走。",
+        "low": "视线能推得很远，这时候念头会显得小一点。",
+        "_": "和什刹海挨着，可以接着走。"
+      },
+      "placeInsights": [
+        {
+          "t": "有地方坐",
+          "d": "不像有些公园只能一直走，这里能停下来。"
+        },
+        {
+          "t": "视线推得远",
+          "d": "远处替你接管了一部分注意力。"
+        }
+      ],
+      "factors": [
+        "water",
+        "green",
+        "openview",
+        "seat",
+        "fewpeople",
+        "dusk",
+        "toocrowd",
+        "toobright",
+        "faraway",
+        "nothing"
+      ],
+      "averageChange": 2.4,
+      "feedbackCount": 131,
+      "sig": {
+        "rings": 1,
+        "ringR": 75,
+        "rays": 5,
+        "nodeAngle": 2.1,
+        "nodeDist": 43,
+        "a": "#25716B",
+        "b": "#7BA9A0"
+      },
+      "factorOptions": [
+        {
+          "label": "有水",
+          "tone": "pos",
+          "insight": "水面一直在动，不需要你去推动它。"
+        },
+        {
+          "label": "有树",
+          "tone": "pos",
+          "insight": "绿色是少数不要求你回应的东西。"
+        },
+        {
+          "label": "视野开阔",
+          "tone": "pos",
+          "insight": "远处替你接管了一部分注意力。"
+        },
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "人不多",
+          "tone": "pos",
+          "insight": "人少的时候，你不需要表演正常。"
+        },
+        {
+          "label": "天色刚好",
+          "tone": "pos",
+          "insight": "天色是这里唯一会自己变化的东西。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太晒 / 太亮",
+          "tone": "neg",
+          "insight": "这条会让傍晚之后的时段排得更靠前。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "tiantan",
+      "placeName": "天坛",
+      "action": "在柏树林里走到没人的那头",
+      "area": "东城",
+      "category": "公园 · 户外",
+      "city": "北京",
+      "coverImage": "sigil:tiantan",
+      "ratio": "4/5",
+      "distance": "6.2 km",
+      "distanceKm": 6.2,
+      "transport": "地铁 5 号线 天坛东门",
+      "suggestedDuration": "60–150 分钟",
+      "indoor": false,
+      "free": false,
+      "crowd": "mid",
+      "see": "成片的老柏树，走远一点几乎没人",
+      "cost": "低。门票几块钱",
+      "environmentTags": [
+        "大片树林",
+        "可以走很远",
+        "人会变少"
+      ],
+      "tags": {
+        "q": 0.85,
+        "g": 0.95,
+        "c": 0.3,
+        "s": 0.9,
+        "co": 0.4,
+        "e": 0.35,
+        "r": 0.95,
+        "cr": 0.2,
+        "l": 0.15,
+        "st": 0.7,
+        "cp": 0.15,
+        "w": 0.9
+      },
+      "matchReason": {
+        "quiet": "往西北角走，人会明显变少，安静是靠距离换来的。",
+        "tight": "柏树林里的空气是凉的，呼吸会自己慢下来。",
+        "noisy": "够大，可以走到累，不用中途做决定。",
+        "_": "黄昏的时候很漂亮，而且那时候人最少。"
+      },
+      "placeInsights": [
+        {
+          "t": "安静靠走出来",
+          "d": "主路一直有人，往里走十分钟就换了个世界。"
+        },
+        {
+          "t": "树是老的",
+          "d": "成片的柏树林，抬头这件事在这里成立。"
+        }
+      ],
+      "factors": [
+        "green",
+        "quiet",
+        "keepwalk",
+        "fewpeople",
+        "openview",
+        "dusk",
+        "faraway",
+        "toocrowd",
+        "nothing"
+      ],
+      "averageChange": 2.6,
+      "feedbackCount": 98,
+      "sig": {
+        "rings": 1,
+        "ringR": 78,
+        "rays": 4,
+        "nodeAngle": -2.4000000000000004,
+        "nodeDist": 46,
+        "a": "#3D6E80",
+        "b": "#7FA3B0"
+      },
+      "factorOptions": [
+        {
+          "label": "有树",
+          "tone": "pos",
+          "insight": "绿色是少数不要求你回应的东西。"
+        },
+        {
+          "label": "声音舒服",
+          "tone": "pos",
+          "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+        },
+        {
+          "label": "能一直走",
+          "tone": "pos",
+          "insight": "你选了能一直走——身体在动，就不必逼自己想清楚。"
+        },
+        {
+          "label": "人不多",
+          "tone": "pos",
+          "insight": "人少的时候，你不需要表演正常。"
+        },
+        {
+          "label": "视野开阔",
+          "tone": "pos",
+          "insight": "远处替你接管了一部分注意力。"
+        },
+        {
+          "label": "天色刚好",
+          "tone": "pos",
+          "insight": "天色是这里唯一会自己变化的东西。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "langyuan",
+      "placeName": "朗园",
+      "action": "在园区里没有目的地地绕",
+      "area": "朝阳",
+      "category": "园区 · 半户外",
+      "city": "北京",
+      "coverImage": "sigil:langyuan",
+      "ratio": "1/1",
+      "distance": "5.1 km",
+      "distanceKm": 5.1,
+      "transport": "地铁 1 号线 大望路",
+      "suggestedDuration": "40–90 分钟",
+      "indoor": false,
+      "free": true,
+      "crowd": "low",
+      "see": "改造过的老厂房、书店、偶尔有展和市集",
+      "cost": "低。逛不花钱",
+      "environmentTags": [
+        "免费",
+        "有展",
+        "人不多",
+        "接着能去亮马河"
+      ],
+      "tags": {
+        "q": 0.65,
+        "g": 0.5,
+        "c": 0.25,
+        "s": 0.85,
+        "co": 0.6,
+        "e": 0.75,
+        "r": 0.7,
+        "cr": 0.8,
+        "l": 0.35,
+        "st": 0.65,
+        "cp": 0.25,
+        "w": 0.7
+      },
+      "matchReason": {
+        "spark": "厂房改的空间里经常有展和市集，撞到什么算什么。",
+        "fresh": "每次去内容都不太一样，不用担心已经看过了。",
+        "okay": "绕一圈再往亮马河走，是个完整的傍晚。",
+        "_": "不用买票、不用预约，走进去就行。"
+      },
+      "placeInsights": [
+        {
+          "t": "内容会换",
+          "d": "展和市集轮着来，同一个地方不会看腻。"
+        },
+        {
+          "t": "能接着走",
+          "d": "从这儿绕出来往亮马河，是一条顺的路线。"
+        }
+      ],
+      "factors": [
+        "newthing",
+        "keepwalk",
+        "fewpeople",
+        "nopressure",
+        "light",
+        "faraway",
+        "nothing"
+      ],
+      "averageChange": 2,
+      "feedbackCount": 73,
+      "sig": {
+        "rings": 2,
+        "ringR": 71,
+        "rays": 6,
+        "nodeAngle": 2.6,
+        "nodeDist": 50,
+        "a": "#5A8A93",
+        "b": "#8FB0B6"
+      },
+      "factorOptions": [
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "能一直走",
+          "tone": "pos",
+          "insight": "你选了能一直走——身体在动，就不必逼自己想清楚。"
+        },
+        {
+          "label": "人不多",
+          "tone": "pos",
+          "insight": "人少的时候，你不需要表演正常。"
+        },
+        {
+          "label": "不必消费",
+          "tone": "pos",
+          "insight": "不用点单也能待着，这件事本身就减轻了一部分压力。"
+        },
+        {
+          "label": "光线",
+          "tone": "pos",
+          "insight": "光线合适的地方，眼睛先松下来。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "yangmeizhu",
+      "placeName": "杨梅竹斜街",
+      "action": "走一条还没被修整过的胡同",
+      "area": "大栅栏",
+      "category": "胡同 · 户外",
+      "city": "北京",
+      "coverImage": "sigil:yangmeizhu",
+      "ratio": "4/5",
+      "distance": "4.3 km",
+      "distanceKm": 4.3,
+      "transport": "地铁 2 号线 前门",
+      "suggestedDuration": "30–60 分钟",
+      "indoor": false,
+      "free": true,
+      "crowd": "low",
+      "see": "住人的院子、几家小店、灰砖和电线",
+      "cost": "无。走不花钱",
+      "environmentTags": [
+        "市井气",
+        "人不多",
+        "免费",
+        "有咖啡馆"
+      ],
+      "tags": {
+        "q": 0.6,
+        "g": 0.25,
+        "c": 0.3,
+        "s": 0.85,
+        "co": 0.9,
+        "e": 0.7,
+        "r": 0.7,
+        "cr": 0.6,
+        "l": 0.35,
+        "st": 0.4,
+        "cp": 0.15,
+        "w": 0.85
+      },
+      "matchReason": {
+        "empty": "这里还有人真的住着，生活在旁边进行，你路过就好。",
+        "fresh": "和被修整过的商业街不一样，走进去是另一种密度。",
+        "_": "一条能慢慢走完的街，尽头有咖啡馆可以坐。"
+      },
+      "placeInsights": [
+        {
+          "t": "还没被整过",
+          "d": "比较有市井气——这件事在北京越来越少。"
+        },
+        {
+          "t": "尽头有得坐",
+          "d": "soloist 在这条线上，走累了正好。"
+        }
+      ],
+      "factors": [
+        "keepwalk",
+        "people",
+        "fewpeople",
+        "newthing",
+        "dusk",
+        "toocrowd",
+        "unsafe",
+        "nothing"
+      ],
+      "averageChange": 2.2,
+      "feedbackCount": 69,
+      "sig": {
+        "rings": 2,
+        "ringR": 69,
+        "rays": 6,
+        "nodeAngle": 0.3999999999999999,
+        "nodeDist": 57,
+        "a": "#4F7F84",
+        "b": "#8BABAE"
+      },
+      "factorOptions": [
+        {
+          "label": "能一直走",
+          "tone": "pos",
+          "insight": "你选了能一直走——身体在动，就不必逼自己想清楚。"
+        },
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "人不多",
+          "tone": "pos",
+          "insight": "人少的时候，你不需要表演正常。"
+        },
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "天色刚好",
+          "tone": "pos",
+          "insight": "天色是这里唯一会自己变化的东西。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "不安全",
+          "tone": "neg",
+          "insight": "安全感不够时，其它条件都不成立。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "wudaoying",
+      "placeName": "国子监 · 五道营",
+      "action": "从银杏那条街走到五道营",
+      "area": "安定门",
+      "category": "胡同 · 户外",
+      "city": "北京",
+      "coverImage": "sigil:wudaoying",
+      "ratio": "1/1",
+      "distance": "2.9 km",
+      "distanceKm": 2.9,
+      "transport": "地铁 2 号线 雍和宫",
+      "suggestedDuration": "40–90 分钟",
+      "indoor": false,
+      "free": true,
+      "crowd": "mid",
+      "see": "国子监的老树，五道营两侧的小店",
+      "cost": "低。逛不花钱，坐下要点单",
+      "environmentTags": [
+        "有老树",
+        "小店多",
+        "能一直走"
+      ],
+      "tags": {
+        "q": 0.55,
+        "g": 0.7,
+        "c": 0.45,
+        "s": 0.8,
+        "co": 0.75,
+        "e": 0.7,
+        "r": 0.7,
+        "cr": 0.55,
+        "l": 0.4,
+        "st": 0.5,
+        "cp": 0.35,
+        "w": 0.85
+      },
+      "matchReason": {
+        "fresh": "两条街的密度不一样，一条安静一条热闹，走一趟能换两次状态。",
+        "okay": "街不长，走完刚好，不会累。",
+        "_": "和鼓楼那一带挨着，可以连起来走。"
+      },
+      "placeInsights": [
+        {
+          "t": "两种节奏",
+          "d": "国子监那侧是树和安静，五道营那侧是店和人。"
+        },
+        {
+          "t": "可以接着往鼓楼",
+          "d": "从这儿走过去不远，两片能连成一趟。"
+        }
+      ],
+      "factors": [
+        "keepwalk",
+        "green",
+        "people",
+        "newthing",
+        "dusk",
+        "toocrowd",
+        "toopricey",
+        "nothing"
+      ],
+      "averageChange": 1.9,
+      "feedbackCount": 84,
+      "sig": {
+        "rings": 2,
+        "ringR": 73,
+        "rays": 6,
+        "nodeAngle": 2.1999999999999997,
+        "nodeDist": 56,
+        "a": "#5A8A93",
+        "b": "#8FB0B6"
+      },
+      "factorOptions": [
+        {
+          "label": "能一直走",
+          "tone": "pos",
+          "insight": "你选了能一直走——身体在动，就不必逼自己想清楚。"
+        },
+        {
+          "label": "有树",
+          "tone": "pos",
+          "insight": "绿色是少数不要求你回应的东西。"
+        },
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "天色刚好",
+          "tone": "pos",
+          "insight": "天色是这里唯一会自己变化的东西。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "ziliaoguan",
+      "placeName": "中国电影资料馆",
+      "action": "买一张下午场，把手机关掉",
+      "area": "小西天",
+      "category": "影院 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:ziliaoguan",
+      "ratio": "4/5",
+      "distance": "1.0 km",
+      "distanceKm": 1,
+      "transport": "地铁 4 号线 新街口",
+      "suggestedDuration": "120–180 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "mid",
+      "see": "排片不按院线来，来的人大多一个人",
+      "cost": "低。票价不贵",
+      "environmentTags": [
+        "排片好",
+        "一个人来的多",
+        "两小时不用做决定"
+      ],
+      "tags": {
+        "q": 0.9,
+        "g": 0.02,
+        "c": 0.4,
+        "s": 0.95,
+        "co": 0.5,
+        "e": 0.8,
+        "r": 0.85,
+        "cr": 0.85,
+        "l": 0.15,
+        "st": 0.9,
+        "cp": 0.3,
+        "w": 0.05
+      },
+      "matchReason": {
+        "noisy": "两个小时里你什么都不用决定，这是这个地方最实在的功能。",
+        "tired": "黑下来之后不用维持任何表情。",
+        "low": "不用跟人说话，也不用假装在做正事。",
+        "_": "看完出来还能顺着走：云南小厨、福声唱片、豆仔咖啡都在附近。"
+      },
+      "placeInsights": [
+        {
+          "t": "两小时不用做选择",
+          "d": "灯一黑，决定权就交出去了。"
+        },
+        {
+          "t": "是一条线的起点",
+          "d": "从这儿开始往东走，一整天都排得满。"
+        }
+      ],
+      "factors": [
+        "quiet",
+        "solo",
+        "seat",
+        "newthing",
+        "toocrowd",
+        "faraway",
+        "nothing"
+      ],
+      "quote": "昨天实践出了北京最舒服的一条 citywalk 路线。从小西天开始，上午先去资料馆看电影……",
+      "averageChange": 2.5,
+      "feedbackCount": 156,
+      "sig": {
+        "rings": 3,
+        "ringR": 54,
+        "rays": 6,
+        "nodeAngle": -1,
+        "nodeDist": 39,
+        "a": "#3D6E80",
+        "b": "#7FA3B0"
+      },
+      "factorOptions": [
+        {
+          "label": "声音舒服",
+          "tone": "pos",
+          "insight": "你选了声音舒服。安静不是没有声音，是声音跟你无关。"
+        },
+        {
+          "label": "独处感",
+          "tone": "pos",
+          "insight": "你选了独处感——这里允许你一个人，不觉得奇怪。"
+        },
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "yunnanxiaochu",
+      "placeName": "云南小厨",
+      "action": "一碗臭豆腐米线，二十分钟解决",
+      "area": "小西天",
+      "category": "吃 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:yunnanxiaochu",
+      "ratio": "1/1",
+      "distance": "1.0 km",
+      "distanceKm": 1,
+      "transport": "资料馆对面",
+      "suggestedDuration": "20–40 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "mid",
+      "see": "很小的馆子，中午满座",
+      "cost": "低。一碗米线的价格",
+      "environmentTags": [
+        "便宜",
+        "快",
+        "资料馆对面"
+      ],
+      "tags": {
+        "q": 0.3,
+        "g": 0.02,
+        "c": 0.7,
+        "s": 0.7,
+        "co": 0.85,
+        "e": 0.4,
+        "r": 0.5,
+        "cr": 0.15,
+        "l": 0.6,
+        "st": 0.25,
+        "cp": 0.15,
+        "w": 0.05
+      },
+      "matchReason": {
+        "tired": "吃点热的比想清楚有用，二十分钟就能解决。",
+        "empty": "店小人多，有热气，不用你参与。",
+        "_": "在资料馆对面。看完电影不用再做一次「去哪吃」的决定。"
+      },
+      "placeInsights": [
+        {
+          "t": "决定成本低",
+          "d": "就在对面，不用再挑一次。"
+        },
+        {
+          "t": "人多是常态",
+          "d": "中午会满，赶时间的话错开。"
+        }
+      ],
+      "factors": [
+        "people",
+        "staff",
+        "toocrowd",
+        "toonoisy",
+        "nothing"
+      ],
+      "averageChange": 1.5,
+      "feedbackCount": 47,
+      "sig": {
+        "rings": 3,
+        "ringR": 51,
+        "rays": 5,
+        "nodeAngle": 2.3000000000000003,
+        "nodeDist": 67,
+        "a": "#2F7F76",
+        "b": "#6FA79C"
+      },
+      "factorOptions": [
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "店员舒服",
+          "tone": "pos",
+          "insight": "被好好对待过的人，出门时会松一点。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太吵",
+          "tone": "neg",
+          "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "huogui",
+      "placeName": "火鬼 paro",
+      "action": "周二去，披萨买一送一",
+      "area": "成府路",
+      "category": "吃 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:huogui",
+      "ratio": "1/1",
+      "distance": "5.4 km",
+      "distanceKm": 5.4,
+      "transport": "地铁 4 号线 北京大学东门",
+      "suggestedDuration": "40–80 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "mid",
+      "see": "披萨炉，周二人会多一些",
+      "cost": "中。周二买一送一，其它时候正常价",
+      "environmentTags": [
+        "周二买一送一",
+        "万圣旁边",
+        "适合两个人"
+      ],
+      "tags": {
+        "q": 0.35,
+        "g": 0.02,
+        "c": 0.6,
+        "s": 0.55,
+        "co": 0.8,
+        "e": 0.5,
+        "r": 0.55,
+        "cr": 0.2,
+        "l": 0.65,
+        "st": 0.6,
+        "cp": 0.4,
+        "w": 0.05
+      },
+      "matchReason": {
+        "near": "两个人来更划算，周二买一送一。",
+        "okay": "逛完万圣走几步就到，不用另做安排。",
+        "_": "有个具体的理由出门，有时候比理由本身重要。"
+      },
+      "placeInsights": [
+        {
+          "t": "周二有说法",
+          "d": "买一送一，这是个出门的理由。"
+        },
+        {
+          "t": "挨着万圣书园",
+          "d": "翻完书吃一顿，一个下午就完整了。"
+        }
+      ],
+      "factors": [
+        "people",
+        "staff",
+        "seat",
+        "toocrowd",
+        "toonoisy",
+        "toopricey",
+        "faraway",
+        "nothing"
+      ],
+      "averageChange": 1.6,
+      "feedbackCount": 35,
+      "sig": {
+        "rings": 3,
+        "ringR": 52,
+        "rays": 5,
+        "nodeAngle": 0.6000000000000001,
+        "nodeDist": 60,
+        "a": "#4F7F84",
+        "b": "#8BABAE"
+      },
+      "factorOptions": [
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "店员舒服",
+          "tone": "pos",
+          "insight": "被好好对待过的人，出门时会松一点。"
+        },
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太吵",
+          "tone": "neg",
+          "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "niaozhouli",
+      "placeName": "鸟州力",
+      "action": "黄昏后在亮马桥吃串烧鸟",
+      "area": "亮马桥",
+      "category": "吃 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:niaozhouli",
+      "ratio": "4/5",
+      "distance": "5.0 km",
+      "distanceKm": 5,
+      "transport": "地铁 10 号线 亮马桥",
+      "suggestedDuration": "60–90 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "mid",
+      "see": "吧台能看到烤台，一个人坐也不奇怪",
+      "cost": "中高。日料的价格",
+      "environmentTags": [
+        "可以坐吧台",
+        "河边散步后",
+        "一个人也行"
+      ],
+      "tags": {
+        "q": 0.4,
+        "g": 0.02,
+        "c": 0.5,
+        "s": 0.8,
+        "co": 0.7,
+        "e": 0.55,
+        "r": 0.6,
+        "cr": 0.3,
+        "l": 0.55,
+        "st": 0.7,
+        "cp": 0.65,
+        "w": 0.05
+      },
+      "matchReason": {
+        "near": "吧台正对烤台，有事看、不用聊天。",
+        "okay": "沿着亮马河走完，顺路吃一顿，是完整的一晚。",
+        "_": "一个人坐吧台在这里是常见的，不用解释。"
+      },
+      "placeInsights": [
+        {
+          "t": "吧台有得看",
+          "d": "烤台就在眼前，一个人吃不会尴尬。"
+        },
+        {
+          "t": "接在河边散步之后",
+          "d": "走完再吃，顺序比反过来舒服。"
+        }
+      ],
+      "factors": [
+        "seat",
+        "solo",
+        "staff",
+        "people",
+        "toopricey",
+        "toonoisy",
+        "faraway",
+        "nothing"
+      ],
+      "averageChange": 1.8,
+      "feedbackCount": 58,
+      "sig": {
+        "rings": 3,
+        "ringR": 53,
+        "rays": 5,
+        "nodeAngle": 0.5,
+        "nodeDist": 50,
+        "a": "#25716B",
+        "b": "#7BA9A0"
+      },
+      "factorOptions": [
+        {
+          "label": "坐得住",
+          "tone": "pos",
+          "insight": "能坐得住，停留时间才由你决定。"
+        },
+        {
+          "label": "独处感",
+          "tone": "pos",
+          "insight": "你选了独处感——这里允许你一个人，不觉得奇怪。"
+        },
+        {
+          "label": "店员舒服",
+          "tone": "pos",
+          "insight": "被好好对待过的人，出门时会松一点。"
+        },
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "太吵",
+          "tone": "neg",
+          "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+        },
+        {
+          "label": "路上太远",
+          "tone": "neg",
+          "insight": "路上消耗掉的力气，也算这次到访的成本。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "qmex",
+      "placeName": "机电院 qmex",
+      "action": "在院子里站着喝，随时能走",
+      "area": "三里屯",
+      "category": "酒吧 · 半户外",
+      "city": "北京",
+      "coverImage": "sigil:qmex",
+      "ratio": "1/1",
+      "distance": "3.6 km",
+      "distanceKm": 3.6,
+      "transport": "地铁 10 号线 团结湖",
+      "suggestedDuration": "60–120 分钟",
+      "indoor": false,
+      "free": false,
+      "crowd": "high",
+      "see": "院子里站着的人，音乐不算太吵",
+      "cost": "中高。酒水价格",
+      "environmentTags": [
+        "半户外",
+        "随时能走",
+        "晚上才成立",
+        "要social"
+      ],
+      "tags": {
+        "q": 0.15,
+        "g": 0.15,
+        "c": 0.8,
+        "s": 0.5,
+        "co": 0.85,
+        "e": 0.7,
+        "r": 0.35,
+        "cr": 0.5,
+        "l": 0.9,
+        "st": 0.6,
+        "cp": 0.65,
+        "w": 0.15
+      },
+      "matchReason": {
+        "fresh": "院子里人来人往，密度高，待一会儿状态就换了。",
+        "okay": "站着喝的好处是随时能走，不用陷进去。",
+        "near": "周围全是人，但你可以只站着不说话。",
+        "_": "晚上才成立的地方。白天去是另一回事。"
+      },
+      "placeInsights": [
+        {
+          "t": "随时能退出",
+          "d": "站着喝不用结束一场，走就走了。"
+        },
+        {
+          "t": "人是真的多",
+          "d": "想安静的话这里不合适，这点得先知道。"
+        }
+      ],
+      "factors": [
+        "people",
+        "energy",
+        "music",
+        "toocrowd",
+        "toonoisy",
+        "toopricey",
+        "needsocial",
+        "unsafe",
+        "nothing"
+      ],
+      "averageChange": 1.4,
+      "feedbackCount": 92,
+      "sig": {
+        "rings": 3,
+        "ringR": 52,
+        "rays": 6,
+        "nodeAngle": -2.2,
+        "nodeDist": 62,
+        "a": "#5A8A93",
+        "b": "#8FB0B6"
+      },
+      "factorOptions": [
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "跟着动起来",
+          "tone": "pos",
+          "insight": "身体先动，脑子后停——顺序反过来更容易。"
+        },
+        {
+          "label": "声音好",
+          "tone": "pos",
+          "insight": "好的声音会占满耳朵，这时候想事情会变慢。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太吵",
+          "tone": "neg",
+          "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "得跟人周旋",
+          "tone": "neg",
+          "insight": "你标了要social。有些地方的门槛不是钱，是力气。"
+        },
+        {
+          "label": "不安全",
+          "tone": "neg",
+          "insight": "安全感不够时，其它条件都不成立。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "lasocial",
+      "placeName": "la social",
+      "action": "先在隔壁日料垫一顿再进去",
+      "area": "三里屯",
+      "category": "酒吧 · 室内",
+      "city": "北京",
+      "coverImage": "sigil:lasocial",
+      "ratio": "4/5",
+      "distance": "3.6 km",
+      "distanceKm": 3.6,
+      "transport": "地铁 10 号线 团结湖",
+      "suggestedDuration": "90–150 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "high",
+      "see": "人挨着人，隔壁就是日料可以先垫",
+      "cost": "高。酒水加一顿的价格",
+      "environmentTags": [
+        "很热闹",
+        "要social",
+        "隔壁能predrink"
+      ],
+      "tags": {
+        "q": 0.1,
+        "g": 0.02,
+        "c": 0.85,
+        "s": 0.35,
+        "co": 0.8,
+        "e": 0.7,
+        "r": 0.25,
+        "cr": 0.4,
+        "l": 0.95,
+        "st": 0.65,
+        "cp": 0.75,
+        "w": 0.05
+      },
+      "matchReason": {
+        "fresh": "想换个状态、而且愿意花力气应付人的时候，这里换得最快。",
+        "okay": "状态还行才适合来。不太行的时候这里会更累。",
+        "_": "隔壁有家日料，进场前可以先垫一顿——这是本地人的顺序。"
+      },
+      "placeInsights": [
+        {
+          "t": "要花力气",
+          "d": "这里的门槛不是钱，是应付人的力气。"
+        },
+        {
+          "t": "先吃再喝",
+          "d": "隔壁日料 predrink，比空腹进去舒服。"
+        }
+      ],
+      "factors": [
+        "people",
+        "energy",
+        "music",
+        "needsocial",
+        "toocrowd",
+        "toonoisy",
+        "toopricey",
+        "unsafe",
+        "nothing"
+      ],
+      "averageChange": 1.1,
+      "feedbackCount": 76,
+      "sig": {
+        "rings": 3,
+        "ringR": 49,
+        "rays": 6,
+        "nodeAngle": 0.2999999999999998,
+        "nodeDist": 65,
+        "a": "#1E6E72",
+        "b": "#4A8F8A"
+      },
+      "factorOptions": [
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "跟着动起来",
+          "tone": "pos",
+          "insight": "身体先动，脑子后停——顺序反过来更容易。"
+        },
+        {
+          "label": "声音好",
+          "tone": "pos",
+          "insight": "好的声音会占满耳朵，这时候想事情会变慢。"
+        },
+        {
+          "label": "得跟人周旋",
+          "tone": "neg",
+          "insight": "你标了要social。有些地方的门槛不是钱，是力气。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太吵",
+          "tone": "neg",
+          "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "不安全",
+          "tone": "neg",
+          "insight": "安全感不够时，其它条件都不成立。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "school",
+      "placeName": "school",
+      "action": "站在最后排听完一整场",
+      "area": "鼓楼",
+      "category": "livehouse · 室内",
+      "city": "北京",
+      "coverImage": "sigil:school",
+      "ratio": "1/1",
+      "distance": "2.2 km",
+      "distanceKm": 2.2,
+      "transport": "地铁 8 号线 鼓楼大街",
+      "suggestedDuration": "90–180 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "high",
+      "see": "很小的场地，站得满，声音很大",
+      "cost": "中。票价加酒",
+      "environmentTags": [
+        "有演出",
+        "声音大",
+        "站着看",
+        "鼓楼线上"
+      ],
+      "tags": {
+        "q": 0.05,
+        "g": 0.02,
+        "c": 0.9,
+        "s": 0.6,
+        "co": 0.85,
+        "e": 0.8,
+        "r": 0.3,
+        "cr": 0.75,
+        "l": 0.95,
+        "st": 0.7,
+        "cp": 0.5,
+        "w": 0.05
+      },
+      "matchReason": {
+        "fresh": "现场的声音会把别的东西盖过去，这是它最实在的作用。",
+        "spark": "演出的阵容不按热度排，撞到没听过的乐队是常事。",
+        "_": "站最后排也能听完整场，不用挤到前面去。"
+      },
+      "placeInsights": [
+        {
+          "t": "声音会盖过念头",
+          "d": "音量足够大的时候，脑子里的东西排不上队。"
+        },
+        {
+          "t": "可以站后面",
+          "d": "不用挤到前排，最后排一样听得完。"
+        }
+      ],
+      "factors": [
+        "music",
+        "energy",
+        "people",
+        "newthing",
+        "toonoisy",
+        "toocrowd",
+        "needsocial",
+        "nothing"
+      ],
+      "averageChange": 1.7,
+      "feedbackCount": 104,
+      "sig": {
+        "rings": 3,
+        "ringR": 48,
+        "rays": 7,
+        "nodeAngle": -0.30000000000000027,
+        "nodeDist": 56,
+        "a": "#1E6E72",
+        "b": "#4A8F8A"
+      },
+      "factorOptions": [
+        {
+          "label": "声音好",
+          "tone": "pos",
+          "insight": "好的声音会占满耳朵，这时候想事情会变慢。"
+        },
+        {
+          "label": "跟着动起来",
+          "tone": "pos",
+          "insight": "身体先动，脑子后停——顺序反过来更容易。"
+        },
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "看到没见过的",
+          "tone": "pos",
+          "insight": "你选了新鲜。注意力被外面勾住，就不在自己身上了。"
+        },
+        {
+          "label": "太吵",
+          "tone": "neg",
+          "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "得跟人周旋",
+          "tone": "neg",
+          "insight": "你标了要social。有些地方的门槛不是钱，是力气。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    },
+    {
+      "placeId": "zhaodai",
+      "placeName": "zhaodai",
+      "action": "跳到脑子彻底停下来",
+      "area": "工体一带",
+      "category": "club · 室内",
+      "city": "北京",
+      "coverImage": "sigil:zhaodai",
+      "ratio": "4/5",
+      "distance": "4.0 km",
+      "distanceKm": 4,
+      "transport": "地铁 10 号线 团结湖",
+      "suggestedDuration": "120–240 分钟",
+      "indoor": true,
+      "free": false,
+      "crowd": "high",
+      "see": "深夜才热，声音系统很好",
+      "cost": "高。门票加酒水",
+      "environmentTags": [
+        "深夜",
+        "电子乐",
+        "身体先动"
+      ],
+      "tags": {
+        "q": 0.02,
+        "g": 0.02,
+        "c": 0.9,
+        "s": 0.55,
+        "co": 0.7,
+        "e": 0.85,
+        "r": 0.3,
+        "cr": 0.6,
+        "l": 1,
+        "st": 0.8,
+        "cp": 0.75,
+        "w": 0.05
+      },
+      "matchReason": {
+        "fresh": "想彻底换个环境的时候，这里是最远的那一端。",
+        "okay": "有力气再来。没力气的时候这里会加倍消耗。",
+        "_": "身体先动，脑子后停——顺序反过来更容易。"
+      },
+      "placeInsights": [
+        {
+          "t": "身体先动",
+          "d": "不需要你先想通，动起来就行。"
+        },
+        {
+          "t": "很消耗",
+          "d": "第二天的状态也算这次到访的成本。"
+        }
+      ],
+      "factors": [
+        "music",
+        "energy",
+        "people",
+        "toonoisy",
+        "toocrowd",
+        "toopricey",
+        "unsafe",
+        "needsocial",
+        "nothing"
+      ],
+      "averageChange": 1.3,
+      "feedbackCount": 67,
+      "sig": {
+        "rings": 3,
+        "ringR": 48,
+        "rays": 7,
+        "nodeAngle": 2.3000000000000003,
+        "nodeDist": 54,
+        "a": "#25716B",
+        "b": "#7BA9A0"
+      },
+      "factorOptions": [
+        {
+          "label": "声音好",
+          "tone": "pos",
+          "insight": "好的声音会占满耳朵，这时候想事情会变慢。"
+        },
+        {
+          "label": "跟着动起来",
+          "tone": "pos",
+          "insight": "身体先动，脑子后停——顺序反过来更容易。"
+        },
+        {
+          "label": "有人但不打扰",
+          "tone": "pos",
+          "insight": "周围有人、但没人看你——这是很难得的配比。"
+        },
+        {
+          "label": "太吵",
+          "tone": "neg",
+          "insight": "你标了太吵。这条会让安静的地方排得更靠前。"
+        },
+        {
+          "label": "太挤",
+          "tone": "neg",
+          "insight": "你标了太挤。换个时段，同一个地方可能是另一回事。"
+        },
+        {
+          "label": "太贵",
+          "tone": "neg",
+          "insight": "花掉的钱也算这次到访的成本，会记进去。"
+        },
+        {
+          "label": "不安全",
+          "tone": "neg",
+          "insight": "安全感不够时，其它条件都不成立。"
+        },
+        {
+          "label": "得跟人周旋",
+          "tone": "neg",
+          "insight": "你标了要social。有些地方的门槛不是钱，是力气。"
+        },
+        {
+          "label": "没什么用",
+          "tone": "neg",
+          "insight": "你说没什么用。这条一样会被记下来，不会被算成失败。"
+        }
+      ]
+    }
+  ]
+}

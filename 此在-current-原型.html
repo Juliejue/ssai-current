@@ -1,6 +1,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>此在 · 情绪空间闭环</title>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  if (location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
+    const analytics = document.createElement("script");
+    analytics.defer = true;
+    analytics.src = "/_vercel/insights/script.js";
+    document.head.appendChild(analytics);
+  }
+</script>
+<script src="/current-client.js"></script>
 <style>
 :root{
   /* ── 品牌浅色体系 · 与品牌手册 / 路演物料同源 ── */
@@ -115,6 +125,21 @@ h1.title.sm{font-size:23px}
 .btn-row{display:flex;gap:10px}
 .btn-row .btn{flex:1}
 .actions{display:flex;flex-direction:column;gap:2px;margin-top:22px}
+
+/* ---------- AI-native 自然语言入口 ---------- */
+.ai-entry{margin:18px 0 20px;padding:14px;border:1px solid var(--line-2);border-radius:18px;background:var(--card)}
+.ai-entry label{display:block;font:500 13px/1.6 var(--sans);color:var(--ink);margin-bottom:8px}
+.ai-entry textarea{display:block;width:100%;min-height:78px;resize:none;border:0;border-bottom:1px solid var(--line);outline:none;background:transparent;padding:2px 0 9px;font:13px/1.7 var(--sans)}
+.ai-entry textarea::placeholder{color:var(--ink-faint)}
+.ai-entry .row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.ai-entry .voice{width:42px;height:42px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;color:var(--water);font-size:17px;flex:none}
+.ai-entry .voice.listening{background:var(--water-wash);border-color:var(--water)}
+.ai-entry .send{height:42px;flex:1;border-radius:22px;background:var(--ink);color:var(--paper);font:500 13px var(--sans)}
+.ai-entry .send:disabled{opacity:.5}
+.ai-entry .status{min-height:18px;margin:8px 0 0;font:11.5px/1.55 var(--sans);color:var(--ink-faint)}
+.ai-entry .status.error{color:var(--d-n2)}
+.or-rule{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--ink-faint);font:10px var(--mono);letter-spacing:.12em}
+.or-rule:before,.or-rule:after{content:"";height:1px;flex:1;background:var(--line)}
 
 /* ---------- sigil cover ---------- */
 .cover{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--ground-2)}
@@ -1112,8 +1137,16 @@ const placeById = id => PLACES.find(p => p.placeId === id) || PLACES[0];
 const reasonFor = (p, moodId) => p.matchReason[moodId] || p.matchReason._;
 /* 按当前情绪（以及已选诉求）给全部空间打分排序 */
 function rankedPlaces(list){
-  return (list || PLACES).slice().sort((a, b) =>
-    matchScore(b, state.mood, state.needs) - matchScore(a, state.mood, state.needs));
+  const order = state.aiPlaceOrder || [];
+  return (list || PLACES).slice().sort((a, b) => {
+    const aiA = order.indexOf(a.placeId), aiB = order.indexOf(b.placeId);
+    if (aiA >= 0 || aiB >= 0) {
+      if (aiA < 0) return 1;
+      if (aiB < 0) return -1;
+      return aiA - aiB;
+    }
+    return matchScore(b, state.mood, state.needs) - matchScore(a, state.mood, state.needs);
+  });
 }
 
 /* ---------- 匿名到访流 ----------
@@ -1329,7 +1362,10 @@ const state = {
   flipped: false,
   draft: null,        // 反馈草稿：返回上一步保留
   records: [],        // FeedbackRecord[]
-  lastRecordId: null
+  lastRecordId: null,
+  aiPlaceOrder: [],
+  aiRecommendations: {},
+  shownRecommendationId: null
 };
 
 /* 演示用的既往记录（原型示例数据，非真实用户数据） */
@@ -1441,7 +1477,13 @@ function renderMood(){
   h += '<div class="screen"><div class="pad">';
   h += '<p class="eyebrow">第一步 · 出发前</p>';
   h += '<h1 class="title">此刻，你更接近<br>哪一种？</h1>';
-  h += '<p class="lead">选一个就好。它只用来决定接下来给你看什么，不会被公开，也不构成任何评估。</p>';
+  h += '<p class="lead">不用先想清楚。你可以随便说发生了什么，我来替你缩小范围。</p>';
+  h += '<div class="ai-entry"><label for="natural-input">现在最占着你的，是什么？</label>' +
+       '<textarea id="natural-input" maxlength="2000" placeholder="比如：今天脑子很乱，不想见人，也不想花很多钱……"></textarea>' +
+       '<div class="row"><button class="voice" id="voice-input" aria-label="用语音说">◉</button>' +
+       '<button class="send" id="natural-submit">听懂了，替我选</button></div>' +
+       '<p class="status" id="natural-status">语音不会被保存；也可以直接打字。</p></div>';
+  h += '<div class="or-rule">或者自己选</div>';
   h += '<div class="mood-grid">';
   MOODS.forEach(m => {
     h += '<button class="mood' + (state.mood === m.id ? " on" : "") + '" data-mood="' + m.id + '">' +
@@ -2091,7 +2133,7 @@ function render(){
   else { state.route = "#/mood"; inner = renderMood(); }
 
   root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + '</div>' +
-    '<p class="stage-note">390 × 844 · 原型演示，无后端 · <a href="#/compare" data-go="#/compare">会议总览页</a></p></div>';
+    '<p class="stage-note">390 × 844 · AI 后端试运行 · <a href="#/compare" data-go="#/compare">会议总览页</a></p></div>';
 
   if (isCompare) scaleMinis();
   bind();
@@ -2110,16 +2152,87 @@ window.addEventListener("resize", () => { if (state.route === "#/compare") scale
 function bind(){
   const root = document.getElementById("root");
 
-  root.querySelectorAll("[data-go]").forEach(el => el.onclick = e => { e.preventDefault(); go(el.dataset.go); });
+  if (state.route === "#/pick") {
+    const list = rankedPlaces();
+    const visible = list[((state.cardIndex % list.length) + list.length) % list.length];
+    if (visible) {
+      const recommendation = state.aiRecommendations[visible.placeId];
+      const key = recommendation ? recommendation.recommendation_id : "local_" + visible.placeId;
+      if (state.shownRecommendationId !== key) {
+        state.shownRecommendationId = key;
+        CurrentAI.track("recommendation_shown", {place_id:visible.placeId, recommendation_id:recommendation ? recommendation.recommendation_id : key, source:recommendation ? "backend" : "local"});
+      }
+    }
+  }
+
+  root.querySelectorAll("[data-go]").forEach(el => el.onclick = e => {
+    e.preventDefault();
+    if (el.dataset.go.indexOf("#/place/") === 0) {
+      const placeId = el.dataset.go.slice(8);
+      const recommendation = state.aiRecommendations[placeId];
+      CurrentAI.track("recommendation_accepted", {place_id:placeId, recommendation_id:recommendation ? recommendation.recommendation_id : "local_" + placeId});
+    }
+    go(el.dataset.go);
+  });
 
   root.querySelectorAll("[data-mood]").forEach(el => el.onclick = () => { state.mood = el.dataset.mood; state.needs = []; render(); });
+
+  const naturalInput = root.querySelector("#natural-input");
+  const naturalSubmit = root.querySelector("#natural-submit");
+  const voiceInput = root.querySelector("#voice-input");
+  const naturalStatus = root.querySelector("#natural-status");
+  function setNaturalStatus(message, error){
+    if (!naturalStatus) return;
+    naturalStatus.textContent = message;
+    naturalStatus.classList.toggle("error", Boolean(error));
+  }
+  function submitNatural(){
+    const text = naturalInput ? naturalInput.value.trim() : "";
+    if (!text){ setNaturalStatus("说一句就好，不需要组织完整。", true); return; }
+    naturalSubmit.disabled = true;
+    setNaturalStatus("我在听懂你此刻真正需要什么…");
+    CurrentAI.interpretAndRecommend(text).then(result => {
+      const interpreted = result.interpretation.state;
+      if (result.recommendations.blocked_by_safety){
+        naturalSubmit.disabled = false;
+        setNaturalStatus(result.recommendations.safety_message, true);
+        return;
+      }
+      state.mood = interpreted.mood_id;
+      state.needs = interpreted.need_keys.filter(k => NEEDS[k]);
+      state.aiPlaceOrder = result.recommendations.recommendations.map(item => item.place_id);
+      state.aiRecommendations = {};
+      result.recommendations.recommendations.forEach(item => { state.aiRecommendations[item.place_id] = item; });
+      state.cardIndex = 0;
+      state.shownRecommendationId = null;
+      go("#/pick");
+    }).catch(error => {
+      naturalSubmit.disabled = false;
+      setNaturalStatus(error.message || "刚才没有接住，请再试一次。", true);
+    });
+  }
+  if (naturalInput) naturalInput.onfocus = () => CurrentAI.track("natural_language_started", {method:"text"});
+  if (naturalSubmit) naturalSubmit.onclick = submitNatural;
+  if (voiceInput) voiceInput.onclick = () => {
+    CurrentAI.toggleVoice({
+      onStatus: message => { voiceInput.classList.add("listening"); setNaturalStatus(message); },
+      onPartial: text => { if (naturalInput) naturalInput.value = text; },
+      onText: text => { voiceInput.classList.remove("listening"); if (naturalInput) naturalInput.value = text; setNaturalStatus("听到了。你可以改一改，再让我替你选。"); },
+      onError: message => { voiceInput.classList.remove("listening"); setNaturalStatus(message, true); }
+    }).catch(error => { voiceInput.classList.remove("listening"); setNaturalStatus(error.message, true); });
+  };
   root.querySelectorAll("[data-need]").forEach(el => el.onclick = () => {
     const k = el.dataset.need, i = state.needs.indexOf(k);
     if (i >= 0) state.needs.splice(i, 1); else state.needs.push(k);
     render();
   });
 
-  root.querySelectorAll("[data-card]").forEach(el => el.onclick = () => shift(parseInt(el.dataset.card, 10)));
+  root.querySelectorAll("[data-card]").forEach(el => el.onclick = () => {
+    const list = rankedPlaces();
+    const visible = list[((state.cardIndex % list.length) + list.length) % list.length];
+    if (visible) CurrentAI.track("recommendation_rejected", {place_id:visible.placeId, reason:"next"});
+    shift(parseInt(el.dataset.card, 10));
+  });
 
   root.querySelectorAll("[data-fav]").forEach(el => el.onclick = () => {
     const id = el.dataset.fav;
@@ -2137,6 +2250,8 @@ function bind(){
 
   root.querySelectorAll("[data-visit]").forEach(el => el.onclick = () => {
     const id = el.dataset.visit;
+    const recommendation = state.aiRecommendations[id];
+    CurrentAI.track("arrival_confirmed", {place_id:id, recommendation_id:recommendation ? recommendation.recommendation_id : "local_" + id});
     state.draft = newDraft(id);
     state.draft.stayMin = 28 + Math.floor(Math.random() * 22);
     go("#/visit/" + id);
@@ -2238,6 +2353,16 @@ function save(placeId){
     createdAt: new Date().toISOString()
   };
   state.records.unshift(rec);
+  CurrentAI.track("outcome_saved", {place_id:p.placeId, change_score:d.score, factor_count:d.factors.length, visibility:d.visibility});
+  CurrentAI.api("/outcomes", {method:"POST", body:JSON.stringify({
+    session_id:CurrentAI.sessionId(),
+    recommendation_id:(state.aiRecommendations[p.placeId] || {}).recommendation_id || "rec_local_" + rec.id,
+    place_id:p.placeId,
+    change_score:d.score,
+    factor_keys:d.factors.map(f => Object.keys(FACTORS).find(k => FACTORS[k].label === f)).filter(Boolean),
+    visibility:d.visibility,
+    note:d.visibility === "anonymous" ? d.note.trim() : null
+  })}).catch(() => {});
   state.lastRecordId = rec.id;
   state.flipped = false;
   go("#/card/" + rec.id);

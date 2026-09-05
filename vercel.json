@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/api/v1/(.*)", "destination": "/api/index.py" },
+    { "source": "/current", "destination": "/此在-current-原型.html" },
+    { "source": "/current/", "destination": "/此在-current-原型.html" },
+    { "source": "/", "destination": "/此在-current-原型.html" }
+  ]
+}
