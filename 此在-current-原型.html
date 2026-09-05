@@ -138,6 +138,8 @@ h1.title.sm{font-size:23px}
 .ai-entry .send:disabled{opacity:.5}
 .ai-entry .status{min-height:18px;margin:8px 0 0;font:11.5px/1.55 var(--sans);color:var(--ink-faint)}
 .ai-entry .status.error{color:var(--d-n2)}
+.ai-entry .location{display:block;margin:9px 0 0;border:0;background:transparent;color:var(--water);font:11.5px/1.5 var(--sans);text-align:left}
+.ai-entry .location.on{color:var(--ink-dim)}
 .or-rule{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--ink-faint);font:10px var(--mono);letter-spacing:.12em}
 .or-rule:before,.or-rule:after{content:"";height:1px;flex:1;background:var(--line)}
 
@@ -1482,6 +1484,7 @@ function renderMood(){
        '<textarea id="natural-input" maxlength="2000" placeholder="比如：今天脑子很乱，不想见人，也不想花很多钱……"></textarea>' +
        '<div class="row"><button class="voice" id="voice-input" aria-label="用语音说">◉</button>' +
        '<button class="send" id="natural-submit">听懂了，替我选</button></div>' +
+       '<button class="location" id="location-input">⌖ 用当前位置算真实路程（可选）</button>' +
        '<p class="status" id="natural-status">语音不会被保存；也可以直接打字。</p></div>';
   h += '<div class="or-rule">或者自己选</div>';
   h += '<div class="mood-grid">';
@@ -1656,12 +1659,15 @@ function chip(group, val, label){
 /* --- 4. 共享地点详情 --- */
 function renderPlace(id){
   const p = placeById(id);
+  const recommendation = state.aiRecommendations[id];
+  const distance = recommendation && recommendation.distance_source === "amap" ? recommendation.distance_km + " km" : p.distance;
+  const arrival = recommendation && recommendation.walking_minutes ? "步行约 " + recommendation.walking_minutes + " 分钟" : p.transport;
   const back = state.route.indexOf("browse") > -1 ? "#/browse" : (state.lastMode || "#/pick");
   let h = topbar(p.placeName, "地点详情", back);
   h += '<div class="screen">';
   h += coverHTML(p, {cls:"detail-cover", caption:true, badge:true});
   h += '<div class="pad" style="padding-top:16px">';
-  h += '<div class="meta-row"><span><i>距离</i>' + p.distance + '</span><span><i>到达</i>' + p.transport +
+  h += '<div class="meta-row"><span><i>距离</i>' + distance + '</span><span><i>到达</i>' + arrival +
        '</span><span><i>建议停留</i>' + p.suggestedDuration + '</span></div>';
   h += '<p class="sec-k">小在眼中的这里</p>';
   h += '<div class="insights" style="margin-top:0">';
@@ -1688,7 +1694,7 @@ function renderPlace(id){
     });
   }
   h += '</div>';
-  h += '<div class="actions"><button class="btn" data-visit="' + p.placeId + '">就去这里 <span>→</span></button>' +
+  h += '<div class="actions">' + (recommendation && recommendation.navigation_url ? '<button class="btn" data-nav="' + escapeHTML(recommendation.navigation_url) + '" data-place-id="' + p.placeId + '">打开导航 <span>→</span></button>' : '<button class="btn" data-visit="' + p.placeId + '">就去这里 <span>→</span></button>') +
        '<button class="btn-text" data-go="' + back + '">回到' + (back === "#/browse" ? "瀑布流" : "卡片推荐") + '</button></div>';
   h += '</div></div>';
   h += dock('你到了之后我不打扰。等你走了，再问你三十秒。');
@@ -2180,6 +2186,7 @@ function bind(){
   const naturalInput = root.querySelector("#natural-input");
   const naturalSubmit = root.querySelector("#natural-submit");
   const voiceInput = root.querySelector("#voice-input");
+  const locationInput = root.querySelector("#location-input");
   const naturalStatus = root.querySelector("#natural-status");
   function setNaturalStatus(message, error){
     if (!naturalStatus) return;
@@ -2221,6 +2228,24 @@ function bind(){
       onError: message => { voiceInput.classList.remove("listening"); setNaturalStatus(message, true); }
     }).catch(error => { voiceInput.classList.remove("listening"); setNaturalStatus(error.message, true); });
   };
+  if (locationInput) locationInput.onclick = () => {
+    locationInput.disabled = true;
+    setNaturalStatus("正在获取当前位置，只用于这次路程计算…");
+    CurrentAI.requestLocation().then(() => {
+      locationInput.classList.add("on");
+      locationInput.textContent = "✓ 已使用当前位置；坐标不会保存";
+      setNaturalStatus("位置只保留在本页内存中，不会写入记录。");
+    }).catch(error => {
+      locationInput.disabled = false;
+      setNaturalStatus(error.message, true);
+    });
+  };
+  root.querySelectorAll("[data-nav]").forEach(el => el.onclick = () => {
+    const placeId = el.dataset.placeId;
+    const recommendation = state.aiRecommendations[placeId];
+    CurrentAI.track("navigation_opened", {place_id:placeId, recommendation_id:recommendation ? recommendation.recommendation_id : null, method:"amap"});
+    window.open(el.dataset.nav, "_blank", "noopener");
+  });
   root.querySelectorAll("[data-need]").forEach(el => el.onclick = () => {
     const k = el.dataset.need, i = state.needs.indexOf(k);
     if (i >= 0) state.needs.splice(i, 1); else state.needs.push(k);
@@ -2230,7 +2255,10 @@ function bind(){
   root.querySelectorAll("[data-card]").forEach(el => el.onclick = () => {
     const list = rankedPlaces();
     const visible = list[((state.cardIndex % list.length) + list.length) % list.length];
-    if (visible) CurrentAI.track("recommendation_rejected", {place_id:visible.placeId, reason:"next"});
+    if (visible) {
+      const recommendation = state.aiRecommendations[visible.placeId];
+      CurrentAI.track("recommendation_rejected", {place_id:visible.placeId, recommendation_id:recommendation ? recommendation.recommendation_id : "local_" + visible.placeId, reason:"next"});
+    }
     shift(parseInt(el.dataset.card, 10));
   });
 

@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .interpretation import interpret
 from .realtime_asr import build_asr_connect_url
-from .recommender import recommend
+from .recommender import recommend_with_live_context
 from .schemas import (
     InterpretRequest,
     InterpretResponse,
@@ -21,7 +21,7 @@ from .schemas import (
     RecommendResponse,
     RiskLevel,
 )
-from .storage import store_outcome, store_product_event
+from .storage import safe_event_properties, store_outcome, store_product_event, store_recommendations
 
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
@@ -70,27 +70,31 @@ async def interpret_route(payload: InterpretRequest) -> InterpretResponse:
 
 
 @app.post("/api/v1/recommendations", response_model=RecommendResponse)
-async def recommendations_route(payload: RecommendRequest) -> RecommendResponse:
+async def recommendations_route(payload: RecommendRequest, request: Request) -> RecommendResponse:
     if payload.state.risk_level == RiskLevel.urgent:
         return RecommendResponse(
             recommendations=[],
             blocked_by_safety=True,
             safety_message="我现在更在意你是否安全。请先联系身边可信任的人；如果你可能马上伤害自己，请立即联系当地急救或报警服务。",
         )
-    return RecommendResponse(recommendations=recommend(payload))
+    recommendations = await recommend_with_live_context(payload)
+    session_id = request.headers.get("x-session-id", "")
+    if 8 <= len(session_id) <= 80:
+        await store_recommendations(session_id, payload.state, recommendations)
+    return RecommendResponse(recommendations=recommendations)
 
 
 @app.post("/api/v1/events", status_code=202)
 async def product_event(payload: ProductEvent) -> dict[str, bool]:
     # Deliberately never log free text, coordinates, or user identifiers.
-    logger.info(json.dumps({"event": "product_event", "name": payload.name, "session_id": payload.session_id, "recommendation_id": payload.recommendation_id, "place_id": payload.place_id, "properties": payload.properties}, ensure_ascii=False))
+    logger.info(json.dumps({"event": "product_event", "name": payload.name, "session_id": payload.session_id, "recommendation_id": payload.recommendation_id, "place_id": payload.place_id, "properties": safe_event_properties(payload)}, ensure_ascii=False))
     persisted = await store_product_event(payload)
     return {"accepted": True, "persisted": persisted}
 
 
 @app.post("/api/v1/outcomes", status_code=202)
 async def outcome(payload: OutcomeRequest) -> dict[str, bool]:
-    # Persistence will be backed by Postgres in the next slice. Avoid logging note.
+    # Never log the optional note, even when the user explicitly shares it anonymously.
     logger.info(json.dumps({"event": "outcome_saved", "session_id": payload.session_id, "recommendation_id": payload.recommendation_id, "place_id": payload.place_id, "change_score": payload.change_score, "factor_count": len(payload.factor_keys), "visibility": payload.visibility}, ensure_ascii=False))
     persisted = await store_outcome(payload)
     return {"accepted": True, "persisted": persisted}

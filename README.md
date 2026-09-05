@@ -33,7 +33,8 @@ python3 -m http.server 8000
 - 未配置大模型时，使用可测试的本地规则解析，不影响开发。
 - 配置 OpenAI-compatible 模型后，模型只负责把自然语言转换为受约束的需求结构。
 - 配置腾讯云 ASR 后，音频由浏览器直传腾讯；Current 后端只生成两分钟有效的签名。
-- 配置 PostgreSQL 后，行为事件和到访结果进入闭环数据库；不配置时只写隐私安全的运行日志。
+- 配置高德 Web 服务 Key 后，且地点完成过人工核对时，用户主动授权位置后会使用真实步行距离和时间；否则自动回退到原型估算。
+- 配置 PostgreSQL 后，推荐决策、行为事件和到访结果进入闭环数据库；不配置时只写隐私安全的运行日志。
 - 原始语音和用户倾诉原文均不写入数据库或分析事件。
 
 运行检查：
@@ -43,6 +44,47 @@ python3 -m http.server 8000
 node --check current-client.js
 node scripts/extract_place_data.mjs
 ```
+
+### 地图地点核对（不自动认领）
+
+原型里的地点名称不能直接当作可靠地图身份。先把 `AMAP_WEB_SERVICE_KEY` 放进本地 `.env`（不要提交），再生成候选：
+
+```bash
+AMAP_WEB_SERVICE_KEY=你的服务端Key .venv/bin/python -m scripts.resolve_amap_places
+```
+
+候选写入被 Git 忽略的 `backend_app/data/amap_candidates.json`。人工核对名称、地址和坐标后，只把确定的一项写入 `backend_app/data/place_overrides.json`：
+
+```json
+{
+  "places": {
+    "wansheng": {
+      "amap": {
+        "provider_place_id": "高德POI ID",
+        "longitude": 116.0,
+        "latitude": 39.0,
+        "verified_name": "地图中的正式名称",
+        "address": "人工核对后的地址",
+        "verification_status": "verified",
+        "verified_at": "2026-09-05T00:00:00Z"
+      }
+    }
+  }
+}
+```
+
+代码不会自动采用搜索第一名；只有 `verification_status=verified` 才会用于路线和导航。
+
+### 闭环数据库
+
+Vercel 上建议从 Marketplace 连接 Neon，并给 `DATABASE_URL` 使用 pooled connection string。环境变量只配置在服务端，按 Development / Preview / Production 分开管理。首次连接后运行：
+
+```bash
+.venv/bin/python scripts/migrate.py
+.venv/bin/python -m scripts.seed_places
+```
+
+数据库保存：结构化需求、推荐排名与得分、接受/拒绝/导航/到访状态、反馈分数和因素。数据库不保存：倾诉原文、原始语音、用户经纬度；私密反馈正文也不上传。
 
 断网也能跑。手机上看用这个链接（私有，问 Julie 要）：
 <https://claude.ai/code/artifact/d78298ab-65f6-4a87-9656-4e1be7a0516b>

@@ -73,6 +73,10 @@ class Recommendation(BaseModel):
     reason: str
     score: float = Field(ge=0, le=1)
     distance_km: float | None = None
+    walking_minutes: int | None = None
+    distance_source: Literal["amap", "prototype_estimate"] = "prototype_estimate"
+    map_verified: bool = False
+    navigation_url: str | None = None
     transport: str | None = None
     suggested_duration: str | None = None
     cost: str | None = None
@@ -115,4 +119,3 @@ class OutcomeRequest(BaseModel):
     factor_keys: list[str] = Field(default_factory=list, max_length=12)
     visibility: Literal["private", "anonymous"] = "private"
     note: str | None = Field(default=None, max_length=80)
-

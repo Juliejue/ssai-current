@@ -7,6 +7,7 @@
   var API_BASE = (window.CURRENT_API_BASE || localApi).replace(/\/$/, '');
   var SESSION_KEY = 'current.session.v1';
   var activeVoice = null;
+  var activeLocation = null;
 
   function sessionId() {
     try {
@@ -58,11 +59,29 @@
         });
         return api('/recommendations', {
           method: 'POST',
-          body: JSON.stringify({ state: interpretation.state, limit: 3 })
+          body: JSON.stringify({ state: interpretation.state, location: activeLocation, limit: 3 })
         }).then(function (recommendations) {
           return { interpretation: interpretation, recommendations: recommendations };
         });
       });
+  }
+
+  function requestLocation() {
+    if (activeLocation) return Promise.resolve(activeLocation);
+    if (!navigator.geolocation) return Promise.reject(new Error('当前浏览器不支持定位'));
+    return new Promise(function (resolve, reject) {
+      navigator.geolocation.getCurrentPosition(function (position) {
+        // Kept only in page memory. The backend uses it for this route request and
+        // deliberately excludes it from logs and persistence.
+        activeLocation = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        };
+        resolve(activeLocation);
+      }, function () {
+        reject(new Error('没有获得位置权限，仍可以按原型距离推荐'));
+      }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+    });
   }
 
   var WORKLET_SOURCE = `
@@ -197,6 +216,7 @@
     sessionId: sessionId,
     track: track,
     interpretAndRecommend: interpretAndRecommend,
+    requestLocation: requestLocation,
     toggleVoice: toggleVoice
   };
 })();
