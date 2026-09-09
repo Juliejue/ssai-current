@@ -460,6 +460,119 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
   border:1px solid var(--line-2);border-radius:22px;padding:9px 16px;transition:all .16s}
 .jump:hover{border-color:var(--water);color:var(--water)}
 .disclaimer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font:11.5px/1.9 var(--mono);color:var(--ink-faint)}
+
+/* ============================================================
+   AI-native 主旅程：说 → 复述 → （最多一次追问）→ 1 主推 + 2 备选 → 出发 → 反馈
+   评委 #4 / #6：第一屏不给选择题，小在提议、人只确认一次。
+   ============================================================ */
+.talk{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 24px 26px;text-align:center;overflow-y:auto}
+.talk .zai{width:112px;height:66px;opacity:.9;margin-bottom:6px}
+.talk h1{margin:0 0 10px;font:400 25px/1.5 var(--serif);letter-spacing:.01em;text-wrap:balance}
+.talk .sub{margin:0 0 26px;font:13px/1.8 var(--sans);color:var(--ink-dim);max-width:26ch}
+.mic{width:96px;height:96px;border-radius:50%;background:var(--ink);color:var(--paper);
+  display:grid;place-items:center;box-shadow:0 10px 28px rgba(18,42,46,.22);position:relative;flex:none}
+.mic svg{width:30px;height:30px}
+.mic:disabled{opacity:.45}
+.mic.listening{background:var(--water)}
+.mic.listening:before{content:"";position:absolute;inset:-12px;border-radius:50%;
+  border:2px solid var(--water);opacity:.45;animation:mic-ring 1.5s ease-out infinite}
+@keyframes mic-ring{0%{transform:scale(.9);opacity:.5}100%{transform:scale(1.22);opacity:0}}
+.mic-cap{margin:14px 0 0;font:12px/1.6 var(--sans);color:var(--ink-dim);min-height:20px}
+.mic-cap.error{color:var(--d-n2)}
+.talk .type-toggle{margin-top:20px;font:12px var(--sans);color:var(--water);border-bottom:1px solid rgba(30,110,114,.3);padding-bottom:2px}
+.talk .typing{width:100%;max-width:320px;margin-top:18px;text-align:left}
+.talk .typing textarea{display:block;width:100%;min-height:76px;resize:none;background:var(--card);
+  border:1px solid var(--line-2);border-radius:14px;padding:11px 12px;font:13px/1.7 var(--sans);outline:none}
+.talk .typing textarea:focus{border-color:var(--water)}
+.talk .typing .send{margin-top:9px;height:44px;width:100%;border-radius:22px;background:var(--ink);color:var(--paper);font:500 14px var(--sans)}
+.talk .typing .send:disabled{background:rgba(18,42,46,.08);color:var(--ink-faint)}
+.talk .foot{margin-top:auto;padding-top:24px;display:flex;flex-direction:column;gap:9px;align-items:center}
+.talk .foot button{font:11.5px/1.5 var(--sans);color:var(--ink-faint)}
+.talk .foot button.on{color:var(--water)}
+.talk .privacy{margin:16px 0 0;font:10.5px/1.7 var(--mono);color:var(--ink-faint);letter-spacing:.02em;max-width:30ch}
+
+/* 小在说的话 */
+.say{display:flex;gap:11px;align-items:flex-start;margin-bottom:16px}
+.say .zai{flex:none;width:34px;height:22px;margin-top:3px;opacity:.85}
+.say .bubble{flex:1;background:var(--card);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:13px 15px}
+.say .bubble p{margin:0;font:400 16px/1.7 var(--serif);color:var(--ink)}
+.say .bubble .tag{display:inline-block;margin-bottom:8px;font:10px var(--mono);letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+
+/* 证据：先给证据再给结论（守则 4） */
+.evidence{margin:0 0 20px;padding:0;list-style:none;border-left:2px solid var(--sun);padding-left:13px}
+.evidence li{margin:0 0 7px;font:12.5px/1.7 var(--sans);color:var(--ink-dim)}
+.evidence li:last-child{margin-bottom:0}
+.evidence li b{color:var(--ink);font-weight:500}
+
+/* 一次追问 / 纠错 chips */
+.ask{margin:0 0 18px;padding:14px;border:1px solid var(--line-2);border-radius:16px;background:var(--sun-wash)}
+.ask p{margin:0 0 11px;font:13.5px/1.65 var(--sans);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{padding:9px 14px;border-radius:20px;border:1px solid var(--line-2);background:var(--card);
+  font:13px var(--sans);color:var(--ink);transition:border-color .14s}
+.chips button:hover{border-color:var(--water);color:var(--water)}
+.chips button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* 1 主推 + 2 备选 */
+.relief{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;
+  font:11px var(--mono);letter-spacing:.06em}
+.relief.now{background:var(--sun-wash);color:var(--sun)}
+.relief.near{background:var(--water-wash);color:var(--water)}
+.relief.later{background:var(--sunk);color:var(--ink-dim)}
+.relief i{width:5px;height:5px;border-radius:50%;background:currentColor;font-style:normal}
+.primary-card{border:1px solid var(--line-2);border-radius:20px;background:var(--card);overflow:hidden;margin-bottom:8px}
+.primary-card .pc-head{padding:15px 16px 0}
+.primary-card h3{margin:11px 0 4px;font:400 22px/1.42 var(--serif);letter-spacing:.01em}
+.primary-card .where{margin:0;font:12px var(--sans);color:var(--ink-faint)}
+.primary-card .pc-body{padding:14px 16px 16px}
+.chain{margin:0 0 14px;padding:0;list-style:none;counter-reset:step}
+.chain li{position:relative;padding-left:20px;margin-bottom:6px;font:12.5px/1.65 var(--sans);color:var(--ink-dim)}
+.chain li:before{content:"";position:absolute;left:5px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--water);opacity:.55}
+.chain li:last-child{margin-bottom:0;color:var(--ink)}
+.chain li:last-child:before{background:var(--sun);opacity:1}
+.cost-rows{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.cost-rows div{display:flex;gap:10px;align-items:baseline;font:12.5px/1.6 var(--sans)}
+.cost-rows i{flex:none;width:56px;font:10px var(--mono);letter-spacing:.1em;color:var(--ink-faint);font-style:normal;text-transform:uppercase}
+.cost-rows span{color:var(--ink-dim)}
+.cost-rows .pay span{color:var(--ink)}
+.sample-note{margin:12px 0 0;padding:9px 11px;border-radius:10px;background:var(--sunk);
+  font:11px/1.65 var(--mono);color:var(--ink-faint)}
+.alts{margin-top:20px}
+.alts .alt{width:100%;display:flex;gap:12px;align-items:flex-start;text-align:left;padding:13px 14px;
+  border:1px solid var(--line);border-radius:15px;background:var(--card);margin-bottom:9px}
+.alts .alt:hover{border-color:var(--line-2)}
+.alts .alt .dot{flex:none;width:22px;height:22px;margin-top:2px}
+.alts .alt h4{margin:0 0 3px;font:400 15px/1.45 var(--serif)}
+.alts .alt p{margin:0;font:11.5px/1.6 var(--sans);color:var(--ink-faint)}
+.alts .alt .relief{margin-top:7px}
+
+/* 行程条：出发 → 到达 → 离开，闭环显式可见 */
+.trip{flex:none;border-top:1px solid var(--line);background:var(--sun-wash);padding:10px 14px;
+  display:flex;align-items:center;gap:10px}
+.trip .txt{flex:1;min-width:0}
+.trip .txt b{display:block;font:500 12.5px/1.5 var(--sans);color:var(--ink)}
+.trip .txt small{display:block;font:10.5px var(--mono);color:var(--ink-dim);letter-spacing:.04em}
+.trip button{flex:none;padding:8px 13px;border-radius:20px;background:var(--ink);color:var(--paper);font:500 12px var(--sans)}
+.trip button.ghost{background:none;color:var(--ink-dim);border:1px solid var(--line-2)}
+
+/* 安全响应 */
+.safe{padding:26px 20px}
+.safe h1{margin:14px 0 12px;font:400 23px/1.5 var(--serif)}
+.safe p{margin:0 0 14px;font:14px/1.85 var(--sans);color:var(--ink-dim)}
+.safe .lines{border:1px solid var(--line-2);border-radius:14px;background:var(--card);padding:14px 15px;margin-bottom:16px}
+.safe .lines b{display:block;font:500 13px var(--sans);margin-bottom:4px}
+.safe .lines span{display:block;font:13px/1.8 var(--mono);color:var(--ink)}
+.safe .lines small{display:block;margin-top:8px;font:11px/1.6 var(--sans);color:var(--ink-faint)}
+
+/* 小在从记录里看到的（FR-12） */
+.learned{margin:0 0 22px;border:1px solid var(--line-2);border-radius:16px;background:var(--card);overflow:hidden}
+.learned .lh{padding:11px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;
+  font:10px var(--mono);letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+.learned .lh span{width:15px;height:15px;flex:none;opacity:.8}
+.learned .lr{padding:12px 14px;border-bottom:1px solid var(--line)}
+.learned .lr:last-child{border-bottom:none}
+.learned .lr strong{display:block;font:500 13px/1.5 var(--sans);color:var(--ink);margin-bottom:3px}
+.learned .lr small{display:block;font:11.5px/1.65 var(--sans);color:var(--ink-faint)}
 </style>
 
 <div id="root"></div>
@@ -1135,6 +1248,8 @@ PLACES.forEach(p => {
   p.factorOptions = p.factors.map(k => FACTORS[k]);
   p.distance = p.distanceKm.toFixed(1) + " km";
 });
+/* 到访样本诚实（FR-10b / FR-19b）：没有真实反馈之前，任何平均分都是假的。 */
+const SAMPLE_EMPTY = "样本还少：这里还没有攒够真实到访反馈，所以我不给平均分，也不承诺你去了会变好。";
 const placeById = id => PLACES.find(p => p.placeId === id) || PLACES[0];
 const reasonFor = (p, moodId) => p.matchReason[moodId] || p.matchReason._;
 /* 按当前情绪（以及已选诉求）给全部空间打分排序 */
@@ -1354,8 +1469,21 @@ function dock(line, opts){
 
 /* ---------- 状态 ---------- */
 const state = {
-  route: "#/mood",
+  route: "#/talk",
   mood: "low",
+  /* ── AI-native 主旅程 ──
+     talk: 第一屏说了什么（只留在本页内存，不入库、不进日志）
+     read: 后端返回的理解结果（状态提议 + 证据 + 至多一次追问）
+     offer: 1 主推 + 2 备选
+     trip: 出发 → 到达 → 离开 的行程状态（本地存，跨到地图 App 再回来不丢） */
+  talkText: "",
+  talkTyping: false,
+  read: null,
+  offer: null,
+  offerNote: null,
+  rejected: [],
+  askAnswered: false,
+  trip: null,
   needs: [],
   cardIndex: 0,
   favs: new Set(),
@@ -1424,7 +1552,8 @@ function fmtDate(iso){
 function stayMinutes(rec){
   const a = new Date(rec.visitStartedAt).getTime(), b = new Date(rec.createdAt).getTime();
   const m = Math.round((b - a) / 60000);
-  return m > 0 && m < 600 ? m : 34;
+  if (m >= 1 && m < 600) return m;
+  return rec.demo ? 34 : Math.max(1, m);
 }
 
 /* 「小在眼中的这次到访」：只由本次的分数与所选因素推出，不做人格或状态判断 */
@@ -1448,6 +1577,87 @@ function visitInsights(rec){
   return [first, second];
 }
 
+/* ---------- 行程（出发 → 到达 → 离开）----------
+   存在 localStorage，因为「带我去」会把人送去地图 App。回来时闭环不能断。
+   只存 placeId / recommendationId / 时间戳——没有坐标，没有原话。 */
+const TRIP_KEY = "current.trip.v1";
+function loadTrip(){
+  try { return JSON.parse(localStorage.getItem(TRIP_KEY) || "null"); } catch(e){ return null; }
+}
+function saveTrip(trip){
+  state.trip = trip;
+  try { trip ? localStorage.setItem(TRIP_KEY, JSON.stringify(trip)) : localStorage.removeItem(TRIP_KEY); } catch(e){}
+}
+state.trip = loadTrip();
+
+function tripStrip(){
+  const t = state.trip;
+  if (!t) return "";
+  const p = placeById(t.placeId);
+  const short = p.placeName.replace(/ · .*/, "").slice(0, 8);
+  if (t.status === "departed"){
+    return '<div class="trip"><div class="txt"><b>在去' + short + '的路上</b>' +
+      '<small>' + fmtDate(t.startedAt) + ' 出发 · 到了按一下，我就不打扰了</small></div>' +
+      '<button data-trip="arrived">我到了</button></div>';
+  }
+  return '<div class="trip"><div class="txt"><b>你在' + short + '</b>' +
+    '<small>到了 ' + fmtDate(t.arrivedAt) + ' · 走的时候说三十秒就行</small></div>' +
+    '<button data-trip="left">我离开了</button>' +
+    '<button class="ghost" data-trip="clear">取消</button></div>';
+}
+
+/* ---------- 小在从你的记录里看到的（FR-12）----------
+   只做「这些记录里出现过什么」的事实归纳，不推断人格、不预测下一次一定有用。
+   记录本地优先，所以这段计算也留在本地。 */
+function learnedPatterns(){
+  const recs = state.records.filter(r => r.changeScore !== null && r.changeScore !== undefined);
+  if (recs.length < 2) return null;
+  const rows = [];
+
+  const good = recs.filter(r => r.changeScore > 0);
+  const bad  = recs.filter(r => r.changeScore < 0);
+
+  const tally = list => {
+    const n = {};
+    list.forEach(r => (r.factors || []).forEach(f => { n[f] = (n[f] || 0) + 1; }));
+    return Object.keys(n).sort((a, b) => n[b] - n[a]);
+  };
+  const topGood = tally(good)[0];
+  if (topGood){
+    rows.push({t:"接住你的时候，多半有「" + topGood + "」",
+               d:"在 " + good.length + " 次变好的记录里出现过。这会让带这个属性的空间往前排。"});
+  }
+  const topBad = tally(bad)[0];
+  if (topBad){
+    rows.push({t:"「" + topBad + "」出现时，你多半没被接住",
+               d:"我会在推荐里避开同类。样本还很少，说错了就点「不太对」。"});
+  }
+  const cats = {};
+  recs.forEach(r => { const c = (r.placeCategory || "").split(" · ")[0]; if (c) cats[c] = (cats[c] || 0) + 1; });
+  const topCat = Object.keys(cats).sort((a, b) => cats[b] - cats[a])[0];
+  if (topCat && cats[topCat] > 1){
+    rows.push({t:"你去得最多的是「" + topCat + "」",
+               d:cats[topCat] + " 次。这是已经发生的事实，不是对你的判断。"});
+  }
+  if (!rows.length) return null;
+  return {rows:rows.slice(0, 3), count:recs.length};
+}
+
+/* ---------- 安全响应（SP-6）：不分析、不诊断、不继续推荐空间 ---------- */
+function renderSafe(){
+  let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div></div>';
+  h += '<div class="screen"><div class="safe">';
+  h += '<div style="width:56px;height:34px;opacity:.85">' + cloudSVG("closed") + '</div>';
+  h += '<h1>听起来你现在<br>非常难受。</h1>';
+  h += '<p>这一步我不给你找地方了。不是因为你说错了什么，是因为现在更要紧的是有人在你身边。</p>';
+  h += '<div class="lines"><b>可以先联系</b><span>身边一个你信得过的人</span>' +
+       '<span>北京心理援助热线 010-82951332</span><span>全国 24 小时 400-161-9995</span>' +
+       '<small>我不做诊断，也不替代任何专业帮助。你随时可以回来。</small></div>';
+  h += '<div class="actions"><button class="btn ghost" data-go="#/talk">回到开头</button></div>';
+  h += '</div></div>';
+  return h;
+}
+
 /* ---------- 路由 ---------- */
 function go(hash){
   state.route = hash;
@@ -1457,7 +1667,7 @@ function go(hash){
   if (sc) sc.scrollTop = 0;
 }
 window.addEventListener("hashchange", () => {
-  const h = location.hash || "#/mood";
+  const h = location.hash || "#/talk";
   if (h !== state.route){ state.route = h; render(); }
 });
 
@@ -1474,19 +1684,12 @@ function topbar(title, kicker, backTo){
 
 /* --- 1. 情绪 --- */
 function renderMood(){
-  let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div>' +
-          '<button class="k" data-go="#/compare" style="letter-spacing:.14em">总览</button></div>';
+  let h = topbar("自己挑一种", "备用入口", "#/talk");
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">第一步 · 出发前</p>';
+  h += '<p class="eyebrow">自己挑 · 备用入口</p>';
   h += '<h1 class="title">此刻，你更接近<br>哪一种？</h1>';
-  h += '<p class="lead">不用先想清楚。你可以随便说发生了什么，我来替你缩小范围。</p>';
-  h += '<div class="ai-entry"><label for="natural-input">现在最占着你的，是什么？</label>' +
-       '<textarea id="natural-input" maxlength="2000" placeholder="比如：今天脑子很乱，不想见人，也不想花很多钱……"></textarea>' +
-       '<div class="row"><button class="voice" id="voice-input" aria-label="用语音说">◉</button>' +
-       '<button class="send" id="natural-submit">听懂了，替我选</button></div>' +
-       '<button class="location" id="location-input">⌖ 用当前位置算真实路程（可选）</button>' +
-       '<p class="status" id="natural-status">语音不会被保存；也可以直接打字。</p></div>';
-  h += '<div class="or-rule">或者自己选</div>';
+  h += '<p class="lead">这一屏是留给「就是不想说话」的时候的。<br>平常直接跟小在说一句就行。</p>';
+  h += '<button class="btn ghost sm" data-go="#/talk" style="margin-bottom:20px">回去直接说一句 →</button>';
   h += '<div class="mood-grid">';
   MOODS.forEach(m => {
     h += '<button class="mood' + (state.mood === m.id ? " on" : "") + '" data-mood="' + m.id + '">' +
@@ -1582,8 +1785,7 @@ function renderPick(){
   const x = p.placeInsights[0];
   h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong><small>' + x.d + '</small></div></div>';
   h += '</div>';
-  h += '<div class="avg"><b>' + signed(p.averageChange) + '</b><p>平均变化 · ' +
-       p.feedbackCount.toLocaleString() + ' 份匿名反馈 <em>原型示例值</em></p></div>';
+  h += '<div class="sample-note">' + SAMPLE_EMPTY + '</div>';
   h += '</div></div>';
   h += '</div>';
   h += '<div class="deck-nav"><button data-card="-1" aria-label="上一个">←</button>' +
@@ -1641,7 +1843,7 @@ function renderBrowse(){
       h += coverHTML(p, {style:"aspect-ratio:" + p.ratio});
       h += '<div class="b"><h4>' + p.action + '</h4><p class="place-sub sm">' + p.placeName + '</p>' +
            '<p class="rsn">' + reasonFor(p, state.mood) + '</p>';
-      h += '<div class="foot"><b>' + signed(p.averageChange) + '</b><span>' + p.distance + '</span><span>' + p.category.split(" · ")[0] + '</span></div>';
+      h += '<div class="foot"><b style="font:10px var(--mono);letter-spacing:.08em;color:var(--ink-faint)">样本还少</b><span>' + p.distance + '</span><span>' + p.category.split(" · ")[0] + '</span></div>';
       h += '<div class="mini-tags">' + p.environmentTags.slice(0,3).map(t => '<span>' + t + '</span>').join("") + '</div>';
       h += '</div></button>';
     });
@@ -1662,7 +1864,10 @@ function renderPlace(id){
   const recommendation = state.aiRecommendations[id];
   const distance = recommendation && recommendation.distance_source === "amap" ? recommendation.distance_km + " km" : p.distance;
   const arrival = recommendation && recommendation.walking_minutes ? "步行约 " + recommendation.walking_minutes + " 分钟" : p.transport;
-  const back = state.route.indexOf("browse") > -1 ? "#/browse" : (state.lastMode || "#/pick");
+  const fromOffer = (state.offer || []).some(x => x.place_id === p.placeId);
+  const back = fromOffer ? "#/offer"
+             : state.route.indexOf("browse") > -1 ? "#/browse"
+             : (state.lastMode || "#/pick");
   let h = topbar(p.placeName, "地点详情", back);
   h += '<div class="screen">';
   h += coverHTML(p, {cls:"detail-cover", caption:true, badge:true});
@@ -1677,8 +1882,7 @@ function renderPlace(id){
   h += '</div>';
   h += '<div class="why" style="margin-top:16px"><span class="k">为什么此刻推荐给你</span><p>' + reasonFor(p, state.mood) + '</p></div>';
   h += '<p class="sec-k">匿名汇总</p>';
-  h += '<div class="avg" style="margin-top:0"><b>' + signed(p.averageChange) + '</b><p>到访前后的平均心情变化' +
-       '<em>' + p.feedbackCount.toLocaleString() + ' 份匿名反馈的平均值。它描述已发生的记录，不承诺你会好起来，也不是医学结论。</em></p></div>';
+  h += '<div class="sample-note" style="margin-top:0">' + SAMPLE_EMPTY + '</div>';
   h += '<div class="tags">' + p.environmentTags.map(t => '<span class="tag">' + t + '</span>').join("") + '</div>';
   // 其他人在这里留下的：比一个平均分更能回答「为什么这里适合我」
   const here = COMMUNITY.filter(e => e.placeId === p.placeId).slice(0, 2);
@@ -1694,10 +1898,12 @@ function renderPlace(id){
     });
   }
   h += '</div>';
-  h += '<div class="actions">' + (recommendation && recommendation.navigation_url ? '<button class="btn" data-nav="' + escapeHTML(recommendation.navigation_url) + '" data-place-id="' + p.placeId + '">打开导航 <span>→</span></button>' : '<button class="btn" data-visit="' + p.placeId + '">就去这里 <span>→</span></button>') +
-       '<button class="btn-text" data-go="' + back + '">回到' + (back === "#/browse" ? "瀑布流" : "卡片推荐") + '</button></div>';
+  h += '<div class="actions">' +
+       '<button class="btn" data-depart="' + p.placeId + '">' +
+       (recommendation && recommendation.navigation_url ? '带我去 · 打开高德导航' : '带我去') + ' <span>→</span></button>' +
+       '<button class="btn-text" data-go="' + back + '">回到' + (back === "#/browse" ? "瀑布流" : back === "#/offer" ? "推荐" : "卡片推荐") + '</button></div>';
   h += '</div></div>';
-  h += dock('你到了之后我不打扰。等你走了，再问你三十秒。');
+  h += tripStrip() || dock('你到了之后我不打扰。等你走了，再问你三十秒。');
   return h;
 }
 
@@ -1838,8 +2044,8 @@ function renderCard(recId, backTo){
   h += '</div>';
   h += '<button class="btn ghost flip-btn" data-flip="1">' + (state.flipped ? "← 翻回正面" : "翻到背面 · 看这次的变化 →") + '</button>';
   if (rec.visibility === "anonymous"){
-    h += '<div class="avg" style="margin-top:14px"><b>' + signed(p.averageChange) + '</b><p>' + p.placeName + ' · 平均心情变化' +
-         '<em>' + p.feedbackCount.toLocaleString() + ' 份匿名反馈的平均值。你这条也加了进去。它不是疗效，也不是治愈率。</em></p></div>';
+    h += '<div class="sample-note" style="margin-top:14px">你这一条进了 ' + p.placeName +
+         ' 的匿名汇总。这里目前还不到 5 条，所以我不给平均分——攒够之前，估计值只是估计值。</div>';
   } else {
     h += '<div class="avg" style="margin-top:14px;background:var(--card)"><b style="color:var(--ink-dim)">—</b>' +
          '<p>这条没有进入 ' + p.placeName + ' 的汇总<em>你选了只存进自己的记录。地点的平均分里没有你。</em></p></div>';
@@ -1875,7 +2081,7 @@ function renderRecords(){
   const all = state.records;
   const avg = all.length ? (all.reduce((s,r) => s + r.changeScore, 0) / all.length) : 0;
   const anon = all.filter(r => r.visibility === "anonymous").length;
-  let h = topbar("情绪空间轨迹", "长期记录", "#/mode");
+  let h = topbar("情绪空间轨迹", "长期记录", "#/talk");
   h += '<div class="screen">';
   // 封面 + 身份：Tara 个人页的结构，对象换成「你自己的记录」
   const read = selfRead(all);
@@ -1892,6 +2098,19 @@ function renderRecords(){
   });
   h += '</div>';
   h += '<div style="padding:13px 18px 16px"><button class="btn ghost sm" data-go="#/nearby">看别人在这些地方留下的 →</button></div></div>';
+
+  // 小在从这些记录里学到的：说清楚下一次推荐会怎么变，而不是给用户贴标签（FR-12 / FR-17）
+  const learned = learnedPatterns();
+  if (learned){
+    h += '<div class="pad" style="padding-bottom:0"><div class="learned">';
+    h += '<div class="lh"><span>' + catSVG() + '</span>下次推荐我会怎么改</div>';
+    learned.rows.forEach(row => {
+      h += '<div class="lr"><strong>' + row.t + '</strong><small>' + row.d + '</small></div>';
+    });
+    h += '<div class="lr"><strong>依据只有你的 ' + learned.count + ' 条记录</strong>' +
+         '<small>这些计算都在你这台设备上完成，没有上传。攒到 5 条以上，我才会用它覆盖原来的估计值。</small></div>';
+    h += '</div></div>';
+  }
   h += '<div class="rec-head" style="padding-top:18px"><p class="eyebrow">你去过的地方</p>' +
        '<h1 class="title sm">' + all.length + ' 次到访，<br>攒成了一片。</h1></div>';
   h += '<div class="rec-stat"><div><b class="num">' + (avg >= 0 ? "+" : "") + avg.toFixed(1) + '</b><small>你的平均变化<br>只算你的记录</small></div>' +
@@ -2109,12 +2328,183 @@ function renderCompare(){
 /* ============================================================
    主渲染
    ============================================================ */
+/* ============================================================
+   AI-native 主旅程 · 四屏
+   ① #/talk  语音优先，一句话就能开始（评委 #4：开场步骤太多）
+   ② #/echo  小在复述理解 + 证据 + 至多一次追问（守则 4：证据先于结论）
+   ③ #/fix   猜错一步可纠（FR-03）
+   ④ #/offer 1 主推 + 2 备选（FR-05 / FR-20）
+   ============================================================ */
+
+function micSVG(){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" ' +
+    'stroke-linecap="round" aria-hidden="true">' +
+    '<rect x="9" y="2.5" width="6" height="11" rx="3"/>' +
+    '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3.2"/></svg>';
+}
+
+/* --- ① 说 --- */
+function renderTalk(){
+  let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div>' +
+          '<button class="k" data-go="#/records" style="letter-spacing:.14em">记录</button></div>';
+  h += '<div class="talk">';
+  h += '<div class="zai">' + cloudSVG("withyou") + '</div>';
+  h += '<h1>现在，说点什么都行。</h1>';
+  h += '<p class="sub">不用组织语言，也不用先想清楚要去哪。<br>你说，我来找。</p>';
+  h += '<button class="mic" id="mic-button" aria-label="按住说话">' + micSVG() + '</button>';
+  h += '<p class="mic-cap" id="mic-cap">按一下开始说 · 再按一下结束</p>';
+  if (!state.talkTyping){
+    h += '<button class="type-toggle" id="type-toggle">不想说话，我打字</button>';
+  } else {
+    h += '<div class="typing"><textarea id="natural-input" maxlength="2000" ' +
+         'placeholder="比如：今天脑子很乱，不想见人，也不想花很多钱……">' + escapeHTML(state.talkText) + '</textarea>' +
+         '<button class="send" id="natural-submit">说完了，替我看看</button></div>';
+  }
+  h += '<p class="privacy">语音不保存 · 原话不上传 · 位置不入库<br>只用来找一个此刻能接住你的地方</p>';
+  h += '<div class="foot">' +
+       '<button id="location-input"' + (CurrentAI.hasLocation() ? ' class="on"' : '') + '>' +
+       (CurrentAI.hasLocation() ? '✓ 已用当前位置算真实路程' : '⌖ 用当前位置算真实路程（可选）') + '</button>' +
+       '<button data-go="#/mood">我不想说，自己挑</button></div>';
+  h += '</div>';
+  h += tripStrip();
+  return h;
+}
+
+/* --- ② 复述 + 至多一次追问 --- */
+function renderEcho(){
+  const r = state.read;
+  if (!r) return renderTalk();
+  let h = topbar("我听到的", "第一步 · 只确认一次", "#/talk");
+  h += '<div class="screen"><div class="pad">';
+  h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
+       '<div class="bubble"><span class="tag">小在</span><p>' + escapeHTML(r.acknowledgement) + '</p></div></div>';
+  h += '<p class="eyebrow">我是这么听出来的</p>';
+  h += '<ul class="evidence">' + (r.evidence || []).map(e => '<li>' + escapeHTML(e) + '</li>').join("") + '</ul>';
+
+  const asking = r.clarify_field && !state.askAnswered;
+  if (asking){
+    h += '<div class="ask"><p>' + escapeHTML(r.state.clarifying_question) + '</p><div class="chips">';
+    (r.clarify_options || []).forEach(o => {
+      h += '<button data-ask="' + escapeHTML(o.key) + '">' + escapeHTML(o.label) + '</button>';
+    });
+    h += '</div></div>';
+    h += '<p class="lead" style="margin:0">只问这一句。选完我直接去找地方，不会再问第二个问题。</p>';
+  } else {
+    h += '<div class="actions"><button class="btn" id="accept-read">就按这个，帮我找 <span>→</span></button>' +
+         '<button class="btn-text" data-go="#/fix">不太对，我换一个说法</button></div>';
+  }
+  h += '<p class="status" id="natural-status" style="min-height:18px;margin:12px 0 0;font:11.5px/1.55 var(--sans);color:var(--ink-faint)"></p>';
+  h += '</div></div>';
+  h += tripStrip() || dock('猜错了不用客气。改一下比忍着强。', {records:false});
+  return h;
+}
+
+/* --- ③ 猜错一步可纠 --- */
+function renderFix(){
+  const r = state.read;
+  const chips = (r && r.correction_chips) || [];
+  let h = topbar("哪一句不对", "一步就能改", "#/echo");
+  h += '<div class="screen"><div class="pad">';
+  h += '<div class="say"><span class="zai">' + cloudSVG() + '</span>' +
+       '<div class="bubble"><span class="tag">小在</span><p>那是我猜错了。挑一个更接近的说法，我立刻重新找。</p></div></div>';
+  h += '<p class="eyebrow">身体上更接近哪一种</p>';
+  h += '<div class="chips">' + chips.map(c =>
+        '<button data-fix="' + escapeHTML(c.key) + '">' + escapeHTML(c.label) + '</button>').join("") + '</div>';
+  h += '<p class="lead" style="margin-top:20px">选完直接出结果，不会再让你确认一遍。<br>这些都是身体上的感觉，不是病名。</p>';
+  h += '<p class="status" id="natural-status" style="min-height:18px;font:11.5px/1.55 var(--sans);color:var(--ink-faint)"></p>';
+  h += '</div></div>';
+  h += dock('说错、改口、再改一次，都算数。', {records:false});
+  return h;
+}
+
+/* --- ④ 1 主推 + 2 备选 --- */
+function reliefPill(rec){
+  return '<span class="relief ' + rec.time_to_relief + '"><i></i>' + escapeHTML(rec.relief_label) + '</span>';
+}
+function renderOffer(){
+  const offer = state.offer;
+  if (!offer || !offer.length) return renderTalk();
+  const main = offer[0];
+  const p = placeById(main.place_id);
+  const alts = offer.slice(1, 3);
+
+  let h = topbar("此刻给你一个", "第二步 · 推荐", "#/echo");
+  h += '<div class="screen"><div class="pad" style="padding-top:16px">';
+  if (state.offerNote){
+    h += '<div class="say"><span class="zai">' + cloudSVG() + '</span><div class="bubble">' +
+         '<span class="tag">小在</span><p>' + escapeHTML(state.offerNote) + '</p></div></div>';
+  }
+
+  h += '<div class="primary-card">';
+  h += coverHTML(p, {style:"aspect-ratio:16/9;border:0;border-radius:0"});
+  h += '<div class="pc-head">' + reliefPill(main) +
+       '<h3>' + escapeHTML(main.action) + '</h3>' +
+       '<p class="where">' + escapeHTML(main.place_name) + ' · ' + p.area + '</p></div>';
+  h += '<div class="pc-body">';
+  h += '<ul class="chain">' + (main.reason_chain || []).map(c => '<li>' + escapeHTML(c) + '</li>').join("") + '</ul>';
+  h += '<div class="cost-rows">';
+  h += '<div><i>到达</i><span>' + escapeHTML(reachLine(main, p)) + '</span></div>';
+  h += '<div class="pay"><i>代价</i><span>' + (main.tradeoffs || []).map(escapeHTML).join(' · ') + '</span></div>';
+  h += '<div><i>待多久</i><span>' + escapeHTML(main.suggested_duration || p.suggestedDuration) + '</span></div>';
+  h += '</div>';
+  h += '<p class="sample-note">' + escapeHTML(sampleLine(main)) + '</p>';
+  h += '</div></div>';
+
+  h += '<div class="actions" style="margin-top:14px">';
+  h += '<button class="btn" data-depart="' + escapeHTML(main.place_id) + '">带我去 <span>→</span></button>';
+  h += '<div class="btn-row" style="margin-top:10px">' +
+       '<button class="btn ghost sm" data-go="#/place/' + escapeHTML(main.place_id) + '">先看看细节</button>' +
+       '<button class="btn ghost sm" id="swap-offer">都不合适，换一批</button></div></div>';
+
+  if (alts.length){
+    h += '<div class="alts"><p class="eyebrow" style="margin-top:4px">要是这个不对，还有</p>';
+    alts.forEach(a => {
+      const ap = placeById(a.place_id);
+      h += '<button class="alt" data-pick="' + escapeHTML(a.place_id) + '">' +
+           '<span class="dot">' + catDot(ap) + '</span><span style="flex:1;min-width:0">' +
+           '<h4>' + escapeHTML(a.action) + '</h4>' +
+           '<p>' + escapeHTML(a.place_name) + '</p>' +
+           '<p style="margin-top:4px;color:var(--ink-dim)">' + escapeHTML(shorten(a.reason, 34)) + '</p>' +
+           reliefPill(a) + '</span></button>';
+    });
+    h += '</div>';
+  }
+  h += '<p class="status" id="natural-status" style="min-height:18px;margin-top:14px;font:11.5px/1.55 var(--sans);color:var(--ink-faint)"></p>';
+  h += '</div></div>';
+  h += tripStrip() || dock('到了我不打扰。等你走了，再问你三十秒。');
+  return h;
+}
+
+function shorten(text, max){
+  text = text || "";
+  return text.length > max ? text.slice(0, max - 1) + "…" : text;
+}
+/* 到达成本一行：真实路线和原型估算必须能被一眼分辨 */
+function reachLine(rec, p){
+  if (rec.distance_source === "amap" && rec.walking_minutes){
+    return "步行约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km（高德实测）";
+  }
+  return rec.relief_label + " · 约 " + rec.reach_minutes + " 分钟 · " + p.transport + "（原型估算，未接地图）";
+}
+/* 样本诚实（FR-10b / FR-19b）：没有真实到访数据时，不给任何平均分 */
+function sampleLine(rec){
+  if (rec.low_support || !rec.sample_size){
+    return "样本还少：这里还没有攒够真实到访反馈，所以我不给平均分，也不承诺你去了会变好。";
+  }
+  return "来自 " + rec.sample_size + " 份真实到访反馈的匿名汇总。它描述已经发生的记录，不是疗效承诺。";
+}
+
 function render(){
   const root = document.getElementById("root");
   const r = state.route;
   let inner = "", isCompare = false;
 
   if (r === "#/compare"){ isCompare = true; inner = renderCompare(); }
+  else if (r === "#/talk")   inner = renderTalk();
+  else if (r === "#/echo")   inner = renderEcho();
+  else if (r === "#/fix")    inner = renderFix();
+  else if (r === "#/offer")  inner = renderOffer();
+  else if (r === "#/safe")   inner = renderSafe();
   else if (r === "#/mood")   inner = renderMood();
   else if (r === "#/needs")  inner = renderNeeds();
   else if (r === "#/mode")   inner = renderMode();
@@ -2136,7 +2526,7 @@ function render(){
   else if (r.indexOf("#/nearby/") === 0) inner = renderNearby(r.slice(9));
   else if (r === "#/nearby")             inner = renderNearby(null);
   else if (r === "#/records")            inner = renderRecords();
-  else { state.route = "#/mood"; inner = renderMood(); }
+  else { state.route = "#/talk"; inner = renderTalk(); }
 
   root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + '</div>' +
     '<p class="stage-note">390 × 844 · AI 后端试运行 · <a href="#/compare" data-go="#/compare">会议总览页</a></p></div>';
@@ -2185,46 +2575,93 @@ function bind(){
 
   const naturalInput = root.querySelector("#natural-input");
   const naturalSubmit = root.querySelector("#natural-submit");
-  const voiceInput = root.querySelector("#voice-input");
+  const voiceInput = root.querySelector("#voice-input") || root.querySelector("#mic-button");
   const locationInput = root.querySelector("#location-input");
-  const naturalStatus = root.querySelector("#natural-status");
+  const naturalStatus = root.querySelector("#natural-status") || root.querySelector("#mic-cap");
   function setNaturalStatus(message, error){
     if (!naturalStatus) return;
     naturalStatus.textContent = message;
     naturalStatus.classList.toggle("error", Boolean(error));
   }
-  function submitNatural(){
-    const text = naturalInput ? naturalInput.value.trim() : "";
-    if (!text){ setNaturalStatus("说一句就好，不需要组织完整。", true); return; }
-    naturalSubmit.disabled = true;
-    setNaturalStatus("我在听懂你此刻真正需要什么…");
-    CurrentAI.interpretAndRecommend(text).then(result => {
-      const interpreted = result.interpretation.state;
-      if (result.recommendations.blocked_by_safety){
-        naturalSubmit.disabled = false;
-        setNaturalStatus(result.recommendations.safety_message, true);
+
+  /* 从后端理解结果推进到推荐。追问与纠错都走这里，所以只花一次请求。 */
+  function runRecommend(needState, note){
+    setNaturalStatus("我在按你说的缩小范围…");
+    return CurrentAI.recommendFor(needState, state.rejected).then(result => {
+      if (result.blocked_by_safety){ go("#/safe"); return; }
+      const list = result.recommendations || [];
+      if (!list.length){
+        setNaturalStatus("这几个条件叠起来暂时没有合适的地方。去掉一个再试试。", true);
         return;
       }
-      state.mood = interpreted.mood_id;
-      state.needs = interpreted.need_keys.filter(k => NEEDS[k]);
-      state.aiPlaceOrder = result.recommendations.recommendations.map(item => item.place_id);
+      state.offer = list;
+      state.offerNote = result.fallback_note || note || null;
+      state.mood = needState.mood_id;
+      state.needs = (needState.need_keys || []).filter(k => NEEDS[k]);
+      state.aiPlaceOrder = list.map(item => item.place_id);
       state.aiRecommendations = {};
-      result.recommendations.recommendations.forEach(item => { state.aiRecommendations[item.place_id] = item; });
+      list.forEach(item => { state.aiRecommendations[item.place_id] = item; });
       state.cardIndex = 0;
       state.shownRecommendationId = null;
-      go("#/pick");
+      CurrentAI.track("recommendation_shown", {
+        place_id:list[0].place_id, recommendation_id:list[0].recommendation_id, source:"backend"
+      });
+      go("#/offer");
     }).catch(error => {
-      naturalSubmit.disabled = false;
       setNaturalStatus(error.message || "刚才没有接住，请再试一次。", true);
     });
   }
-  if (naturalInput) naturalInput.onfocus = () => CurrentAI.track("natural_language_started", {method:"text"});
-  if (naturalSubmit) naturalSubmit.onclick = submitNatural;
+
+  function submitNatural(text){
+    text = (text || (naturalInput ? naturalInput.value : "")).trim();
+    if (!text){ setNaturalStatus("说一句就好，不需要组织完整。", true); return; }
+    state.talkText = text;
+    if (naturalSubmit) naturalSubmit.disabled = true;
+    setNaturalStatus("我在听懂你此刻真正需要什么…");
+    CurrentAI.interpretAndRecommend(text).then(result => {
+      if (naturalSubmit) naturalSubmit.disabled = false;
+      const interpretation = result.interpretation;
+      if (interpretation.state.risk_level === "urgent" || result.recommendations.blocked_by_safety){
+        go("#/safe");
+        return;
+      }
+      // 先复述、再推荐：推荐结果已经拿到，但要等用户确认或纠错才展示（守则 4）。
+      state.read = interpretation;
+      state.askAnswered = false;
+      state.rejected = [];
+      state.offer = result.recommendations.recommendations || [];
+      state.offerNote = result.recommendations.fallback_note || null;
+      state.mood = interpretation.state.mood_id;
+      state.needs = interpretation.state.need_keys.filter(k => NEEDS[k]);
+      state.aiPlaceOrder = state.offer.map(item => item.place_id);
+      state.aiRecommendations = {};
+      state.offer.forEach(item => { state.aiRecommendations[item.place_id] = item; });
+      go("#/echo");
+    }).catch(error => {
+      if (naturalSubmit) naturalSubmit.disabled = false;
+      setNaturalStatus(error.message || "刚才没有接住，请再试一次。", true);
+    });
+  }
+
+  const typeToggle = root.querySelector("#type-toggle");
+  if (typeToggle) typeToggle.onclick = () => {
+    state.talkTyping = true;
+    CurrentAI.track("natural_language_started", {method:"text"});
+    render();
+    const box = document.getElementById("natural-input");
+    if (box) box.focus();
+  };
+  if (naturalInput){
+    naturalInput.onfocus = () => CurrentAI.track("natural_language_started", {method:"text"});
+    naturalInput.oninput = () => { state.talkText = naturalInput.value; };
+  }
+  if (naturalSubmit) naturalSubmit.onclick = () => submitNatural();
   if (voiceInput) voiceInput.onclick = () => {
     CurrentAI.toggleVoice({
       onStatus: message => { voiceInput.classList.add("listening"); setNaturalStatus(message); },
-      onPartial: text => { if (naturalInput) naturalInput.value = text; },
-      onText: text => { voiceInput.classList.remove("listening"); if (naturalInput) naturalInput.value = text; setNaturalStatus("听到了。你可以改一改，再让我替你选。"); },
+      onPartial: text => { state.talkText = text; if (naturalInput) naturalInput.value = text; setNaturalStatus("「" + text + "」"); },
+      // 语音优先：说完直接进入理解，不再要求用户按第二个按钮。
+      onText: text => { voiceInput.classList.remove("listening"); state.talkText = text; if (naturalInput) naturalInput.value = text; submitNatural(text); },
       onError: message => { voiceInput.classList.remove("listening"); setNaturalStatus(message, true); }
     }).catch(error => { voiceInput.classList.remove("listening"); setNaturalStatus(error.message, true); });
   };
@@ -2233,19 +2670,110 @@ function bind(){
     setNaturalStatus("正在获取当前位置，只用于这次路程计算…");
     CurrentAI.requestLocation().then(() => {
       locationInput.classList.add("on");
-      locationInput.textContent = "✓ 已使用当前位置；坐标不会保存";
+      locationInput.textContent = "✓ 已用当前位置算真实路程；坐标不会保存";
+      locationInput.disabled = false;
       setNaturalStatus("位置只保留在本页内存中，不会写入记录。");
     }).catch(error => {
       locationInput.disabled = false;
       setNaturalStatus(error.message, true);
     });
   };
-  root.querySelectorAll("[data-nav]").forEach(el => el.onclick = () => {
-    const placeId = el.dataset.placeId;
-    const recommendation = state.aiRecommendations[placeId];
-    CurrentAI.track("navigation_opened", {place_id:placeId, recommendation_id:recommendation ? recommendation.recommendation_id : null, method:"amap"});
-    window.open(el.dataset.nav, "_blank", "noopener");
+
+  const acceptRead = root.querySelector("#accept-read");
+  if (acceptRead) acceptRead.onclick = () => {
+    if (state.offer && state.offer.length) go("#/offer");
+    else runRecommend(state.read.state);
+  };
+
+  // 唯一的一次追问：选完立即出结果，不再确认第二遍。
+  root.querySelectorAll("[data-ask]").forEach(el => el.onclick = () => {
+    const answer = el.dataset.ask;
+    const field = state.read.clarify_field;
+    const next = Object.assign({}, state.read.state);
+    if (field === "max_travel_minutes") next.max_travel_minutes = parseInt(answer, 10);
+    else next[field] = answer;
+    next.needs_clarification = false;
+    next.clarifying_question = null;
+    state.read.state = next;
+    state.askAnswered = true;
+    CurrentAI.track("natural_language_interpreted", {source:"clarify", mood_id:next.mood_id, need_count:next.need_keys.length, risk_level:next.risk_level});
+    runRecommend(next, "按你说的「" + el.textContent + "」重新找了一遍。");
   });
+
+  // 纠错：指出哪一环不对 → 立即重推（FR-03）
+  root.querySelectorAll("[data-fix]").forEach(el => el.onclick = () => {
+    const moodId = el.dataset.fix;
+    const label = el.textContent;
+    // 用户否掉的是「我怎么读你这句话」。诉求也是从同一句话推出来的，
+    // 留着会和新状态打架（比如刚改成「想有人在旁边」，却还带着「不被人看见」）。
+    // 只保留用户明确说过的硬约束：钱和路程。
+    const next = Object.assign({}, state.read.state, {
+      mood_id:moodId, confidence:0.9, need_keys:[], social_mode:"either", environment:"either"
+    });
+    state.read.state = next;
+    state.read.state_label = label;
+    state.read.acknowledgement = "好，是「" + label + "」。我按这个重新找了一遍。";
+    state.read.evidence = ["这一条是你自己改的，不是我猜的"];
+    state.askAnswered = true;
+    CurrentAI.track("recommendation_rejected", {place_id:(state.offer && state.offer[0] || {}).place_id || null, recommendation_id:(state.offer && state.offer[0] || {}).recommendation_id || null, reason:"state_corrected"});
+    runRecommend(next, "把「" + label + "」当成主线之后，排在最前面的换了。");
+  });
+
+  // 备选升为主推：不是新一轮推荐，只是换一个此刻的答案
+  root.querySelectorAll("[data-pick]").forEach(el => el.onclick = () => {
+    const id = el.dataset.pick;
+    const picked = state.offer.filter(x => x.place_id === id);
+    const rest = state.offer.filter(x => x.place_id !== id);
+    if (!picked.length) return;
+    CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:picked[0].recommendation_id});
+    state.offer = picked.concat(rest);
+    state.offerNote = "换成这个了。前一个我记下来，这次不再给你。";
+    state.aiPlaceOrder = state.offer.map(x => x.place_id);
+    render();
+  });
+
+  const swapOffer = root.querySelector("#swap-offer");
+  if (swapOffer) swapOffer.onclick = () => {
+    (state.offer || []).forEach(x => {
+      if (state.rejected.indexOf(x.place_id) < 0) state.rejected.push(x.place_id);
+      CurrentAI.track("recommendation_rejected", {place_id:x.place_id, recommendation_id:x.recommendation_id, reason:"swap"});
+    });
+    state.rejected = state.rejected.slice(-20);
+    runRecommend(state.read.state, "换了一批。前面那三个这次不会再出现。");
+  };
+
+  // 出发：闭环从这里开始被记录下来
+  root.querySelectorAll("[data-depart]").forEach(el => el.onclick = () => {
+    const id = el.dataset.depart;
+    const rec = state.aiRecommendations[id] || {};
+    saveTrip({placeId:id, recommendationId:rec.recommendation_id || ("local_" + id), startedAt:new Date().toISOString(), status:"departed"});
+    CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:rec.recommendation_id || null});
+    if (rec.navigation_url){
+      CurrentAI.track("navigation_opened", {place_id:id, recommendation_id:rec.recommendation_id || null, method:"amap"});
+      window.open(rec.navigation_url, "_blank", "noopener");
+    }
+    render();
+  });
+
+  root.querySelectorAll("[data-trip]").forEach(el => el.onclick = () => {
+    const action = el.dataset.trip;
+    const trip = state.trip;
+    if (!trip) return;
+    if (action === "arrived"){
+      saveTrip(Object.assign({}, trip, {status:"arrived", arrivedAt:new Date().toISOString()}));
+      CurrentAI.track("arrival_confirmed", {place_id:trip.placeId, recommendation_id:trip.recommendationId});
+      render();
+      return;
+    }
+    if (action === "clear"){ saveTrip(null); render(); return; }
+    state.draft = newDraft(trip.placeId);
+    // 停留时长来自真实的到达时间，反馈页和到访卡必须算出同一个数
+    state.draft.visitStartedAt = trip.arrivedAt || trip.startedAt;
+    state.draft.stayMin = Math.max(1, Math.round((Date.now() - new Date(state.draft.visitStartedAt).getTime()) / 60000));
+    saveTrip(null);
+    go("#/visit/" + trip.placeId);
+  });
+
   root.querySelectorAll("[data-need]").forEach(el => el.onclick = () => {
     const k = el.dataset.need, i = state.needs.indexOf(k);
     if (i >= 0) state.needs.splice(i, 1); else state.needs.push(k);
@@ -2276,14 +2804,6 @@ function bind(){
 
   root.querySelectorAll("[data-recf]").forEach(el => el.onclick = () => { state.recFilter = el.dataset.recf; render(); });
 
-  root.querySelectorAll("[data-visit]").forEach(el => el.onclick = () => {
-    const id = el.dataset.visit;
-    const recommendation = state.aiRecommendations[id];
-    CurrentAI.track("arrival_confirmed", {place_id:id, recommendation_id:recommendation ? recommendation.recommendation_id : "local_" + id});
-    state.draft = newDraft(id);
-    state.draft.stayMin = 28 + Math.floor(Math.random() * 22);
-    go("#/visit/" + id);
-  });
 
   root.querySelectorAll("[data-remind]").forEach(el => el.onclick = () => { state.draft.reminder = true; render(); });
 
@@ -2324,9 +2844,13 @@ function bind(){
   root.querySelectorAll("[data-reset]").forEach(el => el.onclick = () => {
     state.draft = null; state.flipped = false; state.lastRecordId = null;
     state.cardIndex = 0; state.recFilter = "all"; state.mood = "low";
+    state.read = null; state.offer = null; state.offerNote = null;
+    state.rejected = []; state.askAnswered = false; state.talkText = ""; state.talkTyping = false;
+    state.aiPlaceOrder = []; state.aiRecommendations = {};
+    saveTrip(null);
     state.filters = {dist:"all", place:"all", crowd:"all", cost:"all"};
     seed();
-    go("#/mood");
+    go("#/talk");
   });
 
   // 卡片模式滑动（按钮始终可用，手势只是补充）
@@ -2397,6 +2921,6 @@ function save(placeId){
 }
 
 /* ---------- 启动 ---------- */
-state.route = location.hash || "#/mood";
+state.route = location.hash || "#/talk";
 render();
 </script>

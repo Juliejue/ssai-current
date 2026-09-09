@@ -48,6 +48,20 @@
     }).catch(function () {});
   }
 
+  // Re-rank without re-interpreting: used by the correction chips and by the
+  // single clarifying answer, so a fix costs one request instead of two.
+  function recommendFor(needState, rejected) {
+    return api('/recommendations', {
+      method: 'POST',
+      body: JSON.stringify({
+        state: needState,
+        location: activeLocation,
+        rejected_place_ids: rejected || [],
+        limit: 3
+      })
+    });
+  }
+
   function interpretAndRecommend(text) {
     return api('/interpret', { method: 'POST', body: JSON.stringify({ text: text }) })
       .then(function (interpretation) {
@@ -57,10 +71,7 @@
           need_count: interpretation.state.need_keys.length,
           risk_level: interpretation.state.risk_level
         });
-        return api('/recommendations', {
-          method: 'POST',
-          body: JSON.stringify({ state: interpretation.state, location: activeLocation, limit: 3 })
-        }).then(function (recommendations) {
+        return recommendFor(interpretation.state).then(function (recommendations) {
           return { interpretation: interpretation, recommendations: recommendations };
         });
       });
@@ -216,6 +227,8 @@
     sessionId: sessionId,
     track: track,
     interpretAndRecommend: interpretAndRecommend,
+    recommendFor: recommendFor,
+    hasLocation: function () { return Boolean(activeLocation); },
     requestLocation: requestLocation,
     toggleVoice: toggleVoice
   };

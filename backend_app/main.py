@@ -81,7 +81,13 @@ async def recommendations_route(payload: RecommendRequest, request: Request) -> 
     session_id = request.headers.get("x-session-id", "")
     if 8 <= len(session_id) <= 80:
         await store_recommendations(session_id, payload.state, recommendations)
-    return RecommendResponse(recommendations=recommendations)
+    # Never pretend a weak shortlist is a good one (SP-3 / 守则 6).
+    no_good_match = not recommendations or recommendations[0].score < 0.35
+    return RecommendResponse(
+        recommendations=recommendations,
+        no_good_match=no_good_match,
+        fallback_note="这几个我不太有把握，先给你最近的一个；不合适就说一声。" if no_good_match else None,
+    )
 
 
 @app.post("/api/v1/events", status_code=202)

@@ -69,22 +69,118 @@ def _hard_filter(place: dict, state: NeedState, rejected: set[str]) -> bool:
     return True
 
 
-def _tradeoffs(place: dict) -> list[str]:
-    factors = set(place.get("factors", []))
-    labels = {
-        "toocrowd": "可能会挤",
-        "toonoisy": "声音可能偏大",
-        "toopricey": "消费压力偏高",
-        "needsocial": "可能需要和人周旋",
-        "faraway": "路上可能消耗力气",
-        "unsafe": "晚间需要额外注意安全",
-    }
-    return [label for key, label in labels.items() if key in factors][:3]
+# time-to-relief (FR-06): how long until this person is actually held, not how
+# far the place is. An urgent state buys nearby options, never a better far one.
+RELIEF_TIERS: tuple[tuple[int, str, str], ...] = (
+    (10, "now", "现在就能到"),
+    (25, "near", "二十分钟上下"),
+    (10 ** 6, "later", "路上要花点时间 · 可以改天再去"),
+)
+
+
+def _estimate_reach_minutes(place: dict) -> int:
+    """Prototype estimate, clearly separated from an AMap-measured walking time."""
+    distance_km = float(place.get("distanceKm") or 0)
+    return max(5, round(distance_km * 4) + 6)
+
+
+def _relief_tier(minutes: int) -> tuple[str, str]:
+    for threshold, tier, label in RELIEF_TIERS:
+        if minutes <= threshold:
+            return tier, label
+    return "later", "路上要花点时间 · 可以改天再去"
+
+
+def _is_hurried(state: NeedState) -> bool:
+    if state.max_travel_minutes is not None and state.max_travel_minutes <= 15:
+        return True
+    return state.energy <= 1 or state.mood_id in {"tight", "noisy"}
+
+
+RELIEF_BONUS = {"now": 0.12, "near": 0.04, "later": -0.10}
+
+# How a tag reads when the state wants a LOW value of it.
+# What a state asks for when the user has not named a need themselves.
+MOOD_NEED_HINTS: dict[str, str] = {
+    "low": "一个不用打起精神的地方",
+    "quiet": "一个声音跟你无关的地方",
+    "noisy": "一个能把注意力放出去的地方",
+    "spark": "一个能撞见新东西的地方",
+    "tired": "一个能坐下来不被催的地方",
+    "empty": "一个有点人气、但不用应付的地方",
+    "tight": "一个能松开肩膀的地方",
+    "near": "一个周围有人、但不用说话的地方",
+    "fresh": "一个你没去过的地方",
+    "okay": "一个适合随便走走的地方",
+}
+
+LOW_TAG_LABELS: dict[str, str] = {
+    "q": "有点声音",
+    "g": "没什么绿",
+    "c": "人不多",
+    "s": "更适合结伴",
+    "co": "没什么生活气",
+    "e": "熟悉、不刺激",
+    "r": "不特别放松",
+    "cr": "不用动脑",
+    "l": "不吵",
+    "st": "待不久",
+    "cp": "消费压力低",
+    "w": "走不了太远",
+}
+
+
+def _reason_chain(place: dict, state: NeedState, catalog: dict) -> list[str]:
+    """状态 → 需求 → 命中属性. Every line points at a stored field (FR-20)."""
+    from .interpretation import NEED_LABELS, STATE_LABELS
+
+    chain = [f"你说：{STATE_LABELS.get(state.mood_id, '说不太清楚')}"]
+    needs = [NEED_LABELS[key] for key in state.need_keys if key in NEED_LABELS][:2]
+    if needs:
+        chain.append("所以要找：" + "、".join(needs))
+    elif state.social_mode == "alone":
+        chain.append("所以要找：一个人待着不奇怪的地方")
+    elif state.budget_level == "free":
+        chain.append("所以要找：不用消费也能待的地方")
+    else:
+        chain.append("所以要找：" + MOOD_NEED_HINTS.get(state.mood_id, "能让你慢下来的地方"))
+
+    target, _ = _target_for(state, catalog)
+    tags = place.get("tags", {})
+    hits = sorted(
+        (key for key, wanted in target.items() if key in tags and abs(wanted - tags[key]) <= 0.25),
+        key=lambda key: -abs(target[key] - 0.5),
+    )
+    labels = [
+        catalog["TAGS"][key] if target[key] >= 0.5 else LOW_TAG_LABELS.get(key, "不" + catalog["TAGS"][key])
+        for key in hits
+        if key in catalog["TAGS"]
+    ][:3]
+    chain.append("这里命中：" + "、".join(labels) if labels else "这里只是大致接近，我不太确定")
+    return chain
+
+
+def _tradeoffs(place: dict, reach_minutes: int) -> list[str]:
+    """代价照实写. Derived from the reviewed place record, never invented."""
+    tags = place.get("tags", {})
+    costs: list[str] = []
+    if place.get("crowd") == "high":
+        costs.append("人会比较多")
+    if tags.get("l", 0) >= 0.7:
+        costs.append("声音偏大")
+    if not place.get("free"):
+        costs.append("消费压力偏高" if tags.get("cp", 0) >= 0.6 else "要花点钱")
+    if reach_minutes >= 25:
+        costs.append(f"路上大约 {reach_minutes} 分钟")
+    if tags.get("st", 1) <= 0.35:
+        costs.append("不太适合久待")
+    return costs[:3] or ["暂时没看到明显的代价"]
 
 
 def _rank(request: RecommendRequest) -> list[tuple[float, dict, dict[str, float]]]:
     catalog = load_catalog()
     rejected = set(request.rejected_place_ids)
+    hurried = _is_hurried(request.state)
     ranked: list[tuple[float, dict, dict[str, float]]] = []
 
     for place in catalog["PLACES"]:
@@ -110,6 +206,10 @@ def _rank(request: RecommendRequest) -> list[tuple[float, dict, dict[str, float]
             "budget_fit": round(budget_fit, 4),
         }
         score = need_match * 0.45 + energy_fit * 0.20 + travel_fit * 0.15 + social_fit * 0.10 + budget_fit * 0.10
+        if hurried:
+            tier, _ = _relief_tier(_estimate_reach_minutes(place))
+            score += RELIEF_BONUS[tier]
+            breakdown = {**breakdown, "relief_bonus": RELIEF_BONUS[tier]}
         ranked.append((score, place, breakdown))
 
     ranked.sort(key=lambda item: item[0], reverse=True)
@@ -122,11 +222,15 @@ def _to_recommendation(
     breakdown: dict[str, float],
     state: NeedState,
     route: WalkingRoute | None = None,
+    *,
+    role: str = "alternate",
 ) -> Recommendation:
     reasons = place.get("matchReason", {})
     reason = reasons.get(state.mood_id) or reasons.get("_") or "它和你刚才说的需要比较接近。"
     distance_km = round(route.distance_meters / 1000, 2) if route else place.get("distanceKm")
     walking_minutes = max(1, round(route.duration_seconds / 60)) if route else None
+    reach_minutes = walking_minutes or _estimate_reach_minutes(place)
+    tier, relief_label = _relief_tier(reach_minutes)
     return Recommendation(
         recommendation_id=f"rec_{uuid.uuid4().hex}",
         place_id=place["placeId"],
@@ -143,15 +247,25 @@ def _to_recommendation(
         suggested_duration=place.get("suggestedDuration"),
         cost=place.get("cost"),
         see=place.get("see"),
-        tradeoffs=_tradeoffs(place),
+        tradeoffs=_tradeoffs(place, reach_minutes),
         score_breakdown=breakdown,
+        role=role,  # type: ignore[arg-type]
+        reach_minutes=reach_minutes,
+        time_to_relief=tier,  # type: ignore[arg-type]
+        relief_label=relief_label,
+        reason_chain=_reason_chain(place, state, load_catalog()),
+        # Current has no verified visit feedback yet, so nothing may be
+        # presented as an average (FR-10b). The prototype numbers stay out.
+        sample_size=0,
+        low_support=True,
     )
 
 
 def recommend(request: RecommendRequest) -> list[Recommendation]:
     output: list[Recommendation] = []
-    for score, place, breakdown in _rank(request)[: request.limit]:
-        output.append(_to_recommendation(score, place, breakdown, request.state))
+    for index, (score, place, breakdown) in enumerate(_rank(request)[: request.limit]):
+        role = "primary" if index == 0 else "alternate"
+        output.append(_to_recommendation(score, place, breakdown, request.state, role=role))
     return output
 
 
@@ -164,8 +278,8 @@ async def recommend_with_live_context(
     client = map_client or AmapClient()
     if not request.location or not client.configured:
         return [
-            _to_recommendation(score, place, breakdown, request.state)
-            for score, place, breakdown in ranked[: request.limit]
+            _to_recommendation(score, place, breakdown, request.state, role="primary" if index == 0 else "alternate")
+            for index, (score, place, breakdown) in enumerate(ranked[: request.limit])
         ]
 
     # Route only a bounded shortlist. A reviewed provider ID/coordinate is mandatory;
@@ -203,6 +317,6 @@ async def recommend_with_live_context(
 
     enriched.sort(key=lambda item: item[0], reverse=True)
     return [
-        _to_recommendation(score, place, breakdown, request.state, route)
-        for score, place, breakdown, route in enriched[: request.limit]
+        _to_recommendation(score, place, breakdown, request.state, route, role="primary" if index == 0 else "alternate")
+        for index, (score, place, breakdown, route) in enumerate(enriched[: request.limit])
     ]

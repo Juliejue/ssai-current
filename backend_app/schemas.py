@@ -47,10 +47,22 @@ class InterpretRequest(BaseModel):
         return value
 
 
+class ClarifyOption(BaseModel):
+    key: str = Field(max_length=40)
+    label: str = Field(max_length=24)
+
+
 class InterpretResponse(BaseModel):
     state: NeedState
     acknowledgement: str
     source: Literal["model", "rules"]
+    # Everything below is rendered in the user's browser only. None of it is
+    # persisted or logged: it quotes the user's own words back at them.
+    state_label: str = ""
+    evidence: list[str] = Field(default_factory=list, max_length=3)
+    clarify_field: Literal["social_mode", "max_travel_minutes", "budget_level"] | None = None
+    clarify_options: list[ClarifyOption] = Field(default_factory=list, max_length=3)
+    correction_chips: list[ClarifyOption] = Field(default_factory=list, max_length=6)
 
 
 class Location(BaseModel):
@@ -83,12 +95,25 @@ class Recommendation(BaseModel):
     see: str | None = None
     tradeoffs: list[str] = Field(default_factory=list)
     score_breakdown: dict[str, float] = Field(default_factory=dict)
+    role: Literal["primary", "alternate"] = "alternate"
+    reach_minutes: int | None = None
+    time_to_relief: Literal["now", "near", "later"] = "near"
+    relief_label: str = ""
+    # 状态 → 需求 → 命中属性. Every entry is traceable to the stored NeedState
+    # and to a field on the reviewed place record (FR-20).
+    reason_chain: list[str] = Field(default_factory=list, max_length=3)
+    # Honest sampling (FR-10b / FR-19b): Current has no verified visit feedback
+    # yet, so no place is allowed to present an average as if it were a fact.
+    sample_size: int = 0
+    low_support: bool = True
 
 
 class RecommendResponse(BaseModel):
     recommendations: list[Recommendation]
     blocked_by_safety: bool = False
     safety_message: str | None = None
+    no_good_match: bool = False
+    fallback_note: str | None = None
 
 
 ProductEventName = Literal[
