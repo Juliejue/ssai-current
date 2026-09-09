@@ -287,3 +287,73 @@ def test_judge_question_leave_me_alone():
     # 追问只问一次：选项一旦被回答，askAnswered 就把追问关掉
     assert "state.askAnswered = true" in source
     assert "const asking = r.clarify_field && !state.askAnswered" in source
+
+
+# --- US-04：反馈不展示单条，只聚合并附样本量 -------------------------------
+
+
+def test_no_screen_renders_a_single_anonymous_feedback_entry():
+    """单条一旦露出就变成对空间的评分，而评分可以刷——评委 #3 问的就是这个。"""
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    # 渲染单条的那套机器必须整个不在了，留着就是等人再接回去
+    for ghost in ("COMMUNITY", "zaiSay", "avatarCat", 'class="feed"'):
+        assert ghost not in source, f"单条到访流的残留：{ghost}"
+    # 「某个人的此在」现在只允许出现在会议总览页里——那是在解释为什么拆掉它，
+    # 不是在渲染它。手机屏上一处都不能有。
+    assert not any("某个人的此在" in line for line in _agent_copy(source))
+
+
+def test_aggregates_always_carry_a_sample_size():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    body = _function_body(source, "function placeAggregate(")
+    block = source[body[0]:body[1]]
+    assert "AGGREGATE_MIN" in block, "要有出汇总的门槛"
+    assert "count" in block and "enough" in block
+    # 不够门槛时不能给出平均分
+    assert block.index("enough:false") < block.index("average"), "样本不够就不该算平均分"
+
+
+def test_prototype_seed_data_never_counts_as_a_real_aggregate():
+    """演示记录混进汇总，就等于又把假统计放回去了（FR-10b）。"""
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    block = source[slice(*_function_body(source, "function countsTowardAggregate("))]
+    assert "!rec.demo" in block
+
+
+def test_only_verified_visits_count_towards_an_aggregate():
+    """到访卡上写了自述的不进汇总，聚合那边就必须真的把它排除掉。"""
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    block = source[slice(*_function_body(source, "function countsTowardAggregate("))]
+    assert 'presenceLevel !== "self_reported"' in block
+    assert 'visibility === "anonymous"' in block
+    assert "!rec.demo" in block
+
+
+def test_whether_a_record_joined_the_aggregate_is_decided_in_exactly_one_place():
+    """同一条记录在到访卡和汇总页得到两种说法，是这一版最容易犯的错。"""
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    card = source[slice(*_function_body(source, "function renderCard(recId, backTo)"))]
+    aggregate = source[slice(*_function_body(source, "function placeAggregate("))]
+    assert "countsTowardAggregate(rec)" in card, "到访卡要问同一个判据"
+    assert "countsTowardAggregate(r)" in aggregate, "汇总要问同一个判据"
+
+
+def test_the_consent_copy_does_not_promise_a_feed_that_no_longer_exists():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    for lie in ("匿名出现在别人的到访流里", "匿名出现在到访流里", "分享给需要的人"):
+        assert lie not in source, f"授权文案还在承诺已经删掉的东西：{lie}"
+    assert "没有人会看到你这一条本身" in source, "要明说单条不展示"
+
+
+def test_the_detail_page_shows_exactly_one_aggregate_block():
+    """改口径的时候很容易新旧两块并存，屏幕上出现两个「匿名汇总」。"""
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    block = source[slice(*_function_body(source, "function renderPlace(id)"))]
+    assert block.count('<p class="sec-k">匿名汇总</p>') == 1
+
+
+def test_first_hand_quotes_are_labelled_as_profile_source_not_as_feedback():
+    """真人原话留下了，但身份变了：档案来源，不带变化分，不进汇总。"""
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    assert "一手描述" in source
+    assert "档案来源，不是到访反馈" in source

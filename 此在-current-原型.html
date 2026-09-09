@@ -412,17 +412,6 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .eye .row small{display:block;font:12px/1.65 var(--sans);color:var(--ink-dim)}
 .eye .row em{display:block;font:10.5px/1.6 var(--mono);color:var(--ink-faint);margin-top:5px;font-style:normal}
 
-/* ---------- 匿名到访流 ---------- */
-.feed{padding:6px 18px 22px;display:flex;flex-direction:column}
-.frow{padding:16px 0;border-bottom:1px solid var(--line);display:flex;gap:11px;align-items:flex-start;text-align:left;width:100%}
-.frow .av{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-2)}
-.frow .av span{width:18px;height:18px;display:block;opacity:.75}
-.frow .body{min-width:0;flex:1}
-.frow .who{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:6px}
-.frow .who b{font:12px var(--sans);color:var(--ink-dim);font-weight:500}
-.frow .who i{font-style:normal;font:10px var(--mono);color:var(--ink-faint)}
-.frow .place{display:block;font:400 15px/1.4 var(--serif);margin-bottom:6px}
-.frow q{display:block;font:14px/1.8 var(--serif);color:var(--ink);margin:8px 0 0;quotes:"「" "」"}
 .zai-say{display:flex;gap:8px;align-items:flex-start;margin-top:11px;padding:9px 11px;border-radius:11px;
   background:var(--water-wash);border:1px solid rgba(30,110,114,.18)}
 .zai-say span{flex:none;width:15px;height:15px;margin-top:1px;opacity:.8}
@@ -1388,52 +1377,6 @@ function rankedPlaces(list){
   });
 }
 
-/* ---------- 匿名到访流 ----------
-   借 Tara 的代理逻辑：你看到的不是某个人，是「某个人的此在」替他留下的一条。
-   没有昵称、没有人脸、没有主页、没有评论、没有关注。
-   只有主动选择了「匿名分享」的记录会出现在这里。以下为原型示例数据。
---------------------------------- */
-/* 匿名到访流。带 quoted 的条目，note 直接取该地点的真人原话（p.quote）——
-   原话不洗成产品腔，这批内容最好的部分就是那个口气。
-   数据只存一份（在 PLACES 里），这里派生，保证不会对不上。 */
-const COMMUNITY = [
-  {id:"c1", placeId:"liangmahe",  preMood:"低落",         changeScore:3, hue:180, ago:"3 小时前",
-   factors:["能一直走","天色刚好"], quoted:true},
-  {id:"c2", placeId:"postpost",   preMood:"累但静不下来", changeScore:3, hue:44,  ago:"5 小时前",
-   factors:["坐得住","声音好"], quoted:true},
-  {id:"c3", placeId:"tiantan",    preMood:"需要安静",     changeScore:3, hue:120, ago:"昨天",
-   factors:["有树","人不多"], note:"往西北角走了十分钟，人就没了。"},
-  {id:"c4", placeId:"soloist",    preMood:"心里发紧",     changeScore:3, hue:28,  ago:"昨天",
-   factors:["天色刚好","光线"], quoted:true},
-  {id:"c5", placeId:"ziliaoguan", preMood:"脑子停不下来", changeScore:2, hue:200, ago:"昨天",
-   factors:["独处感","坐得住"], quoted:true},
-  {id:"c6", placeId:"fruityshop", preMood:"想要点灵感",   changeScore:2, hue:16,  ago:"2 天前",
-   factors:["声音好","店员舒服"], quoted:true},
-  {id:"c7", placeId:"beipingjiqi",preMood:"想有人在旁边", changeScore:2, hue:36,  ago:"2 天前",
-   factors:["有人但不打扰","坐得住"], note:"坐吧台喝了一杯就走，没跟任何人说话。"},
-  {id:"c8", placeId:"zuoshu",     preMood:"想要点灵感",   changeScore:2, hue:150, ago:"3 天前",
-   factors:["看到没见过的","坐得住"], quoted:true},
-  {id:"c9", placeId:"kule",       preMood:"想换个地方",   changeScore:1, hue:8,   ago:"4 天前",
-   factors:["看到没见过的","太挤"], quoted:true},
-  {id:"c10",placeId:"qmex",       preMood:"状态还行",     changeScore:0, hue:60,  ago:"5 天前",
-   factors:["太挤","得跟人周旋"], note:"周五晚上人太多了，站了半小时就撤了。"}
-];
-COMMUNITY.forEach(e => { if (e.quoted) e.note = (placeById(e.placeId).quote || ""); });
-/* 小在在流里插的一句：只做同类连接，不评价发帖的人 */
-function zaiSay(entry, i){
-  if (entry.self) return "这条是你贡献的。<b>不带昵称、头像和主页</b>，别人只看得到这些。";
-  const mine = state.records.filter(r => r.placeId === entry.placeId);
-  if (mine.length) return "你也在这里留过一条，那次是 <b>" + signed(mine[0].changeScore) + "</b>。";
-  const same = state.records.filter(r => r.preMood === entry.preMood);
-  if (same.length) return "这条的出发前状态和你上次一样，都是「<b>" + entry.preMood + "</b>」。";
-  if (entry.changeScore <= 0) return "这条是没接住的记录。<b>它一样被留下来了。</b>";
-  if (i % 3 === 0) return "这类空间在你现在的状态下排得比较靠前。";
-  return null;
-}
-function avatarCat(hue){
-  return '<span class="av" style="border-color:hsla(' + hue + ',34%,62%,.45);background:hsla(' + hue + ',30%,20%,.5)">' +
-         '<span>' + catSVG() + '</span></span>';
-}
 
 /* ---------- 你的合成符号：每条记录长一个节点 ---------- */
 function selfSigil(recs){
@@ -2167,23 +2110,30 @@ function renderPlace(id){
   });
   h += '</div>';
   h += '<div class="why" style="margin-top:16px"><span class="k">为什么此刻推荐给你</span><p>' + reasonFor(p, state.mood) + '</p></div>';
+  h += '<div class="tags" style="margin-top:16px">' + p.environmentTags.map(t => '<span class="tag">' + t + '</span>').join("") + '</div>';
+  // US-04：不展示单条到访反馈。别人去了怎么样，只以聚合的形式出现，并且附样本量。
+  const agg = placeAggregate(p.placeId);
   h += '<p class="sec-k">匿名汇总</p>';
-  h += '<div class="sample-note" style="margin-top:0">' + SAMPLE_EMPTY + '</div>';
-  h += '<div class="tags">' + p.environmentTags.map(t => '<span class="tag">' + t + '</span>').join("") + '</div>';
-  // 其他人在这里留下的：比一个平均分更能回答「为什么这里适合我」
-  const here = COMMUNITY.filter(e => e.placeId === p.placeId).slice(0, 2);
-  h += '<p class="sec-k">其他人在这里留下的</p>';
   h += '<div class="here" style="margin-top:0"><div class="h"><span style="width:14px;height:14px;display:inline-block">' +
-       catSVG() + '</span><b>都是匿名记录</b><button data-go="#/nearby/' + p.placeId + '">全部 →</button></div>';
-  if (!here.length){
-    h += '<div class="e">这里还没有人选择匿名分享。第一条可以是你的。</div>';
+       catSVG() + '</span><b>只聚合，不展示单条</b><button data-go="#/nearby">怎么算的 →</button></div>';
+  if (agg.enough){
+    h += '<div class="e">到访前后平均变化 <b class="num">' + signed(agg.average) + '</b>' +
+         '<u>' + agg.count + ' 条核验过的反馈 · 最常被勾到的是「' + agg.factors.join("、") + '」</u></div>';
   } else {
-    here.forEach(e => {
-      h += '<div class="e">' + (e.note ? '「' + escapeHTML(e.note) + '」' : e.factors.join("、") + '，没有留话。') +
-           '<u>' + e.preMood + ' → ' + scoreLabel(e.changeScore) + ' ' + signed(e.changeScore) + ' · ' + e.ago + '</u></div>';
-    });
+    h += '<div class="e">' + escapeHTML(agg.line) + '<u>攒够 ' + AGGREGATE_MIN +
+         ' 条核验过的到访，这里才会出现汇总</u></div>';
   }
   h += '</div>';
+
+  // 真人原话不是「到访反馈」，是空间档案的来源（FR-16 的评论那一路）。
+  // 身份不同就不该长得像反馈：不带变化分，不算进任何汇总。
+  if (p.quote){
+    h += '<p class="sec-k">一手描述</p>';
+    h += '<div class="here" style="margin-top:0"><div class="h"><span style="width:14px;height:14px;display:inline-block">' +
+         catSVG() + '</span><b>档案来源，不是到访反馈</b></div>';
+    h += '<div class="e">「' + escapeHTML(p.quote) + '」<u>来自真人的一手经验，用来生成这个地方的档案。不带分数，也不进汇总。</u></div>';
+    h += '</div>';
+  }
   h += '<div class="actions">' +
        '<button class="btn" data-depart="' + p.placeId + '">' +
        (recommendation && recommendation.navigation_url ? '带我去 · 打开高德导航' : '带我去') + ' <span>→</span></button>' +
@@ -2278,7 +2228,9 @@ function renderFactors(id){
   h += '<button class="opt' + (d.visibility === "private" ? " on" : "") + '" data-vis="private"><span class="mark"></span>' +
        '<div><strong>只存进我的记录</strong><small>默认。不进入这个地点的公开统计，也不会被任何人看到。</small></div></button>';
   h += '<button class="opt' + (d.visibility === "anonymous" ? " on" : "") + '" data-vis="anonymous"><span class="mark"></span>' +
-       '<div><strong>匿名分享给需要的人</strong><small>变化分和因素进入地点汇总；如果你留了一句话，它会匿名出现在别人的到访流里。不带昵称、头像、主页，别人也无法回复或找到你。</small></div></button>';
+       '<div><strong>匿名进入这个地点的汇总</strong><small>变化分和因素会和别人的一起算成一个数，' +
+       '并且永远附上样本量。<b>没有人会看到你这一条本身</b>——我们不展示单条反馈。' +
+       '你写的那句话只到我们这里，用来改推荐，不出现在任何人的界面上。</small></div></button>';
   h += '</div>';
   h += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">保存这次感受 <span>→</span></button>' +
        '<button class="btn-text" data-step="1">回上一步改分数</button></div>';
@@ -2291,6 +2243,38 @@ function escapeHTML(s){
 }
 
 /* --- 8. 到访卡（可翻面）--- */
+/* 匿名汇总（US-04：不展示单条，只聚合并附样本量）。
+   进汇总的门槛是 FR-10 那条：只有核验过的到访才算数，自述的不算——
+   这和到访卡上写的那句话必须一致，不能一处说不算、另一处偷偷算进去。
+   攒够 5 条才用真实反馈覆盖估计值（FR-17）；不够就老实说样本还少（FR-19b）。 */
+const AGGREGATE_MIN = 5;
+
+/* 进不进汇总只有这一个判据。到访卡、汇总页、样本说明都问它，
+   否则同一条记录会在两处得到两种说法。 */
+function countsTowardAggregate(rec){
+  return Boolean(rec) &&
+    !rec.demo &&                                 // 演示数据不能冒充真实统计（FR-10b）
+    rec.visibility === "anonymous" &&            // 必须明确选过匿名贡献
+    Boolean(rec.presenceLevel) && rec.presenceLevel !== "self_reported";  // 必须是核验过的到访（FR-10）
+}
+
+function placeAggregate(placeId){
+  const counted = state.records.filter(r => r.placeId === placeId && countsTowardAggregate(r));
+  const n = counted.length;
+  if (n < AGGREGATE_MIN){
+    return {count:n, enough:false,
+            line:n ? "样本还少：这里目前 " + n + " 条真实到访反馈，不到 " + AGGREGATE_MIN +
+                     " 条我不给平均分，也不承诺你去了会变好。"
+                   : SAMPLE_EMPTY};
+  }
+  const sum = counted.reduce((a, r) => a + r.changeScore, 0);
+  const tally = {};
+  counted.forEach(r => (r.factors || []).forEach(f => { tally[f] = (tally[f] || 0) + 1; }));
+  const top = Object.keys(tally).sort((a, b) => tally[b] - tally[a]).slice(0, 3);
+  return {count:n, enough:true, average:(sum / n).toFixed(1), factors:top,
+          line:"来自 " + n + " 条核验过的到访反馈的匿名汇总。它描述已经发生的记录，不是疗效承诺。"};
+}
+
 /* 到访凭据（FR-08）：等级由服务端裁定，这里只如实转述，不替它抬高。 */
 function presenceLine(rec){
   const dwell = rec.dwellMinutes || stayMinutes(rec);
@@ -2345,8 +2329,8 @@ function renderCard(recId, backTo){
        }).join("") : '<span style="color:var(--ink-faint)">没有勾选</span>') + '</span></div>';
   h += '<div class="rear-line" style="border:none"><span class="k">可见性</span><span class="v">' +
        (rec.visibility === "anonymous"
-         ? "匿名贡献 · 变化分和因素进入地点汇总" + (rec.note ? "，这句话匿名出现在到访流里" : "，不带任何可识别信息")
-         : "仅自己可见 · 不进入汇总，也不进入到访流") + '</span></div>';
+         ? "匿名贡献 · 变化分和因素进入地点汇总，单条不展示" + (rec.note ? "；那句话只给我们看" : "")
+         : "仅自己可见 · 不进入任何汇总") + '</span></div>';
   if (rec.note) h += '<blockquote>' + escapeHTML(rec.note) + '</blockquote>';
   h += '<div class="insights" style="margin-top:16px"><div class="head"><span style="width:14px;height:14px;display:inline-block">' +
        catSVG() + '</span><b>小在眼中的这次到访</b></div>';
@@ -2358,8 +2342,13 @@ function renderCard(recId, backTo){
   h += '</div>';
   h += '<button class="btn ghost flip-btn" data-flip="1">' + (state.flipped ? "← 翻回正面" : "翻到背面 · 看这次的变化 →") + '</button>';
   if (rec.visibility === "anonymous"){
-    h += '<div class="sample-note" style="margin-top:14px">你这一条进了 ' + p.placeName +
-         ' 的匿名汇总。这里目前还不到 5 条，所以我不给平均分——攒够之前，估计值只是估计值。</div>';
+    const agg = placeAggregate(p.placeId);
+    h += '<div class="sample-note" style="margin-top:14px">' +
+         (countsTowardAggregate(rec)
+           ? '你这一条进了 ' + p.placeName + ' 的匿名汇总，但不会被单独展示给任何人。' + escapeHTML(agg.line)
+           : '你选了匿名贡献，但这次到访没有核验过（' + PRESENCE_LABEL[rec.presenceLevel || "self_reported"] +
+             '），所以它不会进 ' + p.placeName + ' 的汇总。记录还是你的，只是不参与统计。') +
+         '</div>';
   } else {
     h += '<div class="avg" style="margin-top:14px;background:var(--card)"><b style="color:var(--ink-dim)">—</b>' +
          '<p>这条没有进入 ' + p.placeName + ' 的汇总<em>你选了只存进自己的记录。地点的平均分里没有你。</em></p></div>';
@@ -2421,7 +2410,7 @@ function renderRecords(){
          '</span><div><strong>' + r.t + '</strong><small>' + r.d + '</small><em>依据 · ' + r.e + '</em></div></div>';
   });
   h += '</div>';
-  h += '<div style="padding:13px 18px 16px"><button class="btn ghost sm" data-go="#/nearby">看别人在这些地方留下的 →</button></div></div>';
+  h += '<div style="padding:13px 18px 16px"><button class="btn ghost sm" data-go="#/nearby">匿名汇总是怎么算的 →</button></div></div>';
 
   if (state.deleteWarning){
     h += '<div class="pad" style="padding-bottom:0"><div class="sample-note" style="margin:0">' +
@@ -2481,56 +2470,56 @@ function renderRecords(){
   return h;
 }
 
-/* --- 10. 匿名到访流 ---
-   借 Tara 的代理逻辑：一条一条读别人的此在留下的话，而不是读某个人。
-   进入这里的只有主动选了「匿名分享」的记录，没有昵称、人脸、主页、评论、关注。 */
+/* --- 10. 匿名汇总（原「到访流」）---
+   US-04：反馈不展示单条、只聚合并附样本量。
+   所以这一页不再逐条读别人留下的话——那种读法本质上是在读人，
+   而且单条会被当成对空间的评分，正是评委 #3 担心的那件事。
+   现在这里说清楚汇总是怎么算的、现在攒到哪一步了。
+   一条真实反馈都还没有，就老实空着，不拿原型数据充数（FR-10b）。 */
 function renderNearby(placeFilter){
   const p = placeFilter ? placeById(placeFilter) : null;
-  // 用户自己选择了匿名的记录，也会以同样的形态出现在流里
-  const mine = state.records.filter(r => r.visibility === "anonymous").map(r => ({
-    id:r.id, placeId:r.placeId, preMood:r.preMood, changeScore:r.changeScore, factors:r.factors,
-    note:r.note, hue:44, ago:(r.id === state.lastRecordId ? "刚刚" : fmtDate(r.createdAt)), self:true
-  }));
-  let list = mine.concat(COMMUNITY);
-  if (p) list = list.filter(e => e.placeId === p.placeId);
-  let h = topbar(p ? p.placeName : "匿名到访流", p ? "其他人在这里" : "别人留下的", p ? "#/place/" + p.placeId : "#/records");
-  h += '<div class="screen">';
-  h += '<div class="pad" style="padding-bottom:2px">';
-  h += '<p class="eyebrow">' + (p ? "同一个空间" : "同一批空间") + '</p>';
-  h += '<h1 class="title sm">' + (p ? "别人在这里，<br>发生了什么" : "别人在这些地方，<br>发生了什么") + '</h1>';
-  h += '<p class="lead">你看到的不是某个人，是他的此在替他留下的一条。没有昵称、没有头像、没有主页，也不能评论或关注——只有主动选择匿名的记录会到这里来。</p>';
+  const scope = p ? [p] : PLACES;
+  const rows = scope.map(x => ({place:x, agg:placeAggregate(x.placeId)}))
+                    .filter(r => r.agg.count > 0)
+                    .sort((a, b) => b.agg.count - a.agg.count);
+  const total = rows.reduce((n, r) => n + r.agg.count, 0);
+
+  let h = topbar(p ? p.placeName : "匿名汇总", p ? "这个空间的样本" : "样本怎么算", p ? "#/place/" + p.placeId : "#/records");
+  h += '<div class="screen"><div class="pad">';
+  h += '<p class="eyebrow">只聚合 · 不展示单条</p>';
+  h += '<h1 class="title sm">别人去了怎么样，<br>只以汇总的形式出现。</h1>';
+  h += '<p class="lead">这里不会逐条给你看别人写了什么。单条反馈会被当成对空间的评分，' +
+       '而评分是可以刷的——所以我们只给聚合，并且永远附上样本量。</p>';
+
+  h += '<div class="learned" style="margin-bottom:20px">';
+  h += '<div class="lh"><span>' + catSVG() + '</span>一条反馈要满足什么才算数</div>';
+  h += '<div class="lr"><strong>你得真的去过</strong><small>只有核验过的到访才进汇总。自己按一下「我到了」但没待够 5 分钟的，不算。</small></div>';
+  h += '<div class="lr"><strong>你得明确选了匿名贡献</strong><small>默认是只存进你自己的记录。不选就永远不进。</small></div>';
+  h += '<div class="lr"><strong>一个地点攒够 ' + AGGREGATE_MIN + ' 条才出汇总</strong><small>不够就显示「样本还少」，不给平均分。一个人说安静，可能只是那天安静。</small></div>';
+  h += '<div class="lr"><strong>奖励和情绪变化脱钩</strong><small>完成反馈本身才算数，不是「变好了」才算数——否则数据会往好看的方向偏。</small></div>';
   h += '</div>';
-  if (!list.length){
-    h += '<div class="empty">这个空间还没有人选择匿名分享。<br>第一条可以是你的。</div>';
+
+  h += '<p class="eyebrow">现在攒到哪一步</p>';
+  if (!rows.length){
+    h += '<div class="empty" style="margin:0">' +
+         (p ? "这个空间还没有任何核验过的匿名反馈。" : "还没有任何一个空间攒到反馈。") +
+         '<br>第一条可以是你的。<br><br>' +
+         '<span style="font:11px var(--mono);color:var(--ink-faint)">这里空着是真的空着——' +
+         '我们不拿原型示例数据冒充统计。</span></div>';
   } else {
-    h += '<div class="feed">';
-    list.forEach((e, i) => {
-      const pp = placeById(e.placeId);
-      const opt = f => pp.factorOptions.find(x => x.label === f);
-      h += '<div class="frow">' + avatarCat(e.hue);
-      h += '<div class="body"><div class="who"><b>' + (e.self ? "你的此在" : "某个人的此在") + '</b><i>' + e.ago + '</i>' +
-           (e.self ? '<i style="color:var(--ink)">这是你的记录</i>' : '') + '</div>';
-      if (!p) h += '<span class="place">' + pp.placeName + '</span>';
-      h += '<div class="shift" style="display:flex;align-items:center;gap:6px;font:11.5px var(--mono);color:var(--ink-dim);flex-wrap:wrap">' +
-           e.preMood + ' <span style="color:var(--ink-faint)">→</span> ' + scoreLabel(e.changeScore) +
-           ' <b class="' + scoreCls(e.changeScore) + ' num" style="font-size:14px;font-weight:600">' + signed(e.changeScore) + '</b></div>';
-      if (e.factors.length){
-        h += '<div class="tags" style="margin-top:9px">' + e.factors.map(f => {
-          const o = opt(f);
-          return '<span class="tag ' + (o && o.tone === "neg" ? "neg" : "pos") + '">' + f + '</span>';
-        }).join("") + '</div>';
-      }
-      if (e.note) h += '<q>' + escapeHTML(e.note) + '</q>';
-      const say = zaiSay(e, i);
-      if (say) h += '<div class="zai-say"><span>' + catSVG() + '</span><p>' + say + '</p></div>';
-      h += '</div></div>';
+    h += '<div class="here" style="margin-top:0">';
+    h += '<div class="h"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
+         '</span><b>共 ' + total + ' 条核验过的反馈</b></div>';
+    rows.forEach(r => {
+      h += '<div class="e">' + r.place.placeName +
+           (r.agg.enough ? ' <b class="num">' + signed(r.agg.average) + '</b>' : '') +
+           '<u>' + r.agg.count + ' / ' + AGGREGATE_MIN + ' 条' +
+           (r.agg.enough ? ' · 已出汇总' : ' · 还不够，先不给分') + '</u></div>';
     });
     h += '</div>';
   }
-  h += '<p style="padding:4px 18px 22px;margin:0;font:11px/1.8 var(--mono);color:var(--ink-faint)">' +
-       '原型示例数据。这里只显示变化分、因素和用户自愿留下的一句话，不显示身份信息，也不能回复。</p>';
-  h += '</div>';
-  h += dock(p ? '这些人和你去的是同一个地方，状态不一定一样。' : '每一条的作者都单独同意过。不同意的那些，你永远看不到。');
+  h += '</div></div>';
+  h += dock('宁可空着，也不给你一个刷得出来的分数。');
   return h;
 }
 
@@ -2630,14 +2619,14 @@ function renderCompare(){
     '这两件事在 Current 里都成立，前提是换掉它们的依据和身份载体。</p>' +
     '<div class="mini-row">' +
     miniOf(s.me,      "我们的此在", "封面是你所有记录长成的合成符号；两条观察各带一行「依据」") +
-    miniOf(s.nearby,  "匿名到访流", "小在头像 + 「某个人的此在」；小在偶尔插一句，只做同类连接") +
-    miniOf(s.nearby1, "单个空间的流", "从地点详情进来，只看这一个空间别人的前后变化") +
-    miniOf(s.place,   "地点详情里的两条", "「其他人在这里留下的」比一个 +2.4 更能回答为什么是这里") +
+    miniOf(s.nearby,  "匿名汇总", "不逐条读别人写了什么——只给聚合，并且永远附样本量") +
+    miniOf(s.nearby1, "单个空间的样本", "从地点详情进来，看这一个空间攒到几条、够不够出汇总") +
+    miniOf(s.place,   "地点详情", "汇总 + 一手描述分开放：原话是档案来源，不是到访反馈") +
     '</div>' +
     '<div class="note-box" style="margin-top:18px"><h3>翻译规则，以及守住的线</h3><ul>' +
     '<li><b>人格判断 → 行为归纳。</b>Tara 读的是帖子，读出来是「3D动画与视频创作爱好者」。Current 读的是你自己前后打的分，读出来是「你 5 / 7 次记录都勾了『人不多』」。每条观察下面挂一行依据，点得到具体是哪几次。说行为模式，不说这个人是什么样的人，不判断情绪状态。</li>' +
-    '<li><b>头像社交流 → 代理流。</b>Tara 的机制是你先跟对方的 Tara 聊。Current 里代理就是小在：你看到的是「某个人的此在」留下的一条，头像是云不是脸。</li>' +
-    '<li><b>没有的东西：</b>昵称、人脸、个人主页、评论区、关注、私信、点赞排行。只有主动选择「匿名分享」的记录进流，用户自己的匿名记录也以同样形态出现在里面。</li>' +
+    '<li><b>头像社交流 → 不做流。</b>我们一度做了「某个人的此在」的匿名到访流，读起来很动人。但 US-04 要求「反馈不展示单条、只聚合」——因为单条一旦露出，它就变成了对空间的评分，而评分可以刷，这正是评委 #3 担心的事。所以流被拆掉了，换成聚合 + 样本量。真人原话留下了，但换了身份：它是空间档案的来源，不带变化分，不进任何汇总。</li>' +
+    '<li><b>没有的东西：</b>昵称、人脸、个人主页、评论区、关注、私信、点赞排行，以及任何形式的单条反馈展示。进汇总要同时满足三件事：真的去过（核验过的到访）、明确选了匿名贡献、该地点攒够 5 条。</li>' +
     '<li><b>记录不够时不编。</b>少于两条记录，「我们的此在」会直说「还需要一两次记录，我才敢说」，不生成任何观察。</li>' +
     '</ul></div></section>';
 
