@@ -1,6 +1,9 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>此在 · 情绪空间闭环</title>
+<title>此在 Current · 情绪空间闭环</title>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   if (location.hostname !== "localhost" && location.hostname !== "127.0.0.1") {
@@ -415,11 +418,11 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .frow .who i{font-style:normal;font:10px var(--mono);color:var(--ink-faint)}
 .frow .place{display:block;font:400 15px/1.4 var(--serif);margin-bottom:6px}
 .frow q{display:block;font:14px/1.8 var(--serif);color:var(--ink);margin:8px 0 0;quotes:"「" "」"}
-.perch-say{display:flex;gap:8px;align-items:flex-start;margin-top:11px;padding:9px 11px;border-radius:11px;
+.zai-say{display:flex;gap:8px;align-items:flex-start;margin-top:11px;padding:9px 11px;border-radius:11px;
   background:var(--water-wash);border:1px solid rgba(30,110,114,.18)}
-.perch-say span{flex:none;width:15px;height:15px;margin-top:1px;opacity:.8}
-.perch-say p{margin:0;font:12px/1.65 var(--sans);color:var(--ink-dim)}
-.perch-say p b{color:var(--ink);font-weight:500}
+.zai-say span{flex:none;width:15px;height:15px;margin-top:1px;opacity:.8}
+.zai-say p{margin:0;font:12px/1.65 var(--sans);color:var(--ink-dim)}
+.zai-say p b{color:var(--ink);font-weight:500}
 .here{margin-top:10px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .here .h{padding:10px 13px;font:11px var(--sans);color:var(--ink-faint);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px}
 .here .h b{color:var(--ink-dim);font-weight:500}
@@ -574,6 +577,8 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .learned .lr strong{display:block;font:500 13px/1.5 var(--sans);color:var(--ink);margin-bottom:3px}
 .learned .lr small{display:block;font:11.5px/1.65 var(--sans);color:var(--ink-faint)}
 </style>
+</head>
+<body>
 
 <div id="root"></div>
 
@@ -1298,7 +1303,7 @@ const COMMUNITY = [
 ];
 COMMUNITY.forEach(e => { if (e.quoted) e.note = (placeById(e.placeId).quote || ""); });
 /* 小在在流里插的一句：只做同类连接，不评价发帖的人 */
-function perchSay(entry, i){
+function zaiSay(entry, i){
   if (entry.self) return "这条是你贡献的。<b>不带昵称、头像和主页</b>，别人只看得到这些。";
   const mine = state.records.filter(r => r.placeId === entry.placeId);
   if (mine.length) return "你也在这里留过一条，那次是 <b>" + signed(mine[0].changeScore) + "</b>。";
@@ -2192,8 +2197,8 @@ function renderNearby(placeFilter){
         }).join("") + '</div>';
       }
       if (e.note) h += '<q>' + escapeHTML(e.note) + '</q>';
-      const say = perchSay(e, i);
-      if (say) h += '<div class="perch-say"><span>' + catSVG() + '</span><p>' + say + '</p></div>';
+      const say = zaiSay(e, i);
+      if (say) h += '<div class="zai-say"><span>' + catSVG() + '</span><p>' + say + '</p></div>';
       h += '</div></div>';
     });
     h += '</div>';
@@ -2924,3 +2929,6 @@ function save(placeId){
 state.route = location.hash || "#/talk";
 render();
 </script>
+
+</body>
+</html>
