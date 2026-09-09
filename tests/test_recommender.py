@@ -34,7 +34,7 @@ def test_live_route_replaces_estimate_and_respects_max_travel(monkeypatch):
         "verified_name": place["placeName"],
         "verification_status": "verified",
     }
-    monkeypatch.setattr(recommender, "_rank", lambda _: [(0.8, place, {"travel_fit": 0.5})])
+    monkeypatch.setattr(recommender, "_rank", lambda _request, _now=None: [(0.8, place, {"travel_fit": 0.5})])
 
     class FakeMapClient:
         configured = True

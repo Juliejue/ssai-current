@@ -106,6 +106,10 @@ class Recommendation(BaseModel):
     # yet, so no place is allowed to present an average as if it were a fact.
     sample_size: int = 0
     low_support: bool = True
+    # 营业状态（FR-07）。estimate 只降权并明说是估算；verified 才是硬约束。
+    open_state: Literal["always_open", "open", "likely_closed", "closed", "unknown"] = "unknown"
+    open_label: str = ""
+    hours_source: Literal["verified", "category_estimate", "always_open", "unknown"] = "unknown"
 
 
 class RecommendResponse(BaseModel):
@@ -144,3 +148,5 @@ class OutcomeRequest(BaseModel):
     factor_keys: list[str] = Field(default_factory=list, max_length=12)
     visibility: Literal["private", "anonymous"] = "private"
     note: str | None = Field(default=None, max_length=80)
+    # 哪一环对/错（FR-09 / SP-4）。冷启动阶段最有价值的一列。
+    mismatch_stage: Literal["none", "state", "need", "constraint", "place"] = "none"

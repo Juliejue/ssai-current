@@ -84,7 +84,7 @@ Vercel 上建议从 Marketplace 连接 Neon，并给 `DATABASE_URL` 使用 poole
 .venv/bin/python -m scripts.seed_places
 ```
 
-数据库保存：结构化需求、推荐排名与得分、接受/拒绝/导航/到访状态、反馈分数和因素。数据库不保存：倾诉原文、原始语音、用户经纬度；私密反馈正文也不上传。
+数据库保存：结构化需求、推荐排名与得分、接受/拒绝/导航/到访状态、反馈分数和因素、**哪一环对/错**（`mismatch_stage`，FR-09 / SP-4，冷启动 L0 里最有价值的一列）。数据库不保存：倾诉原文、原始语音、用户经纬度；私密反馈正文也不上传。
 
 断网也能跑。手机上看用这个链接（私有，问 Julie 要）：
 <https://claude.ai/code/artifact/d78298ab-65f6-4a87-9656-4e1be7a0516b>
@@ -104,6 +104,12 @@ Vercel 上建议从 Marketplace 连接 Neon，并给 `DATABASE_URL` 使用 poole
 ```
 
 强痛苦表达在调用模型之前就被规则拦下，直接进 `#/safe`：不推荐空间、不分析、只给人类支持入口。
+
+**营业状态（FR-07）**：`backend_app/opening_hours.py` 存的是**类目常识**（唱片店一般 12:00–20:00、
+club 一般 21:00–04:00、河岸胡同没有门），不是某一家店的一手事实，所以永远标注「未经核对」，
+只降权、不硬过滤。要让它变成真正的硬约束，把逐店营业时间人工核对后写进
+`place_overrides.json` 的 `hours` 并标 `verification_status: "verified"`——和地图身份同一套纪律。
+判断用北京时间（26 个地点都在北京），凌晨只会推「没有门」的地方。
 
 `#/mood → #/needs → #/mode → #/pick／#/browse` 保留为「就是不想说话」的备用入口。
 

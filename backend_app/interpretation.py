@@ -19,7 +19,7 @@ MOOD_RULES: dict[str, tuple[str, ...]] = {
     "tight": ("发紧", "绷着", "喘不过", "心慌"),
     "near": ("想有人", "陪我", "一个人难受", "有人在"),
     "fresh": ("换个地方", "待腻", "没见过", "出去看看"),
-    "okay": ("还行", "挺好", "没事", "随便走走"),
+    "okay": ("还行", "挺好", "没事", "随便走走", "跳舞", "蹦迪", "想动", "出去嗨", "想玩"),
     "low": ("低落", "难受", "委屈", "没力气", "不开心", "糟糕"),
 }
 
@@ -32,7 +32,7 @@ NEED_RULES: dict[str, tuple[str, ...]] = {
     "new": ("没见过", "新鲜", "换个地方"),
     "sound": ("听音乐", "听点声音", "唱片"),
     "people": ("有人在", "有人就行", "生活气"),
-    "loud": ("吵一点", "热闹", "蹦迪"),
+    "loud": ("吵一点", "热闹", "蹦迪", "跳舞", "嗨一点"),
     "slow": ("慢下来", "安静", "缓一缓"),
     "hands": ("手上有事", "做点什么", "翻书"),
     "breathe": ("喘口气", "透气", "发紧"),
@@ -118,7 +118,7 @@ def interpret_with_rules(text: str) -> InterpretResponse:
     energy = 2
     if _contains_any(text, ("没力气", "很累", "动不了", "不想动")):
         energy = 1
-    elif _contains_any(text, ("有力气", "想运动", "想跳", "想跑")):
+    elif _contains_any(text, ("有力气", "想运动", "想跳", "想跑", "跳舞", "蹦迪", "想动", "出去嗨")):
         energy = 4
 
     budget = "free" if _contains_any(text, ("不花钱", "不想花钱", "没钱", "免费")) else "low" if _contains_any(text, ("便宜", "不想花很多钱", "预算低", "少花点")) else "unknown"

@@ -1524,9 +1524,19 @@ function seed(){
 }
 seed();
 
+/* 四环对应 SP-4 的纠错分类：状态 / 需求 / 约束 / 地点。
+   第五个「都挺对的」是 none，不是缺省未答——用户明确说过「没问题」是有信息量的。 */
+const STAGE_OPTIONS = [
+  {key:"none",       right:"都挺对的",     wrong:"说不清"},
+  {key:"state",      right:"状态猜得准",   wrong:"状态就猜错了"},
+  {key:"need",       right:"需求找得对",   wrong:"需求不是这个"},
+  {key:"constraint", right:"远近和花销合适", wrong:"太远／太贵了"},
+  {key:"place",      right:"地方选得好",   wrong:"地方不合适"}
+];
+
 function newDraft(placeId){
   return {placeId, step:0, score:null, factors:[], note:"", visibility:"private",
-          reminder:false, visitStartedAt:new Date().toISOString()};
+          mismatchStage:null, reminder:false, visitStartedAt:new Date().toISOString()};
 }
 
 /* ---------- 文案 ---------- */
@@ -1977,6 +1987,18 @@ function renderFactors(id){
          '" aria-pressed="' + on + '">' + (on ? "✓ " : "") + o.label + '</button>';
   });
   h += '</div>';
+  // 哪一环对/错（FR-09 / SP-4）：问的是「推荐依据对不对」，不是「这地方好不好」。
+  // 措辞跟着分数走——接住了就问哪一环最对，没接住才问哪一环没对上。
+  const missed = d.score !== null && d.score <= 0;
+  h += '<p class="sec-k">' + (missed ? '哪一环没对上？' : '哪一环最对？') + '</p>';
+  h += '<div class="chips" style="margin-bottom:4px">';
+  STAGE_OPTIONS.forEach(o => {
+    const on = d.mismatchStage === o.key;
+    h += '<button class="' + (on ? "on" : "") + '" data-stage="' + o.key + '">' +
+         (missed ? o.wrong : o.right) + '</button>';
+  });
+  h += '</div>';
+  h += '<p class="hint">这一条比分数更有用：它告诉我该改哪一步，而不是把哪个地方拉黑。</p>';
   h += '<div class="note-wrap"><label><span>如果愿意，留下一句话（可跳过）</span><em class="num">' + d.note.length + ' / 80</em></label>' +
        '<textarea id="note" maxlength="80" placeholder="比如：风吹过来的时候，脑子终于安静了一点。">' + escapeHTML(d.note) + '</textarea></div>';
   h += '<p class="sec-k">这条记录放在哪里</p>';
@@ -2435,9 +2457,12 @@ function renderOffer(){
 
   let h = topbar("此刻给你一个", "第二步 · 推荐", "#/echo");
   h += '<div class="screen"><div class="pad" style="padding-top:16px">';
-  if (state.offerNote){
+  const shut = main.open_state === "likely_closed" || main.open_state === "closed";
+  const note = state.offerNote ||
+    (shut ? "这个点它多半已经关门了。营业时间还没人工核对过，所以我不敢说死——要去的话先打个电话。" : null);
+  if (note){
     h += '<div class="say"><span class="zai">' + cloudSVG() + '</span><div class="bubble">' +
-         '<span class="tag">小在</span><p>' + escapeHTML(state.offerNote) + '</p></div></div>';
+         '<span class="tag">小在</span><p>' + escapeHTML(note) + '</p></div></div>';
   }
 
   h += '<div class="primary-card">';
@@ -2449,6 +2474,8 @@ function renderOffer(){
   h += '<ul class="chain">' + (main.reason_chain || []).map(c => '<li>' + escapeHTML(c) + '</li>').join("") + '</ul>';
   h += '<div class="cost-rows">';
   h += '<div><i>到达</i><span>' + escapeHTML(reachLine(main, p)) + '</span></div>';
+  h += '<div class="' + (main.open_state === "likely_closed" || main.open_state === "closed" ? "pay" : "") +
+       '"><i>营业</i><span>' + escapeHTML(main.open_label || "营业时间不确定") + '</span></div>';
   h += '<div class="pay"><i>代价</i><span>' + (main.tradeoffs || []).map(escapeHTML).join(' · ') + '</span></div>';
   h += '<div><i>待多久</i><span>' + escapeHTML(main.suggested_duration || p.suggestedDuration) + '</span></div>';
   h += '</div>';
@@ -2470,7 +2497,10 @@ function renderOffer(){
            '<h4>' + escapeHTML(a.action) + '</h4>' +
            '<p>' + escapeHTML(a.place_name) + '</p>' +
            '<p style="margin-top:4px;color:var(--ink-dim)">' + escapeHTML(shorten(a.reason, 34)) + '</p>' +
-           reliefPill(a) + '</span></button>';
+           reliefPill(a) +
+           (a.open_state === "likely_closed" || a.open_state === "closed"
+             ? '<span class="relief later" style="margin-left:6px"><i></i>可能关门</span>' : '') +
+           '</span></button>';
     });
     h += '</div>';
   }
@@ -2829,6 +2859,12 @@ function bind(){
     syncNote(); render();
   });
 
+  root.querySelectorAll("[data-stage]").forEach(el => el.onclick = () => {
+    syncNote();
+    state.draft.mismatchStage = state.draft.mismatchStage === el.dataset.stage ? null : el.dataset.stage;
+    render();
+  });
+
   root.querySelectorAll("[data-vis]").forEach(el => el.onclick = () => { syncNote(); state.draft.visibility = el.dataset.vis; render(); });
 
   const note = root.querySelector("#note");
@@ -2906,11 +2942,12 @@ function save(placeId){
     factors: d.factors.slice(),
     note: d.note.trim(),
     visibility: d.visibility,
+    mismatchStage: d.mismatchStage || "none",
     visitStartedAt: d.visitStartedAt,
     createdAt: new Date().toISOString()
   };
   state.records.unshift(rec);
-  CurrentAI.track("outcome_saved", {place_id:p.placeId, change_score:d.score, factor_count:d.factors.length, visibility:d.visibility});
+  CurrentAI.track("outcome_saved", {place_id:p.placeId, change_score:d.score, factor_count:d.factors.length, visibility:d.visibility, mismatch_stage:d.mismatchStage || "none"});
   CurrentAI.api("/outcomes", {method:"POST", body:JSON.stringify({
     session_id:CurrentAI.sessionId(),
     recommendation_id:(state.aiRecommendations[p.placeId] || {}).recommendation_id || "rec_local_" + rec.id,
@@ -2918,7 +2955,8 @@ function save(placeId){
     change_score:d.score,
     factor_keys:d.factors.map(f => Object.keys(FACTORS).find(k => FACTORS[k].label === f)).filter(Boolean),
     visibility:d.visibility,
-    note:d.visibility === "anonymous" ? d.note.trim() : null
+    note:d.visibility === "anonymous" ? d.note.trim() : null,
+    mismatch_stage:d.mismatchStage || "none"
   })}).catch(() => {});
   state.lastRecordId = rec.id;
   state.flipped = false;

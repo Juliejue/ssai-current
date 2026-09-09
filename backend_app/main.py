@@ -83,10 +83,19 @@ async def recommendations_route(payload: RecommendRequest, request: Request) -> 
         await store_recommendations(session_id, payload.state, recommendations)
     # Never pretend a weak shortlist is a good one (SP-3 / 守则 6).
     no_good_match = not recommendations or recommendations[0].score < 0.35
+    all_shut = bool(recommendations) and all(
+        item.open_state in {"likely_closed", "closed"} for item in recommendations
+    )
+    if all_shut:
+        note = "这个点开着门的地方不多，下面这几个多半已经打烊了。要不先去没有门的地方走走？"
+    elif no_good_match:
+        note = "这几个我不太有把握，先给你最近的一个；不合适就说一声。"
+    else:
+        note = None
     return RecommendResponse(
         recommendations=recommendations,
-        no_good_match=no_good_match,
-        fallback_note="这几个我不太有把握，先给你最近的一个；不合适就说一声。" if no_good_match else None,
+        no_good_match=no_good_match or all_shut,
+        fallback_note=note,
     )
 
 
@@ -101,6 +110,6 @@ async def product_event(payload: ProductEvent) -> dict[str, bool]:
 @app.post("/api/v1/outcomes", status_code=202)
 async def outcome(payload: OutcomeRequest) -> dict[str, bool]:
     # Never log the optional note, even when the user explicitly shares it anonymously.
-    logger.info(json.dumps({"event": "outcome_saved", "session_id": payload.session_id, "recommendation_id": payload.recommendation_id, "place_id": payload.place_id, "change_score": payload.change_score, "factor_count": len(payload.factor_keys), "visibility": payload.visibility}, ensure_ascii=False))
+    logger.info(json.dumps({"event": "outcome_saved", "session_id": payload.session_id, "recommendation_id": payload.recommendation_id, "place_id": payload.place_id, "change_score": payload.change_score, "factor_count": len(payload.factor_keys), "visibility": payload.visibility, "mismatch_stage": payload.mismatch_stage}, ensure_ascii=False))
     persisted = await store_outcome(payload)
     return {"accepted": True, "persisted": persisted}

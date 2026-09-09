@@ -103,3 +103,127 @@ def test_interpret_endpoint_exposes_the_restatement_the_first_screen_needs():
     assert body["acknowledgement"]
     assert body["evidence"]
     assert "correction_chips" in body
+
+
+# --- FR-07 营业状态 ---------------------------------------------------------
+
+from datetime import datetime
+
+from backend_app.opening_hours import BEIJING, open_state, resolve_hours
+
+
+def _place(place_id: str) -> dict:
+    from backend_app.recommender import load_catalog
+
+    return next(p for p in load_catalog()["PLACES"] if p["placeId"] == place_id)
+
+
+def test_open_spaces_have_no_opening_hours_to_get_wrong():
+    for place_id in ("liangmahe", "shichahai", "yangmeizhu"):
+        status, label, source = open_state(_place(place_id), datetime(2026, 9, 9, 3, tzinfo=BEIJING))
+        assert status == "always_open"
+        assert source == "always_open"
+        assert "没有门" in label
+
+
+def test_late_night_stops_recommending_places_with_doors():
+    from backend_app.recommender import recommend
+
+    results = recommend(
+        RecommendRequest(state=NeedState(mood_id="low"), limit=3),
+        now=datetime(2026, 9, 9, 3, tzinfo=BEIJING),
+    )
+    assert results
+    assert all(item.open_state == "always_open" for item in results)
+
+
+def test_a_bar_is_open_at_midnight_and_shut_at_noon():
+    bar = _place("zhaodai")
+    assert open_state(bar, datetime(2026, 9, 9, 23, tzinfo=BEIJING))[0] == "open"
+    assert open_state(bar, datetime(2026, 9, 9, 12, tzinfo=BEIJING))[0] == "likely_closed"
+
+
+def test_estimated_hours_never_hard_filter_and_always_say_they_are_estimates():
+    from backend_app.recommender import _hard_filter
+
+    shop = _place("fruityshop")
+    midnight = datetime(2026, 9, 9, 3, tzinfo=BEIJING)
+    status, label, source = open_state(shop, midnight)
+    assert status == "likely_closed"
+    assert source == "category_estimate"
+    assert "未经核对" in label
+    # 估算只降权，不把地点悄悄拿掉
+    assert _hard_filter(shop, NeedState(mood_id="low"), set(), midnight) is True
+
+
+def test_verified_closed_hours_are_a_real_hard_constraint():
+    from backend_app.recommender import _hard_filter
+
+    shop = dict(_place("fruityshop"))
+    shop["hours"] = {"open": "12:00", "close": "20:00", "verification_status": "verified"}
+    midnight = datetime(2026, 9, 9, 3, tzinfo=BEIJING)
+    assert open_state(shop, midnight)[0] == "closed"
+    assert resolve_hours(shop)["source"] == "verified"
+    assert _hard_filter(shop, NeedState(mood_id="low"), set(), midnight) is False
+
+
+def test_when_everything_is_shut_the_response_says_so():
+    body = client.post(
+        "/api/v1/recommendations",
+        json={"state": {"mood_id": "spark", "environment": "indoor"}, "limit": 3},
+    ).json()
+    shut = [item for item in body["recommendations"] if item["open_state"] in {"likely_closed", "closed"}]
+    if len(shut) == len(body["recommendations"]) and body["recommendations"]:
+        assert body["no_good_match"] is True
+        assert "打烊" in body["fallback_note"]
+
+
+# --- FR-09 哪一环对/错 ------------------------------------------------------
+
+
+def test_outcome_accepts_and_defaults_the_mismatch_stage():
+    from backend_app.schemas import OutcomeRequest
+
+    payload = OutcomeRequest(
+        session_id="ses_12345678",
+        recommendation_id="rec_12345678",
+        place_id="beihai",
+        change_score=-1,
+    )
+    assert payload.mismatch_stage == "none"
+    payload = OutcomeRequest(
+        session_id="ses_12345678",
+        recommendation_id="rec_12345678",
+        place_id="beihai",
+        change_score=-1,
+        mismatch_stage="constraint",
+    )
+    assert payload.mismatch_stage == "constraint"
+
+
+def test_mismatch_stage_is_rejected_when_it_is_not_one_of_the_four_steps():
+    response = client.post(
+        "/api/v1/outcomes",
+        json={
+            "session_id": "ses_12345678",
+            "recommendation_id": "rec_12345678",
+            "place_id": "beihai",
+            "change_score": 1,
+            "mismatch_stage": "vibes",
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_mismatch_stage_survives_the_event_property_allowlist():
+    from backend_app.schemas import ProductEvent
+    from backend_app.storage import safe_event_properties
+
+    event = ProductEvent(
+        name="outcome_saved",
+        session_id="ses_12345678",
+        properties={"mismatch_stage": "need", "change_score": 2, "note": "不该出现的原文"},
+    )
+    safe = safe_event_properties(event)
+    assert safe["mismatch_stage"] == "need"
+    assert "note" not in safe

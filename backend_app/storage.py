@@ -19,7 +19,7 @@ SAFE_EVENT_PROPERTIES = {
     "recommendation_rejected": {"reason"},
     "navigation_opened": {"method"},
     "arrival_confirmed": set(),
-    "outcome_saved": {"change_score", "factor_count", "visibility"},
+    "outcome_saved": {"change_score", "factor_count", "visibility", "mismatch_stage"},
 }
 
 
@@ -128,14 +128,15 @@ async def store_outcome(payload: OutcomeRequest) -> bool:
                 """
                 INSERT INTO visit_outcomes
                     (session_id, recommendation_id, place_id, change_score,
-                     factor_keys, visibility, anonymous_note)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                     factor_keys, visibility, anonymous_note, mismatch_stage)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (session_id, recommendation_id)
                 DO UPDATE SET
                     change_score = EXCLUDED.change_score,
                     factor_keys = EXCLUDED.factor_keys,
                     visibility = EXCLUDED.visibility,
                     anonymous_note = EXCLUDED.anonymous_note,
+                    mismatch_stage = EXCLUDED.mismatch_stage,
                     updated_at = now()
                 """,
                 (
@@ -146,6 +147,7 @@ async def store_outcome(payload: OutcomeRequest) -> bool:
                     payload.factor_keys,
                     payload.visibility,
                     shareable_note,
+                    payload.mismatch_stage,
                 ),
             )
         return True

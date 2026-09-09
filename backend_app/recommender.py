@@ -3,10 +3,12 @@ from __future__ import annotations
 import asyncio
 import json
 import uuid
+from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 
 from .map_provider import AmapClient, MapProviderError, WalkingRoute, navigation_url
+from .opening_hours import open_state
 from .schemas import NeedState, RecommendRequest, Recommendation
 
 
@@ -53,7 +55,7 @@ def _match_score(place: dict, state: NeedState, catalog: dict) -> float:
     return total / weight_total if weight_total else 0.0
 
 
-def _hard_filter(place: dict, state: NeedState, rejected: set[str]) -> bool:
+def _hard_filter(place: dict, state: NeedState, rejected: set[str], now: datetime | None = None) -> bool:
     if place["placeId"] in rejected:
         return False
     if state.environment == "indoor" and not place.get("indoor"):
@@ -65,6 +67,11 @@ def _hard_filter(place: dict, state: NeedState, rejected: set[str]) -> bool:
     if state.social_mode == "alone" and place.get("crowd") == "high":
         return False
     if state.energy <= 1 and place.get("distanceKm", 0) > 8:
+        return False
+    # 估算出来的「大概率关着门」不能当硬约束——估算会错，用户会被无声地少给选项。
+    # 只有核对过的营业时间才允许直接把地点拿掉。
+    status, _, source = open_state(place, now)
+    if source == "verified" and status == "closed":
         return False
     return True
 
@@ -98,6 +105,9 @@ def _is_hurried(state: NeedState) -> bool:
 
 
 RELIEF_BONUS = {"now": 0.12, "near": 0.04, "later": -0.10}
+
+# 关着门的地方排到后面，但不隐藏——用户有权知道它存在、也有权自己判断估算对不对。
+OPEN_PENALTY = {"likely_closed": -0.45, "closed": -0.60, "unknown": -0.05}
 
 # How a tag reads when the state wants a LOW value of it.
 # What a state asks for when the user has not named a need themselves.
@@ -177,14 +187,14 @@ def _tradeoffs(place: dict, reach_minutes: int) -> list[str]:
     return costs[:3] or ["暂时没看到明显的代价"]
 
 
-def _rank(request: RecommendRequest) -> list[tuple[float, dict, dict[str, float]]]:
+def _rank(request: RecommendRequest, now: datetime | None = None) -> list[tuple[float, dict, dict[str, float]]]:
     catalog = load_catalog()
     rejected = set(request.rejected_place_ids)
     hurried = _is_hurried(request.state)
     ranked: list[tuple[float, dict, dict[str, float]]] = []
 
     for place in catalog["PLACES"]:
-        if not _hard_filter(place, request.state, rejected):
+        if not _hard_filter(place, request.state, rejected, now):
             continue
         need_match = _match_score(place, request.state, catalog)
         energy_fit = 1.0
@@ -210,6 +220,10 @@ def _rank(request: RecommendRequest) -> list[tuple[float, dict, dict[str, float]
             tier, _ = _relief_tier(_estimate_reach_minutes(place))
             score += RELIEF_BONUS[tier]
             breakdown = {**breakdown, "relief_bonus": RELIEF_BONUS[tier]}
+        status, _, _ = open_state(place, now)
+        if status in OPEN_PENALTY:
+            score += OPEN_PENALTY[status]
+            breakdown = {**breakdown, "open_penalty": OPEN_PENALTY[status]}
         ranked.append((score, place, breakdown))
 
     ranked.sort(key=lambda item: item[0], reverse=True)
@@ -224,6 +238,7 @@ def _to_recommendation(
     route: WalkingRoute | None = None,
     *,
     role: str = "alternate",
+    now: datetime | None = None,
 ) -> Recommendation:
     reasons = place.get("matchReason", {})
     reason = reasons.get(state.mood_id) or reasons.get("_") or "它和你刚才说的需要比较接近。"
@@ -231,6 +246,7 @@ def _to_recommendation(
     walking_minutes = max(1, round(route.duration_seconds / 60)) if route else None
     reach_minutes = walking_minutes or _estimate_reach_minutes(place)
     tier, relief_label = _relief_tier(reach_minutes)
+    status, open_label, hours_source = open_state(place, now)
     return Recommendation(
         recommendation_id=f"rec_{uuid.uuid4().hex}",
         place_id=place["placeId"],
@@ -258,14 +274,17 @@ def _to_recommendation(
         # presented as an average (FR-10b). The prototype numbers stay out.
         sample_size=0,
         low_support=True,
+        open_state=status,  # type: ignore[arg-type]
+        open_label=open_label,
+        hours_source=hours_source,  # type: ignore[arg-type]
     )
 
 
-def recommend(request: RecommendRequest) -> list[Recommendation]:
+def recommend(request: RecommendRequest, now: datetime | None = None) -> list[Recommendation]:
     output: list[Recommendation] = []
-    for index, (score, place, breakdown) in enumerate(_rank(request)[: request.limit]):
+    for index, (score, place, breakdown) in enumerate(_rank(request, now)[: request.limit]):
         role = "primary" if index == 0 else "alternate"
-        output.append(_to_recommendation(score, place, breakdown, request.state, role=role))
+        output.append(_to_recommendation(score, place, breakdown, request.state, role=role, now=now))
     return output
 
 
@@ -273,12 +292,13 @@ async def recommend_with_live_context(
     request: RecommendRequest,
     *,
     map_client: AmapClient | None = None,
+    now: datetime | None = None,
 ) -> list[Recommendation]:
-    ranked = _rank(request)
+    ranked = _rank(request, now)
     client = map_client or AmapClient()
     if not request.location or not client.configured:
         return [
-            _to_recommendation(score, place, breakdown, request.state, role="primary" if index == 0 else "alternate")
+            _to_recommendation(score, place, breakdown, request.state, role="primary" if index == 0 else "alternate", now=now)
             for index, (score, place, breakdown) in enumerate(ranked[: request.limit])
         ]
 
@@ -317,6 +337,6 @@ async def recommend_with_live_context(
 
     enriched.sort(key=lambda item: item[0], reverse=True)
     return [
-        _to_recommendation(score, place, breakdown, request.state, route, role="primary" if index == 0 else "alternate")
+        _to_recommendation(score, place, breakdown, request.state, route, role="primary" if index == 0 else "alternate", now=now)
         for index, (score, place, breakdown, route) in enumerate(enriched[: request.limit])
     ]
