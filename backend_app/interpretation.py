@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import logging
 import os
 import re
 
@@ -8,6 +10,12 @@ import httpx
 from pydantic import ValidationError
 
 from .schemas import ClarifyOption, InterpretResponse, NeedState, RiskLevel
+
+
+logger = logging.getLogger("current.interpretation")
+
+# 每次改 SYSTEM_PROMPT 都要抬版本号——留痕靠它才能对得上（FR-30）。
+PROMPT_VERSION = "sp2-interpret-v0.2"
 
 
 MOOD_RULES: dict[str, tuple[str, ...]] = {
@@ -237,39 +245,77 @@ def _extract_json(content: str) -> dict:
     return json.loads(content)
 
 
+def _digest(text: str) -> str:
+    """留痕只留摘要。原话不进日志——哈希能对上同一句话，但还原不出来（FR-30）。"""
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def _trace(*, outcome: str, text: str, attempt: int, model: str, detail: str = "") -> None:
+    logger.info(
+        json.dumps(
+            {
+                "event": "interpretation",
+                "prompt_version": PROMPT_VERSION,
+                "model": model,
+                "attempt": attempt,
+                "input_digest": _digest(text),
+                "input_length": len(text),
+                "outcome": outcome,
+                "detail": detail,
+            },
+            ensure_ascii=False,
+        )
+    )
+
+
+async def _call_model(client: httpx.AsyncClient, *, base_url: str, api_key: str, model: str, text: str, temperature: float) -> NeedState:
+    response = await client.post(
+        f"{base_url}/chat/completions",
+        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        json={
+            "model": model,
+            "temperature": temperature,
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": text},
+            ],
+        },
+    )
+    response.raise_for_status()
+    payload = _extract_json(response.json()["choices"][0]["message"]["content"])
+    return NeedState.model_validate(payload)
+
+
 async def interpret(text: str) -> InterpretResponse:
     rule_result = interpret_with_rules(text)
     # Explicit high-risk language is never delegated to a generative model.
     if rule_result.state.risk_level == RiskLevel.urgent:
+        _trace(outcome="rules_safety_short_circuit", text=text, attempt=0, model="none")
         return _decorate(rule_result, text)
 
     api_key = os.getenv("LLM_API_KEY") or os.getenv("api_key")
     if not api_key:
+        _trace(outcome="rules_no_model_configured", text=text, attempt=0, model="none")
         return _decorate(rule_result, text)
 
     base_url = (os.getenv("LLM_BASE_URL") or os.getenv("base_url") or "https://api.openai.com/v1").rstrip("/")
     model = os.getenv("LLM_MODEL") or os.getenv("model") or "gpt-4o-mini"
-    try:
-        async with httpx.AsyncClient(timeout=20) as client:
-            response = await client.post(
-                f"{base_url}/chat/completions",
-                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-                json={
-                    "model": model,
-                    "temperature": 0.1,
-                    "response_format": {"type": "json_object"},
-                    "messages": [
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": text},
-                    ],
-                },
-            )
-            response.raise_for_status()
-            payload = _extract_json(response.json()["choices"][0]["message"]["content"])
-            state = NeedState.model_validate(payload)
+
+    # 输出契约（FR-26）：校验失败以 temperature=0 重试一次，再失败走规则兜底，绝不空屏。
+    async with httpx.AsyncClient(timeout=20) as client:
+        for attempt, temperature in enumerate((0.1, 0.0), start=1):
+            try:
+                state = await _call_model(client, base_url=base_url, api_key=api_key, model=model, text=text, temperature=temperature)
+            except (httpx.HTTPError, KeyError, IndexError, json.JSONDecodeError, ValidationError) as error:
+                _trace(outcome="contract_failed", text=text, attempt=attempt, model=model, detail=type(error).__name__)
+                continue
+
+            # 代码侧护栏：模型不能把规则已经认定的风险降级（FR-28）。
             if rule_result.state.risk_level == RiskLevel.elevated and state.risk_level == RiskLevel.ordinary:
                 state.risk_level = RiskLevel.elevated
                 state.risk_signals = rule_result.state.risk_signals
+            _trace(outcome="model_ok", text=text, attempt=attempt, model=model)
             return _decorate(
                 InterpretResponse(
                     state=state,
@@ -278,6 +324,6 @@ async def interpret(text: str) -> InterpretResponse:
                 ),
                 text,
             )
-    except (httpx.HTTPError, KeyError, IndexError, json.JSONDecodeError, ValidationError):
-        # Contract failure never reaches the user as a blank screen (FR-26).
-        return _decorate(rule_result, text)
+
+    _trace(outcome="rules_fallback_after_retry", text=text, attempt=2, model=model)
+    return _decorate(rule_result, text)

@@ -9,7 +9,8 @@ from pathlib import Path
 
 from .map_provider import AmapClient, MapProviderError, WalkingRoute, navigation_url
 from .opening_hours import open_state
-from .schemas import NeedState, RecommendRequest, Recommendation
+from .presence import geofence_radius_m, has_geofence
+from .schemas import Geofence, NeedState, RecommendRequest, Recommendation
 
 
 DATA_PATH = Path(__file__).parent / "data" / "places.json"
@@ -247,6 +248,16 @@ def _to_recommendation(
     reach_minutes = walking_minutes or _estimate_reach_minutes(place)
     tier, relief_label = _relief_tier(reach_minutes)
     status, open_label, hours_source = open_state(place, now)
+    amap = place.get("amap") or {}
+    fence = (
+        Geofence(
+            latitude=float(amap["latitude"]),
+            longitude=float(amap["longitude"]),
+            radius_m=geofence_radius_m(place),
+        )
+        if has_geofence(place)
+        else None
+    )
     return Recommendation(
         recommendation_id=f"rec_{uuid.uuid4().hex}",
         place_id=place["placeId"],
@@ -277,6 +288,7 @@ def _to_recommendation(
         open_state=status,  # type: ignore[arg-type]
         open_label=open_label,
         hours_source=hours_source,  # type: ignore[arg-type]
+        geofence=fence,
     )
 
 

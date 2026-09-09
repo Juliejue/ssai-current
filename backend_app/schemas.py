@@ -70,6 +70,14 @@ class Location(BaseModel):
     longitude: float = Field(ge=-180, le=180)
 
 
+class Geofence(BaseModel):
+    """地点的坐标是公开信息，可以下发；用户的坐标不上传，围栏在浏览器里算。"""
+
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    radius_m: int = Field(ge=50, le=2000)
+
+
 class RecommendRequest(BaseModel):
     state: NeedState
     location: Location | None = None
@@ -110,6 +118,8 @@ class Recommendation(BaseModel):
     open_state: Literal["always_open", "open", "likely_closed", "closed", "unknown"] = "unknown"
     open_label: str = ""
     hours_source: Literal["verified", "category_estimate", "always_open", "unknown"] = "unknown"
+    # 只有人工核对过坐标的地点才有围栏（FR-08 L1）。为 None 时前端退回手动确认。
+    geofence: Geofence | None = None
 
 
 class RecommendResponse(BaseModel):
@@ -150,3 +160,6 @@ class OutcomeRequest(BaseModel):
     note: str | None = Field(default=None, max_length=80)
     # 哪一环对/错（FR-09 / SP-4）。冷启动阶段最有价值的一列。
     mismatch_stage: Literal["none", "state", "need", "constraint", "place"] = "none"
+    # 在场证明（FR-08）。浏览器只报结论，服务端会往下降级，绝不采信更高的声明。
+    presence_level: Literal["geofence_dwell", "dwell_only", "self_reported"] = "self_reported"
+    dwell_minutes: int = Field(default=0, ge=0, le=1440)

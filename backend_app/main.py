@@ -11,7 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .interpretation import interpret
 from .realtime_asr import build_asr_connect_url
-from .recommender import recommend_with_live_context
+from .presence import verify as verify_presence
+from .recommender import load_catalog, recommend_with_live_context
 from .schemas import (
     InterpretRequest,
     InterpretResponse,
@@ -107,9 +108,16 @@ async def product_event(payload: ProductEvent) -> dict[str, bool]:
     return {"accepted": True, "persisted": persisted}
 
 
+def _place_by_id(place_id: str) -> dict | None:
+    return next((p for p in load_catalog()["PLACES"] if p["placeId"] == place_id), None)
+
+
 @app.post("/api/v1/outcomes", status_code=202)
-async def outcome(payload: OutcomeRequest) -> dict[str, bool]:
+async def outcome(payload: OutcomeRequest) -> dict[str, bool | str]:
+    # 浏览器的在场声明只会被往下降，永远不会被采信为更高等级（FR-08 L3）。
+    level, presence_reason = verify_presence(payload.presence_level, payload.dwell_minutes, _place_by_id(payload.place_id))
+    payload = payload.model_copy(update={"presence_level": level})
     # Never log the optional note, even when the user explicitly shares it anonymously.
-    logger.info(json.dumps({"event": "outcome_saved", "session_id": payload.session_id, "recommendation_id": payload.recommendation_id, "place_id": payload.place_id, "change_score": payload.change_score, "factor_count": len(payload.factor_keys), "visibility": payload.visibility, "mismatch_stage": payload.mismatch_stage}, ensure_ascii=False))
+    logger.info(json.dumps({"event": "outcome_saved", "session_id": payload.session_id, "recommendation_id": payload.recommendation_id, "place_id": payload.place_id, "change_score": payload.change_score, "factor_count": len(payload.factor_keys), "visibility": payload.visibility, "mismatch_stage": payload.mismatch_stage, "presence_level": level, "dwell_minutes": payload.dwell_minutes}, ensure_ascii=False))
     persisted = await store_outcome(payload)
-    return {"accepted": True, "persisted": persisted}
+    return {"accepted": True, "persisted": persisted, "presence_level": level, "presence_reason": presence_reason}

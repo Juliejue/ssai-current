@@ -1,5 +1,7 @@
 """The PRD's visible promises, asserted where they can regress silently."""
 
+import re
+
 from fastapi.testclient import TestClient
 
 from backend_app.interpretation import interpret_with_rules, _decorate
@@ -227,3 +229,101 @@ def test_mismatch_stage_survives_the_event_property_allowlist():
     safe = safe_event_properties(event)
     assert safe["mismatch_stage"] == "need"
     assert "note" not in safe
+
+
+# --- FR-08 在场证明 ---------------------------------------------------------
+
+from backend_app.presence import (
+    MIN_DWELL_MINUTES,
+    geofence_radius_m,
+    has_geofence,
+    verify as verify_presence,
+)
+
+VERIFIED_AMAP = {
+    "provider_place_id": "B000TEST",
+    "longitude": 116.389,
+    "latitude": 39.925,
+    "verification_status": "verified",
+}
+
+
+def test_no_place_has_a_geofence_until_a_human_verified_its_coordinates():
+    from backend_app.recommender import load_catalog
+
+    # place_overrides.json 是空的，所以现在一个围栏都不该存在。
+    assert not any(has_geofence(p) for p in load_catalog()["PLACES"])
+
+
+def test_large_open_spaces_get_a_bigger_radius_than_shops():
+    assert geofence_radius_m(_place("beihai")) > geofence_radius_m(_place("douzai"))
+    assert geofence_radius_m(_place("liangmahe")) == geofence_radius_m(_place("tiantan"))
+
+
+def test_the_server_downgrades_a_geofence_claim_it_cannot_back_up():
+    # 地点没有核对过的坐标 → 没有围栏 → 声明降为「按停留时长算数」
+    level, reason = verify_presence("geofence_dwell", 45, _place("beihai"))
+    assert level == "dwell_only"
+    assert "坐标" in reason
+
+
+def test_short_visits_are_never_more_than_self_reported():
+    verified = dict(_place("beihai"), amap=VERIFIED_AMAP)
+    level, _ = verify_presence("geofence_dwell", MIN_DWELL_MINUTES - 1, verified)
+    assert level == "self_reported"
+
+
+def test_a_verified_place_plus_enough_dwell_is_the_only_way_to_get_verified():
+    verified = dict(_place("beihai"), amap=VERIFIED_AMAP)
+    level, reason = verify_presence("geofence_dwell", MIN_DWELL_MINUTES, verified)
+    assert level == "geofence_dwell"
+    assert str(MIN_DWELL_MINUTES) in reason
+
+
+def test_presence_level_is_never_upgraded_beyond_what_the_client_claimed():
+    verified = dict(_place("beihai"), amap=VERIFIED_AMAP)
+    assert verify_presence("self_reported", 60, verified)[0] == "dwell_only"
+
+
+def test_the_outcomes_endpoint_returns_the_level_it_actually_accepted():
+    body = client.post(
+        "/api/v1/outcomes",
+        json={
+            "session_id": "ses_12345678",
+            "recommendation_id": "rec_12345678",
+            "place_id": "beihai",
+            "change_score": 2,
+            "presence_level": "geofence_dwell",
+            "dwell_minutes": 45,
+        },
+    ).json()
+    assert body["presence_level"] == "dwell_only", "客户端说了不算"
+    assert body["presence_reason"]
+
+
+def test_a_geofence_is_published_only_alongside_a_navigation_url():
+    """围栏和导航同一道门：都要人工核对过的坐标。"""
+    from backend_app.recommender import _to_recommendation
+
+    place = dict(_place("beihai"), amap=VERIFIED_AMAP)
+    rec = _to_recommendation(0.8, place, {}, NeedState(mood_id="low"))
+    assert rec.geofence is not None
+    assert rec.navigation_url is not None
+
+    plain = _to_recommendation(0.8, _place("beihai"), {}, NeedState(mood_id="low"))
+    assert plain.geofence is None
+    assert plain.navigation_url is None
+
+
+def test_the_client_never_sends_coordinates_anywhere():
+    """在场证明的输入是坐标，输出只有结论。任何请求体里都不该出现经纬度。"""
+    import pathlib
+
+    client_js = (pathlib.Path(__file__).parents[1] / "current-client.js").read_text(encoding="utf-8")
+    sends = re.findall(r"JSON\.stringify\(\{(.*?)\}\)", client_js, re.S)
+    assert sends
+    for body in sends:
+        for field in ("latitude", "longitude", "coords"):
+            assert field not in body or "location: activeLocation" in body, (
+                f"请求体里出现了 {field}：{body[:120]}"
+            )

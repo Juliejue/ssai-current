@@ -95,6 +95,93 @@
     });
   }
 
+  // ---- 在场证明 L1（FR-08）----------------------------------------------
+  // 围栏判定整个在这里完成。用户的经纬度只进这个闭包，既不上传，也不写进
+  // 任何事件属性——上传的只有「进没进围栏」和「待了多久」。
+  var activePresence = null;
+
+  function metersBetween(a, b) {
+    var R = 6371000;
+    var toRad = function (d) { return d * Math.PI / 180; };
+    var dLat = toRad(b.latitude - a.latitude);
+    var dLon = toRad(b.longitude - a.longitude);
+    var lat1 = toRad(a.latitude), lat2 = toRad(b.latitude);
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  // 高德坐标是 GCJ-02，浏览器定位是 WGS-84。中国境内两者能差几百米，
+  // 直接比会让围栏判定系统性偏移，所以先把 WGS-84 转成 GCJ-02 再比。
+  var GCJ_A = 6378245.0, GCJ_EE = 0.00669342162296594323;
+  function outOfChina(lat, lon) {
+    return lon < 72.004 || lon > 137.8347 || lat < 0.8293 || lat > 55.8271;
+  }
+  function transformLat(x, y) {
+    var ret = -100 + 2 * x + 3 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+    ret += (20 * Math.sin(6 * x * Math.PI) + 20 * Math.sin(2 * x * Math.PI)) * 2 / 3;
+    ret += (20 * Math.sin(y * Math.PI) + 40 * Math.sin(y / 3 * Math.PI)) * 2 / 3;
+    ret += (160 * Math.sin(y / 12 * Math.PI) + 320 * Math.sin(y * Math.PI / 30)) * 2 / 3;
+    return ret;
+  }
+  function transformLon(x, y) {
+    var ret = 300 + x + 2 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+    ret += (20 * Math.sin(6 * x * Math.PI) + 20 * Math.sin(2 * x * Math.PI)) * 2 / 3;
+    ret += (20 * Math.sin(x * Math.PI) + 40 * Math.sin(x / 3 * Math.PI)) * 2 / 3;
+    ret += (150 * Math.sin(x / 12 * Math.PI) + 300 * Math.sin(x / 30 * Math.PI)) * 2 / 3;
+    return ret;
+  }
+  function wgs2gcj(lat, lon) {
+    if (outOfChina(lat, lon)) return { latitude: lat, longitude: lon };
+    var dLat = transformLat(lon - 105, lat - 35);
+    var dLon = transformLon(lon - 105, lat - 35);
+    var radLat = lat / 180 * Math.PI;
+    var magic = 1 - GCJ_EE * Math.sin(radLat) * Math.sin(radLat);
+    var sqrtMagic = Math.sqrt(magic);
+    dLat = (dLat * 180) / ((GCJ_A * (1 - GCJ_EE)) / (magic * sqrtMagic) * Math.PI);
+    dLon = (dLon * 180) / (GCJ_A / sqrtMagic * Math.cos(radLat) * Math.PI);
+    return { latitude: lat + dLat, longitude: lon + dLon };
+  }
+
+  // fence: {latitude, longitude, radius_m}（高德 GCJ-02）。
+  // callbacks.onState({inside, dwellMinutes, level, accuracyM})
+  function watchPresence(fence, callbacks) {
+    stopPresence();
+    if (!fence || !navigator.geolocation) return null;
+
+    var insideSince = null;
+    var lastLevel = 'self_reported';
+
+    function emit(inside, accuracy) {
+      var dwellMinutes = insideSince ? Math.floor((Date.now() - insideSince) / 60000) : 0;
+      lastLevel = inside && dwellMinutes >= 5 ? 'geofence_dwell' : lastLevel;
+      callbacks.onState({ inside: inside, dwellMinutes: dwellMinutes, level: lastLevel, accuracyM: Math.round(accuracy || 0) });
+    }
+
+    var id = navigator.geolocation.watchPosition(function (position) {
+      var here = wgs2gcj(position.coords.latitude, position.coords.longitude);
+      var distance = metersBetween(here, fence);
+      // 定位误差算进围栏，否则室内定位会把真到了的人判成没到。
+      var inside = distance <= fence.radius_m + Math.min(position.coords.accuracy || 0, 200);
+      if (inside && !insideSince) insideSince = Date.now();
+      if (!inside) insideSince = null;
+      emit(inside, position.coords.accuracy);
+    }, function () {
+      callbacks.onUnavailable('没有位置权限，到了按一下就行');
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
+
+    var ticker = setInterval(function () { if (insideSince) emit(true, 0); }, 30000);
+    activePresence = { id: id, ticker: ticker };
+    return activePresence;
+  }
+
+  function stopPresence() {
+    if (!activePresence) return;
+    try { navigator.geolocation.clearWatch(activePresence.id); } catch (_) {}
+    clearInterval(activePresence.ticker);
+    activePresence = null;
+  }
+
   var WORKLET_SOURCE = `
     class CurrentPcmProcessor extends AudioWorkletProcessor {
       process(inputs) {
@@ -230,6 +317,8 @@
     recommendFor: recommendFor,
     hasLocation: function () { return Boolean(activeLocation); },
     requestLocation: requestLocation,
+    watchPresence: watchPresence,
+    stopPresence: stopPresence,
     toggleVoice: toggleVoice
   };
 })();
