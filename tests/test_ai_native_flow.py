@@ -76,8 +76,20 @@ def test_hurried_state_prefers_somewhere_reachable_now():
 def test_trade_offs_come_from_the_place_record_not_from_feedback_options():
     for item in recommend(RecommendRequest(state=NeedState(mood_id="low"), limit=5)):
         assert item.tradeoffs
-        if item.reach_minutes < 25:
-            assert not any("路上大约" in cost for cost in item.tradeoffs)
+
+
+def test_travel_time_is_stated_once_and_never_repeated_as_a_cost():
+    """「到达」那一行已经写了路程，代价栏再写一遍是同一个信息说两遍。"""
+    for item in recommend(RecommendRequest(state=NeedState(mood_id="low"), limit=8)):
+        for cost in item.tradeoffs:
+            assert "路上" not in cost and "分钟" not in cost, f"代价里重复了路程：{cost}"
+
+
+def test_each_piece_of_evidence_quotes_a_different_thing_the_user_said():
+    read = _read("今天脑子很乱，不想见人，也不想花很多钱")
+    quoted = re.findall(r"「([^」]+)」", "".join(read.evidence))
+    assert len(quoted) == len(set(quoted)), f"同一句话被引用了两次：{quoted}"
+    assert len(read.evidence) == 3
 
 
 def test_no_place_may_present_an_average_before_it_has_samples():

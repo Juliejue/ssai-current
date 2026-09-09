@@ -154,24 +154,45 @@ def _matched_tokens(text: str, patterns: tuple[str, ...]) -> list[str]:
 
 
 def _evidence_for(text: str, state: NeedState) -> list[str]:
-    """Quote the user's own words back. Never inferred, never stored, never logged."""
+    """Quote the user's own words back. Never inferred, never stored, never logged.
+
+    同一句话只引用一次。之前「不想见人」会先作为诉求出现、再作为社交约束出现，
+    同一个信号说两遍，看起来像没读懂。
+    """
     evidence: list[str] = []
+    cited: set[str] = set()
+
     for token in _matched_tokens(text, MOOD_RULES.get(state.mood_id, ())):
         evidence.append(f"你说了「{token}」")
+        cited.add(token)
         break
+
     for key in state.need_keys:
-        tokens = _matched_tokens(text, NEED_RULES.get(key, ()))
-        if tokens:
-            evidence.append(f"「{tokens[0]}」——我理解成{NEED_LABELS.get(key, key)}")
+        tokens = [t for t in _matched_tokens(text, NEED_RULES.get(key, ())) if t not in cited]
+        if not tokens:
+            continue
+        evidence.append(f"「{tokens[0]}」——我理解成{NEED_LABELS.get(key, key)}")
+        cited.add(tokens[0])
         if len(evidence) >= 2:
             break
+
     if len(evidence) < 3:
-        if state.budget_level == "free":
-            evidence.append("你提到了钱，所以我只找不用消费的地方")
-        elif state.social_mode == "alone":
-            evidence.append("你说了不想见人，所以我把人多的地方去掉了")
-        elif state.energy <= 1:
-            evidence.append("听起来你没什么力气，所以我把远的地方往后放了")
+        # 兜底那条也必须引用用户真说过的词，不能写死一句「你说了不想见人」。
+        constraints: list[tuple[bool, tuple[str, ...], str]] = [
+            (state.budget_level in {"free", "low"}, ("不花钱", "不想花钱", "不想花很多钱", "没钱", "免费", "便宜", "预算低", "少花点"), "所以我只找花不了什么钱的地方"),
+            (state.social_mode == "alone", ("不想见人", "一个人", "别跟人说话", "躲"), "所以我把人多的地方去掉了"),
+            (state.energy <= 1, ("没力气", "很累", "动不了", "不想动", "困", "疲惫"), "所以我把远的地方往后放了"),
+        ]
+        for applies, tokens, consequence in constraints:
+            if not applies:
+                continue
+            fresh = [t for t in _matched_tokens(text, tokens) if t not in cited]
+            if not fresh:
+                continue
+            evidence.append(f"「{fresh[0]}」——{consequence}")
+            cited.add(fresh[0])
+            break
+
     if not evidence:
         evidence.append("你说的话里我没抓到很明确的线索，所以这一条我不太确定")
     return evidence[:3]

@@ -91,6 +91,10 @@ button{background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highligh
 .back:hover{color:var(--ink)}
 
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+/* 只有一个决定的屏（复述确认、纠错）内容天然短，靠上放会留一大片死区。
+   用 margin:auto 而不是 justify-content:center——内容变长时不会把顶部裁掉。 */
+.screen.mid{display:flex;flex-direction:column}
+.screen.mid > .pad{margin-top:auto;margin-bottom:auto;width:100%}
 .screen::-webkit-scrollbar{display:none}
 .pad{padding:20px 18px 26px}
 
@@ -468,13 +472,18 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
    AI-native 主旅程：说 → 复述 → （最多一次追问）→ 1 主推 + 2 备选 → 出发 → 反馈
    评委 #4 / #6：第一屏不给选择题，小在提议、人只确认一次。
    ============================================================ */
-.talk{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 24px 26px;text-align:center;overflow-y:auto}
+.talk{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:22px 22px 26px;text-align:center;overflow-y:auto}
 .talk .zai{width:112px;height:66px;opacity:.9;margin-bottom:6px}
 .talk h1{margin:0 0 10px;font:400 25px/1.5 var(--serif);letter-spacing:.01em;text-wrap:balance}
-.talk .sub{margin:0 0 26px;font:13px/1.8 var(--sans);color:var(--ink-dim);max-width:26ch}
+.talk .sub{margin:0 0 26px;font:13px/1.8 var(--sans);color:var(--ink-dim);max-width:30ch;text-wrap:balance}
 .mic{width:96px;height:96px;border-radius:50%;background:var(--ink);color:var(--paper);
-  display:grid;place-items:center;box-shadow:0 10px 28px rgba(18,42,46,.22);position:relative;flex:none}
+  display:grid;place-items:center;box-shadow:0 10px 28px rgba(18,42,46,.22);position:relative;flex:none;
+  transition:width .18s,height .18s}
 .mic svg{width:30px;height:30px}
+/* 打字时麦克风退成一个小圆钮：主动作只能有一个 */
+.mic.small{width:46px;height:46px;background:none;border:1px solid var(--line-2);color:var(--water);box-shadow:none}
+.mic.small svg{width:19px;height:19px}
 .mic:disabled{opacity:.45}
 .mic.listening{background:var(--water)}
 .mic.listening:before{content:"";position:absolute;inset:-12px;border-radius:50%;
@@ -489,10 +498,12 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .talk .typing textarea:focus{border-color:var(--water)}
 .talk .typing .send{margin-top:9px;height:44px;width:100%;border-radius:22px;background:var(--ink);color:var(--paper);font:500 14px var(--sans)}
 .talk .typing .send:disabled{background:rgba(18,42,46,.08);color:var(--ink-faint)}
-.talk .foot{margin-top:auto;padding-top:24px;display:flex;flex-direction:column;gap:9px;align-items:center}
-.talk .foot button{font:11.5px/1.5 var(--sans);color:var(--ink-faint)}
-.talk .foot button.on{color:var(--water)}
-.talk .privacy{margin:16px 0 0;font:10.5px/1.7 var(--mono);color:var(--ink-faint);letter-spacing:.02em;max-width:30ch}
+.talk .foot{margin-top:30px;display:flex;flex-direction:column;gap:10px;align-items:center}
+/* 两个入口重要性不同：定位是可选增强，「自己挑」是退路，别给一样的分量 */
+.talk .foot button{font:12px/1.5 var(--sans);color:var(--water)}
+.talk .foot button.on{color:var(--ink-dim)}
+.talk .foot button.quiet{font-size:11.5px;color:var(--ink-faint)}
+.talk .privacy{margin:18px 0 0;font:10.5px/1.8 var(--mono);color:var(--ink-faint);letter-spacing:.02em;max-width:34ch;text-wrap:balance}
 
 /* 小在说的话 */
 .say{display:flex;gap:11px;align-items:flex-start;margin-bottom:16px}
@@ -506,6 +517,18 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .evidence li{margin:0 0 7px;font:12.5px/1.7 var(--sans);color:var(--ink-dim)}
 .evidence li:last-child{margin-bottom:0}
 .evidence li b{color:var(--ink);font-weight:500}
+
+/* 哪一环对/错（FR-09）。上面就是一排影响因素 chip，这一组必须长得不一样，
+   否则读起来像同一组的延续。做法：收进一个带底的框，chip 用水青实底。 */
+.stage-pick{margin:22px 0 0;padding:14px;border-radius:16px;background:var(--water-wash);
+  border:1px solid rgba(30,110,114,.18)}
+.stage-pick .lead-q{margin:0 0 4px;font:500 14px/1.5 var(--sans);color:var(--ink)}
+.stage-pick .note{margin:0 0 12px;font:11.5px/1.6 var(--sans);color:var(--ink-dim)}
+.stage-pick .row{display:flex;flex-wrap:wrap;gap:7px}
+.stage-pick button{padding:8px 13px;border-radius:9px;border:1px solid transparent;
+  background:rgba(255,255,255,.75);font:12.5px var(--sans);color:var(--ink-dim);transition:all .14s}
+.stage-pick button:hover{color:var(--ink);border-color:rgba(30,110,114,.3)}
+.stage-pick button.on{background:var(--water);color:#fff;border-color:var(--water)}
 
 /* 一次追问 / 纠错 chips */
 .ask{margin:0 0 18px;padding:14px;border:1px solid var(--line-2);border-radius:16px;background:var(--sun-wash)}
@@ -2040,15 +2063,16 @@ function renderFactors(id){
   // 哪一环对/错（FR-09 / SP-4）：问的是「推荐依据对不对」，不是「这地方好不好」。
   // 措辞跟着分数走——接住了就问哪一环最对，没接住才问哪一环没对上。
   const missed = d.score !== null && d.score <= 0;
-  h += '<p class="sec-k">' + (missed ? '哪一环没对上？' : '哪一环最对？') + '</p>';
-  h += '<div class="chips" style="margin-bottom:4px">';
+  h += '<div class="stage-pick">';
+  h += '<p class="lead-q">' + (missed ? '哪一环没对上？' : '哪一环最对？') + '</p>';
+  h += '<p class="note">这一条比分数更有用：它告诉我该改哪一步，而不是把哪个地方拉黑。</p>';
+  h += '<div class="row">';
   STAGE_OPTIONS.forEach(o => {
     const on = d.mismatchStage === o.key;
     h += '<button class="' + (on ? "on" : "") + '" data-stage="' + o.key + '">' +
          (missed ? o.wrong : o.right) + '</button>';
   });
-  h += '</div>';
-  h += '<p class="hint">这一条比分数更有用：它告诉我该改哪一步，而不是把哪个地方拉黑。</p>';
+  h += '</div></div>';
   h += '<div class="note-wrap"><label><span>如果愿意，留下一句话（可跳过）</span><em class="num">' + d.note.length + ' / 80</em></label>' +
        '<textarea id="note" maxlength="80" placeholder="比如：风吹过来的时候，脑子终于安静了一点。">' + escapeHTML(d.note) + '</textarea></div>';
   h += '<p class="sec-k">这条记录放在哪里</p>';
@@ -2443,8 +2467,10 @@ function renderTalk(){
   h += '<div class="zai">' + cloudSVG("withyou") + '</div>';
   h += '<h1>现在，说点什么都行。</h1>';
   h += '<p class="sub">不用组织语言，也不用先想清楚要去哪。<br>你说，我来找。</p>';
-  h += '<button class="mic" id="mic-button" aria-label="按住说话">' + micSVG() + '</button>';
-  h += '<p class="mic-cap" id="mic-cap">按一下开始说 · 再按一下结束</p>';
+  // 打字时麦克风退成小圆钮：一屏一个主动作，语音的优先级靠体量表达
+  h += '<button class="mic' + (state.talkTyping ? ' small' : '') + '" id="mic-button" aria-label="用语音说">' + micSVG() + '</button>';
+  h += '<p class="mic-cap" id="mic-cap">' +
+       (state.talkTyping ? '也可以点上面这个改用语音' : '按一下开始说 · 再按一下结束') + '</p>';
   if (!state.talkTyping){
     h += '<button class="type-toggle" id="type-toggle">不想说话，我打字</button>';
   } else {
@@ -2456,7 +2482,7 @@ function renderTalk(){
   h += '<div class="foot">' +
        '<button id="location-input"' + (CurrentAI.hasLocation() ? ' class="on"' : '') + '>' +
        (CurrentAI.hasLocation() ? '✓ 已用当前位置算真实路程' : '⌖ 用当前位置算真实路程（可选）') + '</button>' +
-       '<button data-go="#/mood">我不想说，自己挑</button></div>';
+       '<button class="quiet" data-go="#/mood">我不想说，自己挑</button></div>';
   h += '</div>';
   h += tripStrip();
   return h;
@@ -2467,11 +2493,11 @@ function renderEcho(){
   const r = state.read;
   if (!r) return renderTalk();
   let h = topbar("我听到的", "第一步 · 只确认一次", "#/talk");
-  h += '<div class="screen"><div class="pad">';
+  h += '<div class="screen mid"><div class="pad">';
   h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
-       '<div class="bubble"><span class="tag">小在</span><p>' + escapeHTML(r.acknowledgement) + '</p></div></div>';
+       '<div class="bubble"><span class="tag">小在</span><p>' + keepQuotedTogether(escapeHTML(r.acknowledgement)) + '</p></div></div>';
   h += '<p class="eyebrow">我是这么听出来的</p>';
-  h += '<ul class="evidence">' + (r.evidence || []).map(e => '<li>' + escapeHTML(e) + '</li>').join("") + '</ul>';
+  h += '<ul class="evidence">' + (r.evidence || []).map(e => '<li>' + keepQuotedTogether(escapeHTML(e)) + '</li>').join("") + '</ul>';
 
   const asking = r.clarify_field && !state.askAnswered;
   if (asking){
@@ -2496,7 +2522,7 @@ function renderFix(){
   const r = state.read;
   const chips = (r && r.correction_chips) || [];
   let h = topbar("哪一句不对", "一步就能改", "#/echo");
-  h += '<div class="screen"><div class="pad">';
+  h += '<div class="screen mid"><div class="pad">';
   h += '<div class="say"><span class="zai">' + cloudSVG() + '</span>' +
        '<div class="bubble"><span class="tag">小在</span><p>那是我猜错了。挑一个更接近的说法，我立刻重新找。</p></div></div>';
   h += '<p class="eyebrow">身体上更接近哪一种</p>';
@@ -2527,11 +2553,11 @@ function renderOffer(){
     (shut ? "这个点它多半已经关门了。营业时间还没人工核对过，所以我不敢说死——要去的话先打个电话。" : null);
   if (note){
     h += '<div class="say"><span class="zai">' + cloudSVG() + '</span><div class="bubble">' +
-         '<span class="tag">小在</span><p>' + escapeHTML(note) + '</p></div></div>';
+         '<span class="tag">小在</span><p>' + keepQuotedTogether(escapeHTML(note)) + '</p></div></div>';
   }
 
   h += '<div class="primary-card">';
-  h += coverHTML(p, {style:"aspect-ratio:16/9;border:0;border-radius:0"});
+  h += coverHTML(p, {style:"aspect-ratio:24/9;border:0;border-radius:0"});
   h += '<div class="pc-head">' + reliefPill(main) +
        '<h3>' + escapeHTML(main.action) + '</h3>' +
        '<p class="where">' + escapeHTML(main.place_name) + ' · ' + p.area + '</p></div>';
@@ -2575,16 +2601,22 @@ function renderOffer(){
   return h;
 }
 
+/* 「」里的词是小在给出的那个状态判断，被断行拆开会很难读。
+   先 escapeHTML 再包标签——顺序反了就成了注入。 */
+function keepQuotedTogether(escaped){
+  return escaped.replace(/「[^」]{1,12}」/g, m => '<span style="white-space:nowrap">' + m + '</span>');
+}
 function shorten(text, max){
   text = text || "";
   return text.length > max ? text.slice(0, max - 1) + "…" : text;
 }
 /* 到达成本一行：真实路线和原型估算必须能被一眼分辨 */
+/* 卡片顶部的 pill 已经说过 time-to-relief，这行不要再说第二遍。 */
 function reachLine(rec, p){
   if (rec.distance_source === "amap" && rec.walking_minutes){
     return "步行约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km（高德实测）";
   }
-  return rec.relief_label + " · 约 " + rec.reach_minutes + " 分钟 · " + p.transport + "（原型估算，未接地图）";
+  return "约 " + rec.reach_minutes + " 分钟 · " + p.transport + "（原型估算，未接地图）";
 }
 /* 样本诚实（FR-10b / FR-19b）：没有真实到访数据时，不给任何平均分 */
 function sampleLine(rec){

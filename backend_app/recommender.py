@@ -171,7 +171,7 @@ def _reason_chain(place: dict, state: NeedState, catalog: dict) -> list[str]:
     return chain
 
 
-def _tradeoffs(place: dict, reach_minutes: int) -> list[str]:
+def _tradeoffs(place: dict) -> list[str]:
     """代价照实写. Derived from the reviewed place record, never invented."""
     tags = place.get("tags", {})
     costs: list[str] = []
@@ -181,11 +181,25 @@ def _tradeoffs(place: dict, reach_minutes: int) -> list[str]:
         costs.append("声音偏大")
     if not place.get("free"):
         costs.append("消费压力偏高" if tags.get("cp", 0) >= 0.6 else "要花点钱")
-    if reach_minutes >= 25:
-        costs.append(f"路上大约 {reach_minutes} 分钟")
+    # 路程不写进代价：「到达」那一行已经把它说清楚了，重复一遍会让代价栏
+    # 看起来只有这一条，反而显得这地方没有别的代价。
     if tags.get("st", 1) <= 0.35:
         costs.append("不太适合久待")
-    return costs[:3] or ["暂时没看到明显的代价"]
+    if costs:
+        return costs[:3]
+
+    # 真的没有代价也是一条信息，但要说清楚「凭什么没有」，
+    # 否则「暂时没看到」读起来像系统没算出来。
+    upsides = []
+    if place.get("free"):
+        upsides.append("不用花钱")
+    if place.get("crowd") == "low":
+        upsides.append("人不多")
+    if tags.get("l", 1) < 0.4:
+        upsides.append("不吵")
+    if tags.get("s", 0) >= 0.7:
+        upsides.append("一个人去不奇怪")
+    return ["没什么要你付出的：" + "、".join(upsides[:3])] if upsides else ["没看出明显的代价"]
 
 
 def _rank(request: RecommendRequest, now: datetime | None = None) -> list[tuple[float, dict, dict[str, float]]]:
@@ -274,7 +288,7 @@ def _to_recommendation(
         suggested_duration=place.get("suggestedDuration"),
         cost=place.get("cost"),
         see=place.get("see"),
-        tradeoffs=_tradeoffs(place, reach_minutes),
+        tradeoffs=_tradeoffs(place),
         score_breakdown=breakdown,
         role=role,  # type: ignore[arg-type]
         reach_minutes=reach_minutes,
