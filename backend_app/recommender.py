@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 
-from .map_provider import AmapClient, MapProviderError, WalkingRoute, navigation_url
+from .map_provider import AmapClient, MapProviderError, WalkingRoute, map_links, navigation_url
 from .opening_hours import open_state
 from .presence import geofence_radius_m, has_geofence
 from .schemas import Geofence, NeedState, RecommendRequest, Recommendation
@@ -73,6 +73,11 @@ def _hard_filter(place: dict, state: NeedState, rejected: set[str], now: datetim
     # 只有核对过的营业时间才允许直接把地点拿掉。
     status, _, source = open_state(place, now)
     if source == "verified" and status == "closed":
+        return False
+    # 路程上限是用户自己说的（「太远了，就近」），必须真的生效。
+    # 这里用的是原型估算——估算会错，但把用户明说的条件当没听见更错。
+    # 接上高德之后 recommend_with_live_context 会再用实测时间过一遍。
+    if state.max_travel_minutes is not None and _estimate_reach_minutes(place) > state.max_travel_minutes:
         return False
     return True
 
@@ -303,6 +308,7 @@ def _to_recommendation(
         open_label=open_label,
         hours_source=hours_source,  # type: ignore[arg-type]
         geofence=fence,
+        map_links=map_links(place),
     )
 
 

@@ -599,6 +599,40 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .learned .lr:last-child{border-bottom:none}
 .learned .lr strong{display:block;font:500 13px/1.5 var(--sans);color:var(--ink);margin-bottom:3px}
 .learned .lr small{display:block;font:11.5px/1.65 var(--sans);color:var(--ink-faint)}
+
+/* ---- FR-03 四环纠错：先挑哪一环，再挑具体的 ---- */
+.links{display:flex;gap:6px;margin:0 0 16px;padding:4px;border-radius:13px;background:var(--sunk)}
+.links button{flex:1;padding:9px 4px;border-radius:10px;font:12px var(--sans);color:var(--ink-dim);
+  transition:background .14s,color .14s;white-space:nowrap}
+.links button.on{background:var(--card);color:var(--ink);font-weight:500;box-shadow:0 1px 3px rgba(18,42,46,.08)}
+.link-hint{margin:0 0 12px;font:12px/1.7 var(--sans);color:var(--ink-faint)}
+.place-out{width:100%;margin-top:2px;padding:14px;border-radius:14px;border:1px dashed var(--line-2);
+  background:var(--card);text-align:left}
+.place-out strong{display:block;font:500 14px/1.5 var(--sans);color:var(--ink);margin-bottom:3px}
+.place-out small{display:block;font:11.5px/1.6 var(--sans);color:var(--ink-faint)}
+
+/* ---- US-06 地图三选 ---- */
+.sheet{position:absolute;inset:0;background:rgba(18,42,46,.34);display:flex;align-items:flex-end;z-index:20}
+.sheet-in{width:100%;background:var(--card);border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+.sheet-in h4{margin:0 0 3px;font:500 15px/1.5 var(--sans)}
+.sheet-in .sub{margin:0 0 14px;font:11.5px/1.6 var(--sans);color:var(--ink-faint)}
+.sheet-in a{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px 15px;border:1px solid var(--line);border-radius:13px;margin-bottom:8px;
+  font:14px var(--sans);color:var(--ink);text-decoration:none}
+.sheet-in a:hover{border-color:var(--water);color:var(--water)}
+.sheet-in a i{font-style:normal;font:10px var(--mono);letter-spacing:.08em;color:var(--ink-faint)}
+.sheet-in .cancel{width:100%;margin-top:4px;height:44px;border-radius:22px;color:var(--ink-dim);font:13px var(--sans)}
+
+/* ---- FR-12 删除 ---- */
+.danger{display:block;width:100%;margin-top:10px;padding:11px;border-radius:22px;
+  border:1px solid var(--line);font:12.5px var(--sans);color:var(--ink-faint)}
+.danger:hover{border-color:var(--d-n2);color:var(--d-n2)}
+.confirm{margin-top:12px;padding:14px;border-radius:14px;background:var(--sunk);border:1px solid var(--line-2)}
+.confirm p{margin:0 0 12px;font:12.5px/1.7 var(--sans);color:var(--ink)}
+.confirm .row{display:flex;gap:8px}
+.confirm .row button{flex:1;height:42px;border-radius:21px;font:13px var(--sans)}
+.confirm .row .yes{background:var(--d-n2);color:#fff}
+.confirm .row .no{border:1px solid var(--line-2);color:var(--ink-dim)}
 </style>
 </head>
 <body>
@@ -1511,6 +1545,10 @@ const state = {
   offerNote: null,
   rejected: [],
   askAnswered: false,
+  fixLink: "state",
+  mapSheet: null,
+  pendingDelete: null,
+  deleteWarning: null,
   trip: null,
   watchingPlaceId: null,
   needs: [],
@@ -2167,9 +2205,19 @@ function renderCard(recId, backTo){
          '<p>这条没有进入 ' + p.placeName + ' 的汇总<em>你选了只存进自己的记录。地点的平均分里没有你。</em></p></div>';
   }
   h += '<div class="actions"><button class="btn" data-go="#/records">进入情绪空间轨迹 <span>→</span></button>' +
-       '<button class="btn-text" data-reset="1">重新体验</button></div>';
+       '<button class="btn-text" data-reset="1">重新体验</button>';
+  // FR-12 / §M6：记忆可删除。承诺过「只存进我的记录」，就要给得出出口。
+  if (state.pendingDelete === rec.id){
+    h += '<div class="confirm"><p>删掉这条记录？变化分、影响因素、你写的那句话都会一起消失，' +
+         '本地和服务端都不留。<b>这一步撤不回来。</b></p>' +
+         '<div class="row"><button class="no" data-delcancel="1">先留着</button>' +
+         '<button class="yes" data-delyes="' + rec.id + '">删掉</button></div></div>';
+  } else if (!rec.demo){
+    h += '<button class="danger" data-del="' + rec.id + '">删掉这条记录</button>';
+  }
+  h += '</div>';
   h += '</div></div>';
-  h += dock('我替你记住了这里。');
+  h += dock('我替你记住了这里。你也随时可以让我忘掉。');
   return h;
 }
 
@@ -2214,6 +2262,11 @@ function renderRecords(){
   });
   h += '</div>';
   h += '<div style="padding:13px 18px 16px"><button class="btn ghost sm" data-go="#/nearby">看别人在这些地方留下的 →</button></div></div>';
+
+  if (state.deleteWarning){
+    h += '<div class="pad" style="padding-bottom:0"><div class="sample-note" style="margin:0">' +
+         escapeHTML(state.deleteWarning) + '</div></div>';
+  }
 
   // 小在从这些记录里学到的：说清楚下一次推荐会怎么变，而不是给用户贴标签（FR-12 / FR-17）
   const learned = learnedPatterns();
@@ -2517,18 +2570,50 @@ function renderEcho(){
   return h;
 }
 
-/* --- ③ 猜错一步可纠 --- */
+/* --- ③ 猜错一步可纠（FR-03）---
+   PRD 要的是「状态 / 需求 / 约束 / 地点 哪一环不对」，不只是改状态。
+   四环放在同一屏：默认停在「状态」，最常见的情况仍然只要一次点击（US-02）；
+   要改别的环才多一次。选完立即重推，不追问第二次。 */
+const FIX_LINKS = [
+  {key:"state",      label:"状态",   hint:"我把你此刻的感觉猜错了"},
+  {key:"need",       label:"需求",   hint:"状态对，但我找错了你需要什么样的环境"},
+  {key:"constraint", label:"条件",   hint:"远近、花销、室内外——有条件我漏了"},
+  {key:"place",      label:"地点",   hint:"都对，就是这几个地方不想去"}
+];
+
 function renderFix(){
   const r = state.read;
-  const chips = (r && r.correction_chips) || [];
-  let h = topbar("哪一句不对", "一步就能改", "#/echo");
+  const link = state.fixLink || "state";
+  const groups = (r && r.corrections) || {};
+  const meta = FIX_LINKS.find(l => l.key === link) || FIX_LINKS[0];
+
+  let h = topbar("哪一环不对", "一步就能改", "#/echo");
   h += '<div class="screen mid"><div class="pad">';
   h += '<div class="say"><span class="zai">' + cloudSVG() + '</span>' +
-       '<div class="bubble"><span class="tag">小在</span><p>那是我猜错了。挑一个更接近的说法，我立刻重新找。</p></div></div>';
-  h += '<p class="eyebrow">身体上更接近哪一种</p>';
-  h += '<div class="chips">' + chips.map(c =>
-        '<button data-fix="' + escapeHTML(c.key) + '">' + escapeHTML(c.label) + '</button>').join("") + '</div>';
-  h += '<p class="lead" style="margin-top:20px">选完直接出结果，不会再让你确认一遍。<br>这些都是身体上的感觉，不是病名。</p>';
+       '<div class="bubble"><span class="tag">小在</span><p>那是我猜错了。指出哪一环不对，我立刻重新找。</p></div></div>';
+
+  h += '<div class="links">' + FIX_LINKS.map(l =>
+        '<button class="' + (l.key === link ? "on" : "") + '" data-fixlink="' + l.key + '">' + l.label + '</button>'
+      ).join("") + '</div>';
+  h += '<p class="link-hint">' + meta.hint + '</p>';
+
+  if (link === "place"){
+    h += '<button class="place-out" id="fix-place">' +
+         '<strong>这几个都不想去，换一批</strong>' +
+         '<small>刚才那些我记下来，这一轮不会再给你。状态和需求都保持不变。</small></button>';
+  } else {
+    const chips = groups[link] || [];
+    if (!chips.length){
+      h += '<p class="lead" style="margin:0">这一环我已经按你说的设过了，没有别的可改。换一环看看。</p>';
+    } else {
+      h += '<div class="chips">' + chips.map(c =>
+            '<button data-fix="' + escapeHTML(link) + '|' + escapeHTML(c.key) + '">' + escapeHTML(c.label) + '</button>'
+          ).join("") + '</div>';
+    }
+  }
+
+  h += '<p class="lead" style="margin-top:20px">选完直接出结果，不会再让你确认一遍。<br>' +
+       (link === "state" ? '这些都是身体上的感觉，不是病名。' : '改哪一环都算数，改完还可以再改。') + '</p>';
   h += '<p class="status" id="natural-status" style="min-height:18px;font:11.5px/1.55 var(--sans);color:var(--ink-faint)"></p>';
   h += '</div></div>';
   h += dock('说错、改口、再改一次，都算数。', {records:false});
@@ -2606,6 +2691,31 @@ function renderOffer(){
 function keepQuotedTogether(escaped){
   return escaped.replace(/「[^」]{1,12}」/g, m => '<span style="white-space:nowrap">' + m + '</span>');
 }
+/* US-06：给用户选地图，不替他决定。
+   高德收 GCJ-02，Apple / Google 收 WGS-84，后端已经按各家坐标系分别转好了。 */
+const MAP_APPS = [
+  {key:"amap",   name:"高德地图",   note:"GCJ-02 · 国内最准"},
+  {key:"apple",  name:"Apple 地图", note:"WGS-84 · iPhone 自带"},
+  {key:"google", name:"Google 地图", note:"WGS-84 · 需要能连上"}
+];
+
+function mapSheet(){
+  const t = state.mapSheet;
+  if (!t) return "";
+  const links = t.links || {};
+  let h = '<div class="sheet" id="map-sheet"><div class="sheet-in">';
+  h += '<h4>用哪个地图带你去？</h4>';
+  h += '<p class="sub">' + escapeHTML(t.placeName) + ' · 坐标已按各家的坐标系换算过，不会偏</p>';
+  MAP_APPS.forEach(app => {
+    if (!links[app.key]) return;
+    h += '<a href="' + escapeHTML(links[app.key]) + '" target="_blank" rel="noopener" data-mapapp="' + app.key + '">' +
+         '<span>' + app.name + '</span><i>' + app.note + '</i></a>';
+  });
+  h += '<button class="cancel" id="map-cancel">先不去</button>';
+  h += '</div></div>';
+  return h;
+}
+
 function shorten(text, max){
   text = text || "";
   return text.length > max ? text.slice(0, max - 1) + "…" : text;
@@ -2660,7 +2770,7 @@ function render(){
   else if (r === "#/records")            inner = renderRecords();
   else { state.route = "#/talk"; inner = renderTalk(); }
 
-  root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + '</div>' +
+  root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + mapSheet() + '</div>' +
     '<p class="stage-note">390 × 844 · AI 后端试运行 · <a href="#/compare" data-go="#/compare">会议总览页</a></p></div>';
 
   if (isCompare) scaleMinis();
@@ -2834,23 +2944,59 @@ function bind(){
   });
 
   // 纠错：指出哪一环不对 → 立即重推（FR-03）
-  root.querySelectorAll("[data-fix]").forEach(el => el.onclick = () => {
-    const moodId = el.dataset.fix;
-    const label = el.textContent;
-    // 用户否掉的是「我怎么读你这句话」。诉求也是从同一句话推出来的，
-    // 留着会和新状态打架（比如刚改成「想有人在旁边」，却还带着「不被人看见」）。
-    // 只保留用户明确说过的硬约束：钱和路程。
-    const next = Object.assign({}, state.read.state, {
-      mood_id:moodId, confidence:0.9, need_keys:[], social_mode:"either", environment:"either"
-    });
-    state.read.state = next;
-    state.read.state_label = label;
-    state.read.acknowledgement = "好，是「" + label + "」。我按这个重新找了一遍。";
-    state.read.evidence = ["这一条是你自己改的，不是我猜的"];
-    state.askAnswered = true;
-    CurrentAI.track("recommendation_rejected", {place_id:(state.offer && state.offer[0] || {}).place_id || null, recommendation_id:(state.offer && state.offer[0] || {}).recommendation_id || null, reason:"state_corrected"});
-    runRecommend(next, "把「" + label + "」当成主线之后，排在最前面的换了。");
+  root.querySelectorAll("[data-fixlink]").forEach(el => el.onclick = () => {
+    state.fixLink = el.dataset.fixlink;
+    render();
   });
+
+  root.querySelectorAll("[data-fix]").forEach(el => el.onclick = () => {
+    const [link, value] = el.dataset.fix.split("|");
+    const label = el.textContent;
+    const next = Object.assign({}, state.read.state);
+    let note;
+
+    if (link === "state"){
+      // 状态被否掉了，从同一句话推出的诉求也跟着作废，否则新状态和旧诉求打架。
+      // 只保留用户明确说过的硬约束：钱和路程。
+      Object.assign(next, {mood_id:value, confidence:0.9, need_keys:[], social_mode:"either", environment:"either"});
+      state.read.state_label = label;
+      state.read.acknowledgement = "好，是「" + label + "」。我按这个重新找了一遍。";
+      state.read.evidence = ["这一条是你自己改的，不是我猜的"];
+      note = "把「" + label + "」当成主线之后，排在最前面的换了。";
+    } else if (link === "need"){
+      // 状态没错，只是需要的环境找偏了：换掉诉求，状态保持不动。
+      next.need_keys = [value];
+      state.read.acknowledgement = "状态我没听错，是需要的东西找偏了。改成「" + label + "」再找一遍。";
+      state.read.evidence = ["「" + label + "」是你自己指定的"];
+      note = "按「" + label + "」重新排了一遍，状态还是原来那个。";
+    } else {
+      // 条件：key 形如 "字段:值"。服务端会按 NeedState 的字面量再校验一次。
+      const [field, raw] = value.split(":");
+      next[field] = field === "max_travel_minutes" ? parseInt(raw, 10) : raw;
+      state.read.acknowledgement = "记下了：" + label + "。这一条会一直生效，直到你再改。";
+      state.read.evidence = ["「" + label + "」是你自己加的条件"];
+      note = "加上「" + label + "」之后，不符合的我都拿掉了。";
+    }
+
+    state.read.state = next;
+    state.askAnswered = true;
+    CurrentAI.track("recommendation_rejected", {
+      place_id:(state.offer && state.offer[0] || {}).place_id || null,
+      recommendation_id:(state.offer && state.offer[0] || {}).recommendation_id || null,
+      reason:"corrected", stage:link
+    });
+    runRecommend(next, note);
+  });
+
+  const fixPlace = root.querySelector("#fix-place");
+  if (fixPlace) fixPlace.onclick = () => {
+    (state.offer || []).forEach(x => {
+      if (state.rejected.indexOf(x.place_id) < 0) state.rejected.push(x.place_id);
+      CurrentAI.track("recommendation_rejected", {place_id:x.place_id, recommendation_id:x.recommendation_id, reason:"corrected", stage:"place"});
+    });
+    state.rejected = state.rejected.slice(-20);
+    runRecommend(state.read.state, "这几个都不给你了。状态和需求我没动。");
+  };
 
   // 备选升为主推：不是新一轮推荐，只是换一个此刻的答案
   root.querySelectorAll("[data-pick]").forEach(el => el.onclick = () => {
@@ -2884,12 +3030,23 @@ function bind(){
               geofence:rec.geofence || null, dwellMinutes:0, inside:false,
               presenceLevel:"self_reported"});
     CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:rec.recommendation_id || null});
-    if (rec.navigation_url){
-      CurrentAI.track("navigation_opened", {place_id:id, recommendation_id:rec.recommendation_id || null, method:"amap"});
-      window.open(rec.navigation_url, "_blank", "noopener");
+    const links = rec.map_links || {};
+    if (Object.keys(links).length){
+      // 选哪个地图是用户的事（US-06）。没有核对过坐标就没有链接，行程照样记。
+      state.mapSheet = {placeId:id, placeName:rec.place_name || placeById(id).placeName,
+                        recommendationId:rec.recommendation_id || null, links:links};
     }
     render();
   });
+
+  root.querySelectorAll("[data-mapapp]").forEach(el => el.onclick = () => {
+    const t = state.mapSheet || {};
+    CurrentAI.track("navigation_opened", {place_id:t.placeId, recommendation_id:t.recommendationId, method:el.dataset.mapapp});
+    state.mapSheet = null;
+    setTimeout(render, 0);   // 让 <a> 先完成跳转，再收面板
+  });
+  const mapCancel = root.querySelector("#map-cancel");
+  if (mapCancel) mapCancel.onclick = () => { state.mapSheet = null; render(); };
 
   root.querySelectorAll("[data-trip]").forEach(el => el.onclick = () => {
     const action = el.dataset.trip;
@@ -2987,6 +3144,29 @@ function bind(){
 
   root.querySelectorAll("[data-save]").forEach(el => el.onclick = () => { syncNote(); save(el.dataset.save); });
 
+  root.querySelectorAll("[data-del]").forEach(el => el.onclick = () => {
+    state.pendingDelete = el.dataset.del;
+    state.deleteWarning = null;
+    render();
+  });
+  root.querySelectorAll("[data-delcancel]").forEach(el => el.onclick = () => { state.pendingDelete = null; render(); });
+  root.querySelectorAll("[data-delyes]").forEach(el => el.onclick = () => {
+    const id = el.dataset.delyes;
+    const rec = state.records.find(r => r.id === id);
+    // 本地先删，服务端跟着删。删不掉要如实说，不能假装删了。
+    state.records = state.records.filter(r => r.id !== id);
+    state.pendingDelete = null;
+    if (state.lastRecordId === id) state.lastRecordId = null;
+    const remoteId = rec && rec.recommendationId;
+    go("#/records");
+    if (remoteId){
+      CurrentAI.deleteOutcome(remoteId).catch(() => {
+        state.deleteWarning = "本地这条已经删了，但服务端没删成功。等下再进来一次，我会重试。";
+        render();
+      });
+    }
+  });
+
   root.querySelectorAll("[data-flip]").forEach(el => el.onclick = () => { state.flipped = !state.flipped; render(); });
 
   root.querySelectorAll("[data-rec]").forEach(el => el.onclick = () => { state.flipped = false; go("#/card/" + el.dataset.rec); });
@@ -3040,8 +3220,9 @@ function save(placeId){
   const d = state.draft;
   if (d.score === null) return;
   const p = placeById(placeId);
+  const id = "r" + Date.now();
   const rec = {
-    id: "r" + Date.now(),
+    id: id,
     placeId: p.placeId,
     placeName: p.placeName,
     placeCategory: p.category,
@@ -3052,6 +3233,7 @@ function save(placeId){
     note: d.note.trim(),
     visibility: d.visibility,
     mismatchStage: d.mismatchStage || "none",
+    recommendationId: (state.aiRecommendations[p.placeId] || {}).recommendation_id || ("rec_local_" + id),
     presenceLevel: d.presenceLevel || "self_reported",
     presenceReason: null,
     dwellMinutes: d.dwellMinutes || 0,
@@ -3062,7 +3244,7 @@ function save(placeId){
   CurrentAI.track("outcome_saved", {place_id:p.placeId, change_score:d.score, factor_count:d.factors.length, visibility:d.visibility, mismatch_stage:d.mismatchStage || "none", presence_level:d.presenceLevel || "self_reported", dwell_minutes:d.dwellMinutes || 0});
   CurrentAI.api("/outcomes", {method:"POST", body:JSON.stringify({
     session_id:CurrentAI.sessionId(),
-    recommendation_id:(state.aiRecommendations[p.placeId] || {}).recommendation_id || "rec_local_" + rec.id,
+    recommendation_id:rec.recommendationId,
     place_id:p.placeId,
     change_score:d.score,
     factor_keys:d.factors.map(f => Object.keys(FACTORS).find(k => FACTORS[k].label === f)).filter(Boolean),

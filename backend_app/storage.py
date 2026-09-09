@@ -6,7 +6,7 @@ import os
 
 import psycopg
 
-from .schemas import NeedState, OutcomeRequest, ProductEvent, Recommendation
+from .schemas import NeedState, OutcomeDeleteRequest, OutcomeRequest, ProductEvent, Recommendation
 
 
 logger = logging.getLogger("current.storage")
@@ -16,7 +16,7 @@ SAFE_EVENT_PROPERTIES = {
     "natural_language_interpreted": {"source", "mood_id", "need_count", "risk_level"},
     "recommendation_shown": {"source"},
     "recommendation_accepted": set(),
-    "recommendation_rejected": {"reason"},
+    "recommendation_rejected": {"reason", "stage"},
     "navigation_opened": {"method"},
     "arrival_confirmed": {"presence_level", "dwell_minutes"},
     "outcome_saved": {"change_score", "factor_count", "visibility", "mismatch_stage", "presence_level", "dwell_minutes"},
@@ -158,4 +158,25 @@ async def store_outcome(payload: OutcomeRequest) -> bool:
         return True
     except psycopg.Error:
         logger.exception("failed to persist outcome")
+        return False
+
+
+async def delete_outcome(payload: OutcomeDeleteRequest) -> bool:
+    """FR-12 / §M6：记忆可删除。
+
+    真删行，不是打个 deleted 标记——「可删除」承诺的是数据不再存在。
+    只能删自己这个 session 写的那条：session_id 与 recommendation_id 必须同时对上。
+    """
+    database_url = _database_url()
+    if not database_url:
+        return False
+    try:
+        async with await psycopg.AsyncConnection.connect(database_url) as connection:
+            await connection.execute(
+                "DELETE FROM visit_outcomes WHERE session_id = %s AND recommendation_id = %s",
+                (payload.session_id, payload.recommendation_id),
+            )
+        return True
+    except psycopg.Error:
+        logger.exception("failed to delete outcome")
         return False

@@ -62,6 +62,14 @@
     });
   }
 
+  // FR-12：删除是个承诺，不能只在本地抹掉、服务端还留着。
+  function deleteOutcome(recommendationId) {
+    return api('/outcomes/delete', {
+      method: 'POST',
+      body: JSON.stringify({ session_id: sessionId(), recommendation_id: recommendationId })
+    });
+  }
+
   function interpretAndRecommend(text) {
     return api('/interpret', { method: 'POST', body: JSON.stringify({ text: text }) })
       .then(function (interpretation) {
@@ -315,6 +323,7 @@
     track: track,
     interpretAndRecommend: interpretAndRecommend,
     recommendFor: recommendFor,
+    deleteOutcome: deleteOutcome,
     hasLocation: function () { return Boolean(activeLocation); },
     requestLocation: requestLocation,
     watchPresence: watchPresence,

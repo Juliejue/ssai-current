@@ -9,7 +9,7 @@ import re
 import httpx
 from pydantic import ValidationError
 
-from .schemas import ClarifyOption, InterpretResponse, NeedState, RiskLevel
+from .schemas import ClarifyOption, CorrectionOptions, InterpretResponse, NeedState, RiskLevel
 
 
 logger = logging.getLogger("current.interpretation")
@@ -90,6 +90,20 @@ CORRECTION_CHIPS: tuple[tuple[str, str], ...] = (
     ("fresh", "想换个地方"),
     ("quiet", "需要安静"),
     ("low", "没什么力气"),
+)
+
+# 诉求这一环：按「空间 / 刺激 / 恢复」各挑最常被说错的，凑够但不超过 6 个。
+NEED_CORRECTIONS: tuple[str, ...] = ("hide", "sit", "walk", "green", "people", "slow", "new", "free")
+
+# 约束这一环：key 用 "字段:值" 编码，前端照着改 NeedState，服务端仍会按
+# NeedState 的字面量重新校验一次，客户端塞不进白名单以外的值。
+CONSTRAINT_CORRECTIONS: tuple[tuple[str, str], ...] = (
+    ("max_travel_minutes:15", "太远了，就近"),
+    ("budget_level:free", "不想花钱"),
+    ("environment:indoor", "想待在室内"),
+    ("environment:outdoor", "想在户外"),
+    ("social_mode:alone", "想一个人"),
+    ("social_mode:with_people", "想周围有人"),
 )
 
 CLARIFY_QUESTIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
@@ -198,6 +212,15 @@ def _evidence_for(text: str, state: NeedState) -> list[str]:
     return evidence[:3]
 
 
+def _already_holds(state: NeedState, encoded: str) -> bool:
+    """已经是这个约束了就别再当成「纠错选项」摆出来。"""
+    field, _, raw = encoded.partition(":")
+    current = getattr(state, field, None)
+    if field == "max_travel_minutes":
+        return current is not None and current <= int(raw)
+    return str(current) == raw
+
+
 def _needs_clarification(state: NeedState) -> str | None:
     """Ask at most one question, and only when the answer changes the shortlist."""
     if state.social_mode == "either" and len(state.need_keys) < 2:
@@ -221,11 +244,25 @@ def _decorate(response: InterpretResponse, text: str) -> InterpretResponse:
     response.state_label = STATE_LABELS.get(state.mood_id, "说不太清楚")
     response.acknowledgement = _restatement(state)
     response.evidence = _evidence_for(text, state)
-    response.correction_chips = [
-        ClarifyOption(key=key, label=label)
-        for key, label in CORRECTION_CHIPS
-        if key != state.mood_id
-    ][:6]
+    # FR-03：四环都要能一步纠正，不能只让用户改「状态」这一环。
+    # 地点那一环不给选项——「这几个都不想去」本身就是动作。
+    response.corrections = CorrectionOptions(
+        state=[
+            ClarifyOption(key=key, label=label)
+            for key, label in CORRECTION_CHIPS
+            if key != state.mood_id
+        ][:6],
+        need=[
+            ClarifyOption(key=key, label=NEED_LABELS[key])
+            for key in NEED_CORRECTIONS
+            if key not in state.need_keys
+        ][:6],
+        constraint=[
+            ClarifyOption(key=key, label=label)
+            for key, label in CONSTRAINT_CORRECTIONS
+            if not _already_holds(state, key)
+        ][:6],
+    )
 
     field = None if state.risk_level is not RiskLevel.ordinary else _needs_clarification(state)
     if field and field in CLARIFY_QUESTIONS:

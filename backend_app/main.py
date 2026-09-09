@@ -16,13 +16,14 @@ from .recommender import load_catalog, recommend_with_live_context
 from .schemas import (
     InterpretRequest,
     InterpretResponse,
+    OutcomeDeleteRequest,
     OutcomeRequest,
     ProductEvent,
     RecommendRequest,
     RecommendResponse,
     RiskLevel,
 )
-from .storage import safe_event_properties, store_outcome, store_product_event, store_recommendations
+from .storage import delete_outcome, safe_event_properties, store_outcome, store_product_event, store_recommendations
 
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
@@ -79,6 +80,16 @@ async def recommendations_route(payload: RecommendRequest, request: Request) -> 
             safety_message="我现在更在意你是否安全。请先联系身边可信任的人；如果你可能马上伤害自己，请立即联系当地急救或报警服务。",
         )
     recommendations = await recommend_with_live_context(payload)
+
+    # 用户刚说完「太远了」，结果一个都没有——这是纠错之后最糟的结局。
+    # US-03「近处先接住」：放开上限重来一次，给最近的几个，并且说清楚它们超了。
+    relaxed_note = None
+    if not recommendations and payload.state.max_travel_minutes is not None:
+        relaxed = payload.model_copy(update={"state": payload.state.model_copy(update={"max_travel_minutes": None})})
+        recommendations = await recommend_with_live_context(relaxed)
+        if recommendations:
+            relaxed_note = f"{payload.state.max_travel_minutes} 分钟内我没找到合适的。下面是最近的几个，都超了——你看要不要将就一下。"
+
     session_id = request.headers.get("x-session-id", "")
     if 8 <= len(session_id) <= 80:
         await store_recommendations(session_id, payload.state, recommendations)
@@ -87,7 +98,9 @@ async def recommendations_route(payload: RecommendRequest, request: Request) -> 
     all_shut = bool(recommendations) and all(
         item.open_state in {"likely_closed", "closed"} for item in recommendations
     )
-    if all_shut:
+    if relaxed_note:
+        note = relaxed_note
+    elif all_shut:
         note = "这个点开着门的地方不多，下面这几个多半已经打烊了。要不先去没有门的地方走走？"
     elif no_good_match:
         note = "这几个我不太有把握，先给你最近的一个；不合适就说一声。"
@@ -95,7 +108,7 @@ async def recommendations_route(payload: RecommendRequest, request: Request) -> 
         note = None
     return RecommendResponse(
         recommendations=recommendations,
-        no_good_match=no_good_match or all_shut,
+        no_good_match=no_good_match or all_shut or bool(relaxed_note),
         fallback_note=note,
     )
 
@@ -121,3 +134,11 @@ async def outcome(payload: OutcomeRequest) -> dict[str, bool | str]:
     logger.info(json.dumps({"event": "outcome_saved", "session_id": payload.session_id, "recommendation_id": payload.recommendation_id, "place_id": payload.place_id, "change_score": payload.change_score, "factor_count": len(payload.factor_keys), "visibility": payload.visibility, "mismatch_stage": payload.mismatch_stage, "presence_level": level, "dwell_minutes": payload.dwell_minutes}, ensure_ascii=False))
     persisted = await store_outcome(payload)
     return {"accepted": True, "persisted": persisted, "presence_level": level, "presence_reason": presence_reason}
+
+
+@app.post("/api/v1/outcomes/delete", status_code=202)
+async def outcome_delete(payload: OutcomeDeleteRequest) -> dict[str, bool]:
+    """记忆可删除（FR-12 / §M6）。删除本身不留正文，只记一次「发生过删除」。"""
+    logger.info(json.dumps({"event": "outcome_deleted", "session_id": payload.session_id, "recommendation_id": payload.recommendation_id}, ensure_ascii=False))
+    deleted = await delete_outcome(payload)
+    return {"accepted": True, "deleted": deleted}

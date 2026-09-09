@@ -165,7 +165,10 @@ def test_never_asks_a_second_question(monkeypatch):
 
 
 def test_correction_chips_are_never_clinical_labels():
-    for chip in _read("今天脑子很乱").correction_chips:
+    corrections = _read("今天脑子很乱").corrections
+    chips = corrections.state + corrections.need + corrections.constraint
+    assert chips
+    for chip in chips:
         for word in BANNED_WORDS:
             assert word not in chip.label
 

@@ -1,6 +1,7 @@
 """The PRD's visible promises, asserted where they can regress silently."""
 
 import re
+from urllib.parse import quote
 
 from fastapi.testclient import TestClient
 
@@ -47,8 +48,33 @@ def test_urgent_language_is_never_asked_a_follow_up_question():
 
 def test_correction_chips_are_body_words_and_exclude_the_current_guess():
     read = _read("今天脑子很乱")
-    assert len(read.correction_chips) == 6
-    assert all(chip.key != read.state.mood_id for chip in read.correction_chips)
+    assert len(read.corrections.state) == 6
+    assert all(chip.key != read.state.mood_id for chip in read.corrections.state)
+
+
+def test_all_four_links_can_be_corrected_not_only_the_state():
+    """FR-03：状态 / 需求 / 约束 / 地点。地点那一环是动作，不需要选项。"""
+    read = _read("今天脑子很乱，不想见人，也不想花很多钱")
+    assert read.corrections.state, "状态可改"
+    assert read.corrections.need, "需求可改"
+    assert read.corrections.constraint, "条件可改"
+    assert all(len(getattr(read.corrections, link)) <= 6 for link in ("state", "need", "constraint"))
+
+
+def test_corrections_do_not_offer_what_the_user_already_said():
+    read = _read("今天脑子很乱，不想见人，也不想花很多钱")
+    assert read.state.social_mode == "alone"
+    assert "social_mode:alone" not in [c.key for c in read.corrections.constraint]
+    assert "hide" not in [c.key for c in read.corrections.need]
+
+
+def test_constraint_corrections_only_name_real_need_state_fields():
+    read = _read("难受")
+    allowed = set(NeedState.model_fields)
+    for chip in read.corrections.constraint:
+        field, _, raw = chip.key.partition(":")
+        assert field in allowed, f"{field} 不是 NeedState 上的字段"
+        assert raw
 
 
 def test_first_result_is_the_primary_and_the_rest_are_alternates():
@@ -116,7 +142,7 @@ def test_interpret_endpoint_exposes_the_restatement_the_first_screen_needs():
     assert body["state_label"]
     assert body["acknowledgement"]
     assert body["evidence"]
-    assert "correction_chips" in body
+    assert body["corrections"]["state"]
 
 
 # --- FR-07 营业状态 ---------------------------------------------------------
@@ -339,3 +365,109 @@ def test_the_client_never_sends_coordinates_anywhere():
             assert field not in body or "location: activeLocation" in body, (
                 f"请求体里出现了 {field}：{body[:120]}"
             )
+
+
+# --- US-06 地图三选 ---------------------------------------------------------
+
+from backend_app.coords import gcj_to_wgs, wgs_to_gcj
+from backend_app.map_provider import map_links
+
+
+def test_gcj_and_wgs_round_trip_without_drifting():
+    for latitude, longitude in ((39.925, 116.389), (31.2304, 121.4737), (23.1291, 113.2644)):
+        back = wgs_to_gcj(*gcj_to_wgs(latitude, longitude))
+        assert abs(back[0] - latitude) < 1e-7
+        assert abs(back[1] - longitude) < 1e-7
+
+
+def test_the_two_coordinate_systems_really_are_hundreds_of_metres_apart():
+    """如果这个测试变成 0，说明转换被谁绕过去了——跳转会偏到隔壁街区。"""
+    import math
+
+    latitude, longitude = 39.925, 116.389
+    wgs_lat, wgs_lon = gcj_to_wgs(latitude, longitude)
+    metres = math.hypot(
+        (latitude - wgs_lat) * 111_320,
+        (longitude - wgs_lon) * 111_320 * math.cos(math.radians(latitude)),
+    )
+    assert 300 < metres < 900, f"境内偏移应当是几百米，实测 {metres:.0f} m"
+
+
+def test_outside_china_nothing_is_shifted():
+    assert gcj_to_wgs(40.7128, -74.0060) == (40.7128, -74.0060)
+
+
+def test_three_maps_are_offered_and_each_gets_its_own_coordinate_system():
+    place = dict(_place("beihai"), amap=VERIFIED_AMAP)
+    links = map_links(place)
+    assert set(links) == {"amap", "apple", "google"}
+
+    gcj = f"{VERIFIED_AMAP['longitude']},{VERIFIED_AMAP['latitude']}"
+    assert quote(gcj, safe="") in links["amap"].replace("%2C", quote(",", safe=""))
+    # Apple / Google 必须拿到转换后的 WGS-84，不能是原始的 GCJ-02
+    assert str(VERIFIED_AMAP["latitude"]) not in links["apple"]
+    assert str(VERIFIED_AMAP["latitude"]) not in links["google"]
+    wgs_lat, wgs_lon = (round(v, 6) for v in gcj_to_wgs(VERIFIED_AMAP["latitude"], VERIFIED_AMAP["longitude"]))
+    assert quote(f"{wgs_lat},{wgs_lon}", safe="") in links["apple"].replace("%2C", quote(",", safe=""))
+    assert quote(f"{wgs_lat},{wgs_lon}", safe="") in links["google"].replace("%2C", quote(",", safe=""))
+
+
+def test_map_links_need_the_same_human_review_as_navigation():
+    from backend_app.recommender import _to_recommendation
+
+    assert map_links(_place("beihai")) == {}
+    assert _to_recommendation(0.8, _place("beihai"), {}, NeedState(mood_id="low")).map_links == {}
+    verified = _to_recommendation(0.8, dict(_place("beihai"), amap=VERIFIED_AMAP), {}, NeedState(mood_id="low"))
+    assert set(verified.map_links) == {"amap", "apple", "google"}
+
+
+# --- FR-12 记忆可删除 -------------------------------------------------------
+
+
+def test_deleting_a_record_is_accepted_and_scoped_to_one_session():
+    body = client.post(
+        "/api/v1/outcomes/delete",
+        json={"session_id": "ses_12345678", "recommendation_id": "rec_12345678"},
+    )
+    assert body.status_code == 202
+    assert body.json()["accepted"] is True
+
+
+def test_delete_rejects_ids_that_could_not_be_ours():
+    for payload in (
+        {"session_id": "short", "recommendation_id": "rec_12345678"},
+        {"session_id": "ses_12345678"},
+        {"recommendation_id": "rec_12345678"},
+    ):
+        assert client.post("/api/v1/outcomes/delete", json=payload).status_code == 422
+
+
+def test_delete_never_logs_what_was_deleted(caplog):
+    with caplog.at_level("INFO", logger="current"):
+        client.post(
+            "/api/v1/outcomes/delete",
+            json={"session_id": "ses_12345678", "recommendation_id": "rec_12345678"},
+        )
+    logged = " ".join(r.message for r in caplog.records)
+    assert "outcome_deleted" in logged
+    assert "note" not in logged and "change_score" not in logged
+
+
+# --- 「太远了」这条纠错必须真的生效，且不能把人推进空屏 ---
+
+
+def test_saying_it_is_too_far_actually_narrows_the_shortlist():
+    wide = recommend(RecommendRequest(state=NeedState(mood_id="noisy"), limit=3))
+    near = recommend(RecommendRequest(state=NeedState(mood_id="noisy", max_travel_minutes=15), limit=3))
+    assert any(item.reach_minutes > 15 for item in wide), "没有上限时本来就该出现远的"
+    assert all(item.reach_minutes <= 15 for item in near), "说了太远还给远的，等于没听见"
+
+
+def test_an_impossible_cap_falls_back_to_the_nearest_and_says_they_exceed_it():
+    body = client.post(
+        "/api/v1/recommendations",
+        json={"state": {"mood_id": "noisy", "max_travel_minutes": 5}, "limit": 3},
+    ).json()
+    assert body["recommendations"], "纠错之后不能给空屏"
+    assert body["no_good_match"] is True
+    assert "都超了" in body["fallback_note"]

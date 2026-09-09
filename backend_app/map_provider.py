@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode
 
+from .coords import gcj_to_wgs
+
 import httpx
 
 
@@ -158,3 +160,47 @@ def navigation_url(place: dict[str, Any]) -> str | None:
         }
     )
     return f"https://uri.amap.com/navigation?{query}"
+
+
+def map_links(place: dict[str, Any]) -> dict[str, str]:
+    """US-06：给用户选地图，而不是替他决定用哪家。
+
+    我们存的坐标来自高德，是 GCJ-02。Apple 和 Google 用 WGS-84，
+    不转换会偏 500 米以上——跳过去就是隔壁街区。
+    和导航、围栏同一道门：没有人工核对过的坐标就一条链接都不给。
+    """
+    amap = place.get("amap") or {}
+    if amap.get("verification_status") != "verified":
+        return {}
+    try:
+        gcj_longitude = float(amap["longitude"])
+        gcj_latitude = float(amap["latitude"])
+    except (KeyError, TypeError, ValueError):
+        return {}
+
+    name = amap.get("verified_name") or place["placeName"]
+    wgs_latitude, wgs_longitude = (round(v, 6) for v in gcj_to_wgs(gcj_latitude, gcj_longitude))
+
+    amap_query = urlencode(
+        {
+            "to": f"{gcj_longitude},{gcj_latitude},{name}",
+            "mode": "walk",
+            "policy": 1,
+            "src": "current",
+            "coordinate": "gaode",
+            "callnative": 1,
+        }
+    )
+    apple_query = urlencode({"daddr": f"{wgs_latitude},{wgs_longitude}", "q": name, "dirflg": "w"})
+    google_query = urlencode(
+        {
+            "api": 1,
+            "destination": f"{wgs_latitude},{wgs_longitude}",
+            "travelmode": "walking",
+        }
+    )
+    return {
+        "amap": f"https://uri.amap.com/navigation?{amap_query}",
+        "apple": f"https://maps.apple.com/?{apple_query}",
+        "google": f"https://www.google.com/maps/dir/?{google_query}",
+    }

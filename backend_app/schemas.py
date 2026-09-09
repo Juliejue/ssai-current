@@ -52,6 +52,14 @@ class ClarifyOption(BaseModel):
     label: str = Field(max_length=24)
 
 
+class CorrectionOptions(BaseModel):
+    """FR-03：能被一步纠正的四环。地点那一环不需要选项——换一批就是动作本身。"""
+
+    state: list[ClarifyOption] = Field(default_factory=list, max_length=6)
+    need: list[ClarifyOption] = Field(default_factory=list, max_length=6)
+    constraint: list[ClarifyOption] = Field(default_factory=list, max_length=6)
+
+
 class InterpretResponse(BaseModel):
     state: NeedState
     acknowledgement: str
@@ -62,7 +70,7 @@ class InterpretResponse(BaseModel):
     evidence: list[str] = Field(default_factory=list, max_length=3)
     clarify_field: Literal["social_mode", "max_travel_minutes", "budget_level"] | None = None
     clarify_options: list[ClarifyOption] = Field(default_factory=list, max_length=3)
-    correction_chips: list[ClarifyOption] = Field(default_factory=list, max_length=6)
+    corrections: CorrectionOptions = Field(default_factory=CorrectionOptions)
 
 
 class Location(BaseModel):
@@ -120,6 +128,8 @@ class Recommendation(BaseModel):
     hours_source: Literal["verified", "category_estimate", "always_open", "unknown"] = "unknown"
     # 只有人工核对过坐标的地点才有围栏（FR-08 L1）。为 None 时前端退回手动确认。
     geofence: Geofence | None = None
+    # US-06：让用户选地图。GCJ-02 与 WGS-84 已按各家坐标系分别转换好。
+    map_links: dict[str, str] = Field(default_factory=dict)
 
 
 class RecommendResponse(BaseModel):
@@ -148,6 +158,13 @@ class ProductEvent(BaseModel):
     recommendation_id: str | None = Field(default=None, max_length=80)
     place_id: str | None = Field(default=None, max_length=80)
     properties: dict[str, str | int | float | bool | None] = Field(default_factory=dict)
+
+
+class OutcomeDeleteRequest(BaseModel):
+    """FR-12 / §M6：记忆可删除。承诺过就要给得出出口。"""
+
+    session_id: str = Field(min_length=8, max_length=80)
+    recommendation_id: str = Field(min_length=8, max_length=80)
 
 
 class OutcomeRequest(BaseModel):
