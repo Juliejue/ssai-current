@@ -300,7 +300,7 @@ async def interpret(text: str) -> InterpretResponse:
         return _decorate(rule_result, text)
 
     base_url = (os.getenv("LLM_BASE_URL") or os.getenv("base_url") or "https://api.openai.com/v1").rstrip("/")
-    model = os.getenv("LLM_MODEL") or os.getenv("model") or "gpt-4o-mini"
+    model = os.getenv("LLM_MODEL") or os.getenv("model") or "glm-4.7-flash"
 
     # 输出契约（FR-26）：校验失败以 temperature=0 重试一次，再失败走规则兜底，绝不空屏。
     async with httpx.AsyncClient(timeout=20) as client:
