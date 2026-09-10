@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -16,6 +17,13 @@ logger = logging.getLogger("current.interpretation")
 
 # 每次改 SYSTEM_PROMPT 都要抬版本号——留痕靠它才能对得上（FR-30）。
 PROMPT_VERSION = "sp2-interpret-v0.2"
+
+# 限流和 schema 失败是两回事，重试方式也不一样：
+# 429/5xx 是「现在排不上队」，立刻重试等于白试，要等一下；
+# schema 失败是「模型说了不合契约的话」，要立刻用 temperature=0 再要一次（FR-26）。
+# 智谱免费档限的就是并发，不接这一条的话第一屏会经常悄悄退回规则版。
+RATE_LIMIT_ATTEMPTS = 3
+RATE_LIMIT_BACKOFF_SECONDS = 1.5
 
 
 MOOD_RULES: dict[str, tuple[str, ...]] = {
@@ -345,6 +353,33 @@ async def _call_model(client: httpx.AsyncClient, *, base_url: str, api_key: str,
     return NeedState.model_validate(payload)
 
 
+def _is_transient(error: Exception) -> bool:
+    """值得等一下再试的：排队、服务端抖动、连接被重置。
+
+    模型提供商说「你参数不对」不在此列——那种重试多少次都是一样的答案。
+    """
+    if isinstance(error, httpx.HTTPStatusError):
+        return error.response.status_code in (429, 500, 502, 503, 504)
+    return isinstance(error, httpx.TransportError)
+
+
+async def _call_model_with_backoff(client, *, base_url, api_key, model, text, temperature, attempt):
+    """排队排不上就等一下再要一次。等不到就把异常抛出去，走上面的契约兜底。"""
+    last: Exception | None = None
+    for round_index in range(RATE_LIMIT_ATTEMPTS):
+        try:
+            return await _call_model(client, base_url=base_url, api_key=api_key, model=model, text=text, temperature=temperature)
+        except Exception as error:  # noqa: BLE001 - 分流后原样抛出
+            if not _is_transient(error):
+                raise
+            last = error
+            _trace(outcome="transient_retry", text=text, attempt=attempt, model=model,
+                   detail=f"{type(error).__name__} round {round_index + 1}/{RATE_LIMIT_ATTEMPTS}")
+            if round_index + 1 < RATE_LIMIT_ATTEMPTS:
+                await asyncio.sleep(RATE_LIMIT_BACKOFF_SECONDS * (round_index + 1))
+    raise last  # type: ignore[misc]
+
+
 async def interpret(text: str) -> InterpretResponse:
     rule_result = interpret_with_rules(text)
     # Explicit high-risk language is never delegated to a generative model.
@@ -364,7 +399,10 @@ async def interpret(text: str) -> InterpretResponse:
     async with httpx.AsyncClient(timeout=20) as client:
         for attempt, temperature in enumerate((0.1, 0.0), start=1):
             try:
-                state = await _call_model(client, base_url=base_url, api_key=api_key, model=model, text=text, temperature=temperature)
+                state = await _call_model_with_backoff(
+                    client, base_url=base_url, api_key=api_key, model=model, text=text,
+                    temperature=temperature, attempt=attempt,
+                )
             except (httpx.HTTPError, KeyError, IndexError, json.JSONDecodeError, ValidationError) as error:
                 _trace(outcome="contract_failed", text=text, attempt=attempt, model=model, detail=type(error).__name__)
                 continue

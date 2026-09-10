@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 from dataclasses import dataclass
 from typing import Any
@@ -11,6 +12,10 @@ import httpx
 
 
 AMAP_BASE_URL = "https://restapi.amap.com"
+
+# 只对传输层错误重试，不对「高德说你参数错了」重试。
+CONNECT_ATTEMPTS = 4
+RETRY_BACKOFF_SECONDS = 0.4
 
 
 class MapProviderError(RuntimeError):
@@ -40,7 +45,7 @@ class AmapClient:
         api_key: str | None = None,
         *,
         transport: httpx.AsyncBaseTransport | None = None,
-        timeout_seconds: float = 4.0,
+        timeout_seconds: float = 8.0,
     ) -> None:
         self.api_key = api_key if api_key is not None else os.getenv("AMAP_WEB_SERVICE_KEY", "")
         self.transport = transport
@@ -54,17 +59,32 @@ class AmapClient:
         if not self.api_key:
             raise MapProviderError("AMAP_WEB_SERVICE_KEY is not configured")
         request_params = {**params, "key": self.api_key}
-        try:
-            async with httpx.AsyncClient(
-                base_url=AMAP_BASE_URL,
-                timeout=self.timeout_seconds,
-                transport=self.transport,
-            ) as client:
-                response = await client.get(path, params=request_params)
-                response.raise_for_status()
-                payload = response.json()
-        except (httpx.HTTPError, ValueError) as error:
-            raise MapProviderError("地图服务暂时不可用") from error
+        # restapi.amap.com 会间歇性重置连接（实测约一半的首次握手失败，重试就好）。
+        # 不重试的话，一半的路线会静默退回原型估算——用户看到「未接地图」，
+        # 会以为 Key 没配好，其实只是没重连。传输错误重试，业务错误不重试。
+        last_error: Exception | None = None
+        payload: dict[str, Any] | None = None
+        for attempt in range(CONNECT_ATTEMPTS):
+            try:
+                async with httpx.AsyncClient(
+                    base_url=AMAP_BASE_URL,
+                    timeout=self.timeout_seconds,
+                    transport=self.transport,
+                ) as client:
+                    response = await client.get(path, params=request_params)
+                    response.raise_for_status()
+                    payload = response.json()
+                break
+            except httpx.TransportError as error:
+                # TransportError 覆盖连不上、连接超时、读超时、协议错——
+                # GET 是幂等的，这几种全都可以安全重试。业务错误走下面那条，不重试。
+                last_error = error
+                if attempt + 1 < CONNECT_ATTEMPTS:
+                    await asyncio.sleep(RETRY_BACKOFF_SECONDS * (attempt + 1))
+            except (httpx.HTTPError, ValueError) as error:
+                raise MapProviderError("地图服务暂时不可用") from error
+        if payload is None:
+            raise MapProviderError("地图服务暂时不可用") from last_error
         if str(payload.get("status")) != "1" or str(payload.get("infocode")) != "10000":
             raise MapProviderError(str(payload.get("info") or "地图服务请求失败"))
         return payload

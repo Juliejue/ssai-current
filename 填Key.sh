@@ -20,11 +20,11 @@ lines = p.read_text(encoding="utf-8").splitlines()
 done = False
 for i, line in enumerate(lines):
     if line.startswith(name + "="):
-        lines[i] = f"{name}={value}"
+        lines[i] = f'{name}="{value}"'
         done = True
         break
 if not done:
-    lines.append(f"{name}={value}")
+    lines.append(f'{name}="{value}"')
 p.write_text("\n".join(lines) + "\n", encoding="utf-8")
 PY
   echo "  ✓ 已写入 .env"

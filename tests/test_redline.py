@@ -357,3 +357,29 @@ def test_first_hand_quotes_are_labelled_as_profile_source_not_as_feedback():
     source = PROTOTYPE.read_text(encoding="utf-8")
     assert "一手描述" in source
     assert "档案来源，不是到访反馈" in source
+
+
+def test_transient_provider_errors_are_retried_but_bad_requests_are_not():
+    """限流和连接重置值得等一下再试；「你参数不对」重试多少次都一样。"""
+    import httpx as _httpx
+
+    from backend_app.interpretation import _is_transient
+
+    def status(code):
+        return _httpx.HTTPStatusError("", request=_httpx.Request("POST", "https://x"),
+                                      response=_httpx.Response(code))
+
+    assert _is_transient(status(429)) is True
+    assert _is_transient(status(503)) is True
+    assert _is_transient(_httpx.ConnectError("reset")) is True
+    assert _is_transient(_httpx.ConnectTimeout("slow")) is True
+    assert _is_transient(status(400)) is False
+    assert _is_transient(status(401)) is False
+    assert _is_transient(ValueError("bad json")) is False
+
+
+def test_the_map_client_retries_transport_errors():
+    """restapi.amap.com 实测约一半的首次握手会超时；不重试就有一半路线静默退回估算。"""
+    source = (pathlib.Path(__file__).parents[1] / "backend_app" / "map_provider.py").read_text(encoding="utf-8")
+    assert "except httpx.TransportError" in source
+    assert "CONNECT_ATTEMPTS" in source
