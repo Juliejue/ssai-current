@@ -2106,6 +2106,60 @@ function scaleMinis(){
 }
 window.addEventListener("resize", () => { if (state.route === "#/compare") scaleMinis(); });
 
+  /* ---------- 三大地图 App 唤起与跳转 (新增修复) ---------- */
+function openMapNavigation(placeId) {
+  const p = placeById(placeId);
+  const name = encodeURIComponent(p.placeName);
+  const lat = p.lat, lng = p.lng;
+
+  // 高德 App Scheme 与 网页兜底
+  const amapAppUrl = (lat && lng) 
+    ? `androidamap://viewMap?sourceApplication=CurrentApp&poiname=${name}&lat=${lat}&lon=${lng}&dev=0`
+    : `androidamap://poi?sourceApplication=CurrentApp&keywords=${name}`;
+  const amapWebUrl = (lat && lng)
+    ? `https://uri.amap.com/marker?coordinate=${lng},${lat}&name=${name}`
+    : `https://uri.amap.com/search?keyword=${name}`;
+
+  // 谷歌与苹果地图
+  const googleUrl = (lat && lng)
+    ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${name}`;
+  const appleUrl = (lat && lng)
+    ? `http://maps.apple.com/?q=${name}&sll=${lat},${lng}`
+    : `http://maps.apple.com/?q=${name}`;
+
+  // 自定义导航选择弹窗，确保高德、苹果、谷歌三个选项一定全部出现
+  const modal = document.createElement("div");
+  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;z-index:9999;";
+  modal.innerHTML = `
+    <div style="width:100%;max-width:390px;background:#fff;border-radius:20px 20px 0 0;padding:20px;box-shadow:0 -4px 20px rgba(0,0,0,0.15);">
+      <h3 style="margin:0 0 14px;font-size:16px;text-align:center;">选择导航地图</h3>
+      <button id="nav-amap" style="width:100%;height:46px;border-radius:12px;border:1px solid #ccc;margin-bottom:8px;background:#f0f3f2;">高德地图 (优先唤起 App)</button>
+      <button id="nav-apple" style="width:100%;height:46px;border-radius:12px;border:1px solid #ccc;margin-bottom:8px;background:#f0f3f2;">Apple 地图 (Maps App)</button>
+      <button id="nav-google" style="width:100%;height:46px;border-radius:12px;border:1px solid #ccc;margin-bottom:8px;background:#f0f3f2;">Google 地图 (网页/App)</button>
+      <button id="nav-cancel" style="width:100%;height:40px;border:none;background:none;color:#888;margin-top:4px;">取消</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("nav-amap").onclick = () => {
+    document.body.removeChild(modal);
+    window.location.href = amapAppUrl;
+    setTimeout(() => { window.location.href = amapWebUrl; }, 1500);
+  };
+  document.getElementById("nav-apple").onclick = () => {
+    document.body.removeChild(modal);
+    window.location.href = appleUrl;
+  };
+  document.getElementById("nav-google").onclick = () => {
+    document.body.removeChild(modal);
+    window.location.href = googleUrl;
+  };
+  document.getElementById("nav-cancel").onclick = () => {
+    document.body.removeChild(modal);
+  };
+}
+
 /* ---------- 事件绑定 ---------- */
 function bind(){
   const root = document.getElementById("root");
@@ -2134,13 +2188,72 @@ function bind(){
   });
 
   root.querySelectorAll("[data-recf]").forEach(el => el.onclick = () => { state.recFilter = el.dataset.recf; render(); });
+/* ---------- 三大地图 App 唤起与跳转 ---------- */
+function openMapNavigation(placeId) {
+  const p = placeById(placeId);
+  const name = encodeURIComponent(p.placeName);
+  const lat = p.lat, lng = p.lng;
 
-  root.querySelectorAll("[data-visit]").forEach(el => el.onclick = () => {
+  // 高德 App Scheme 与 网页兜底
+  const amapAppUrl = (lat && lng) 
+    ? `androidamap://viewMap?sourceApplication=CurrentApp&poiname=${name}&lat=${lat}&lon=${lng}&dev=0`
+    : `androidamap://poi?sourceApplication=CurrentApp&keywords=${name}`;
+  const amapWebUrl = (lat && lng)
+    ? `https://uri.amap.com/marker?coordinate=${lng},${lat}&name=${name}`
+    : `https://uri.amap.com/search?keyword=${name}`;
+
+  // 谷歌与苹果地图
+  const googleUrl = (lat && lng)
+    ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${name}`;
+  const appleUrl = (lat && lng)
+    ? `http://maps.apple.com/?q=${name}&sll=${lat},${lng}`
+    : `http://maps.apple.com/?q=${name}`;
+
+  // 弹出选择框，确保高德、苹果、谷歌三个选项全部出现
+  const modal = document.createElement("div");
+  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;z-index:9999;";
+  modal.innerHTML = `
+    <div style="width:100%;max-width:390px;background:#fff;border-radius:20px 20px 0 0;padding:20px;box-shadow:0 -4px 20px rgba(0,0,0,0.15);box-sizing:border-box;">
+      <h3 style="margin:0 0 14px;font-size:16px;text-align:center;color:#122A2E;">选择路线导航地图</h3>
+      <button id="nav-amap" style="width:100%;height:46px;border-radius:12px;border:1px solid rgba(18,42,46,.2);margin-bottom:8px;background:#F0F3F2;color:#122A2E;font-size:14px;font-weight:500;">高德地图 (优先唤起 App)</button>
+      <button id="nav-apple" style="width:100%;height:46px;border-radius:12px;border:1px solid rgba(18,42,46,.2);margin-bottom:8px;background:#F0F3F2;color:#122A2E;font-size:14px;font-weight:500;">Apple 地图 (Maps App)</button>
+      <button id="nav-google" style="width:100%;height:46px;border-radius:12px;border:1px solid rgba(18,42,46,.2);margin-bottom:8px;background:#F0F3F2;color:#122A2E;font-size:14px;font-weight:500;">Google 地图 (网页/App)</button>
+      <button id="nav-cancel" style="width:100%;height:40px;border:none;background:none;color:#8CA0A0;margin-top:4px;font-size:13px;">取消</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("nav-amap").onclick = () => {
+    document.body.removeChild(modal);
+    window.location.href = amapAppUrl;
+    setTimeout(() => { window.location.href = amapWebUrl; }, 1500);
+  };
+  document.getElementById("nav-apple").onclick = () => {
+    document.body.removeChild(modal);
+    window.location.href = appleUrl;
+  };
+  document.getElementById("nav-google").onclick = () => {
+    document.body.removeChild(modal);
+    window.location.href = googleUrl;
+  };
+  document.getElementById("nav-cancel").onclick = () => {
+    document.body.removeChild(modal);
+  };
+}
+
+    root.querySelectorAll("[data-visit]").forEach(el => el.onclick = () => {
     const id = el.dataset.visit;
+    
+    // 1. 弹出三大地图导航选项（优先唤起高德 App）
+    openMapNavigation(id);
+    
+    // 2. 同时记录到访草稿并跳转
     state.draft = newDraft(id);
     state.draft.stayMin = 28 + Math.floor(Math.random() * 22);
     go("#/visit/" + id);
   });
+
 
   root.querySelectorAll("[data-remind]").forEach(el => el.onclick = () => { state.draft.reminder = true; render(); });
 
