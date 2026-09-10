@@ -20,6 +20,13 @@ BEIJING = ZoneInfo("Asia/Shanghai")
 
 OpenState = Literal["always_open", "open", "likely_closed", "closed", "unknown"]
 
+# 营业时间的三级来源，可信度递增：
+#   category_estimate  我按类目猜的（唱片店一般 12:00–20:00）
+#   provider           高德随 POI 一起给的真实营业时间
+#   verified           有人真的去确认过 / 打电话问过
+# 只有最后一级才允许直接把地点过滤掉。高德的数据比我猜的准得多，
+# 但它也会过期——过期的营业时间去硬过滤，会让用户在不知情的情况下少拿到选项。
+
 ALWAYS_OPEN = "always_open"
 
 # 类目 → (开, 关)。关门时间小于开门时间表示跨过午夜。
@@ -45,8 +52,11 @@ CATEGORY_HOURS: dict[str, tuple[str, str] | None] = {
 
 
 def _parse(value: str) -> time:
-    hour, minute = value.split(":")
-    return time(int(hour), int(minute))
+    """高德会给 24:00，有的店甚至给 26:00（凌晨两点打烊）。
+    Python 的 time() 只收 0–23，所以先对 24 取模——26:00 变成 02:00，
+    再配合下面的跨午夜判断，语义正好是对的。"""
+    hour, _, minute = value.partition(":")
+    return time(int(hour) % 24, int(minute or 0))
 
 
 def _category_keys(place: dict) -> list[str]:
@@ -63,14 +73,23 @@ def _category_window(place: dict) -> tuple[tuple[str, str] | None, bool]:
 
 def resolve_hours(place: dict) -> dict:
     """人工核对过的营业时间优先；否则退回类目估算；都没有就是 unknown。"""
-    verified = place.get("hours") or {}
-    if verified.get("verification_status") == "verified":
-        return {
-            "open": verified.get("open"),
-            "close": verified.get("close"),
-            "closed_days": verified.get("closed_days") or [],
-            "source": "verified",
-        }
+    supplied = place.get("hours") or {}
+    status = supplied.get("verification_status")
+    if status in ("verified", "provider"):
+        # 多时段的店（午休、或者「00:00-02:00 08:00-23:00」）要按段判断。
+        # 压成一个大区间会把 02:00–08:00 说成开着——这是「说开着其实关着」，
+        # 是两种错里更糟的那一种。
+        spans = supplied.get("spans")
+        if not spans and supplied.get("open") and supplied.get("close"):
+            spans = [[supplied["open"], supplied["close"]]]
+        if spans:
+            return {
+                "open": spans[0][0],
+                "close": spans[-1][1],
+                "spans": spans,
+                "closed_days": supplied.get("closed_days") or [],
+                "source": status,
+            }
     window, matched = _category_window(place)
     if not matched:
         return {"open": None, "close": None, "closed_days": [], "source": "unknown"}
@@ -101,11 +120,18 @@ def open_state(place: dict, now: datetime | None = None) -> tuple[OpenState, str
     if now.weekday() in (hours["closed_days"] or []):
         return "closed", "今天闭馆", source
 
-    opens, closes = _parse(hours["open"]), _parse(hours["close"])
-    inside = _within(now, opens, closes)
+    spans = hours.get("spans") or [[hours["open"], hours["close"]]]
+    inside = any(_within(now, _parse(a), _parse(b)) for a, b in spans)
 
     if source == "verified":
         return ("open", f"现在开着 · {hours['close']} 关门", source) if inside else ("closed", f"现在没开 · {hours['open']} 才开门", source)
+
+    if source == "provider":
+        # 高德的数据，比类目估算准，但仍然可能过期，所以只降权不过滤。
+        window = "、".join(f"{a}–{b}" for a, b in spans)
+        if inside:
+            return "open", f"高德记的营业时间是 {window}", source
+        return "likely_closed", f"高德记的营业时间是 {window}，现在应该没开", source
 
     # 估算：说清楚这是「一般来说」，不冒充确定
     if inside:

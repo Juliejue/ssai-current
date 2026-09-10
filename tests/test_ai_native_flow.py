@@ -3,6 +3,8 @@
 import re
 from urllib.parse import quote
 
+import pytest
+
 from fastapi.testclient import TestClient
 
 from backend_app.interpretation import interpret_with_rules, _decorate
@@ -186,13 +188,27 @@ def test_a_bar_is_open_at_midnight_and_shut_at_noon():
 def test_estimated_hours_never_hard_filter_and_always_say_they_are_estimates():
     from backend_app.recommender import _hard_filter
 
-    shop = _place("fruityshop")
+    shop = {"placeId": "x", "category": "唱片店 · 室内", "distanceKm": 2}
     midnight = datetime(2026, 9, 9, 3, tzinfo=BEIJING)
     status, label, source = open_state(shop, midnight)
     assert status == "likely_closed"
     assert source == "category_estimate"
     assert "未经核对" in label
     # 估算只降权，不把地点悄悄拿掉
+    assert _hard_filter(shop, NeedState(mood_id="low"), set(), midnight) is True
+
+
+def test_provider_hours_are_used_but_still_never_hard_filter():
+    """高德的营业时间比我猜的准，但也会过期——过期的数据不该悄悄拿掉选项。"""
+    from backend_app.recommender import _hard_filter
+
+    shop = {"placeId": "x", "category": "唱片店 · 室内", "distanceKm": 2,
+            "hours": {"spans": [["12:00", "20:00"]], "verification_status": "provider"}}
+    midnight = datetime(2026, 9, 9, 3, tzinfo=BEIJING)
+    status, label, source = open_state(shop, midnight)
+    assert status == "likely_closed"
+    assert source == "provider"
+    assert "高德" in label
     assert _hard_filter(shop, NeedState(mood_id="low"), set(), midnight) is True
 
 
@@ -286,11 +302,28 @@ VERIFIED_AMAP = {
 }
 
 
-def test_no_place_has_a_geofence_until_a_human_verified_its_coordinates():
+def _unverified_place() -> dict:
+    """随便找一个还没人工核对过的地点。
+
+    直接写死某个 placeId 会在 Julie 确认到它的那天突然变红——
+    这些测试要的是「未核对的地点长什么样」，不是某一家店。
+    """
+    from backend_app.presence import has_geofence
     from backend_app.recommender import load_catalog
 
-    # place_overrides.json 是空的，所以现在一个围栏都不该存在。
-    assert not any(has_geofence(p) for p in load_catalog()["PLACES"])
+    for place in load_catalog()["PLACES"]:
+        if not has_geofence(place):
+            return place
+    pytest.skip("26 个地点已经全部核对完了，这条断言没有对象可测")
+
+
+def test_a_geofence_exists_only_where_a_human_confirmed_the_coordinates():
+    """围栏必须和人工核对一一对应：核对过的才有，没核对的一个都不能有。"""
+    from backend_app.recommender import load_catalog
+
+    for place in load_catalog()["PLACES"]:
+        reviewed = (place.get("amap") or {}).get("verification_status") == "verified"
+        assert has_geofence(place) is reviewed, f"{place['placeId']} 的围栏和核对状态对不上"
 
 
 def test_large_open_spaces_get_a_bigger_radius_than_shops():
@@ -300,26 +333,26 @@ def test_large_open_spaces_get_a_bigger_radius_than_shops():
 
 def test_the_server_downgrades_a_geofence_claim_it_cannot_back_up():
     # 地点没有核对过的坐标 → 没有围栏 → 声明降为「按停留时长算数」
-    level, reason = verify_presence("geofence_dwell", 45, _place("beihai"))
+    level, reason = verify_presence("geofence_dwell", 45, _unverified_place())
     assert level == "dwell_only"
     assert "坐标" in reason
 
 
 def test_short_visits_are_never_more_than_self_reported():
-    verified = dict(_place("beihai"), amap=VERIFIED_AMAP)
+    verified = dict(_unverified_place(), amap=VERIFIED_AMAP)
     level, _ = verify_presence("geofence_dwell", MIN_DWELL_MINUTES - 1, verified)
     assert level == "self_reported"
 
 
 def test_a_verified_place_plus_enough_dwell_is_the_only_way_to_get_verified():
-    verified = dict(_place("beihai"), amap=VERIFIED_AMAP)
+    verified = dict(_unverified_place(), amap=VERIFIED_AMAP)
     level, reason = verify_presence("geofence_dwell", MIN_DWELL_MINUTES, verified)
     assert level == "geofence_dwell"
     assert str(MIN_DWELL_MINUTES) in reason
 
 
 def test_presence_level_is_never_upgraded_beyond_what_the_client_claimed():
-    verified = dict(_place("beihai"), amap=VERIFIED_AMAP)
+    verified = dict(_unverified_place(), amap=VERIFIED_AMAP)
     assert verify_presence("self_reported", 60, verified)[0] == "dwell_only"
 
 
@@ -329,7 +362,7 @@ def test_the_outcomes_endpoint_returns_the_level_it_actually_accepted():
         json={
             "session_id": "ses_12345678",
             "recommendation_id": "rec_12345678",
-            "place_id": "beihai",
+            "place_id": _unverified_place()["placeId"],
             "change_score": 2,
             "presence_level": "geofence_dwell",
             "dwell_minutes": 45,
@@ -343,12 +376,12 @@ def test_a_geofence_is_published_only_alongside_a_navigation_url():
     """围栏和导航同一道门：都要人工核对过的坐标。"""
     from backend_app.recommender import _to_recommendation
 
-    place = dict(_place("beihai"), amap=VERIFIED_AMAP)
-    rec = _to_recommendation(0.8, place, {}, NeedState(mood_id="low"))
+    unreviewed = _unverified_place()
+    rec = _to_recommendation(0.8, dict(unreviewed, amap=VERIFIED_AMAP), {}, NeedState(mood_id="low"))
     assert rec.geofence is not None
     assert rec.navigation_url is not None
 
-    plain = _to_recommendation(0.8, _place("beihai"), {}, NeedState(mood_id="low"))
+    plain = _to_recommendation(0.8, unreviewed, {}, NeedState(mood_id="low"))
     assert plain.geofence is None
     assert plain.navigation_url is None
 
@@ -415,9 +448,10 @@ def test_three_maps_are_offered_and_each_gets_its_own_coordinate_system():
 def test_map_links_need_the_same_human_review_as_navigation():
     from backend_app.recommender import _to_recommendation
 
-    assert map_links(_place("beihai")) == {}
-    assert _to_recommendation(0.8, _place("beihai"), {}, NeedState(mood_id="low")).map_links == {}
-    verified = _to_recommendation(0.8, dict(_place("beihai"), amap=VERIFIED_AMAP), {}, NeedState(mood_id="low"))
+    unreviewed = _unverified_place()
+    assert map_links(unreviewed) == {}
+    assert _to_recommendation(0.8, unreviewed, {}, NeedState(mood_id="low")).map_links == {}
+    verified = _to_recommendation(0.8, dict(unreviewed, amap=VERIFIED_AMAP), {}, NeedState(mood_id="low"))
     assert set(verified.map_links) == {"amap", "apple", "google"}
 
 

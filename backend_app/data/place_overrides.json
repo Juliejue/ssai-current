@@ -1,3 +1,451 @@
 {
-  "places": {}
+  "places": {
+    "postpost": {
+      "amap": {
+        "provider_place_id": "B0JU47BEX4",
+        "longitude": 116.452497,
+        "latitude": 39.939455,
+        "verified_name": "postpost(三里屯店)",
+        "address": "幸福三村五巷菜店隔壁",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "11:00",
+            "01:00"
+          ]
+        ],
+        "open": "11:00",
+        "close": "01:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "soloist": {
+      "amap": {
+        "provider_place_id": "B000ABCP86",
+        "longitude": 116.39296,
+        "latitude": 39.895942,
+        "verified_name": "Soloist 独奏公司(杨梅竹店)",
+        "address": "煤市街杨梅竹斜街39号",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "09:00",
+            "20:00"
+          ]
+        ],
+        "open": "09:00",
+        "close": "20:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "school": {
+      "amap": {
+        "provider_place_id": "B000A8WU3N",
+        "longitude": 116.412927,
+        "latitude": 39.948525,
+        "verified_name": "School酒吧",
+        "address": "五道营胡同53号院内(雍和宫地铁站E西北口步行270米)",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "20:00",
+            "24:00"
+          ]
+        ],
+        "open": "20:00",
+        "close": "24:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "fruityshop": {
+      "amap": {
+        "provider_place_id": "B0FFKCHF3X",
+        "longitude": 116.522364,
+        "latitude": 39.91909,
+        "verified_name": "fRUITYSHOP唱片店",
+        "address": "甘露园中街雅成三里18-119号",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "12:30",
+            "19:30"
+          ]
+        ],
+        "open": "12:30",
+        "close": "19:30",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "huogui": {
+      "amap": {
+        "provider_place_id": "B0FFHCA6TW",
+        "longitude": 116.336854,
+        "latitude": 39.991999,
+        "verified_name": "火鬼PYRO(五道口店)",
+        "address": "北京城区五道口华清嘉园12号楼04号房地下一层",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "10:00",
+            "02:00"
+          ]
+        ],
+        "open": "10:00",
+        "close": "02:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "fusheng": {
+      "amap": {
+        "provider_place_id": "B0FFJ7WG37",
+        "longitude": 116.37664,
+        "latitude": 39.95131,
+        "verified_name": "福声唱片(德胜佳苑店)",
+        "address": "北京城区冰窖口胡同1号院5号楼-1至1层1-44号、1-46号",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "10:00",
+            "20:00"
+          ]
+        ],
+        "open": "10:00",
+        "close": "20:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "kule": {
+      "amap": {
+        "provider_place_id": "B0FFHUX8GF",
+        "longitude": 116.417233,
+        "latitude": 39.925913,
+        "verified_name": "酷乐唱片",
+        "address": "东四北大街499-1号(东四地铁站A西北口步行110米)",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "14:30",
+            "20:30"
+          ]
+        ],
+        "open": "14:30",
+        "close": "20:30",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "wansheng": {
+      "amap": {
+        "provider_place_id": "B0J3SU7JEZ",
+        "longitude": 116.339596,
+        "latitude": 39.992017,
+        "verified_name": "万圣书园(五道口购物中心店)",
+        "address": "成府路28号五道口购物中心3F层(北门进入直行30m,扶梯上到3F可见)",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "10:00",
+            "22:00"
+          ]
+        ],
+        "open": "10:00",
+        "close": "22:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "sanlian": {
+      "amap": {
+        "provider_place_id": "B000A8ZN4E",
+        "longitude": 116.411337,
+        "latitude": 39.926144,
+        "verified_name": "三联韬奋书店(美术馆店)",
+        "address": "美术馆东街22号三联韬奋图书中心1层",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "09:30",
+            "21:00"
+          ]
+        ],
+        "open": "09:30",
+        "close": "21:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "zhishang": {
+      "amap": {
+        "provider_place_id": "B0H1D5N0HJ",
+        "longitude": 116.417781,
+        "latitude": 39.92173,
+        "verified_name": "北京纸上声音书店(东四店)",
+        "address": "东四南大街72号(东四地铁站C东南口步行360米)",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "09:00",
+            "21:00"
+          ]
+        ],
+        "open": "09:00",
+        "close": "21:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "douzai": {
+      "amap": {
+        "provider_place_id": "B0IRVSS46N",
+        "longitude": 116.377027,
+        "latitude": 39.951261,
+        "verified_name": "DOzzZe豆仔",
+        "address": "冰窖口胡同与敞风胡同交叉口西40米",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "08:00",
+            "20:00"
+          ]
+        ],
+        "open": "08:00",
+        "close": "20:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "liangmahe": {
+      "amap": {
+        "provider_place_id": "B0FFFQ6VEL",
+        "longitude": 116.475275,
+        "latitude": 39.950549,
+        "verified_name": "亮马河",
+        "address": "朝阳区",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "shichahai": {
+      "amap": {
+        "provider_place_id": "B000A7O5PK",
+        "longitude": 116.385121,
+        "latitude": 39.941893,
+        "verified_name": "什刹海",
+        "address": "地安门西大街49号",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "beihai": {
+      "amap": {
+        "provider_place_id": "B000A80UL1",
+        "longitude": 116.391802,
+        "latitude": 39.928775,
+        "verified_name": "北海公园",
+        "address": "文津街1号",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "06:00",
+            "21:00"
+          ]
+        ],
+        "open": "06:00",
+        "close": "21:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "tiantan": {
+      "amap": {
+        "provider_place_id": "B000A81CB2",
+        "longitude": 116.410829,
+        "latitude": 39.881913,
+        "verified_name": "天坛公园",
+        "address": "天坛东里甲1号",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "yangmeizhu": {
+      "amap": {
+        "provider_place_id": "B0FFH6JM2W",
+        "longitude": 116.390844,
+        "latitude": 39.89528,
+        "verified_name": "杨梅竹斜街",
+        "address": "西城区",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "wudaoying": {
+      "amap": {
+        "provider_place_id": "B000A1FDA9",
+        "longitude": 116.413285,
+        "latitude": 39.946777,
+        "verified_name": "国子监",
+        "address": "国子监街13-15号",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "09:00",
+            "17:00"
+          ],
+          [
+            "09:00",
+            "17:00"
+          ],
+          [
+            "09:00",
+            "17:00"
+          ]
+        ],
+        "open": "09:00",
+        "close": "17:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "ziliaoguan": {
+      "amap": {
+        "provider_place_id": "B0FFG0ZJY6",
+        "longitude": 116.369805,
+        "latitude": 39.953044,
+        "verified_name": "中国电影资料馆",
+        "address": "小西天文慧园路3号",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "21:00",
+            "02:00"
+          ]
+        ],
+        "open": "21:00",
+        "close": "02:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "yunnanxiaochu": {
+      "amap": {
+        "provider_place_id": "B0JAL7538K",
+        "longitude": 116.372068,
+        "latitude": 39.952055,
+        "verified_name": "云南小厨(金尚城溪)",
+        "address": "新街口外大街34号1层沿街门面",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "09:00",
+            "21:00"
+          ]
+        ],
+        "open": "09:00",
+        "close": "21:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "niaozhouli": {
+      "amap": {
+        "provider_place_id": "B000A8Z7UC",
+        "longitude": 116.464594,
+        "latitude": 39.958339,
+        "verified_name": "鸟州力(食品科技大厦店)",
+        "address": "霄云路32号快客2层",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      },
+      "hours": {
+        "spans": [
+          [
+            "17:00",
+            "02:00"
+          ]
+        ],
+        "open": "17:00",
+        "close": "02:00",
+        "verification_status": "provider",
+        "source_note": "高德随 POI 提供",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    },
+    "lasocial": {
+      "amap": {
+        "provider_place_id": "B0K1DAF85X",
+        "longitude": 116.456425,
+        "latitude": 39.931575,
+        "verified_name": "La Social SLT(三里屯店)",
+        "address": "工体北路4号院75号楼(团结湖地铁站H口步行320米)",
+        "verification_status": "verified",
+        "verified_at": "2026-09-10T06:24:48Z"
+      }
+    }
+  }
 }

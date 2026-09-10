@@ -207,7 +207,7 @@ def test_a_model_that_recovers_on_the_retry_is_used(monkeypatch):
         attempts["n"] += 1
         if attempts["n"] == 1:
             raise httpx.ConnectError("boom")
-        return NeedState(mood_id="tight", need_keys=["breathe"])
+        return NeedState(mood_id="tight", need_keys=["breathe"]), None
 
     monkeypatch.setattr(interpretation, "_call_model", flaky)
     result = asyncio.run(interpret("心里发紧"))
@@ -220,7 +220,7 @@ def test_a_model_may_not_downgrade_a_risk_the_rules_already_raised(monkeypatch):
     monkeypatch.setenv("LLM_API_KEY", "test-key")
 
     async def calm_model(_client, **_kwargs):
-        return NeedState(mood_id="okay", risk_level="ordinary")
+        return NeedState(mood_id="okay", risk_level="ordinary"), None
 
     monkeypatch.setattr(interpretation, "_call_model", calm_model)
     result = asyncio.run(interpret("我快崩溃了，撑不住了"))
@@ -383,3 +383,34 @@ def test_the_map_client_retries_transport_errors():
     source = (pathlib.Path(__file__).parents[1] / "backend_app" / "map_provider.py").read_text(encoding="utf-8")
     assert "except httpx.TransportError" in source
     assert "CONNECT_ATTEMPTS" in source
+
+
+def test_thinking_is_disabled_for_qwen3_but_not_sent_to_others():
+    """Qwen3 默认开思考链，会把 5 秒变成 18 秒，吃掉 PRD §8 的 3 秒预算。
+    但这是 Qwen 专有参数，发给别的厂商会被拒收。"""
+    source = (pathlib.Path(__file__).parents[1] / "backend_app" / "interpretation.py").read_text(encoding="utf-8")
+    block = source[source.index("async def _call_model("):source.index("async def _call_model_with_backoff")]
+    assert '"qwen3" in model.lower()' in block
+    assert '"enable_thinking"] = False' in block or '"enable_thinking": False' in block
+
+
+def test_model_supplied_evidence_must_quote_words_the_user_actually_said():
+    """模型编一句听起来很懂的话很容易。「」里的片段必须真的出现在原文里。"""
+    from backend_app.interpretation import _decorate, _quotes_the_user, interpret_with_rules
+
+    text = "刚跟我妈吵完架，现在谁都不想理"
+    assert _quotes_the_user("「吵完架」——所以我猜你还绷着", text) is True
+    assert _quotes_the_user("「加班到很晚」——所以你很累", text) is False, "原文里没有这句"
+    assert _quotes_the_user("你看起来很难过", text) is False, "没有引用就不算证据"
+    assert _quotes_the_user("「吵完架」——对应 mood_id 为 tight", text) is False, "字段名不能说给用户听"
+    assert _quotes_the_user("「吵完架」——所以我怎么理解：当前处于冲突后的余波状态，情绪紧绷", text) is False, "占位符和书面语要挡掉"
+
+    # 编造的证据要被丢掉，并退回规则版，而不是原样展示
+    fabricated = ["「我失恋了」——所以你难过", "「压力很大」——所以要安静"]
+    read = _decorate(interpret_with_rules(text), text, model_evidence=fabricated)
+    assert all("失恋" not in e and "压力很大" not in e for e in read.evidence)
+
+    # 真的引用了原话就采用
+    honest = ["「吵完架」——所以我猜你现在还绷着", "「谁都不想理」——所以我只找人少的地方"]
+    read = _decorate(interpret_with_rules(text), text, model_evidence=honest)
+    assert read.evidence == honest

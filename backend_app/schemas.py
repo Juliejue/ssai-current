@@ -125,7 +125,7 @@ class Recommendation(BaseModel):
     # 营业状态（FR-07）。estimate 只降权并明说是估算；verified 才是硬约束。
     open_state: Literal["always_open", "open", "likely_closed", "closed", "unknown"] = "unknown"
     open_label: str = ""
-    hours_source: Literal["verified", "category_estimate", "always_open", "unknown"] = "unknown"
+    hours_source: Literal["verified", "provider", "category_estimate", "always_open", "unknown"] = "unknown"
     # 只有人工核对过坐标的地点才有围栏（FR-08 L1）。为 None 时前端退回手动确认。
     geofence: Geofence | None = None
     # US-06：让用户选地图。GCJ-02 与 WGS-84 已按各家坐标系分别转换好。

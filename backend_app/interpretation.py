@@ -16,7 +16,7 @@ from .schemas import ClarifyOption, CorrectionOptions, InterpretResponse, NeedSt
 logger = logging.getLogger("current.interpretation")
 
 # 每次改 SYSTEM_PROMPT 都要抬版本号——留痕靠它才能对得上（FR-30）。
-PROMPT_VERSION = "sp2-interpret-v0.2"
+PROMPT_VERSION = "sp2-interpret-v0.4"
 
 # 限流和 schema 失败是两回事，重试方式也不一样：
 # 429/5xx 是「现在排不上队」，立刻重试等于白试，要等一下；
@@ -247,11 +247,37 @@ def _restatement(state: NeedState) -> str:
     return f"我猜你现在更接近「{label}」{tail}。猜错了就说一声，我马上换。"
 
 
-def _decorate(response: InterpretResponse, text: str) -> InterpretResponse:
+# 模型会把 prompt 里的字段名、占位符原样吐给用户。这些一出现就整条丢掉。
+EVIDENCE_LEAKS = ("mood_id", "need_keys", "social_mode", "budget_level", "risk_level",
+                  "所以我怎么理解", "json", "字段", "对应")
+
+
+def _quotes_the_user(line: str, text: str) -> bool:
+    """证据必须引用用户真说过的词，而且得是小在的口气。
+
+    模型编一句听起来很懂的话是很容易的，所以逐条核对「」里的片段确实出现在
+    原文里；再挡掉泄漏出来的字段名和过长的书面语（FR-28 代码侧护栏）。
+    """
+    if len(line) > 40 or any(leak in line.lower() for leak in EVIDENCE_LEAKS):
+        return False
+    quoted = re.findall(r"「([^」]{1,20})」", line)
+    return bool(quoted) and all(q in text for q in quoted)
+
+
+def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[str] | None = None) -> InterpretResponse:
     state = response.state
     response.state_label = STATE_LABELS.get(state.mood_id, "说不太清楚")
     response.acknowledgement = _restatement(state)
-    response.evidence = _evidence_for(text, state)
+
+    # 模型读懂了、规则没读懂的句子，证据也得跟着模型走——
+    # 否则会出现「我猜你心里发紧」配「我没抓到明确线索」这种自相矛盾。
+    verified: list[str] = []
+    if model_evidence:
+        verified = [
+            line.strip() for line in model_evidence
+            if isinstance(line, str) and line.strip() and _quotes_the_user(line, text)
+        ][:3]
+    response.evidence = verified or _evidence_for(text, state)
     # FR-03：四环都要能一步纠正，不能只让用户改「状态」这一环。
     # 地点那一环不给选项——「这几个都不想去」本身就是动作。
     response.corrections = CorrectionOptions(
@@ -301,9 +327,23 @@ SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户的中文自然�
   "needs_clarification": boolean,
   "clarifying_question": string 或 null,
   "risk_level": "ordinary|elevated|urgent",
-  "risk_signals": []
+  "risk_signals": [],
+  "evidence": ["1-3 条，见下面的写法"]
 }
-只有缺失会改变推荐的关键事实时才追问一个问题。不要根据语气、身份或疾病做推断。"""
+只有缺失会改变推荐的关键事实时才追问一个问题。不要根据语气、身份或疾病做推断。
+
+evidence 的写法（这是给用户看的，不是给程序看的）：
+- 每条必须包含用户真的说过的词，用「」括起来。编造用户没说过的话属于失败。
+- 用小在的口气：短句、白话、身体感。不要出现字段名、术语、临床词。
+- 每条不超过 25 个字。
+
+好的例子：
+  「吵完架」——所以我猜你现在还绷着
+  「谁都不想理」——所以我把人多的地方去掉了
+  「胃是空的」——所以我顺手找了能吃口东西的
+不好的例子（不要这样写）：
+  「加班到现在」——所以我怎么理解：当前处于长时间工作后的疲惫状态
+  「人也是空的」——对应 mood_id 为 empty"""
 
 
 def _extract_json(content: str) -> dict:
@@ -334,23 +374,30 @@ def _trace(*, outcome: str, text: str, attempt: int, model: str, detail: str = "
     )
 
 
-async def _call_model(client: httpx.AsyncClient, *, base_url: str, api_key: str, model: str, text: str, temperature: float) -> NeedState:
+async def _call_model(client: httpx.AsyncClient, *, base_url: str, api_key: str, model: str, text: str, temperature: float) -> tuple[NeedState, list[str] | None]:
+    payload = {
+        "model": model,
+        "temperature": temperature,
+        "response_format": {"type": "json_object"},
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": text},
+        ],
+    }
+    # Qwen3 系列默认开思考链。我们这一步是受约束的信息抽取，不需要它推理，
+    # 开着会从 5 秒变成 18 秒——直接吃掉 PRD §8 给的 3 秒预算。
+    # 这个参数是 Qwen 专有的，别的厂商会拒收，所以按模型名判断。
+    if "qwen3" in model.lower():
+        payload["enable_thinking"] = False
     response = await client.post(
         f"{base_url}/chat/completions",
         headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-        json={
-            "model": model,
-            "temperature": temperature,
-            "response_format": {"type": "json_object"},
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": text},
-            ],
-        },
+        json=payload,
     )
     response.raise_for_status()
     payload = _extract_json(response.json()["choices"][0]["message"]["content"])
-    return NeedState.model_validate(payload)
+    evidence = payload.pop("evidence", None)
+    return NeedState.model_validate(payload), evidence
 
 
 def _is_transient(error: Exception) -> bool:
@@ -399,7 +446,7 @@ async def interpret(text: str) -> InterpretResponse:
     async with httpx.AsyncClient(timeout=20) as client:
         for attempt, temperature in enumerate((0.1, 0.0), start=1):
             try:
-                state = await _call_model_with_backoff(
+                state, model_evidence = await _call_model_with_backoff(
                     client, base_url=base_url, api_key=api_key, model=model, text=text,
                     temperature=temperature, attempt=attempt,
                 )
@@ -419,6 +466,7 @@ async def interpret(text: str) -> InterpretResponse:
                     source="model",
                 ),
                 text,
+                model_evidence=model_evidence,
             )
 
     _trace(outcome="rules_fallback_after_retry", text=text, attempt=2, model=model)
