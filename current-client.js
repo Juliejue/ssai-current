@@ -8,6 +8,9 @@
   var SESSION_KEY = 'current.session.v1';
   var activeVoice = null;
   var activeLocation = null;
+  var activeLocationMode = null;
+  // 公开的演示起点，不代表评委当前位置。坐标采用高德使用的 GCJ-02。
+  var BEIJING_DEMO_ORIGIN = { latitude: 39.9244, longitude: 116.4173 };
 
   // 第三方服务的错误原文可能很长，甚至夹带控制台和付费链接。
   // 第一屏只告诉用户下一步能做什么，不把供应商后台文案直接甩给人。
@@ -99,21 +102,38 @@
   }
 
   function requestLocation() {
-    if (activeLocation) return Promise.resolve(activeLocation);
+    if (activeLocation && activeLocationMode === 'real') return Promise.resolve(activeLocation);
     if (!navigator.geolocation) return Promise.reject(new Error('当前浏览器不支持定位'));
     return new Promise(function (resolve, reject) {
       navigator.geolocation.getCurrentPosition(function (position) {
+        var latitude = position.coords.latitude;
+        var longitude = position.coords.longitude;
+        // 北京是当前唯一开放的真实地点库。跨城步行没有意义，也不能把上海或
+        // 深圳的位置伪装成北京起点；异地用户应显式选择体验模式。
+        var inBeijingPilot = latitude >= 39.4 && latitude <= 41.1 && longitude >= 115.4 && longitude <= 117.6;
+        if (!inBeijingPilot) {
+          activeLocation = null;
+          activeLocationMode = null;
+          reject(new Error('你现在不在北京。可以选择「体验北京」，路线会从北京东四开始算。'));
+          return;
+        }
         // Kept only in page memory. The backend uses it for this route request and
         // deliberately excludes it from logs and persistence.
-        activeLocation = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        };
+        // 浏览器给 WGS-84，高德路线接口收 GCJ-02，所以只在内存中转换一次。
+        activeLocation = wgs2gcj(latitude, longitude);
+        activeLocationMode = 'real';
         resolve(activeLocation);
       }, function () {
         reject(new Error('没有获得位置权限，仍可以按原型距离推荐'));
       }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
     });
+  }
+
+  function useBeijingDemo() {
+    stopPresence();
+    activeLocation = { latitude: BEIJING_DEMO_ORIGIN.latitude, longitude: BEIJING_DEMO_ORIGIN.longitude };
+    activeLocationMode = 'demo';
+    return activeLocation;
   }
 
   // ---- 在场证明 L1（FR-08）----------------------------------------------
@@ -168,6 +188,10 @@
   // callbacks.onState({inside, dwellMinutes, level, accuracyM})
   function watchPresence(fence, callbacks) {
     stopPresence();
+    if (activeLocationMode === 'demo') {
+      callbacks.onUnavailable('北京体验模式不启用到访验证');
+      return null;
+    }
     if (!fence || !navigator.geolocation) return null;
 
     var insideSince = null;
@@ -338,6 +362,8 @@
     recommendFor: recommendFor,
     deleteOutcome: deleteOutcome,
     hasLocation: function () { return Boolean(activeLocation); },
+    getLocationMode: function () { return activeLocationMode; },
+    useBeijingDemo: useBeijingDemo,
     requestLocation: requestLocation,
     watchPresence: watchPresence,
     stopPresence: stopPresence,

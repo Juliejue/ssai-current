@@ -394,6 +394,21 @@ def test_voice_provider_errors_are_translated_into_user_actions():
     assert "fail(message.message" not in source
 
 
+def test_beijing_demo_mode_is_explicit_and_never_creates_fake_visits():
+    """异地评委可以看真实北京路线，但模拟起点不能污染到访闭环。"""
+    client = (pathlib.Path(__file__).parents[1] / "current-client.js").read_text(encoding="utf-8")
+    prototype = PROTOTYPE.read_text(encoding="utf-8")
+    assert "BEIJING_DEMO_ORIGIN" in client
+    assert "activeLocationMode = 'demo'" in client
+    assert "北京体验模式不启用到访验证" in client
+    assert "wgs2gcj(latitude, longitude)" in client
+    assert 'id="demo-location"' in prototype
+    assert "高德实测 · 从北京东四起算" in prototype
+    demo_guard = prototype.split('if (CurrentAI.getLocationMode() === "demo")', 1)[1].split("saveTrip({", 1)[0]
+    assert "saveTrip" not in demo_guard
+    assert "experience_mode:true" in demo_guard
+
+
 def test_transient_provider_errors_are_retried_but_bad_requests_are_not():
     """限流和连接重置值得等一下再试；「你参数不对」重试多少次都一样。"""
     import httpx as _httpx

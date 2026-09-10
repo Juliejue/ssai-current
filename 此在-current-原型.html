@@ -1768,6 +1768,13 @@ function saveTrip(trip){
   try { trip ? localStorage.setItem(TRIP_KEY, JSON.stringify(trip)) : localStorage.removeItem(TRIP_KEY); } catch(e){}
 }
 function startTrip(id, rec){
+  if (CurrentAI.getLocationMode() === "demo"){
+    // 体验模式可以打开真实地图，但不能制造一条并未发生的行程或到访反馈。
+    CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:rec.recommendation_id || null, experience_mode:true});
+    state.offerDeparted = true;
+    saveReach({offersWithoutDeparture:0});
+    return;
+  }
   saveTrip({placeId:id, recommendationId:rec.recommendation_id || ("local_" + id),
             startedAt:new Date().toISOString(), status:"departed",
             geofence:rec.geofence || null, dwellMinutes:0, inside:false,
@@ -2807,6 +2814,7 @@ function reachBlockedText(reason){
 
 /* --- ① 说 --- */
 function renderTalk(){
+  const locationMode = CurrentAI.getLocationMode();
   let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div>' +
           '<div style="display:flex;gap:14px"><button class="k" data-go="#/settings" style="letter-spacing:.14em">设置</button>' +
           '<button class="k" data-go="#/records" style="letter-spacing:.14em">记录</button></div></div>';
@@ -2833,8 +2841,10 @@ function renderTalk(){
   }
   h += '<p class="privacy">语音不保存 · 原话不上传 · 位置不入库<br>只用来找一个此刻能接住你的地方</p>';
   h += '<div class="foot">' +
-       '<button id="location-input"' + (CurrentAI.hasLocation() ? ' class="on"' : '') + '>' +
-       (CurrentAI.hasLocation() ? '✓ 已用当前位置算真实路程' : '⌖ 用当前位置算真实路程（可选）') + '</button>' +
+       '<button id="location-input"' + (locationMode === "real" ? ' class="on"' : '') + '>' +
+       (locationMode === "real" ? '✓ 北京真实定位 · 高德算路' : '⌖ 我在北京，用当前位置算路') + '</button>' +
+       '<button id="demo-location"' + (locationMode === "demo" ? ' class="on"' : '') + '>' +
+       (locationMode === "demo" ? '✓ 体验北京 · 以东四为起点' : '不在北京？体验北京路线') + '</button>' +
        '<button class="quiet" data-go="#/mood">我不想说，自己挑</button></div>';
   h += '</div>';
   h += tripStrip();
@@ -3038,10 +3048,13 @@ function shorten(text, max){
 /* 到达成本一行：真实路线和原型估算必须能被一眼分辨 */
 /* 卡片顶部的 pill 已经说过 time-to-relief，这行不要再说第二遍。 */
 function reachLine(rec, p){
+  const locationMode = CurrentAI.getLocationMode();
   if (rec.distance_source === "amap" && rec.walking_minutes){
-    return "步行约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km（高德实测）";
+    const source = locationMode === "demo" ? "高德实测 · 从北京东四起算" : "高德实测";
+    return "步行约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km（" + source + "）";
   }
-  return "约 " + rec.reach_minutes + " 分钟 · " + p.transport + "（原型估算，未接地图）";
+  if (locationMode) return "约 " + rec.reach_minutes + " 分钟 · " + p.transport + "（高德暂未返回路线，使用原型估算）";
+  return "约 " + rec.reach_minutes + " 分钟 · " + p.transport + "（未开启定位，使用原型估算）";
 }
 /* 样本诚实（FR-10b / FR-19b）：没有真实到访数据时，不给任何平均分 */
 function sampleLine(rec){
@@ -3138,6 +3151,7 @@ function bind(){
   const naturalSubmit = root.querySelector("#natural-submit");
   const voiceInput = root.querySelector("#voice-input") || root.querySelector("#mic-button");
   const locationInput = root.querySelector("#location-input");
+  const demoLocation = root.querySelector("#demo-location");
   const naturalStatus = root.querySelector("#natural-status") || root.querySelector("#mic-cap");
   function setNaturalStatus(message, error){
     if (!naturalStatus) return;
@@ -3246,6 +3260,13 @@ function bind(){
       locationInput.disabled = false;
       setNaturalStatus(error.message, true);
     });
+  };
+  if (demoLocation) demoLocation.onclick = () => {
+    CurrentAI.useBeijingDemo();
+    CurrentAI.track("natural_language_started", {method:"beijing_demo"});
+    render();
+    const cap = document.getElementById("mic-cap");
+    if (cap) cap.textContent = "体验模式：路线从北京东四起算，不启用到访验证。";
   };
 
   const acceptRead = root.querySelector("#accept-read");
