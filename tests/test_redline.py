@@ -359,6 +359,31 @@ def test_first_hand_quotes_are_labelled_as_profile_source_not_as_feedback():
     assert "档案来源，不是到访反馈" in source
 
 
+def test_cancelling_map_choice_does_not_start_a_trip():
+    """「先不去」必须真的是取消，不能留下虚假的进行中行程。"""
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    depart_handler = source.split('root.querySelectorAll("[data-depart]")', 1)[1].split(
+        'root.querySelectorAll("[data-mapapp]")', 1
+    )[0]
+    map_handler = source.split('root.querySelectorAll("[data-mapapp]")', 1)[1].split(
+        'const mapCancel', 1
+    )[0]
+    cancel_handler = source.split('const mapCancel', 1)[1].split(
+        'root.querySelectorAll("[data-trip]")', 1
+    )[0]
+
+    assert "startTrip(t.placeId, rec)" in map_handler
+    assert "startTrip(id, rec)" in depart_handler  # 无地图链接时按钮本身就是确认
+    assert "saveTrip" not in cancel_handler
+
+
+def test_recommendation_logging_does_not_hold_up_the_user_response():
+    """跨境数据库冷启动不能挡在推荐结果前面。"""
+    source = (pathlib.Path(__file__).parents[1] / "backend_app" / "main.py").read_text(encoding="utf-8")
+    assert "background_tasks.add_task(store_recommendations" in source
+    assert "await store_recommendations" not in source
+
+
 def test_transient_provider_errors_are_retried_but_bad_requests_are_not():
     """限流和连接重置值得等一下再试；「你参数不对」重试多少次都一样。"""
     import httpx as _httpx

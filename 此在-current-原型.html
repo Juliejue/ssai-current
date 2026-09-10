@@ -1767,6 +1767,15 @@ function saveTrip(trip){
   state.trip = trip;
   try { trip ? localStorage.setItem(TRIP_KEY, JSON.stringify(trip)) : localStorage.removeItem(TRIP_KEY); } catch(e){}
 }
+function startTrip(id, rec){
+  saveTrip({placeId:id, recommendationId:rec.recommendation_id || ("local_" + id),
+            startedAt:new Date().toISOString(), status:"departed",
+            geofence:rec.geofence || null, dwellMinutes:0, inside:false,
+            presenceLevel:"self_reported"});
+  CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:rec.recommendation_id || null});
+  state.offerDeparted = true;
+  saveReach({offersWithoutDeparture:0});
+}
 state.trip = loadTrip();
 state.reach = loadReach();
 noteSession();
@@ -3338,28 +3347,27 @@ function bind(){
     runRecommend(state.read.state, "换了一批。前面那三个这次不会再出现。");
   };
 
-  // 出发：闭环从这里开始被记录下来
+  // 有地图链接时，先让用户选地图；真正选定之后才把行程记成已出发。
+  // 否则点「先不去」也会留下一个并不存在的进行中行程。
   root.querySelectorAll("[data-depart]").forEach(el => el.onclick = () => {
     const id = el.dataset.depart;
     const rec = state.aiRecommendations[id] || {};
-    saveTrip({placeId:id, recommendationId:rec.recommendation_id || ("local_" + id),
-              startedAt:new Date().toISOString(), status:"departed",
-              geofence:rec.geofence || null, dwellMinutes:0, inside:false,
-              presenceLevel:"self_reported"});
-    CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:rec.recommendation_id || null});
-    state.offerDeparted = true;
-    saveReach({offersWithoutDeparture:0});
     const links = rec.map_links || {};
     if (Object.keys(links).length){
-      // 选哪个地图是用户的事（US-06）。没有核对过坐标就没有链接，行程照样记。
+      // 选哪个地图是用户的事（US-06）。
       state.mapSheet = {placeId:id, placeName:rec.place_name || placeById(id).placeName,
                         recommendationId:rec.recommendation_id || null, links:links};
+    } else {
+      // 没有核对过坐标就没有地图链接；此时按钮本身就是最终确认。
+      startTrip(id, rec);
     }
     render();
   });
 
   root.querySelectorAll("[data-mapapp]").forEach(el => el.onclick = () => {
     const t = state.mapSheet || {};
+    const rec = state.aiRecommendations[t.placeId] || {};
+    startTrip(t.placeId, rec);
     CurrentAI.track("navigation_opened", {place_id:t.placeId, recommendation_id:t.recommendationId, method:el.dataset.mapapp});
     state.mapSheet = null;
     setTimeout(render, 0);   // 让 <a> 先完成跳转，再收面板

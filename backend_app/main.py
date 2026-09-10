@@ -6,7 +6,7 @@ import os
 import time
 import uuid
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .interpretation import interpret
@@ -72,7 +72,11 @@ async def interpret_route(payload: InterpretRequest) -> InterpretResponse:
 
 
 @app.post("/api/v1/recommendations", response_model=RecommendResponse)
-async def recommendations_route(payload: RecommendRequest, request: Request) -> RecommendResponse:
+async def recommendations_route(
+    payload: RecommendRequest,
+    request: Request,
+    background_tasks: BackgroundTasks,
+) -> RecommendResponse:
     if payload.state.risk_level == RiskLevel.urgent:
         return RecommendResponse(
             recommendations=[],
@@ -92,7 +96,11 @@ async def recommendations_route(payload: RecommendRequest, request: Request) -> 
 
     session_id = request.headers.get("x-session-id", "")
     if 8 <= len(session_id) <= 80:
-        await store_recommendations(session_id, payload.state, recommendations)
+        # Neon may need several seconds to wake or establish a cross-border TLS
+        # connection. The decision log matters, but the user must not wait for it
+        # before seeing the recommendation. Starlette runs this after sending the
+        # response body while still completing it within the request lifecycle.
+        background_tasks.add_task(store_recommendations, session_id, payload.state, recommendations)
     # Never pretend a weak shortlist is a good one (SP-3 / 守则 6).
     no_good_match = not recommendations or recommendations[0].score < 0.35
     all_shut = bool(recommendations) and all(

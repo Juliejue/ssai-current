@@ -1,0 +1,13 @@
+.env*
+.vercel/
+.venv/
+__pycache__/
+*.pyc
+
+# 本地核对与临时产物，不属于群内试用网站
+current-qrcode.png
+current-qrcode.svg
+ocr_vision.m
+此在-Current-PRD-V1.5.md
+交接-给下一位.md
+交接-背景说明.md

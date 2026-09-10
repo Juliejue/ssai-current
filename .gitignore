@@ -16,3 +16,4 @@ backend_app/data/amap_candidates.json
 
 # 渲染产物
 *.pdf
+.env*
