@@ -9,6 +9,19 @@
   var activeVoice = null;
   var activeLocation = null;
 
+  // 第三方服务的错误原文可能很长，甚至夹带控制台和付费链接。
+  // 第一屏只告诉用户下一步能做什么，不把供应商后台文案直接甩给人。
+  function voiceErrorMessage(message) {
+    var code = Number(message && message.code);
+    if (code === 6001) return '当前网络像是经过了境外代理。关闭 VPN 后再试，或者直接打字。';
+    if (code === 4003) return '语音功能还没有开通，请先直接打字。';
+    if (code === 4004 || code === 4005) return '语音额度暂时不可用，请先直接打字。';
+    if (code === 4006) return '现在说话的人有点多，请稍后再试或直接打字。';
+    if (code === 4007) return '这段声音没有识别出来，可以再说一次或直接打字。';
+    if (code === 5000 || code === 5001 || code === 5002) return '语音连接刚刚抖了一下，可以再试一次或直接打字。';
+    return '语音暂时没有接住，请再试一次或直接打字。';
+  }
+
   function sessionId() {
     try {
       var existing = localStorage.getItem(SESSION_KEY);
@@ -283,7 +296,7 @@
       if (typeof event.data !== 'string') return;
       try {
         var message = JSON.parse(event.data);
-        if (message.code !== undefined && message.code !== 0) return fail(message.message || '语音识别失败');
+        if (message.code !== undefined && message.code !== 0) return fail(voiceErrorMessage(message));
         var result = message.result || {};
         var text = result.voice_text_str || message.text || '';
         if (text) { latestText = text; callbacks.onPartial(text); }

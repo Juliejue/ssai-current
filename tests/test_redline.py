@@ -384,6 +384,16 @@ def test_recommendation_logging_does_not_hold_up_the_user_response():
     assert "await store_recommendations" not in source
 
 
+def test_voice_provider_errors_are_translated_into_user_actions():
+    """第一屏不能把供应商控制台和付费链接原样甩给用户。"""
+    source = (pathlib.Path(__file__).parents[1] / "current-client.js").read_text(encoding="utf-8")
+    assert "function voiceErrorMessage(message)" in source
+    assert "code === 6001" in source
+    assert "关闭 VPN 后再试，或者直接打字" in source
+    assert "fail(voiceErrorMessage(message))" in source
+    assert "fail(message.message" not in source
+
+
 def test_transient_provider_errors_are_retried_but_bad_requests_are_not():
     """限流和连接重置值得等一下再试；「你参数不对」重试多少次都一样。"""
     import httpx as _httpx
