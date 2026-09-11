@@ -111,6 +111,13 @@ button{background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highligh
 
 /* ---------- type ---------- */
 .eyebrow{font:10px var(--mono);letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase;margin:0 0 10px}
+/* 收起来的段落：承诺不能删，但也不必一进页面就糊人一脸。标题沿用 eyebrow 的样子。 */
+.fold{margin:0}
+.fold>summary{font:10px var(--mono);letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase;
+  margin:0 0 10px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary:after{content:"+";font:12px var(--mono);opacity:.7}
+.fold[open]>summary:after{content:"−"}
 h1.title{margin:0 0 8px;font:400 27px/1.42 var(--serif);letter-spacing:.01em;text-wrap:balance}
 h1.title.sm{font-size:23px}
 .lead{margin:0 0 20px;font:13.5px/1.75 var(--sans);color:var(--ink-dim);max-width:31ch}
@@ -2150,9 +2157,22 @@ function renderPlace(id){
     h += '<div class="e">「' + escapeHTML(p.quote) + '」<u>来自真人的一手经验，用来生成这个地方的档案。不带分数，也不进汇总。</u></div>';
     h += '</div>';
   }
+  // 有核对过的坐标 → 点下去弹三选地图；没有 → 一个地图都给不了。
+  // 两种情况长得必须不一样，而且要在点之前就说清楚：
+  // 之前按钮写「打开高德导航」，点下去弹的却是三选面板，是文案在撒谎。
+  // 只有手上真有这条推荐，才知道它到底有没有核对过坐标。
+  // 从瀑布流点进来的地点没有 recommendation，这时候两种话都不能说——
+  // 说「还没核对」可能是冤枉它，说「选地图」又给不出地图。
+  const hasMaps = !!(recommendation && recommendation.map_links &&
+                     Object.keys(recommendation.map_links).length > 0);
+  const knowsMapState = !!recommendation;
   h += '<div class="actions">' +
        '<button class="btn" data-depart="' + p.placeId + '">' +
-       (recommendation && recommendation.navigation_url ? '带我去 · 打开高德导航' : '带我去') + ' <span>→</span></button>' +
+       (hasMaps ? '带我去 · 选地图' : '带我去') + ' <span>→</span></button>' +
+       (knowsMapState && !hasMaps
+          ? '<p class="sub" style="margin:8px 2px 0">这个地点我还没核对过坐标，' +
+            '所以不给导航——怕把你带到同名的另一家去。到了自己按一下「我到了」。</p>'
+          : '') +
        '<button class="btn-text" data-go="' + back + '">回到' + (back === "#/browse" ? "瀑布流" : back === "#/offer" ? "推荐" : "卡片推荐") + '</button></div>';
   h += '</div></div>';
   h += tripStrip() || dock('你到了之后我不打扰。等你走了，再问你三十秒。');
@@ -2764,25 +2784,25 @@ function renderSettings(){
 
   h += '<p class="eyebrow" style="margin-top:26px">打扰</p>';
   h += '<div class="setrow"><div class="txt"><b>让小在主动来找我</b>' +
-       '<small>' + (r.stopped ? "已经停了：你连着拒绝过几次，我不再自己回来。" :
-                    allowed.ok ? "现在可以来。" : reachBlockedText(allowed.reason)) + '</small></div>' +
+       (r.stopped ? '<small>已经停了：你连着拒绝过几次，我不再自己回来。</small>' :
+        allowed.ok ? "" : '<small>' + reachBlockedText(allowed.reason) + '</small>') + '</div>' +
        '<button class="switch' + (r.enabled ? " on" : "") + '" data-reachtoggle="1" aria-pressed="' + r.enabled + '"><i></i></button></div>';
-  h += '<div class="setrow"><div class="txt"><b>一天最多几次</b><small>用完就不再来，第二天重置。</small></div>' +
+  h += '<div class="setrow"><div class="txt"><b>一天最多几次</b></div>' +
        '<div class="pick">' + [1,2,3].map(n =>
          '<button class="' + (r.dailyCap === n ? "on" : "") + '" data-cap="' + n + '">' + n + '</button>').join("") + '</div></div>';
-  h += '<div class="setrow"><div class="txt"><b>静默时段</b><small>这段时间我一句话都不说。</small></div>' +
+  h += '<div class="setrow"><div class="txt"><b>静默时段</b>' +
+       '<small>' + r.silentFrom + ' 点到第二天 ' + r.silentTo + ' 点，我一句话都不说。</small></div>' +
        '<div class="pick">' + [[22,8],[21,9],[20,10]].map(w =>
          '<button class="' + (r.silentFrom === w[0] ? "on" : "") + '" data-silent="' + w[0] + ':' + w[1] + '">' +
-         w[0] + '–' + w[1] + '</button>').join("") + '</div></div>';
-  h += '<div class="setrow"><div class="txt"><b>看一次主动触达长什么样</b>' +
-       '<small>演示用。真实情况下是我按上面的规则自己来找你。</small></div>' +
+         w[0] + '–' + w[1] + '点</button>').join("") + '</div></div>';
+  h += '<div class="setrow"><div class="txt"><b>看一次主动触达长什么样</b><small>演示用。</small></div>' +
        '<div class="pick"><button data-demoreach="1">试一次</button></div></div>';
 
-  h += '<p class="eyebrow" style="margin-top:26px">这台设备上存了什么</p>';
+  h += '<details class="fold" style="margin-top:26px"><summary>这台设备上存了什么</summary>';
   h += '<div class="tier"><div class="tb" style="padding-top:13px">' +
        '到访记录 ' + state.records.length + ' 条（含 3 条演示数据）<b>行程状态 ' + (state.trip ? "1 条进行中" : "无") + '</b>' +
        '<b>打扰记录：今天 ' + (r.todayKey === ReachPolicy.startOfDay(Date.now()) ? r.todayCount : 0) + ' 次</b>' +
-       '<b>一个匿名 session ID，不含姓名、手机号、设备指纹</b></div></div>';
+       '<b>一个匿名 session ID，不含姓名、手机号、设备指纹</b></div></div></details>';
   h += '<button class="danger" data-wipe="1">清空这台设备上的全部记录</button>';
   if (state.pendingWipe){
     h += '<div class="confirm"><p>清空之后，你的到访记录、行程和打扰设置都会消失。' +
@@ -2791,12 +2811,12 @@ function renderSettings(){
          '<button class="yes" data-wipeyes="1">清空</button></div></div>';
   }
 
-  h += '<p class="eyebrow" style="margin-top:26px">不会变的三条</p>';
-  h += '<div class="boundary"><b>硬边界</b><ul style="margin:0;padding-left:18px">' +
+  h += '<details class="fold" style="margin-top:26px"><summary>不会变的三条</summary>';
+  h += '<div class="boundary"><ul style="margin:0;padding-left:18px">' +
        '<li>不诊断：不给情绪贴临床标签，生理数据只做校准</li>' +
        '<li>不评判：情绪变差不叫失败，只叫这次没接住</li>' +
        '<li>不侵入社交：没有昵称、人脸、主页、私信、关注</li>' +
-       '<li>不做人脸识别，不采集原始生理流</li></ul></div>';
+       '<li>不做人脸识别，不采集原始生理流</li></ul></div></details>';
   h += '</div></div>';
   h += dock('这一页上的每一项，关了就是关了。', {records:false});
   return h;
@@ -2984,7 +3004,9 @@ function renderOffer(){
   h += '</div></div>';
 
   h += '<div class="actions" style="margin-top:14px">';
-  h += '<button class="btn" data-depart="' + escapeHTML(main.place_id) + '">带我去 <span>→</span></button>';
+  const mainHasMaps = main.map_links && Object.keys(main.map_links).length > 0;
+  h += '<button class="btn" data-depart="' + escapeHTML(main.place_id) + '">' +
+       (mainHasMaps ? '带我去 · 选地图' : '带我去') + ' <span>→</span></button>';
   h += '<div class="btn-row" style="margin-top:10px">' +
        '<button class="btn ghost sm" data-go="#/place/' + escapeHTML(main.place_id) + '">先看看细节</button>' +
        '<button class="btn ghost sm" id="swap-offer">都不合适，换一批</button></div></div>';
