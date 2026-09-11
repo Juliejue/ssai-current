@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -12,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .interpretation import interpret
 from .realtime_asr import build_asr_connect_url
 from .presence import verify as verify_presence
-from .recommender import load_catalog, recommend_with_live_context
+from .recommender import load_catalog, recommend_with_live_context, warm_discovery
 from .schemas import (
     InterpretRequest,
     InterpretResponse,
@@ -68,7 +69,16 @@ async def asr_signature() -> dict[str, str | int]:
 
 @app.post("/api/v1/interpret", response_model=InterpretResponse)
 async def interpret_route(payload: InterpretRequest) -> InterpretResponse:
-    return await interpret(payload.text)
+    # 模型读这句话要 4–6 秒，周边搜索要 2–4 秒，两件事互不依赖。
+    # 用户还在看「我听到的」那一屏时，地图结果就已经备好了——
+    # 等他点到推荐，那一步几乎不用等。
+    warm = asyncio.create_task(warm_discovery(payload.location)) if payload.location else None
+    try:
+        return await interpret(payload.text)
+    finally:
+        if warm and not warm.done():
+            # 预热失败不影响任何事，但也不能留一个没人管的任务。
+            warm.add_done_callback(lambda task: task.exception())
 
 
 @app.post("/api/v1/recommendations", response_model=RecommendResponse)

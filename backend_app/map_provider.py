@@ -130,6 +130,42 @@ class AmapClient:
             )
         return candidates
 
+    async def search_around(
+        self,
+        *,
+        longitude: float,
+        latitude: float,
+        types: str = "",
+        keywords: str = "",
+        radius: int = 5000,
+        page_size: int = 25,
+    ) -> list[dict[str, Any]]:
+        """周边搜索：候选地点从地图来，而不是从我们写死的清单来。
+
+        `show_fields` 里的 photos 是 #2「把实景放上来」的全部来源——
+        高德给每个 POI 返回若干张真实照片，页面直接用。
+        """
+        payload = await self._get(
+            "/v5/place/around",
+            {
+                "location": f"{longitude},{latitude}",
+                **({"types": types} if types else {}),
+                **({"keywords": keywords} if keywords else {}),
+                "radius": max(500, min(radius, 50000)),
+                "show_fields": "business,photos,navi",
+                "page_size": max(1, min(page_size, 25)),
+                "sortrule": "distance",
+            },
+        )
+        results: list[dict[str, Any]] = []
+        for poi in payload.get("pois") or []:
+            try:
+                poi_longitude, poi_latitude = parse_location(poi.get("location", ""))
+            except MapProviderError:
+                continue
+            results.append({**poi, "longitude": poi_longitude, "latitude": poi_latitude})
+        return results
+
     async def walking_route(
         self,
         *,
@@ -160,9 +196,17 @@ class AmapClient:
             raise MapProviderError("地图服务返回了无效路线") from error
 
 
+# 坐标可信 ≠ 身份是我们认定的。
+# "verified"        我们把一个名字人工核对到了某个 POI 上
+# "provider_exact"  这条记录整个就是高德的 POI，名字和坐标本来就是一对
+# 导航要的是前一种保证（不会把人送到同名的另一家），两者都满足。
+# 围栏在场证明要的是后一种以外的东西（防作弊、进汇总），只认 "verified"。
+TRUSTWORTHY_COORDINATES = ("verified", "provider_exact")
+
+
 def navigation_url(place: dict[str, Any]) -> str | None:
     amap = place.get("amap") or {}
-    if amap.get("verification_status") != "verified":
+    if amap.get("verification_status") not in TRUSTWORTHY_COORDINATES:
         return None
     try:
         longitude = float(amap["longitude"])
@@ -190,7 +234,7 @@ def map_links(place: dict[str, Any]) -> dict[str, str]:
     和导航、围栏同一道门：没有人工核对过的坐标就一条链接都不给。
     """
     amap = place.get("amap") or {}
-    if amap.get("verification_status") != "verified":
+    if amap.get("verification_status") not in TRUSTWORTHY_COORDINATES:
         return {}
     try:
         gcj_longitude = float(amap["longitude"])

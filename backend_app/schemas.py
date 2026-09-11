@@ -35,8 +35,16 @@ class NeedState(BaseModel):
         return value if value in allowed else "low"
 
 
+class Location(BaseModel):
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+
+
 class InterpretRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
+    # 可选。给了就在模型读句子的同时先把周边搜出来，等用户走到推荐那一步时
+    # 结果已经在缓存里了。这个坐标只在内存里用一次，不写盘、不入库（守则 6）。
+    location: Location | None = None
 
     @field_validator("text")
     @classmethod
@@ -71,11 +79,6 @@ class InterpretResponse(BaseModel):
     clarify_field: Literal["social_mode", "max_travel_minutes", "budget_level"] | None = None
     clarify_options: list[ClarifyOption] = Field(default_factory=list, max_length=3)
     corrections: CorrectionOptions = Field(default_factory=CorrectionOptions)
-
-
-class Location(BaseModel):
-    latitude: float = Field(ge=-90, le=90)
-    longitude: float = Field(ge=-180, le=180)
 
 
 class Geofence(BaseModel):
@@ -130,6 +133,16 @@ class Recommendation(BaseModel):
     geofence: Geofence | None = None
     # US-06：让用户选地图。GCJ-02 与 WGS-84 已按各家坐标系分别转换好。
     map_links: dict[str, str] = Field(default_factory=dict)
+    # 这个地点是人工核对过的那 26 个，还是此刻从地图上搜出来的。
+    # 界面必须能看出区别：把搜索结果说成是我们核对过的，是这里最不能犯的错。
+    source: Literal["curated", "discovered"] = "curated"
+    # 高德 POI 自带的真实照片。人工地点也有（按核对过的 POI ID 取的）。
+    photos: list[str] = Field(default_factory=list, max_length=3)
+    category: str | None = None
+    area: str | None = None
+    # 地点坐标是公开信息，可以下发——用来在地图上画点。用户的坐标不上传。
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 class RecommendResponse(BaseModel):

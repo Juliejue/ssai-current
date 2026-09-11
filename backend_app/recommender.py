@@ -2,16 +2,22 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
+import time
 import uuid
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 
+from .discovery import discover, warm as warm_search
+from .narrate import narrate_quietly
 from .map_provider import AmapClient, MapProviderError, WalkingRoute, map_links, navigation_url
 from .opening_hours import open_state
 from .presence import geofence_radius_m, has_geofence
-from .schemas import Geofence, NeedState, RecommendRequest, Recommendation
+from .schemas import Geofence, Location, NeedState, RecommendRequest, Recommendation
 
+
+logger = logging.getLogger("current.recommender")
 
 DATA_PATH = Path(__file__).parent / "data" / "places.json"
 OVERRIDES_PATH = Path(__file__).parent / "data" / "place_overrides.json"
@@ -64,6 +70,10 @@ ENERGY_DISTANCE_LIMIT_KM = 8
 # 用户明说的「不想要」比他没说出口的偏好重，但还不到一票否决——
 # 说「不想见人」的人，不该被拿掉全北京所有有人的地方。
 AVOID_WEIGHT = 0.25
+
+# 现场搜出来的地点要让人工核对过的一个身位。差距要小到「附近真的更合适」时
+# 它仍然能赢，又要大到同分时不会把人写的那份内容挤掉。
+CURATION_PREFERENCE = 0.06
 
 # 「避开某个需求」到底该避开哪个维度，必须一条条写出来，不能拿 NEEDS 的 target 反推。
 # 反推过一版：need「想手上有事做」的 target 是 {创作刺激, 可久待}，于是用户说「什么都不做」
@@ -251,13 +261,18 @@ def _tradeoffs(place: dict) -> list[str]:
     return ["没什么要你付出的：" + "、".join(upsides[:3])] if upsides else ["没看出明显的代价"]
 
 
-def _rank(request: RecommendRequest, now: datetime | None = None) -> list[tuple[float, dict, dict[str, float]]]:
+def _rank(
+    request: RecommendRequest,
+    now: datetime | None = None,
+    discovered: list[dict] | None = None,
+) -> list[tuple[float, dict, dict[str, float]]]:
     catalog = load_catalog()
     rejected = set(request.rejected_place_ids)
     hurried = _is_hurried(request.state)
     ranked: list[tuple[float, dict, dict[str, float]]] = []
 
-    for place in catalog["PLACES"]:
+    # 人工核对过的和现场搜出来的走同一套打分——差别在数据可信度，不在算法。
+    for place in list(catalog["PLACES"]) + list(discovered or []):
         if not _hard_filter(place, request.state, rejected, now):
             continue
         need_match = _match_score(place, request.state, catalog)
@@ -280,6 +295,11 @@ def _rank(request: RecommendRequest, now: datetime | None = None) -> list[tuple[
             "budget_fit": round(budget_fit, 4),
         }
         score = need_match * 0.45 + energy_fit * 0.20 + travel_fit * 0.15 + social_fit * 0.10 + budget_fit * 0.10
+        if place.get("source") == "discovered":
+            # 同分时让人工核对过的先出场：它有真人写的理由、核对过的身份、
+            # 和能进汇总的到访。现场结果是用来补空缺的，不是用来顶替的。
+            score -= CURATION_PREFERENCE
+            breakdown = {**breakdown, "discovered": 1.0}
         avoid_penalty = _avoid_penalty(place, request.state)
         if avoid_penalty:
             score += avoid_penalty
@@ -336,6 +356,12 @@ def _to_recommendation(
         walking_minutes=walking_minutes,
         distance_source="amap" if route else "prototype_estimate",
         map_verified=(place.get("amap") or {}).get("verification_status") == "verified",
+        source=place.get("source") or "curated",
+        photos=[url for url in (place.get("photos") or []) if isinstance(url, str)][:3],
+        category=place.get("category"),
+        area=place.get("area"),
+        latitude=float(amap["latitude"]) if amap.get("latitude") is not None else None,
+        longitude=float(amap["longitude"]) if amap.get("longitude") is not None else None,
         navigation_url=navigation_url(place),
         transport=place.get("transport"),
         suggested_duration=place.get("suggestedDuration"),
@@ -368,14 +394,51 @@ def recommend(request: RecommendRequest, now: datetime | None = None) -> list[Re
     return output
 
 
+def _spread(ranked: list[tuple], limit: int) -> list[tuple]:
+    """同一类最多出现两个。
+
+    「一个主推荐 + 两个备选」的意义是给出不同的出路；三个都是咖啡馆，
+    等于把选择权收回去了。先按分数挑，类别满了的先跳过，
+    最后不够数再把跳过的按分数补回来——宁可重复，也不能少给。
+    """
+    picked: list[tuple] = []
+    skipped: list[tuple] = []
+    seen: dict[str, int] = {}
+    for item in ranked:
+        category = str(item[1].get("category") or "")
+        if seen.get(category, 0) >= 2:
+            skipped.append(item)
+            continue
+        seen[category] = seen.get(category, 0) + 1
+        picked.append(item)
+        if len(picked) >= limit:
+            return picked
+    return (picked + skipped)[:limit]
+
+
+async def warm_discovery(location: Location | None) -> None:
+    """在 /interpret 那几秒里先把周边搜好，填进缓存。失败了当没发生过。"""
+    if location is None:
+        return
+    client = AmapClient()
+    if not client.configured:
+        return
+    try:
+        await warm_search(client, location)
+    except Exception:  # noqa: BLE001 - 预热是纯赚，不能反过来弄坏任何东西
+        logger.debug("discovery warm-up failed", exc_info=True)
+
+
 async def recommend_with_live_context(
     request: RecommendRequest,
     *,
     map_client: AmapClient | None = None,
     now: datetime | None = None,
 ) -> list[Recommendation]:
-    ranked = _rank(request, now)
     client = map_client or AmapClient()
+    # 现场从地图上搜候选。搜不到就退回人工那 26 个——少给选项，但绝不编。
+    discovered = await discover(client, request.location, request.state) if request.location else []
+    ranked = _rank(request, now, discovered=discovered)
     if not request.location or not client.configured:
         return [
             _to_recommendation(score, place, breakdown, request.state, role="primary" if index == 0 else "alternate", now=now)
@@ -384,7 +447,7 @@ async def recommend_with_live_context(
 
     # Route only a bounded shortlist. A reviewed provider ID/coordinate is mandatory;
     # search results are never silently promoted to production data.
-    shortlist = ranked[: max(request.limit * 3, 9)]
+    shortlist = ranked[: request.limit + 2]
     semaphore = asyncio.Semaphore(4)
 
     async def route_for(place: dict) -> WalkingRoute | None:
@@ -403,7 +466,20 @@ async def recommend_with_live_context(
         except (KeyError, TypeError, ValueError, MapProviderError):
             return None
 
-    routes = await asyncio.gather(*(route_for(place) for _, place, _ in shortlist))
+    # 文案和路线一起发，不排队——多花的是并发，不是用户的时间。
+    # 只给现场搜出来的写：人工那 26 个已经有真人写的理由链了，模型不该去改它。
+    to_narrate = [place for _, place, _ in shortlist[: request.limit * 2] if place.get("source") == "discovered"]
+    routes, written = await asyncio.gather(
+        asyncio.gather(*(route_for(place) for _, place, _ in shortlist)),
+        narrate_quietly(to_narrate, request.state),
+    )
+    for place in to_narrate:
+        line = written.get(place["placeId"])
+        if line:
+            # 模板那句是保底；模型这句是这个产品的意义所在。
+            place["action"] = line["action"]
+            place["matchReason"] = {"_": line["why_now"]}
+            place["narrated"] = True
     enriched: list[tuple[float, dict, dict[str, float], WalkingRoute | None]] = []
     # 只因为「实测太远」被拿掉的。全军覆没时还得把它们请回来——
     # 给一个远的并说清楚它远，好过给空屏（US-03）。
@@ -438,5 +514,5 @@ async def recommend_with_live_context(
     enriched.sort(key=lambda item: item[0], reverse=True)
     return [
         _to_recommendation(score, place, breakdown, request.state, route, role="primary" if index == 0 else "alternate", now=now)
-        for index, (score, place, breakdown, route) in enumerate(enriched[: request.limit])
+        for index, (score, place, breakdown, route) in enumerate(_spread(enriched, request.limit))
     ]

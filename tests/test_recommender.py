@@ -34,10 +34,15 @@ def test_live_route_replaces_estimate_and_respects_max_travel(monkeypatch):
         "verified_name": place["placeName"],
         "verification_status": "verified",
     }
-    monkeypatch.setattr(recommender, "_rank", lambda _request, _now=None: [(0.8, place, {"travel_fit": 0.5})])
+    monkeypatch.setattr(recommender, "_rank", lambda _request, _now=None, discovered=None: [(0.8, place, {"travel_fit": 0.5})])
 
     class FakeMapClient:
         configured = True
+
+        async def search_around(self, **_):
+            # 这些用例考的是「实测路线怎么改变排序」，不是现场搜索。
+            # 返回空 = 候选集只有人工那 26 个，正是这些断言假设的前提。
+            return []
 
         async def walking_route(self, **_):
             return WalkingRoute(distance_meters=1600, duration_seconds=1200)
@@ -80,7 +85,7 @@ def test_measured_walk_cancels_the_estimated_relief_bonus(monkeypatch):
     monkeypatch.setattr(
         recommender,
         "_rank",
-        lambda _request, _now=None: [
+        lambda _request, _now=None, discovered=None: [
             (0.80, far, {"travel_fit": 0.95, "relief_bonus": 0.12}),
             (0.74, near, {"travel_fit": 0.85, "relief_bonus": 0.12}),
         ],
@@ -91,6 +96,11 @@ def test_measured_walk_cancels_the_estimated_relief_bonus(monkeypatch):
 
     class FakeMapClient:
         configured = True
+
+        async def search_around(self, **_):
+            # 这些用例考的是「实测路线怎么改变排序」，不是现场搜索。
+            # 返回空 = 候选集只有人工那 26 个，正是这些断言假设的前提。
+            return []
         order = [far["placeId"], near["placeId"]]
 
         def __init__(self):
@@ -122,7 +132,7 @@ def test_measured_distance_applies_the_same_limit_as_the_estimate(monkeypatch):
     monkeypatch.setattr(
         recommender,
         "_rank",
-        lambda _request, _now=None: [
+        lambda _request, _now=None, discovered=None: [
             (0.80, far, {"travel_fit": 0.95, "relief_bonus": 0.12}),
             (0.74, near, {"travel_fit": 0.85, "relief_bonus": 0.12}),
         ],
@@ -132,6 +142,11 @@ def test_measured_distance_applies_the_same_limit_as_the_estimate(monkeypatch):
 
     class FakeMapClient:
         configured = True
+
+        async def search_around(self, **_):
+            # 这些用例考的是「实测路线怎么改变排序」，不是现场搜索。
+            # 返回空 = 候选集只有人工那 26 个，正是这些断言假设的前提。
+            return []
 
         def __init__(self):
             self.calls = 0
@@ -156,11 +171,16 @@ def test_never_returns_empty_when_only_distance_disqualified_everything(monkeypa
     monkeypatch.setattr(
         recommender,
         "_rank",
-        lambda _request, _now=None: [(0.80, far, {"travel_fit": 0.95, "relief_bonus": 0.12})],
+        lambda _request, _now=None, discovered=None: [(0.80, far, {"travel_fit": 0.95, "relief_bonus": 0.12})],
     )
 
     class FakeMapClient:
         configured = True
+
+        async def search_around(self, **_):
+            # 这些用例考的是「实测路线怎么改变排序」，不是现场搜索。
+            # 返回空 = 候选集只有人工那 26 个，正是这些断言假设的前提。
+            return []
 
         async def walking_route(self, **_):
             return WalkingRoute(distance_meters=9000, duration_seconds=7200)
