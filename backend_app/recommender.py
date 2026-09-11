@@ -56,6 +56,11 @@ def _match_score(place: dict, state: NeedState, catalog: dict) -> float:
     return total / weight_total if weight_total else 0.0
 
 
+# 没力气的人走不了太远。估算距离和高德实测距离都按这一条过滤，
+# 常量只此一份——两边各写一个数字，迟早会改岔。
+ENERGY_DISTANCE_LIMIT_KM = 8
+
+
 def _hard_filter(place: dict, state: NeedState, rejected: set[str], now: datetime | None = None) -> bool:
     if place["placeId"] in rejected:
         return False
@@ -67,7 +72,7 @@ def _hard_filter(place: dict, state: NeedState, rejected: set[str], now: datetim
         return False
     if state.social_mode == "alone" and place.get("crowd") == "high":
         return False
-    if state.energy <= 1 and place.get("distanceKm", 0) > 8:
+    if state.energy <= 1 and place.get("distanceKm", 0) > ENERGY_DISTANCE_LIMIT_KM:
         return False
     # 估算出来的「大概率关着门」不能当硬约束——估算会错，用户会被无声地少给选项。
     # 只有核对过的营业时间才允许直接把地点拿掉。
@@ -357,15 +362,35 @@ async def recommend_with_live_context(
 
     routes = await asyncio.gather(*(route_for(place) for _, place, _ in shortlist))
     enriched: list[tuple[float, dict, dict[str, float], WalkingRoute | None]] = []
+    # 只因为「实测太远」被拿掉的。全军覆没时还得把它们请回来——
+    # 给一个远的并说清楚它远，好过给空屏（US-03）。
+    too_far: list[tuple[float, dict, dict[str, float], WalkingRoute | None]] = []
     for (score, place, breakdown), route in zip(shortlist, routes, strict=True):
         if route:
             walking_minutes = max(1, round(route.duration_seconds / 60))
+            distance_km = route.distance_meters / 1000
             if request.state.max_travel_minutes and walking_minutes > request.state.max_travel_minutes:
                 continue
             travel_fit = max(0.0, 1 - walking_minutes / 90)
             score = score - breakdown["travel_fit"] * 0.15 + travel_fit * 0.15
             breakdown = {**breakdown, "travel_fit": round(travel_fit, 4)}
+
+            # places.json 里的 distanceKm 是原型里的固定常数，跟用户从哪儿出发无关。
+            # 所以实测一回来，凡是拿估算算出来的结论都必须重算，而不是只调 travel_fit：
+            # 否则一个实际要走 108 分钟的地方，会带着估算给的「现在就能到」加分当主推荐。
+            if "relief_bonus" in breakdown:
+                tier, _ = _relief_tier(walking_minutes)
+                score = score - breakdown["relief_bonus"] + RELIEF_BONUS[tier]
+                breakdown = {**breakdown, "relief_bonus": RELIEF_BONUS[tier]}
+
+            # _hard_filter 里的同一条上限，用实测距离再过一遍。
+            if request.state.energy <= 1 and distance_km > ENERGY_DISTANCE_LIMIT_KM:
+                too_far.append((score, place, breakdown, route))
+                continue
         enriched.append((score, place, breakdown, route))
+
+    if not enriched:
+        enriched = too_far
 
     enriched.sort(key=lambda item: item[0], reverse=True)
     return [

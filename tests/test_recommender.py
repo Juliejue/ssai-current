@@ -53,3 +53,122 @@ def test_live_route_replaces_estimate_and_respects_max_travel(monkeypatch):
 
     request.state.max_travel_minutes = 10
     assert asyncio.run(recommender.recommend_with_live_context(request, map_client=FakeMapClient())) == []
+
+
+def _verified(place_id: str) -> dict:
+    """原型地点 + 一份人工核对过的高德身份，这样它才会被真的去算路线。"""
+    place = dict(next(p for p in load_catalog()["PLACES"] if p["placeId"] == place_id))
+    place["amap"] = {
+        "provider_place_id": f"B000{place_id[:6].upper()}",
+        "longitude": 116.4,
+        "latitude": 39.9,
+        "verified_name": place["placeName"],
+        "verification_status": "verified",
+    }
+    return place
+
+
+def test_measured_walk_cancels_the_estimated_relief_bonus(monkeypatch):
+    """108 分钟的路不能带着估算给的「现在就能到」加分当主推荐。
+
+    places.json 里的 distanceKm 是固定常数，跟用户从哪儿出发无关。线上真实复现过：
+    估算说电影资料馆离国贸 1.0 公里（→「现在就能到」+0.12），高德实测 8.1 公里 / 108 分钟。
+    """
+    far = _verified("ziliaoguan")
+    near = _verified("liangmahe")
+    # 估算阶段：远的那个分数更高，正是因为它拿了「现在就能到」的加分。
+    monkeypatch.setattr(
+        recommender,
+        "_rank",
+        lambda _request, _now=None: [
+            (0.80, far, {"travel_fit": 0.95, "relief_bonus": 0.12}),
+            (0.74, near, {"travel_fit": 0.85, "relief_bonus": 0.12}),
+        ],
+    )
+
+    routes = {far["placeId"]: WalkingRoute(distance_meters=8100, duration_seconds=6480),
+              near["placeId"]: WalkingRoute(distance_meters=2990, duration_seconds=2400)}
+
+    class FakeMapClient:
+        configured = True
+        order = [far["placeId"], near["placeId"]]
+
+        def __init__(self):
+            self.calls = 0
+
+        async def walking_route(self, **_):
+            route = routes[self.order[self.calls]]
+            self.calls += 1
+            return route
+
+    # energy=2：远的那个不被距离上限拿掉，但必须掉到主推荐之外。
+    request = RecommendRequest(
+        state=NeedState(mood_id="tight", energy=2),
+        location=Location(latitude=39.9388, longitude=116.4527),
+    )
+    results = asyncio.run(recommender.recommend_with_live_context(request, map_client=FakeMapClient()))
+    assert results[0].place_id == near["placeId"]
+    assert results[0].walking_minutes == 40
+    far_result = next(item for item in results if item.place_id == far["placeId"])
+    assert far_result.walking_minutes == 108
+    assert far_result.time_to_relief == "later"
+    assert far_result.score_breakdown["relief_bonus"] == recommender.RELIEF_BONUS["later"]
+
+
+def test_measured_distance_applies_the_same_limit_as_the_estimate(monkeypatch):
+    """没力气的人走不了 8 公里——估算说 1 公里也一样。"""
+    far = _verified("ziliaoguan")
+    near = _verified("liangmahe")
+    monkeypatch.setattr(
+        recommender,
+        "_rank",
+        lambda _request, _now=None: [
+            (0.80, far, {"travel_fit": 0.95, "relief_bonus": 0.12}),
+            (0.74, near, {"travel_fit": 0.85, "relief_bonus": 0.12}),
+        ],
+    )
+    routes = [WalkingRoute(distance_meters=8100, duration_seconds=6480),
+              WalkingRoute(distance_meters=2990, duration_seconds=2400)]
+
+    class FakeMapClient:
+        configured = True
+
+        def __init__(self):
+            self.calls = 0
+
+        async def walking_route(self, **_):
+            route = routes[self.calls]
+            self.calls += 1
+            return route
+
+    request = RecommendRequest(
+        state=NeedState(mood_id="tight", energy=1),
+        location=Location(latitude=39.9388, longitude=116.4527),
+    )
+    results = asyncio.run(recommender.recommend_with_live_context(request, map_client=FakeMapClient()))
+    assert far["placeId"] not in {item.place_id for item in results}
+    assert results[0].place_id == near["placeId"]
+
+
+def test_never_returns_empty_when_only_distance_disqualified_everything(monkeypatch):
+    """全被距离筛掉时，宁可给远的并说清楚，也不能给空屏（US-03）。"""
+    far = _verified("ziliaoguan")
+    monkeypatch.setattr(
+        recommender,
+        "_rank",
+        lambda _request, _now=None: [(0.80, far, {"travel_fit": 0.95, "relief_bonus": 0.12})],
+    )
+
+    class FakeMapClient:
+        configured = True
+
+        async def walking_route(self, **_):
+            return WalkingRoute(distance_meters=9000, duration_seconds=7200)
+
+    request = RecommendRequest(
+        state=NeedState(mood_id="tight", energy=1),
+        location=Location(latitude=39.9388, longitude=116.4527),
+    )
+    results = asyncio.run(recommender.recommend_with_live_context(request, map_client=FakeMapClient()))
+    assert len(results) == 1
+    assert results[0].time_to_relief == "later"
