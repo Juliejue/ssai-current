@@ -44,6 +44,9 @@ PROMISE_WORDS: tuple[str, ...] = (
 
 MAX_ACTION_CHARS = 16
 MAX_WHY_CHARS = 34
+# 英文一个词就占好几个字符，按汉字的尺子量会把好句子全砍掉。
+MAX_ACTION_CHARS_EN = 44
+MAX_WHY_CHARS_EN = 84
 NARRATE_TIMEOUT_SECONDS = 12
 NARRATE_ATTEMPTS = 3
 
@@ -77,6 +80,33 @@ why_now：为什么是此刻的这里。不超过 34 字，从心理环境出发
   why_now: 缓解你的焦虑情绪   （诊断 + 承诺效果）"""
 
 
+SYSTEM_PROMPT_EN = """You are Xiaozai, a voice that helps someone find a place to be right now.
+Given how a person feels and a few places (name + category), write two lines for each.
+
+Output JSON only: {"places":[{"id":"...","action":"...","why_now":"..."}]}
+
+action: one concrete thing they can do there. Under 40 characters. A move, not a verdict.
+why_now: why here, right now. Under 80 characters. Start from the psychological environment.
+
+Hard rules (break one and the line is discarded):
+1. Use ONLY what the name and category already tell you. You have not been inside.
+   Never invent specifics like "a good wall", "great speakers", "a seat by the window".
+   What the name itself reveals is fair game.
+2. No diagnosing, labelling, or judging. No clinical words. Never "you're too sensitive".
+3. Never promise an outcome. Not "this will make you feel better". "Might" at most.
+4. Xiaozai's voice: short, plain, physical. Not lyrical, no slogans.
+5. No field names, category names, or jargon.
+
+Good:
+  Place "Nanchizi Art Museum · gallery", state "tired but wired, no people"
+  action: Stand in a corner and look at one painting
+  why_now: Nobody in a gallery expects anything from you
+Bad:
+  action: Soak in the rich atmosphere      (empty, no action)
+  why_now: A quiet elegant spot perfect for relaxing   (invented facts)
+  why_now: Eases your anxiety              (diagnosis + promise)"""
+
+
 def _clean(line: Any, limit: int) -> str | None:
     if not isinstance(line, str):
         return None
@@ -94,16 +124,21 @@ def _clean(line: Any, limit: int) -> str | None:
     return text
 
 
-def _state_line(state: NeedState) -> str:
+def _state_line(state: NeedState, lang: str = "zh") -> str:
+    from .i18n import AVOID_LABELS_EN, NEED_LABELS_EN, STATE_LABELS_EN
     from .interpretation import AVOID_LABELS, NEED_LABELS, STATE_LABELS
 
-    parts = [STATE_LABELS.get(state.mood_id, "说不太清楚")]
-    parts += [NEED_LABELS[key] for key in state.need_keys if key in NEED_LABELS][:2]
-    parts += [AVOID_LABELS[key] for key in state.avoid_tags if key in AVOID_LABELS][:1]
-    return "、".join(parts)
+    english = lang == "en"
+    states = STATE_LABELS_EN if english else STATE_LABELS
+    needs = NEED_LABELS_EN if english else NEED_LABELS
+    avoids = AVOID_LABELS_EN if english else AVOID_LABELS
+    parts = [states.get(state.mood_id, "hard to name" if english else "说不太清楚")]
+    parts += [needs[key] for key in state.need_keys if key in needs][:2]
+    parts += [avoids[key] for key in state.avoid_tags if key in avoids][:1]
+    return (", " if english else "、").join(parts)
 
 
-async def narrate(places: list[dict], state: NeedState) -> dict[str, dict[str, str]]:
+async def narrate(places: list[dict], state: NeedState, lang: str = "zh") -> dict[str, dict[str, str]]:
     """返回 {placeId: {"action":…, "why_now":…}}。任何一步出问题都返回空——调用方退回模板。"""
     api_key = os.getenv("LLM_API_KEY") or os.getenv("api_key")
     if not api_key or not places:
@@ -115,13 +150,14 @@ async def narrate(places: list[dict], state: NeedState) -> dict[str, dict[str, s
         f'- id={place["placeId"]}  名字「{place["placeName"]}」  类别 {place["category"]}'
         for place in places
     )
-    user_prompt = f"此刻的状态：{_state_line(state)}\n\n地点：\n{listing}"
+    user_prompt = (f"Right now: {_state_line(state, lang)}\n\nPlaces:\n{listing}" if lang == "en"
+                   else f"此刻的状态：{_state_line(state)}\n\n地点：\n{listing}")
 
     body: dict[str, Any] = {
         "model": model,
         "temperature": 0.7,  # 这是写文案，不是抽结构，可以松一点
         "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": SYSTEM_PROMPT_EN if lang == "en" else SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
         ],
     }
@@ -159,8 +195,8 @@ async def narrate(places: list[dict], state: NeedState) -> dict[str, dict[str, s
         if not isinstance(item, dict):
             continue
         place_id = str(item.get("id") or "")
-        action = _clean(item.get("action"), MAX_ACTION_CHARS)
-        why_now = _clean(item.get("why_now"), MAX_WHY_CHARS)
+        action = _clean(item.get("action"), MAX_ACTION_CHARS_EN if lang == "en" else MAX_ACTION_CHARS)
+        why_now = _clean(item.get("why_now"), MAX_WHY_CHARS_EN if lang == "en" else MAX_WHY_CHARS)
         # 两句缺一条就整条不要：半句模板半句模型，读起来会精神分裂。
         if place_id and action and why_now:
             written[place_id] = {"action": action, "why_now": why_now}
@@ -168,10 +204,10 @@ async def narrate(places: list[dict], state: NeedState) -> dict[str, dict[str, s
     return written
 
 
-async def narrate_quietly(places: list[dict], state: NeedState) -> dict[str, dict[str, str]]:
+async def narrate_quietly(places: list[dict], state: NeedState, lang: str = "zh") -> dict[str, dict[str, str]]:
     """narrate 的免死金牌版：无论出什么事都不让推荐这条主路径失败。"""
     try:
-        return await narrate(places, state)
+        return await narrate(places, state, lang)
     except asyncio.CancelledError:
         raise
     except Exception:  # noqa: BLE001 - 文案是锦上添花，不能拖垮推荐

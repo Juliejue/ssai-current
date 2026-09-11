@@ -11,6 +11,7 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from .interpretation import interpret
+from .i18n import ui
 from .map_provider import MapProviderError, static_map_png
 from .realtime_asr import build_asr_connect_url
 from .presence import verify as verify_presence
@@ -98,7 +99,7 @@ async def interpret_route(payload: InterpretRequest) -> InterpretResponse:
     # 等他点到推荐，那一步几乎不用等。
     warm = asyncio.create_task(warm_discovery(payload.location)) if payload.location else None
     try:
-        return await interpret(payload.text)
+        return await interpret(payload.text, payload.lang)
     finally:
         if warm and not warm.done():
             # 预热失败不影响任何事，但也不能留一个没人管的任务。
@@ -115,7 +116,7 @@ async def recommendations_route(
         return RecommendResponse(
             recommendations=[],
             blocked_by_safety=True,
-            safety_message="我现在更在意你是否安全。请先联系身边可信任的人；如果你可能马上伤害自己，请立即联系当地急救或报警服务。",
+            safety_message=ui("safety", payload.lang) or "我现在更在意你是否安全。请先联系身边可信任的人；如果你可能马上伤害自己，请立即联系当地急救或报警服务。",
         )
     recommendations = await recommend_with_live_context(payload)
 
@@ -126,7 +127,8 @@ async def recommendations_route(
         relaxed = payload.model_copy(update={"state": payload.state.model_copy(update={"max_travel_minutes": None})})
         recommendations = await recommend_with_live_context(relaxed)
         if recommendations:
-            relaxed_note = f"{payload.state.max_travel_minutes} 分钟内我没找到合适的。下面是最近的几个，都超了——你看要不要将就一下。"
+            relaxed_note = (ui("relaxed_note", payload.lang, minutes=payload.state.max_travel_minutes)
+                            or f"{payload.state.max_travel_minutes} 分钟内我没找到合适的。下面是最近的几个，都超了——你看要不要将就一下。")
 
     session_id = request.headers.get("x-session-id", "")
     if 8 <= len(session_id) <= 80:
@@ -143,9 +145,9 @@ async def recommendations_route(
     if relaxed_note:
         note = relaxed_note
     elif all_shut:
-        note = "这个点开着门的地方不多，下面这几个多半已经打烊了。要不先去没有门的地方走走？"
+        note = ui("all_shut", payload.lang) or "这个点开着门的地方不多，下面这几个多半已经打烊了。要不先去没有门的地方走走？"
     elif no_good_match:
-        note = "这几个我不太有把握，先给你最近的一个；不合适就说一声。"
+        note = ui("no_good_match", payload.lang) or "这几个我不太有把握，先给你最近的一个；不合适就说一声。"
     else:
         note = None
     return RecommendResponse(

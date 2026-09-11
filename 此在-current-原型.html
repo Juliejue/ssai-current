@@ -110,6 +110,10 @@ button{background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highligh
 .dock .to-records:hover{color:var(--ink-dim);border-color:var(--line-2)}
 
 /* ---------- type ---------- */
+.topright{display:flex;align-items:center;gap:8px;margin-left:auto}
+.langsw{border:1px solid var(--line);background:transparent;color:var(--ink-dim);
+  font:10px var(--mono);letter-spacing:.12em;padding:4px 8px;border-radius:999px;cursor:pointer}
+.langsw:hover{color:var(--ink);border-color:var(--ink-dim)}
 .eyebrow{font:10px var(--mono);letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase;margin:0 0 10px}
 /* 收起来的段落：承诺不能删，但也不必一进页面就糊人一脸。标题沿用 eyebrow 的样子。 */
 .fold{margin:0}
@@ -1408,9 +1412,31 @@ function placeFromRecommendation(rec){
     sig: {rings:2, ringR:56, rays:5, nodeAngle:-3, nodeDist:46, a:"#3D6E80", b:"#7FA3B0"}
   };
 }
+/* 26 个人工地点的英文版（scripts/translate_places.py 生成）。
+   后端在 lang=en 时已经用它出推荐卡；但详情页、记录页是前端直接读本地 PLACES 渲染的，
+   所以这份也得带到前端来，否则切了英文还有一半是中文。 */
+const PLACES_EN = {"fruityshop":{"placeName":"fRUITYSHOP","action":"Ask them to play one for you","category":"record shop · indoors","see":"A wall of vinyl, a good sound system","cost":"Low. You can just listen without buying; staff won't push.","suggestedDuration":"20–60 minutes","transport":"Metro Line 8, Shichahai","matchReason":{"spark":"When you need inspiration, letting someone else pick is easier than searching—ask for one and they'll play it.","fresh":"The stock here isn't the same batch you see on streaming apps. Ten minutes of browsing turns up things you haven't heard.","low":"No talking required, no purchase needed. Standing there listening to one side counts as a win.","_":"Few places let your hands be busy and your ears engaged at the same time."},"placeInsights":[{"t":"Listen without buying","d":"Ask for a track and they play it; the staff know their inventory well. This alone lowers the pressure."},{"t":"Fair prices","d":"A new Aphex Twin record costs 320 here, versus 588 at the shop on Chaoyue's fifth floor."}],"environmentTags":["audition available","no purchase necessary","good sound","jazz/electronic/rock"]},"postpost":{"placeName":"postpost","action":"Grab a book off the shelf and sit down","category":"bookstore · concept store · coffee","see":"Walls of browsable books, full Genelec audio setup, own-brand and curated clothing","cost":"Medium. You can just sit and read, but the curry rice and pour-over are worth ordering","suggestedDuration":"60–120 minutes","transport":"Line 10, Tuanjiehu Station","matchReason":{"spark":"The selection and new arrivals move fast enough that you’ll likely find something in an hour.","tired":"Every corner on the first floor sounds good. Sit down without deciding where to go next; stay until you don’t want to anymore.","fresh":"Books, clothes, curry, and drinks under one roof. A quick walk around fills your senses.","_":"All shelf books are available for borrowing—you can finish them without buying, which is rare for a bookstore."},"placeInsights":[{"t":"Shelf books borrowable","d":"As a bookstore, this matters most. You don’t have to pay upfront to read."},{"t":"Club-grade sound system","d":"Full Genelec setup. Every corner on the first floor offers a good listening experience."}],"environmentTags":["borrowable shelves","great sound","curated selection","easy to linger"]},"fusheng":{"placeName":"Fusheng Records","action":"Browse a round after the movie","category":"record shop · indoors","see":"Shelves packed tight. If the owner is there, you might chat.","cost":"Low. It's fine to browse without buying.","suggestedDuration":"20–40 mins","transport":"Line 4, Xinjiekou Station","matchReason":{"spark":"It's on the same line as the Film Archive and Douzai Coffee. You can string them together in one afternoon without making new decisions.","noisy":"Flipping through records is repetitive. Your hands keep moving, and your thoughts slow down with them.","_":"Places you pass by are easier to start than places you go out of your way for."},"placeInsights":[{"t":"Easy chain","d":"Watch a film at the Archive, get coffee at Douzai, flip through records here—all on one street."},{"t":"The search is the thing","d":"No goal needed. Whatever you find, you find."}],"environmentTags":["next to archive","easy chain","no purchase required"]},"kule":{"placeName":"Kule Records","action":"Squeeze into the rock section to grab a spot","category":"record shop · indoors","see":"Narrow aisles, the rock section is always standing room only","cost":"Low. But it's tight, staying long feels cramped","suggestedDuration":"20–40 minutes","transport":"Metro Line 5, Zhangzizhonglu","matchReason":{"fresh":"Stock is complete, but it's crowded. If you want something new and don't mind being close to people, this is it.","okay":"When you're feeling okay, squeezing in can actually be fun.","_":"Bookstores and record shops are clustered around Dongsi, easy to visit together."},"placeInsights":[{"t":"Really crowded","d":"The rock section often gets blocked by people, so you can't see everything. Good to know beforehand."},{"t":"On the Dongsi line","d":"Sanlian, Paper Sound, and Maybe Books are nearby, making for a good combined trip."}],"environmentTags":["very crowded","full stock","dongsi book street"]},"wansheng":{"placeName":"All Sages Bookstore","action":"Browse the social sciences section until closing","category":"bookshop · indoors","see":"Floor-to-ceiling shelves of social science books, with a coffee area nearby","cost":"Low. You can just look; if you sit in the coffee area, you need to order.","suggestedDuration":"60–150 minutes","transport":"Metro Line 4, Peking University East Gate","matchReason":{"quiet":"The quiet here isn't luck; it's how the space is built.","tired":"You can sit without being watched or asked how long you're staying.","tight":"High shelves and narrow aisles hold your gaze, which often helps you loosen up.","_":"Being alone here requires no explanation to anyone."},"placeInsights":[{"t":"Staying long is normal","d":"Sitting from afternoon until close isn't strange; it's the default here."},{"t":"Pizza next door","d":"Fire Ghost Paro is a short walk away, with buy-one-get-one pizza on Tuesdays."}],"environmentTags":["quiet","easy to sit","academic","no purchase needed"]},"sanlian":{"placeName":"Sanlian Taofen Bookstore","action":"Sit on the steps and finish a book","category":"bookstore · indoors","see":"Steps you can sit on, sunken reading area","cost":"Low. Sitting on the steps to read requires no purchase","suggestedDuration":"40–90 minutes","transport":"Line 5, Zhangzizhonglu Station","matchReason":{"low":"No need to sit up straight. Any posture works on the steps. Two pages is enough.","tired":"The seat here isn't bought with consumption; it's just allowed.","_":"Holding a book gives you a valid reason to be alone."},"placeInsights":[{"t":"Sitting without buying","d":"The steps and sunken area are for sitting, not decoration."},{"t":"On Dongsi book line","d":"Next to Paper Sound, Maybe Books, and Zuoshu; easy to chain into half a day."}],"environmentTags":["sit on floor","no purchase needed","Dongsi line"]},"zhishang":{"placeName":"Zhishang Shengyin","action":"Flip through indie publications you haven't seen before","category":"bookstore · indoors","see":"Indie publications, zines, uncommon prints","cost":"Low. Browsing is free","suggestedDuration":"20–50 mins","transport":"Line 5, Zhangzizhonglu","matchReason":{"spark":"Most items here aren't in algorithmic feeds; you might stumble on something.","fresh":"The upside of indie publishing is a high ratio of unknowns.","_":"Small shops have a different kind of quiet—not empty, just unmonitored."},"placeInsights":[{"t":"High ratio of unknowns","d":"These items rarely show up in your feed."},{"t":"Very small space","d":"It gets cramped when busy; weekday afternoons are better."}],"environmentTags":["indie publishing","small and quiet","dongsi area"]},"zuoshu":{"placeName":"Zuoshu · Longfu Temple","action":"Stand for a long time in front of the feminism shelf","category":"bookstore · coffee · market","see":"Shelves for feminism, non-fiction, and niche philosophy; doubles as a cafe","cost":"Medium. Browsing is free, but sitting down requires ordering a drink","suggestedDuration":"40–90 minutes","transport":"Metro Line 6, Dongsi","matchReason":{"spark":"The selection has a stance—feminism, non-fiction, and lesser-known philosophy are all here.","near":"People around you are reading similar things, but no one will interrupt.","_":"You can read, sit, and have a drink; three things for an afternoon, all in one place."},"placeInsights":[{"t":"Curated with intent","d":"Not arranged by bestseller lists, but carefully chosen by someone."},{"t":"Also a cafe","d":"No need to move when you're tired; this removes one decision."}],"environmentTags":["good curation","coffee available","occasional markets"]},"soloist":{"placeName":"soloist coffee","action":"Watch the sunset hit the grey tiles","category":"coffee · hutong","see":"Grey roof tiles and a hutong outside the window; light in the evening","cost":"Medium. The price of a coffee","suggestedDuration":"40–80 minutes","transport":"Metro Line 2, Qianmen","matchReason":{"low":"Sit and watch the sky change. You don't have to do anything.","tight":"Outside is slow: tiles, the alley, people walking by. Tension might loosen on its own.","empty":"Life happens around you. You don't need to join in, just watch.","_":"Go in the evening. Half the appeal here is the light."},"placeInsights":[{"t":"Light is the main event","d":"Sunset on grey tiles doesn't require your participation."},{"t":"Street isn't polished","d":"It feels lived-in. Walking in and out shifts your pace."}],"environmentTags":["sunset view","lived-in feel","best at dusk"]},"douzai":{"placeName":"Douzai Coffee","action":"Wait for a movie to start","category":"coffee · indoors","see":"Most people are waiting for a film; many sit alone","cost":"Medium. Price of a cup","suggestedDuration":"30–60 mins","transport":"Metro Line 4, Xinjiekou","matchReason":{"quiet":"Most others are here alone too, so sitting by yourself feels normal.","tired":"You have a clear reason to wait, so resting doesn't need an excuse.","_":"It's on the same line as the Film Archive and Fusheng Records, good for a chain."},"placeInsights":[{"t":"Alone is default","d":"Sitting here solo requires no explanation."},{"t":"Valid reason to wait","d":"Waiting for the start time makes staying put feel justified."}],"environmentTags":["next to archive","mostly solo visitors","quiet"]},"beipingjiqi":{"placeName":"Beiping Machine","action":"Sit at the bar alone with a drink","category":"craft beer · indoors","see":"Long bar counter, many solo visitors, frequent menu changes","cost":"Mid-high. Price of one craft beer","suggestedDuration":"40–90 minutes","transport":"Metro Line 8, Gulou Dajie","matchReason":{"empty":"The bar means people are nearby, but no one expects you to talk.","near":"If you want company without the effort of socializing, the bar is the easiest spot.","okay":"When you're doing fine, one drink is enough; no need to stay late.","_":"Sitting at the bar alone here is normal, not something that needs explaining."},"placeInsights":[{"t":"Solo is normal","d":"Half the seats at the bar are taken by people drinking alone."},{"t":"Leave anytime","d":"Finish your drink and pay; there's no pressure to stay until closing."}],"environmentTags":["solo bar seating","no socializing required","Gulou area"]},"liangmahe":{"placeName":"Liangma River","action":"Walk along the river, thinking as you go","category":"riverbank · outdoors","see":"Riverside paths, lights across the water, people walking at dusk","cost":"Free. No spending required","suggestedDuration":"30–90 minutes","transport":"Metro Line 10, Liangmaqiao Station","matchReason":{"noisy":"The water keeps moving; your looping thoughts might struggle to keep up.","low":"This place doesn't ask you to cheer up, just pulls your gaze further than your thoughts.","tight":"As you walk, your breathing lengthens on its own, without you having to adjust it.","empty":"A long line with no choices to make; however far you go counts.","_":"No consumption needed, and no one asks how long you're staying."},"placeInsights":[{"t":"Keep walking","d":"When your body is moving, you don't have to force clarity."},{"t":"Dusk is best","d":"The half-hour when daylight swaps with the lights is worth rushing for."}],"environmentTags":["walkable","waterfront","best at dusk","free"]},"shichahai":{"placeName":"Shichahai","action":"Walk along the water. You don't have to finish the loop.","category":"waterfront · outdoors","see":"Willows on the bank, people rowing boats, the quieter stretch further along","cost":"Free. Unless you want a drink to sit with.","suggestedDuration":"40–120 mins","transport":"Line 8, Shichahai Station","matchReason":{"noisy":"Walking by the water is a mindless motion. Go as far as you feel like.","empty":"Life keeps happening on the banks. You don't need to join in, just pass through.","low":"If you get tired or hot, there are shops right at the subway exit. Sit down, rest, then keep going.","_":"Following the water from Xihai is the most comfortable part of this route."},"placeInsights":[{"t":"Stop anytime","d":"No need to complete the full circle; turn back when you're done."},{"t":"Quieter to the north","d":"It gets calmer closer to the Xihai side."}],"environmentTags":["walkable","waterfront","free","long walk"]},"beihai":{"placeName":"Beihai Park","action":"Sit by the shore and look at the White Pagoda","category":"park · outdoors","see":"Water, the White Pagoda, benches; people skating on the ice in winter","cost":"Low. Ticket is a few yuan","suggestedDuration":"60–120 minutes","transport":"Metro Line 6, Beihai North Station","matchReason":{"tight":"The water and trees don't ask anything of you.","tired":"There are benches. Just sit down; no need to keep walking.","low":"Your gaze can travel far, making thoughts feel smaller.","_":"It's next to Shichahai, so you can keep walking."},"placeInsights":[{"t":"Places to sit","d":"Unlike some parks where you have to keep moving, here you can stop."},{"t":"Long sightlines","d":"The distance takes over some of your attention for you."}],"environmentTags":["has water","has benches","good for sitting long"]},"tiantan":{"placeName":"Temple of Heaven","action":"Walk to the far end of the cypress grove","category":"park · outdoors","see":"Rows of old cypresses; few people if you go deeper","cost":"Low. Ticket is a few yuan","suggestedDuration":"60–150 minutes","transport":"Line 5, Temple of Heaven East Gate","matchReason":{"quiet":"Head northwest and the crowd thins out; quiet comes from distance.","tight":"The air in the cypress grove is cool; your breathing slows down on its own.","noisy":"It’s big enough to walk until tired, without needing to make decisions halfway.","_":"Beautiful at dusk, when there are the fewest people."},"placeInsights":[{"t":"Quiet takes walking","d":"The main path is always busy; ten minutes inward feels like another world."},{"t":"Trees are old","d":"Rows of cypresses make looking up feel natural here."}],"environmentTags":["large grove","long walks","crowds thin out"]},"langyuan":{"placeName":"Langyuan","action":"Wander the grounds without a destination","category":"campus · semi-outdoor","see":"Converted old factories, bookstores, occasional exhibitions and markets","cost":"Low. Browsing is free","suggestedDuration":"40–90 minutes","transport":"Line 1, Dawanglu Station","matchReason":{"spark":"Exhibitions and markets pop up in these factory spaces; see what you find.","fresh":"The content changes each time, so it never feels stale.","okay":"Walk around here, then head to Liangma River for a complete evening.","_":"No tickets, no reservations. Just walk in."},"placeInsights":[{"t":"Content rotates","d":"Exhibitions and markets take turns, keeping the place fresh."},{"t":"Easy to continue","d":"From here, walking toward Liangma River is a smooth route."}],"environmentTags":["free entry","exhibitions","not crowded","near Liangma River"]},"yangmeizhu":{"placeName":"Yangmeizhu Xiejie","action":"Walk a hutong that hasn't been polished up yet","category":"hutong · outdoors","see":"Courtyards where people live, a few small shops, grey bricks and wires","cost":"Free. Walking costs nothing","suggestedDuration":"30–60 mins","transport":"Line 2, Qianmen Station","matchReason":{"empty":"People actually live here; life happens alongside you, just pass through.","fresh":"Unlike the renovated commercial streets, this feels denser and real.","_":"A street you can walk slowly to the end, where there's a cafe to sit."},"placeInsights":[{"t":"Not yet fixed up","d":"It has a raw, everyday feel—something rare in Beijing now."},{"t":"Somewhere to sit","d":"soloist is on this line, good for when your feet get tired."}],"environmentTags":["everyday feel","not crowded","free","has cafes"]},"wudaoying":{"placeName":"Guozijian · Wudaoying","action":"Walk from the ginkgo street to Wudaoying","category":"hutong · outdoors","see":"Old trees at Guozijian, small shops lining Wudaoying","cost":"Low. Walking is free, sitting down means ordering","suggestedDuration":"40–90 mins","transport":"Line 2, Yonghegong Station","matchReason":{"fresh":"The density shifts between the two streets—one quiet, one busy—so a walk switches your state twice.","okay":"The street isn't long; you finish it just right without getting tired.","_":"It's next to the Gulou area, so you can link them into one route."},"placeInsights":[{"t":"Two rhythms","d":"The Guozijian side has trees and quiet; the Wudaoying side has shops and people."},{"t":"Continue to Gulou","d":"It's not far from here, so you can connect both areas in one go."}],"environmentTags":["old trees","many small shops","good for walking"]},"ziliaoguan":{"placeName":"China Film Archive","action":"Buy a matinee ticket, turn off your phone","category":"cinema · indoors","see":"Screenings don't follow mainstream chains; most people come alone","cost":"Low. Tickets are cheap","suggestedDuration":"120–180 minutes","transport":"Metro Line 4, Xinjiekou","matchReason":{"noisy":"For two hours you don't have to make any decisions—that's the real function of this place.","tired":"Once the lights go down, you don't have to keep up any expression.","low":"No need to talk to anyone, or pretend you're doing something important.","_":"After the film, keep walking: Yunnan Kitchen, Fusheng Records, and Douzai Coffee are nearby."},"placeInsights":[{"t":"Two hours no choices","d":"When the lights dim, you hand over the decision-making."},{"t":"Start of a route","d":"Walk east from here and you can fill the whole day."}],"environmentTags":["good curation","mostly solo visitors","no decisions for two hours"]},"yunnanxiaochu":{"placeName":"Yunnan Xiaochu","action":"Get a bowl of stinky tofu rice noodles, done in twenty minutes","category":"eat · indoors","see":"Tiny spot, packed at lunch","cost":"Low. Price of one noodle bowl","suggestedDuration":"20–40 mins","transport":"Opposite the Film Archive","matchReason":{"tired":"Hot food helps more than thinking it through; you’re done in twenty.","empty":"Small room, lots of people and steam. You don’t have to participate.","_":"Right across from the Film Archive. No need to make another 'where to eat' decision after the movie."},"placeInsights":[{"t":"Low decision cost","d":"It’s right there, no need to choose again."},{"t":"Crowded is normal","d":"Full at lunch; go off-peak if you’re in a rush."}],"environmentTags":["cheap","fast","opposite archive"]},"huogui":{"placeName":"Huogui paro","action":"Go on a Tuesday for the buy-one-get-one pizza deal","category":"eat · indoors","see":"Pizza oven, busier on Tuesdays","cost":"Mid. Buy-one-get-one on Tuesdays, regular price otherwise","suggestedDuration":"40–80 mins","transport":"Metro Line 4, Peking Univ East Gate","matchReason":{"near":"Better value for two people with the Tuesday deal.","okay":"A short walk from Wansheng Bookstore, no extra planning needed.","_":"Having a specific reason to go out sometimes matters more than the reason itself."},"placeInsights":[{"t":"Tuesday has a hook","d":"Buy-one-get-one is a reason to leave the house."},{"t":"Next to Wansheng","d":"Eat after browsing books to complete the afternoon."}],"environmentTags":["Tuesday BOGO","Near Wansheng","Good for pairs"]},"niaozhouli":{"placeName":"Niaozhouli","action":"Eat yakitori at Liangmaqiao after dusk","category":"food · indoors","see":"Counter seats face the grill; sitting alone is normal","cost":"Mid-high. Japanese cuisine prices","suggestedDuration":"60–90 minutes","transport":"Line 10, Liangmaqiao Station","matchReason":{"near":"The counter faces the grill, so you have something to watch without needing to talk.","okay":"Finish a walk along the Liangma River and eat here; it makes for a complete evening.","_":"Sitting alone at the counter is common here, no explanation needed."},"placeInsights":[{"t":"Something to watch","d":"The grill is right in front of you, so eating alone feels natural."},{"t":"After the river walk","d":"Walking first then eating feels better than the other way around."}],"environmentTags":["counter seating","after river walk","solo friendly"]},"qmex":{"placeName":"qmex","action":"Stand in the courtyard and drink, leave whenever","category":"bar · semi-outdoor","see":"People standing in the yard, music not too loud","cost":"Mid-high. Drink prices.","suggestedDuration":"60–120 minutes","transport":"Subway Line 10 Tuanjiehu","matchReason":{"fresh":"The courtyard is busy; staying a while shifts your state.","okay":"Standing to drink means you can leave anytime, no getting stuck.","near":"Surrounded by people, but you can just stand there without talking.","_":"It only works at night. Daytime is a different story."},"placeInsights":[{"t":"Easy exit","d":"Standing to drink doesn't require ending a session; you just walk away."},{"t":"Really crowded","d":"Not suitable if you want quiet; know this beforehand."}],"environmentTags":["semi-outdoor","easy exit","night only","social"]},"lasocial":{"placeName":"la social","action":"Grab a bite at the Japanese place next door first","category":"bar · indoors","see":"Packed, with a Japanese restaurant right next door for a pre-drink meal","cost":"High. Drinks plus dinner","suggestedDuration":"90–150 mins","transport":"Line 10, Tuanjiehu","matchReason":{"fresh":"Fastest shift if you want a change and have the energy to handle people.","okay":"Only come when you're feeling okay. It drains more when you're not.","_":"There's a Japanese spot next door—eat first before going in. That's how locals do it."},"placeInsights":[{"t":"Takes effort","d":"The barrier here isn't money, it's the energy to deal with people."},{"t":"Eat then drink","d":"Pre-drinking at the Japanese place next door beats entering on an empty stomach."}],"environmentTags":["very lively","social effort","next-door predrink"]},"school":{"placeName":"School","action":"Stand at the back and listen to the whole set","category":"livehouse · indoors","see":"Small venue, packed, loud sound","cost":"Medium. Ticket plus drinks","suggestedDuration":"90–180 minutes","transport":"Subway Line 8, Gulou Dajie","matchReason":{"fresh":"The live sound drowns out everything else; that is its most practical function.","spark":"The lineup isn't sorted by popularity, so stumbling upon unknown bands is common.","_":"You can stand at the very back and still hear the entire show without pushing forward."},"placeInsights":[{"t":"Sound drowns thoughts","d":"When the volume is high enough, your mind stops queuing up worries."},{"t":"Back row works","d":"No need to crowd the front; the last row hears it all just fine."}],"environmentTags":["live music","loud","standing room","Gulou area"]},"zhaodai":{"placeName":"zhaodai","action":"Dance until your brain shuts off","category":"club · indoors","see":"Gets busy late, great sound system","cost":"High. Ticket plus drinks","suggestedDuration":"120–240 minutes","transport":"Line 10, Tuanjiehu Station","matchReason":{"fresh":"If you want a total change of scene, this is the furthest end of the spectrum.","okay":"You need energy to spare. If you're tired, this will drain you twice as fast.","_":"Move your body first, let your mind stop later—it works better in that order."},"placeInsights":[{"t":"Body moves first","d":"You don't need to figure it out; just start moving."},{"t":"Very draining","d":"Count how you feel the next day as part of the cost."}],"environmentTags":["late night","electronic music","physical"]}};
+function localized(p){
+  if (!p || currentLang() !== "en") return p;
+  const en = PLACES_EN[p.placeId];
+  if (!en) return p;
+  // 只覆盖译过的字段，其余保持原样——缺一句比错一句好。
+  return Object.assign({}, p, {
+    placeName: en.placeName || p.placeName,
+    action: en.action || p.action,
+    category: en.category || p.category,
+    see: en.see || p.see,
+    cost: en.cost || p.cost,
+    transport: en.transport || p.transport,
+    suggestedDuration: en.suggestedDuration || p.suggestedDuration,
+    matchReason: en.matchReason || p.matchReason,
+    placeInsights: en.placeInsights || p.placeInsights,
+    environmentTags: en.environmentTags || p.environmentTags
+  });
+}
 function placeById(id){
   const known = PLACES.find(p => p.placeId === id);
-  if (known) return known;
+  if (known) return localized(known);
   const made = placeFromRecommendation(state.aiRecommendations[id]);
   return made || PLACES[0];
 }
@@ -1989,11 +2015,20 @@ window.addEventListener("hashchange", () => {
    屏幕渲染：每个 render* 返回 phone 内部完整 HTML
    ============================================================ */
 
+/* 语言开关放在顶栏右上角，和「总览」并排——评委第一眼就要找得到。 */
+function langToggle(){
+  const en = currentLang() === "en";
+  return '<button class="langsw" data-lang="' + (en ? "zh" : "en") + '" ' +
+         'aria-label="' + (en ? "切换到中文" : "Switch to English") + '">' +
+         (en ? "中" : "EN") + '</button>';
+}
+
 function topbar(title, kicker, backTo){
   return '<div class="top"><div class="lead">' +
     (backTo ? '<button class="back" data-go="' + backTo + '" aria-label="返回">←</button>' : '') +
     '<div><div class="k">' + kicker + '</div></div><h2>' + title + '</h2></div>' +
-    '<button class="k" data-go="#/compare" style="letter-spacing:.14em">总览</button></div>';
+    '<div class="topright">' + langToggle() +
+    '<button class="k" data-go="#/compare" style="letter-spacing:.14em">总览</button></div></div>';
 }
 
 /* --- 1. 情绪 --- */
@@ -2898,7 +2933,8 @@ function reachBlockedText(reason){
 function renderTalk(){
   const locationMode = CurrentAI.getLocationMode();
   let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div>' +
-          '<div style="display:flex;gap:14px"><button class="k" data-go="#/settings" style="letter-spacing:.14em">设置</button>' +
+          '<div style="display:flex;gap:10px;align-items:center">' + langToggle() +
+          '<button class="k" data-go="#/settings" style="letter-spacing:.14em">设置</button>' +
           '<button class="k" data-go="#/records" style="letter-spacing:.14em">记录</button></div></div>';
   h += '<div class="talk">';
   h += '<div class="zai">' + cloudSVG("withyou") + '</div>';
@@ -3161,6 +3197,291 @@ function sampleLine(rec){
   return "来自 " + rec.sample_size + " 份真实到访反馈的匿名汇总。它描述已经发生的记录，不是疗效承诺。";
 }
 
+/* ============================================================
+   英文版（FR：国际评审看得懂才评得了）
+
+   做法：不改任何渲染函数，在 render() 之后走一遍 DOM 把文案换掉。
+   理由——原型里有 1000+ 条中文散在模板字符串里，逐个包一层 T() 要动到
+   几乎每一行渲染代码，那种改法在比赛前一晚风险太大。
+   DOM 这一层是外挂的：翻译出问题，把开关关掉就回到完好的中文版。
+
+   用户真正读到的内容（状态、理由、为什么是这里、代价）是后端生成的，
+   那部分由 lang 参数在服务端就出英文，不在这里翻。
+   这里只管界面骨架。
+   ============================================================ */
+const I18N_KEY = "current.lang.v1";
+function currentLang(){
+  try { return localStorage.getItem(I18N_KEY) === "en" ? "en" : "zh"; } catch(e){ return "zh"; }
+}
+function setLang(lang){
+  try { localStorage.setItem(I18N_KEY, lang); } catch(e){}
+  document.documentElement.setAttribute("lang", lang === "en" ? "en" : "zh-CN");
+}
+
+/* 整段精确匹配优先。短词（「约」「你」「分钟」）只在整个文本节点就是它时才换，
+   否则会把别的句子切碎。 */
+const EN = {
+  "此在 · Current": "Current",
+  "总览": "Overview", "设置": "Settings", "记录": "Records", "推荐": "Picks",
+  "小在": "Xiaozai", "代价": "What it asks", "到达": "Getting there",
+  "营业": "Hours", "距离": "Distance", "待多久": "How long", "建议停留": "Suggested stay",
+  "匿名": "anonymous", "私密": "private", "取消": "Cancel", "约": "about",
+  "分钟": "min", "步行约": "about a", "条记录": " records", "瀑布流": "the grid",
+  "地点详情": "Place", "我听到的": "What I heard", "此刻给你一个": "One for right now",
+  "你的轨迹": "Your trail", "我们的此在": "Ours", "卡片推荐": "cards",
+  "第一步 · 只确认一次": "Step 1 · one check", "第二步 · 推荐": "Step 2 · the pick",
+  "第三步 · 你刚离开": "Step 3 · you just left", "依据 ·": "based on ·",
+  "出发前": "before you go", "本次停留": "you stayed", "· 停留": " · stayed",
+  "· 围栏内": " · inside the fence", "出发 ·": "left ·", "分钟 ·": " min ·",
+  "刚刚保存": "just saved", "回到开头": "Back to start", "先停一下": "Hold on",
+  "先不去": "Not now", "取消": "Cancel",
+
+  "现在，说点什么都行。": "Say anything. Right now.",
+  "不用组织语言，也不用先想清楚要去哪。": "You don't have to phrase it well, or know where you want to go.",
+  "你说，我来找。": "You talk. I'll look.",
+  "不想说话，我打字": "I'd rather type",
+  "按一下开始说 · 再按一下结束": "Tap to start · tap again to stop",
+  "也可以点上面这个改用语音": "Or tap above to use your voice instead",
+  "我不想说，自己挑": "I'd rather just browse",
+  "⌖ 我在北京，用当前位置算路": "⌖ I'm in Beijing — use my location",
+  "不在北京？体验北京路线": "Not in Beijing? Try it from Beijing",
+  "✓ 体验北京 · 以东四为起点": "✓ Beijing demo · starting from Dongsi",
+  "✓ 北京真实定位 · 高德算路": "✓ Live location · routed by Amap",
+  "语音不保存 · 原话不上传 · 位置不入库": "Voice isn't kept · your words aren't uploaded · your location isn't stored",
+  "只用来找一个此刻能接住你的地方": "Used only to find somewhere that can hold you right now",
+  "说完了，替我看看": "That's it — take a look",
+  "比如：今天脑子很乱，不想见人，也不想花很多钱……": "e.g. my head's noisy today, I don't want to see anyone, and I don't want to spend much…",
+
+  "我是这么听出来的": "How I heard it",
+  "猜错了不用客气。改一下比忍着强。": "Say so if I got it wrong. Correcting me beats putting up with it.",
+  "只问这一句。选完我直接去找地方，不会再问第二个问题。": "Just this one question. Then I go find somewhere — no second question.",
+  "不太对，我换一个说法": "Not quite — let me say it differently",
+  "那是我猜错了。指出哪一环不对，我立刻重新找。": "Then I got it wrong. Point at what's off and I'll look again.",
+  "哪一环不对": "What's off",
+  "一步就能改": "one tap to change it",
+  "改哪一环都算数，改完还可以再改。": "Change any part. You can change it again after that.",
+  "说错、改口、再改一次，都算数。": "Misspeak, take it back, change it again — all of it counts.",
+  "就按这个，帮我找": "Go with this",
+  "这一环我已经按你说的设过了，没有别的可改。换一环看看。": "I already set this from what you said — nothing else to change here. Try another one.",
+  "这几个都不想去，换一批": "None of these — show me others",
+  "刚才那些我记下来，这一轮不会再给你。状态和需求都保持不变。": "Noted. You won't see those again this round. Your state and needs stay as they are.",
+
+  "带我去": "Take me there", "带我去 · 选地图": "Take me there · pick a map",
+  "先看看细节": "See details first", "都不合适，换一批": "None of these — show me others",
+  "要是这个不对，还有": "If this one's wrong, there's also",
+  "再给我看一个": "Show me another",
+  "为什么此刻推荐给你": "Why here, right now",
+  "小在眼中的这里": "What Xiaozai notices here",
+  "一手描述": "First-hand", "档案来源，不是到访反馈": "Profile source, not visit feedback",
+  "来自真人的一手经验，用来生成这个地方的档案。不带分数，也不进汇总。":
+    "A real person's first-hand account, used to build this place's profile. No score, never counted in the aggregate.",
+  "样本还少：这里还没有攒够真实到访反馈，所以我不给平均分，也不承诺你去了会变好。":
+    "Thin sample: not enough real visits here yet, so I won't give an average, and I won't promise you'll feel better.",
+  "匿名汇总": "Anonymous aggregate", "只聚合，不展示单条": "Aggregate only, never a single entry",
+  "怎么算的 →": "how it's counted →", "匿名汇总是怎么算的 →": "how the aggregate is counted →",
+  "条核验过的到访，这里才会出现汇总": " verified visits before an aggregate shows up here",
+  "营业时间不确定": "Opening hours unclear",
+  "这个点它多半已经关门了。营业时间还没人工核对过，所以我不敢说死——要去的话先打个电话。":
+    "It's probably closed by now. Nobody has checked these hours by hand, so I won't state it as fact — call ahead if you're going.",
+  "可能关门": "may be closed",
+  "（未开启定位，使用原型估算）": " (location off — prototype estimate)",
+  "（高德暂未返回路线，使用原型估算）": " (no route from Amap — prototype estimate)",
+  "高德实测": "measured by Amap", "高德实测 · 从北京东四起算": "measured by Amap · from Dongsi, Beijing",
+  "用哪个地图带你去？": "Which map should take you?",
+  "· 坐标已按各家的坐标系换算过，不会偏": " · coordinates converted for each provider, so it won't be off",
+  "这个地点我还没核对过坐标，": "I haven't checked this place's coordinates yet, ",
+  "所以不给导航——怕把你带到同名的另一家去。到了自己按一下「我到了」。":
+    "so I won't hand you navigation — I'd rather not send you to a different place with the same name. Tap \"I'm here\" when you arrive.",
+  "这个地点还没核对坐标，到了按一下": "coordinates not checked — tap when you arrive",
+
+  "我到了": "I'm here", "我离开了": "I've left",
+  "到了我自己知道，不用按": "I'll know when I'm there — no need to tap",
+  "到了我不打扰。等你走了，再问你三十秒。": "I won't bother you there. When you leave, I'll ask for thirty seconds.",
+  "你到了之后我不打扰。等你走了，再问你三十秒。": "I won't bother you once you're there. When you leave, I'll ask for thirty seconds.",
+  "花 30 秒，看看这个地方有没有接住你。不想现在说也可以。":
+    "Thirty seconds — did this place hold you? You don't have to answer now.",
+  "我不评价这个地方。我只想知道它对": "I'm not rating this place. I only want to know what it did for",
+  "做了什么。": ".",
+  "这些都是身体上的感觉，不是病名。": "These are body sensations, not names for conditions.",
+  "到访反馈": "Visit feedback", "记录现在": "Save it now", "稍后提醒": "Remind me later",
+  "先别提，一周后再说": "Leave it — ask me in a week",
+  "好，先去过你的生活。这条会留在记录里等你。": "Go live your life. This will wait for you in your records.",
+  "匿名贡献": "Contribute anonymously", "进入了地点汇总": "counted in the place aggregate",
+  "只算你的记录": "yours only", "长期记录": "Long-term record", "私密记录": "Private record",
+  "只有你能看到": "Only you can see this",
+  "下次推荐我会怎么改": "What I'll do differently next time",
+  "你去过的地方": "Places you've been", "情绪空间轨迹": "Your trail",
+  "攒成了一片。": "adding up.", "一次轻轻的回望": "a gentle look back",
+  "这个筛选下还没有记录。": "No records under this filter yet.",
+  "换一个看看。": "Try another.",
+  "你的平均变化": "Your average change", "到访前后平均变化": "Average change, before and after",
+
+  "条核验过的反馈 · 最常被勾到的是「": " verified responses · most often picked: 「",
+  "只用你打过的分说话": "Speaks only from scores you gave",
+  "这些计算都在你这台设备上完成，没有上传。攒到 5 条以上，我才会用它覆盖原来的估计值。":
+    "All of this is computed on your device and never uploaded. Only past five entries will I let it override the original estimate.",
+  "份真实到访反馈的匿名汇总。它描述已经发生的记录，不是疗效承诺。":
+    " real visits, aggregated anonymously. It describes what happened, not a promised effect.",
+  "这些是你的。要不要给别人看，每一条你都单独决定过。":
+    "These are yours. Whether anyone else sees them, you decided one by one.",
+  "前三条为原型示例记录。所有内容只存在本页运行时内存中，刷新即清空：没有后端、没有账号、没有定位。":
+    "The first three are prototype samples. Everything lives in this page's memory and clears on refresh: no backend, no account, no location.",
+
+  "听起来你现在": "It sounds like right now you're",
+  "非常难受。": "having a really hard time.",
+  "这一步我不给你找地方了。不是因为你说错了什么，是因为现在更要紧的是有人在你身边。":
+    "I'm not going to find you a place this time. Not because you said anything wrong — because what matters more right now is having someone with you.",
+  "可以先联系": "You could reach",
+  "身边一个你信得过的人": "someone you trust",
+  "北京心理援助热线 010-82951332": "Beijing crisis line 010-82951332",
+  "全国 24 小时 400-161-9995": "National 24h line 400-161-9995",
+  "我能做的只是找个地方——真难受的时候，找个人说说比找个地方管用。":
+    "All I can do is find a place. When it's really bad, talking to a person helps more than a place does.",
+  "我不做诊断，也不替代任何专业帮助。你随时可以回来。":
+    "I don't diagnose, and I don't replace professional help. You can come back any time.",
+
+  "今天你回来好几次了。": "You've come back several times today.",
+  "要不我先别提这件事？你想起来的时候再回来。": "Want me to drop it for now? Come back when it occurs to you.",
+  "最近几次我给你的地方，你都没有去。": "You haven't gone to the last few places I suggested.",
+  "可能是我没找对，也可能是现在就是不想出门——两种都没关系，不用解释。":
+    "Maybe I got it wrong, maybe you just don't want to go out right now. Either is fine. No explanation needed.",
+  "不出门不是问题。如果最近一直提不起劲，找个信得过的人说说，比找个地方更管用。":
+    "Staying in isn't a problem. If nothing has felt worth it for a while, talking to someone you trust helps more than any place I could find.",
+  "我不会因为你没去就少给你什么。": "I won't give you less because you didn't go.",
+  "回到开头": "Back to start",
+  "那次没接住": " didn't hold you that time", "出发前是": "You left feeling ",
+  "，离开时": ", and came back at ", "。这条会让同类空间在": ". This pushes similar places down in ",
+  "的推荐里往后退。": "your picks.",
+  "你勾过的每一条都只出现过一次。再记几次，我才能说清是什么在稳定地起作用。":
+    "Everything you've ticked has come up exactly once. A few more entries and I can say what's actually working.",
+  "种因素各出现 1 次": " factors, one occurrence each",
+  "接住你的时候，多半有": "When something holds you, it usually has ",
+  "在 2 次变好的记录里出现过。这会让带这个属性的空间往前排。":
+    "Showed up in 2 entries where things improved. This moves places with that quality up.",
+  "出现时，你多半没被接住": " shows up, it usually didn't hold you",
+  "我会在推荐里避开同类。样本还很少，说错了就点「不太对」。":
+    "I'll steer away from similar places. The sample is still small — tap \"not quite\" if I'm wrong.",
+  "还没有反复出现的因素": "No factor has shown up more than once yet",
+  "绕到银锭桥就不想走了，坐了会儿。": "Got as far as Yinding Bridge and didn't want to walk further. Sat a while.",
+  "人太多了，没看进去。": "Too many people. Couldn't take anything in.",
+  "明显轻了": "noticeably lighter", "松了一点": "loosened a little", "还是有点沉": "still heavy",
+  "能一直走": "room to walk", "有水": "water", "坐得住": "somewhere to sit", "不必消费": "no need to buy",
+  "太挤": "too crowded",
+  "刚从": "Just back from ", "回来吗？": "?",
+  "我不评价这个地方。我只想知道它对": "I'm not rating this place. I only want to know what it did for ",
+  "我拿什么来猜": "What I use to guess", "你此刻需要什么": "what you need right now",
+  "一次轻轻的回望": "a gentle look back",
+
+  "授权与打扰": "Permissions", "你说了算": "Your call",
+  "信号分层 · 逐项可关": "Layered signals · each one optional",
+  "三层信号，一层比一层贴近你。默认只开最外面那层。": "Three layers, each closer to you than the last. Only the outermost is on by default.",
+  "每一层都写清楚：拿它做什么、存什么、不存什么。": "Each one spells out what it's for, what's kept, and what isn't.",
+  "默认层": "Default layer", "手机层": "Phone layer", "身体层": "Body layer",
+  "时间，和你自己说的话": "The time, and what you tell me",
+  "没有这一层产品就不成立，所以它不能关。你不说话我就不猜。": "Without this there's no product, so it can't be turned off. If you say nothing, I guess nothing.",
+  "存：结构化之后的需求（情绪档、诉求、预算档）": "Kept: your need, structured (state, ask, budget band)",
+  "不存：你说的原话、语音本身": "Not kept: your exact words, or the audio",
+  "当前位置": "Your location",
+  "用来算真实路程，以及到了之后无感核验到访。判定在你手机上完成。": "Used for real travel time, and to confirm a visit without you doing anything. The check runs on your phone.",
+  "存：到访结论（进没进围栏、待了多久）": "Kept: the conclusion (inside the fence or not, how long)",
+  "不存：你的经纬度，一次都不上传": "Not kept: your coordinates. They are never uploaded.",
+  "心率变化（HRV）": "Heart rate variability (HRV)",
+  "只用来校准——比如「要不要换个更安静、人更少的地方」。不做诊断，不下结论。": "Only for calibration — e.g. whether to find somewhere quieter. No diagnosis, no conclusions.",
+  "还没做": "not built yet",
+  "接入后会存：到访前后的匿名差值 + 空间 ID + 时段": "Would keep: an anonymous before/after delta + place ID + time of day",
+  "永远不存：原始连续生理流、人脸": "Never kept: raw physiological streams, or faces",
+  "打扰": "Interruptions", "让小在主动来找我": "Let Xiaozai reach out",
+  "现在在静默时段里，我不说话。": "Quiet hours right now — I won't say anything.",
+  "一天最多几次": "How many times a day", "静默时段": "Quiet hours",
+  "看一次主动触达长什么样": "See what a check-in looks like", "演示用。": "Demo only.",
+  "试一次": "Try it", "这台设备上存了什么": "What's stored on this device",
+  "行程状态 无": "Trip: none", "清空这台设备上的全部记录": "Erase everything on this device",
+  "不会变的三条": "Three things that won't change",
+  "不诊断：不给情绪贴临床标签，生理数据只做校准": "No diagnosing: no clinical labels on feelings; body data only calibrates",
+  "不评判：情绪变差不叫失败，只叫这次没接住": "No judging: feeling worse isn't failure, it just means this one didn't hold you",
+  "不侵入社交：没有昵称、人脸、主页、私信、关注": "No social layer: no handles, faces, profiles, DMs, or follows",
+  "不做人脸识别，不采集原始生理流": "No face recognition, no raw physiological capture",
+  "这一页上的每一项，关了就是关了。": "Anything you switch off on this page stays off.",
+
+  "样本怎么算": "How the sample works", "只聚合 · 不展示单条": "Aggregate only · never a single entry",
+  "别人去了怎么样，": "How it went for others", "只以汇总的形式出现。": "only ever appears as an aggregate.",
+  "一条反馈要满足什么才算数": "What makes a response count",
+  "你得真的去过": "You have to have actually gone",
+  "一个地点攒够 5 条才出汇总": "A place needs five before an aggregate appears",
+  "奖励和情绪变化脱钩": "Rewards are decoupled from whether you felt better",
+  "现在攒到哪一步": "Where it stands now",
+  "还没有任何一个空间攒到反馈。": "No place has enough responses yet.",
+  "第一条可以是你的。": "The first one could be yours.",
+  "全部": "All", "让我安静下来": "Calmed me", "给我能量": "Gave me energy", "没有帮助": "Didn't help",
+  "还没有反复出现的因素": "No factor has shown up more than once yet",
+  "去过 3 个空间，室内偏多；平均变化": "3 places so far, mostly indoors; average change"
+};
+
+/* 长串优先替换，避免短词先把长句里的字吃掉。 */
+const EN_KEYS = Object.keys(EN).sort((a, b) => b.length - a.length);
+const EN_SUBSTRING_KEYS = EN_KEYS.filter(k => k.length >= 4);
+
+/* 短到不能当通用替换、但确实会夹在拼出来的句子里的几个碎片。
+   只在「这个节点已经有英文了」的时候才动它——那说明这句是拼出来的，
+   剩下的中文是漏网的碎片，不是一整句还没翻的中文。 */
+const EN_FRAGMENTS = [
+  ["刚从", "Just back from "], ["回来吗", ""],
+  ["你做了什么", "you"], ["它对", "it did for "],
+  ["分钟", " min"], ["约 ", "about "], ["条记录", " records"],
+  ["你", "you"]
+];
+
+/* 情绪名来自 MOODS，不在地点数据里，得单独给一份。 */
+const MOODS_EN = {
+  low: "running on empty", quiet: "need it quiet", noisy: "can't stop thinking",
+  spark: "want something new", tired: "tired but wired", empty: "feeling hollow",
+  tight: "wound tight", near: "want someone nearby", fresh: "need a change of scene",
+  okay: "doing okay"
+};
+
+function translateNode(root){
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const raw = node.nodeValue;
+    if (!raw || !/[一-鿿]/.test(raw)) return;
+    const exact = EN[raw.trim()];
+    if (exact !== undefined){
+      node.nodeValue = raw.replace(raw.trim(), exact);
+      return;
+    }
+    let out = raw;
+    for (const key of EN_SUBSTRING_KEYS){
+      if (out.indexOf(key) >= 0) out = out.split(key).join(EN[key]);
+    }
+    for (const m of MOODS){
+      if (out.indexOf(m.name) >= 0 && MOODS_EN[m.id]) out = out.split(m.name).join(MOODS_EN[m.id]);
+    }
+    if (/[A-Za-z]/.test(out)){
+      for (const pair of EN_FRAGMENTS){
+        if (out.indexOf(pair[0]) >= 0) out = out.split(pair[0]).join(pair[1]);
+      }
+    }
+    if (out !== raw) node.nodeValue = out;
+  });
+  // placeholder / aria-label 不是文本节点，得单独处理
+  root.querySelectorAll("[placeholder]").forEach(el => {
+    const t = EN[el.getAttribute("placeholder")];
+    if (t) el.setAttribute("placeholder", t);
+  });
+  root.querySelectorAll("[aria-label]").forEach(el => {
+    const t = EN[el.getAttribute("aria-label")];
+    if (t) el.setAttribute("aria-label", t);
+  });
+}
+
+function applyLang(root){
+  if (currentLang() !== "en") return;
+  try { translateNode(root); }
+  catch(e){ /* 翻译是外挂层，出问题就保持中文，绝不让它弄坏页面 */ }
+}
+
 function render(){
   const root = document.getElementById("root");
   const r = state.route;
@@ -3202,6 +3523,7 @@ function render(){
     '<p class="stage-note">390 × 844 · AI 后端试运行 · <a href="#/compare" data-go="#/compare">会议总览页</a></p></div>';
 
   if (isCompare) scaleMinis();
+  applyLang(root);
   syncPresenceWatch();
   bind();
 }
@@ -3231,6 +3553,13 @@ function bind(){
       }
     }
   }
+
+  root.querySelectorAll("[data-lang]").forEach(el => el.onclick = () => {
+    setLang(el.dataset.lang);
+    // 语言变了，后端生成的那部分内容也得重新取一次——它是在服务端出的英文。
+    if (state.read && state.read.state) runRecommend(state.read.state, null);
+    render();
+  });
 
   root.querySelectorAll("[data-go]").forEach(el => el.onclick = e => {
     e.preventDefault();

@@ -10,6 +10,8 @@ from functools import lru_cache
 from pathlib import Path
 
 from .discovery import discover, warm as warm_search
+from .i18n import (AVOID_LABELS_EN, LOW_TAG_LABELS_EN, NEED_LABELS_EN, RELIEF_LABELS_EN,
+                   STATE_LABELS_EN, TAG_LABELS_EN, ui)
 from .narrate import narrate_quietly
 from .map_provider import AmapClient, MapProviderError, WalkingRoute, map_links, navigation_url
 from .opening_hours import open_state
@@ -34,6 +36,22 @@ def load_catalog() -> dict:
             if place["placeId"] in overrides:
                 place.update(overrides[place["placeId"]])
     return catalog
+
+
+EN_PATH = Path(__file__).parent / "data" / "places.en.json"
+
+
+@lru_cache(maxsize=1)
+def english_places() -> dict[str, dict]:
+    """26 个人工地点的英文版（scripts/translate_places.py 生成，人可以再过一遍）。
+
+    现场翻会多一次模型往返，而这些文案是产品的门面，值得先译好放在这儿，
+    而不是每次请求重新掷一次骰子。译不到的字段就留中文——缺一句比错一句好。
+    """
+    if not EN_PATH.exists():
+        return {}
+    with EN_PATH.open(encoding="utf-8") as handle:
+        return json.load(handle).get("places", {})
 
 
 def _target_for(state: NeedState, catalog: dict) -> tuple[dict[str, float], dict[str, int]]:
@@ -198,7 +216,7 @@ LOW_TAG_LABELS: dict[str, str] = {
 }
 
 
-def _reason_chain(place: dict, state: NeedState, catalog: dict) -> list[str]:
+def _reason_chain(place: dict, state: NeedState, catalog: dict, lang: str = "zh") -> list[str]:
     """两行：你说了什么 → 这里是什么。每一行都指向真实存下来的字段（FR-20）。
 
     原来是三行：「你说：X」「所以要找：Y」「这里命中：Z」。中间那行是模板生成的套话
@@ -208,12 +226,20 @@ def _reason_chain(place: dict, state: NeedState, catalog: dict) -> list[str]:
     """
     from .interpretation import AVOID_LABELS, NEED_LABELS, STATE_LABELS
 
+    english = lang == "en"
+    need_table = NEED_LABELS_EN if english else NEED_LABELS
+    avoid_table = AVOID_LABELS_EN if english else AVOID_LABELS
+    state_table = STATE_LABELS_EN if english else STATE_LABELS
+    joiner = ", " if english else "、"
+
     # 一行最多三样，不然它自己就变成了同事说的那种「可以不要的小字」。
     # 「不想要」是用户自己说出口的，比任何推断都硬，所以它占掉那三样里的一个。
-    avoided = [AVOID_LABELS[key] for key in state.avoid_tags if key in AVOID_LABELS][:1]
-    wanted = [NEED_LABELS[key] for key in state.need_keys if key in NEED_LABELS]
-    said = [STATE_LABELS.get(state.mood_id, "说不太清楚")] + wanted[: 2 - len(avoided)] + avoided
-    chain = ["你说：" + "、".join(said)]
+    avoided = [avoid_table[key] for key in state.avoid_tags if key in avoid_table][:1]
+    wanted = [need_table[key] for key in state.need_keys if key in need_table]
+    said = [state_table.get(state.mood_id, "hard to name" if english else "说不太清楚")] + wanted[: 2 - len(avoided)] + avoided
+    # 中文用全角冒号，英文用半角——排版上这是两回事，混用会一眼看出不对。
+    lead = f'{ui("chain_said", "en")}: ' if english else "你说："
+    chain = [lead + joiner.join(said)]
 
     target, _ = _target_for(state, catalog)
     tags = place.get("tags", {})
@@ -221,6 +247,14 @@ def _reason_chain(place: dict, state: NeedState, catalog: dict) -> list[str]:
         (key for key, wanted in target.items() if key in tags and abs(wanted - tags[key]) <= 0.25),
         key=lambda key: -abs(target[key] - 0.5),
     )
+    if english:
+        labels = [
+            TAG_LABELS_EN[key] if target[key] >= 0.5 else LOW_TAG_LABELS_EN.get(key, key)
+            for key in hits
+            if key in TAG_LABELS_EN
+        ][:3]
+        chain.append(f'{ui("chain_here", "en")}: ' + joiner.join(labels) if labels else ui("chain_unsure", "en") or "")
+        return chain
     labels = [
         catalog["TAGS"][key] if target[key] >= 0.5 else LOW_TAG_LABELS.get(key, "不" + catalog["TAGS"][key])
         for key in hits
@@ -230,7 +264,20 @@ def _reason_chain(place: dict, state: NeedState, catalog: dict) -> list[str]:
     return chain
 
 
-def _tradeoffs(place: dict) -> list[str]:
+TRADEOFF_EN = {
+    "人会比较多": "it gets crowded",
+    "声音偏大": "it's on the loud side",
+    "消费压力偏高": "not cheap",
+    "要花点钱": "costs a bit",
+    "不太适合久待": "not a place to linger",
+    "不用花钱": "free",
+    "人不多": "not crowded",
+    "不吵": "quiet",
+    "一个人去不奇怪": "going alone is normal here",
+}
+
+
+def _tradeoffs(place: dict, lang: str = "zh") -> list[str]:
     """代价照实写. Derived from the reviewed place record, never invented."""
     tags = place.get("tags", {})
     costs: list[str] = []
@@ -245,7 +292,8 @@ def _tradeoffs(place: dict) -> list[str]:
     if tags.get("st", 1) <= 0.35:
         costs.append("不太适合久待")
     if costs:
-        return costs[:3]
+        picked = costs[:3]
+        return [TRADEOFF_EN.get(c, c) for c in picked] if lang == "en" else picked
 
     # 真的没有代价也是一条信息，但要说清楚「凭什么没有」，
     # 否则「暂时没看到」读起来像系统没算出来。
@@ -258,6 +306,9 @@ def _tradeoffs(place: dict) -> list[str]:
         upsides.append("不吵")
     if tags.get("s", 0) >= 0.7:
         upsides.append("一个人去不奇怪")
+    if lang == "en":
+        english = [TRADEOFF_EN.get(u, u) for u in upsides[:3]]
+        return [ui("tradeoff_lead", "en") + ", ".join(english)] if english else [ui("no_tradeoff", "en") or ""]
     return ["没什么要你付出的：" + "、".join(upsides[:3])] if upsides else ["没看出明显的代价"]
 
 
@@ -327,13 +378,37 @@ def _to_recommendation(
     *,
     role: str = "alternate",
     now: datetime | None = None,
+    lang: str = "zh",
 ) -> Recommendation:
     reasons = place.get("matchReason", {})
-    reason = reasons.get(state.mood_id) or reasons.get("_") or "它和你刚才说的需要比较接近。"
+    name = place["placeName"]
+    action = place["action"]
+    category = place.get("category")
+    see, cost = place.get("see"), place.get("cost")
+    transport, duration = place.get("transport"), place.get("suggestedDuration")
+    # 现场搜出来的地点由模型当场按语言写，已经是对的语言了；
+    # 这里只覆盖人工那 26 个。
+    if lang == "en" and place.get("source") == "discovered":
+        # 名字保留中文——评委要照着招牌找过去，翻成英文反而找不到。
+        category = place.get("category_en") or category
+    if lang == "en" and place.get("source") != "discovered":
+        english = english_places().get(place["placeId"]) or {}
+        if english:
+            reasons = english.get("matchReason") or reasons
+            name = english.get("placeName") or name
+            action = english.get("action") or action
+            category = english.get("category") or category
+            see, cost = english.get("see") or see, english.get("cost") or cost
+            transport = english.get("transport") or transport
+            duration = english.get("suggestedDuration") or duration
+    reason = reasons.get(state.mood_id) or reasons.get("_") or (
+        "It's close to what you just described." if lang == "en" else "它和你刚才说的需要比较接近。")
     distance_km = round(route.distance_meters / 1000, 2) if route else place.get("distanceKm")
     walking_minutes = max(1, round(route.duration_seconds / 60)) if route else None
     reach_minutes = walking_minutes or _estimate_reach_minutes(place)
     tier, relief_label = _relief_tier(reach_minutes)
+    if lang == "en":
+        relief_label = RELIEF_LABELS_EN.get(tier, relief_label)
     status, open_label, hours_source = open_state(place, now)
     amap = place.get("amap") or {}
     fence = (
@@ -348,8 +423,8 @@ def _to_recommendation(
     return Recommendation(
         recommendation_id=f"rec_{uuid.uuid4().hex}",
         place_id=place["placeId"],
-        place_name=place["placeName"],
-        action=place["action"],
+        place_name=name,
+        action=action,
         reason=reason,
         score=round(max(0.0, min(1.0, score)), 4),
         distance_km=distance_km,
@@ -358,22 +433,22 @@ def _to_recommendation(
         map_verified=(place.get("amap") or {}).get("verification_status") == "verified",
         source=place.get("source") or "curated",
         photos=[url for url in (place.get("photos") or []) if isinstance(url, str)][:3],
-        category=place.get("category"),
+        category=category,
         area=place.get("area"),
         latitude=float(amap["latitude"]) if amap.get("latitude") is not None else None,
         longitude=float(amap["longitude"]) if amap.get("longitude") is not None else None,
         navigation_url=navigation_url(place),
-        transport=place.get("transport"),
-        suggested_duration=place.get("suggestedDuration"),
-        cost=place.get("cost"),
-        see=place.get("see"),
-        tradeoffs=_tradeoffs(place),
+        transport=transport,
+        suggested_duration=duration,
+        cost=cost,
+        see=see,
+        tradeoffs=_tradeoffs(place, lang),
         score_breakdown=breakdown,
         role=role,  # type: ignore[arg-type]
         reach_minutes=reach_minutes,
         time_to_relief=tier,  # type: ignore[arg-type]
         relief_label=relief_label,
-        reason_chain=_reason_chain(place, state, load_catalog()),
+        reason_chain=_reason_chain(place, state, load_catalog(), lang),
         # Current has no verified visit feedback yet, so nothing may be
         # presented as an average (FR-10b). The prototype numbers stay out.
         sample_size=0,
@@ -390,7 +465,7 @@ def recommend(request: RecommendRequest, now: datetime | None = None) -> list[Re
     output: list[Recommendation] = []
     for index, (score, place, breakdown) in enumerate(_rank(request, now)[: request.limit]):
         role = "primary" if index == 0 else "alternate"
-        output.append(_to_recommendation(score, place, breakdown, request.state, role=role, now=now))
+        output.append(_to_recommendation(score, place, breakdown, request.state, role=role, now=now, lang=request.lang))
     return output
 
 
@@ -441,7 +516,7 @@ async def recommend_with_live_context(
     ranked = _rank(request, now, discovered=discovered)
     if not request.location or not client.configured:
         return [
-            _to_recommendation(score, place, breakdown, request.state, role="primary" if index == 0 else "alternate", now=now)
+            _to_recommendation(score, place, breakdown, request.state, role="primary" if index == 0 else "alternate", now=now, lang=request.lang)
             for index, (score, place, breakdown) in enumerate(ranked[: request.limit])
         ]
 
@@ -471,7 +546,7 @@ async def recommend_with_live_context(
     to_narrate = [place for _, place, _ in shortlist[: request.limit * 2] if place.get("source") == "discovered"]
     routes, written = await asyncio.gather(
         asyncio.gather(*(route_for(place) for _, place, _ in shortlist)),
-        narrate_quietly(to_narrate, request.state),
+        narrate_quietly(to_narrate, request.state, lang=request.lang),
     )
     for place in to_narrate:
         line = written.get(place["placeId"])
@@ -513,6 +588,6 @@ async def recommend_with_live_context(
 
     enriched.sort(key=lambda item: item[0], reverse=True)
     return [
-        _to_recommendation(score, place, breakdown, request.state, route, role="primary" if index == 0 else "alternate", now=now)
+        _to_recommendation(score, place, breakdown, request.state, route, role="primary" if index == 0 else "alternate", now=now, lang=request.lang)
         for index, (score, place, breakdown, route) in enumerate(_spread(enriched, request.limit))
     ]

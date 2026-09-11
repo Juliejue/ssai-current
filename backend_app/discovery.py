@@ -144,7 +144,7 @@ async def warm(client: AmapClient, location: Location) -> None:
 
 CATEGORY_PROFILE: dict[str, dict[str, Any]] = {
     "park": {
-        "label": "公园 · 户外",
+        "label": "公园 · 户外", "label_en": "park · outdoors",
         "action": "找条长椅坐下，或者随便走走",
         "indoor": False,
         "free": True,
@@ -156,7 +156,7 @@ CATEGORY_PROFILE: dict[str, dict[str, Any]] = {
                  "r": 0.85, "cr": 0.2, "l": 0.2, "st": 0.8, "cp": 0.05, "w": 0.9},
     },
     "books": {
-        "label": "书店 · 室内",
+        "label": "书店 · 室内", "label_en": "bookshop · indoors",
         "action": "抽一本坐下，不买也行",
         "indoor": True,
         "free": True,
@@ -168,7 +168,7 @@ CATEGORY_PROFILE: dict[str, dict[str, Any]] = {
                  "r": 0.75, "cr": 0.7, "l": 0.15, "st": 0.85, "cp": 0.3, "w": 0.1},
     },
     "gallery": {
-        "label": "展馆 · 室内",
+        "label": "展馆 · 室内", "label_en": "gallery · indoors",
         "action": "慢慢看一圈，不用看完",
         "indoor": True,
         "free": False,
@@ -180,7 +180,7 @@ CATEGORY_PROFILE: dict[str, dict[str, Any]] = {
                  "r": 0.7, "cr": 0.8, "l": 0.15, "st": 0.7, "cp": 0.45, "w": 0.35},
     },
     "cafe": {
-        "label": "咖啡 · 室内",
+        "label": "咖啡 · 室内", "label_en": "coffee · indoors",
         "action": "点一杯，占一张桌子",
         "indoor": True,
         "free": False,
@@ -192,7 +192,7 @@ CATEGORY_PROFILE: dict[str, dict[str, Any]] = {
                  "r": 0.7, "cr": 0.5, "l": 0.4, "st": 0.85, "cp": 0.55, "w": 0.1},
     },
     "cinema": {
-        "label": "影院 · 室内",
+        "label": "影院 · 室内", "label_en": "cinema · indoors",
         "action": "买一张最近的场次，把手机关掉",
         "indoor": True,
         "free": False,
@@ -204,7 +204,7 @@ CATEGORY_PROFILE: dict[str, dict[str, Any]] = {
                  "r": 0.8, "cr": 0.5, "l": 0.1, "st": 0.9, "cp": 0.5, "w": 0.05},
     },
     "temple": {
-        "label": "寺庙 · 半户外",
+        "label": "寺庙 · 半户外", "label_en": "temple · part outdoors",
         "action": "进去待一会儿，什么都不用做",
         "indoor": False,
         "free": False,
@@ -310,6 +310,7 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
         "action": profile["action"],
         "area": str(poi.get("adname") or poi.get("cityname") or ""),
         "category": profile["label"],
+        "category_en": profile.get("label_en") or profile["label"],
         "city": str(poi.get("cityname") or ""),
         "coverImage": f"photo:{photos[0]}",
         "photos": photos,

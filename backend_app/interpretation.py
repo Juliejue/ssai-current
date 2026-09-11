@@ -10,6 +10,8 @@ import re
 import httpx
 from pydantic import ValidationError
 
+from .i18n import (AVOID_LABELS_EN, CLARIFY_EN, CONSTRAINT_CORRECTIONS_EN, CORRECTION_CHIPS_EN,
+                    NEED_LABELS_EN, state_label, ui)
 from .schemas import ClarifyOption, CorrectionOptions, InterpretResponse, NeedState, RiskLevel
 
 
@@ -265,7 +267,13 @@ def _needs_clarification(state: NeedState) -> str | None:
     return None
 
 
-def _restatement(state: NeedState) -> str:
+def _restatement(state: NeedState, lang: str = "zh") -> str:
+    if lang == "en":
+        label = state_label(state.mood_id, "en") or "hard to name"
+        needs = [NEED_LABELS_EN[key] for key in state.need_keys if key in NEED_LABELS_EN][:2]
+        if needs:
+            return ui("restate_with_need", "en", label=label, needs=" and ".join(needs)) or ""
+        return ui("restate", "en", label=label) or ""
     label = STATE_LABELS.get(state.mood_id, "说不太清楚")
     needs = [NEED_LABELS[key] for key in state.need_keys if key in NEED_LABELS][:2]
     tail = "，需要一个" + "、".join(needs) + "的地方" if needs else ""
@@ -289,7 +297,7 @@ def _quotes_the_user(line: str, text: str) -> bool:
     return bool(quoted) and all(q in text for q in quoted)
 
 
-def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[str] | None = None) -> InterpretResponse:
+def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[str] | None = None, lang: str = "zh") -> InterpretResponse:
     state = response.state
     # 代码侧护栏：avoid_tags 现在真的会压分，所以它必须和 need_keys 用同一套词表，
     # 且不能自相矛盾。模型编出来的词直接丢掉，两边都出现时「想要」压过「不想要」。
@@ -297,8 +305,8 @@ def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[st
         key for key in dict.fromkeys(state.avoid_tags)
         if key in NEED_LABELS and key not in state.need_keys
     ][:8]
-    response.state_label = STATE_LABELS.get(state.mood_id, "说不太清楚")
-    response.acknowledgement = _restatement(state)
+    response.state_label = state_label(state.mood_id, lang) or STATE_LABELS.get(state.mood_id, "说不太清楚")
+    response.acknowledgement = _restatement(state, lang)
 
     # 模型读懂了、规则没读懂的句子，证据也得跟着模型走——
     # 否则会出现「我猜你心里发紧」配「我没抓到明确线索」这种自相矛盾。
@@ -311,27 +319,32 @@ def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[st
     response.evidence = verified or _evidence_for(text, state)
     # FR-03：四环都要能一步纠正，不能只让用户改「状态」这一环。
     # 地点那一环不给选项——「这几个都不想去」本身就是动作。
+    english = lang == "en"
+    chips = CORRECTION_CHIPS_EN if english else CORRECTION_CHIPS
+    constraints = CONSTRAINT_CORRECTIONS_EN if english else CONSTRAINT_CORRECTIONS
+    need_labels = NEED_LABELS_EN if english else NEED_LABELS
     response.corrections = CorrectionOptions(
         state=[
             ClarifyOption(key=key, label=label)
-            for key, label in CORRECTION_CHIPS
+            for key, label in chips
             if key != state.mood_id
         ][:6],
         need=[
-            ClarifyOption(key=key, label=NEED_LABELS[key])
+            ClarifyOption(key=key, label=need_labels[key])
             for key in NEED_CORRECTIONS
-            if key not in state.need_keys
+            if key not in state.need_keys and key in need_labels
         ][:6],
         constraint=[
             ClarifyOption(key=key, label=label)
-            for key, label in CONSTRAINT_CORRECTIONS
+            for key, label in constraints
             if not _already_holds(state, key)
         ][:6],
     )
 
+    clarify_table = CLARIFY_EN if lang == "en" else CLARIFY_QUESTIONS
     field = None if state.risk_level is not RiskLevel.ordinary else _needs_clarification(state)
-    if field and field in CLARIFY_QUESTIONS:
-        question, options = CLARIFY_QUESTIONS[field]
+    if field and field in clarify_table:
+        question, options = clarify_table[field]
         state.needs_clarification = True
         state.clarifying_question = question
         response.clarify_field = field
@@ -381,6 +394,16 @@ evidence 的写法（这是给用户看的，不是给程序看的）：
   「人也是空的」——对应 mood_id 为 empty"""
 
 
+ENGLISH_SUFFIX = """
+
+IMPORTANT — this user reads English. Write `evidence` and `clarifying_question` in English.
+Everything else (the enum values) stays exactly as specified above.
+Same voice in English: short, plain, physical. Not clinical, not flowery.
+Quote the user's own words inside 「」 exactly as they typed them, even if they typed Chinese.
+Good: 「had a fight」 — so I'm guessing you're still braced for something
+Bad: The user is experiencing interpersonal conflict-related distress"""
+
+
 def _extract_json(content: str) -> dict:
     content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip(), flags=re.IGNORECASE)
     return json.loads(content)
@@ -409,13 +432,13 @@ def _trace(*, outcome: str, text: str, attempt: int, model: str, detail: str = "
     )
 
 
-async def _call_model(client: httpx.AsyncClient, *, base_url: str, api_key: str, model: str, text: str, temperature: float) -> tuple[NeedState, list[str] | None]:
+async def _call_model(client: httpx.AsyncClient, *, base_url: str, api_key: str, model: str, text: str, temperature: float, lang: str = "zh") -> tuple[NeedState, list[str] | None]:
     payload = {
         "model": model,
         "temperature": temperature,
         "response_format": {"type": "json_object"},
         "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": SYSTEM_PROMPT + (ENGLISH_SUFFIX if lang == "en" else "")},
             {"role": "user", "content": text},
         ],
     }
@@ -445,12 +468,12 @@ def _is_transient(error: Exception) -> bool:
     return isinstance(error, httpx.TransportError)
 
 
-async def _call_model_with_backoff(client, *, base_url, api_key, model, text, temperature, attempt):
+async def _call_model_with_backoff(client, *, base_url, api_key, model, text, temperature, attempt, lang="zh"):
     """排队排不上就等一下再要一次。等不到就把异常抛出去，走上面的契约兜底。"""
     last: Exception | None = None
     for round_index in range(RATE_LIMIT_ATTEMPTS):
         try:
-            return await _call_model(client, base_url=base_url, api_key=api_key, model=model, text=text, temperature=temperature)
+            return await _call_model(client, base_url=base_url, api_key=api_key, model=model, text=text, temperature=temperature, lang=lang)
         except Exception as error:  # noqa: BLE001 - 分流后原样抛出
             if not _is_transient(error):
                 raise
@@ -462,17 +485,17 @@ async def _call_model_with_backoff(client, *, base_url, api_key, model, text, te
     raise last  # type: ignore[misc]
 
 
-async def interpret(text: str) -> InterpretResponse:
+async def interpret(text: str, lang: str = "zh") -> InterpretResponse:
     rule_result = interpret_with_rules(text)
     # Explicit high-risk language is never delegated to a generative model.
     if rule_result.state.risk_level == RiskLevel.urgent:
         _trace(outcome="rules_safety_short_circuit", text=text, attempt=0, model="none")
-        return _decorate(rule_result, text)
+        return _decorate(rule_result, text, lang=lang)
 
     api_key = os.getenv("LLM_API_KEY") or os.getenv("api_key")
     if not api_key:
         _trace(outcome="rules_no_model_configured", text=text, attempt=0, model="none")
-        return _decorate(rule_result, text)
+        return _decorate(rule_result, text, lang=lang)
 
     base_url = (os.getenv("LLM_BASE_URL") or os.getenv("base_url") or "https://api.openai.com/v1").rstrip("/")
     model = os.getenv("LLM_MODEL") or os.getenv("model") or "glm-4.7-flash"
@@ -483,7 +506,7 @@ async def interpret(text: str) -> InterpretResponse:
             try:
                 state, model_evidence = await _call_model_with_backoff(
                     client, base_url=base_url, api_key=api_key, model=model, text=text,
-                    temperature=temperature, attempt=attempt,
+                    temperature=temperature, attempt=attempt, lang=lang,
                 )
             except (httpx.HTTPError, KeyError, IndexError, json.JSONDecodeError, ValidationError) as error:
                 _trace(outcome="contract_failed", text=text, attempt=attempt, model=model, detail=type(error).__name__)
@@ -502,7 +525,8 @@ async def interpret(text: str) -> InterpretResponse:
                 ),
                 text,
                 model_evidence=model_evidence,
+                lang=lang,
             )
 
     _trace(outcome="rules_fallback_after_retry", text=text, attempt=2, model=model)
-    return _decorate(rule_result, text)
+    return _decorate(rule_result, text, lang=lang)

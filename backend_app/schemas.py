@@ -42,6 +42,9 @@ class Location(BaseModel):
 
 class InterpretRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
+    # 比赛有英文评委。用户读到的内容大半是后端生成的，所以语言必须传到这一层，
+    # 不能只在前端翻界面。
+    lang: Literal["zh", "en"] = "zh"
     # 可选。给了就在模型读句子的同时先把周边搜出来，等用户走到推荐那一步时
     # 结果已经在缓存里了。这个坐标只在内存里用一次，不写盘、不入库（守则 6）。
     location: Location | None = None
@@ -91,6 +94,7 @@ class Geofence(BaseModel):
 
 class RecommendRequest(BaseModel):
     state: NeedState
+    lang: Literal["zh", "en"] = "zh"
     location: Location | None = None
     rejected_place_ids: list[str] = Field(default_factory=list, max_length=20)
     limit: int = Field(default=3, ge=1, le=10)

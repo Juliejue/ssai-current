@@ -187,7 +187,7 @@ def test_contract_failure_retries_once_then_falls_back_without_ever_going_blank(
     monkeypatch.setenv("LLM_API_KEY", "test-key")
     calls: list[float] = []
 
-    async def always_broken(_client, *, base_url, api_key, model, text, temperature):
+    async def always_broken(_client, *, base_url, api_key, model, text, temperature, lang="zh"):
         calls.append(temperature)
         raise json.JSONDecodeError("bad", "", 0)
 
@@ -203,7 +203,7 @@ def test_a_model_that_recovers_on_the_retry_is_used(monkeypatch):
     monkeypatch.setenv("LLM_API_KEY", "test-key")
     attempts = {"n": 0}
 
-    async def flaky(_client, *, base_url, api_key, model, text, temperature):
+    async def flaky(_client, *, base_url, api_key, model, text, temperature, lang="zh"):
         attempts["n"] += 1
         if attempts["n"] == 1:
             raise httpx.ConnectError("boom")

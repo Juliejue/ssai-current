@@ -64,6 +64,13 @@
     }).catch(function () {});
   }
 
+  /* 用户读到的内容大半是服务端生成的（状态、理由、为什么是这里、代价），
+     所以语言必须跟着请求一起送过去，光在前端翻界面是不够的。 */
+  function lang() {
+    try { return localStorage.getItem('current.lang.v1') === 'en' ? 'en' : 'zh'; }
+    catch (e) { return 'zh'; }
+  }
+
   // Re-rank without re-interpreting: used by the correction chips and by the
   // single clarifying answer, so a fix costs one request instead of two.
   function recommendFor(needState, rejected) {
@@ -73,7 +80,8 @@
         state: needState,
         location: activeLocation,
         rejected_place_ids: rejected || [],
-        limit: 3
+        limit: 3,
+        lang: lang()
       })
     });
   }
@@ -87,7 +95,10 @@
   }
 
   function interpretAndRecommend(text) {
-    return api('/interpret', { method: 'POST', body: JSON.stringify({ text: text }) })
+    // 把位置一起送过去：模型读这句话要几秒，服务端可以在同一段时间里
+    // 先把周边搜好，等用户点到推荐那一步就不用再等。
+    return api('/interpret', { method: 'POST', body: JSON.stringify({
+        text: text, lang: lang(), location: activeLocation }) })
       .then(function (interpretation) {
         track('natural_language_interpreted', {
           source: interpretation.source,
