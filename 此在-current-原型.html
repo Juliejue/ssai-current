@@ -164,6 +164,17 @@ h1.title.sm{font-size:23px}
 .cover .grain{display:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
 .cover svg.sig{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:66%;height:66%}
+/* 实拍图盖在符号之上。图加载失败会把自己删掉，符号自然露出来。 */
+.cover img.shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+/* 地图条：地图挂了就整条移除，不留空白框 */
+.mapstrip{position:relative;margin:12px 0 2px;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  background:var(--ground-2);aspect-ratio:8/3}
+.mapstrip img{display:block;width:100%;height:100%;object-fit:cover}
+/* 图上面要压字，所以给底部一层由深到透的遮罩，不然白字会看不清。 */
+.cover img.shot ~ .cap{z-index:2;background:linear-gradient(to top,rgba(12,26,29,.82),rgba(12,26,29,.34) 52%,transparent)}
+.cover img.shot ~ .cap small{color:rgba(255,255,255,.72)}
+.cover img.shot ~ .cap strong{color:#fff}
+.cover img.shot ~ .cat-badge{z-index:2;opacity:.75;filter:brightness(3)}
 .cover .cat-badge{position:absolute;left:11px;top:11px;width:17px;height:17px;opacity:.45}
 .cover .cap{position:absolute;left:0;right:0;bottom:0;padding:14px 14px 12px;
   background:linear-gradient(transparent,rgba(255,255,255,.94))}
@@ -1368,7 +1379,41 @@ PLACES.forEach(p => {
 });
 /* 到访样本诚实（FR-10b / FR-19b）：没有真实反馈之前，任何平均分都是假的。 */
 const SAMPLE_EMPTY = "样本还少：这里还没有攒够真实到访反馈，所以我不给平均分，也不承诺你去了会变好。";
-const placeById = id => PLACES.find(p => p.placeId === id) || PLACES[0];
+/* 现场从地图上搜出来的地点不在本地 PLACES 里，只存在于后端这次返回的推荐中。
+   以前这里找不到就退回 PLACES[0]，于是「和光书社」会显示成水果店的数据——
+   静默地展示错的地方，比报错还糟。 */
+function placeFromRecommendation(rec){
+  if (!rec) return null;
+  return {
+    placeId: rec.place_id,
+    placeName: rec.place_name,
+    action: rec.action,
+    area: rec.area || "",
+    category: rec.category || "",
+    city: "",
+    photos: rec.photos || [],
+    coverImage: (rec.photos && rec.photos[0]) ? "photo:" + rec.photos[0] : "",
+    ratio: "4/5",
+    distanceKm: rec.distance_km,
+    transport: rec.transport || "",
+    suggestedDuration: rec.suggested_duration || "",
+    indoor: true, free: false, crowd: "low",
+    see: rec.see || "", cost: rec.cost || "",
+    environmentTags: [],
+    tags: {}, matchReason: {_: rec.reason},
+    // 现场搜出来的没有真人写的洞察、没有一手原话、也没有反馈——这些都不编。
+    placeInsights: [], factors: [], factorOptions: [], quote: "",
+    averageChange: null, feedbackCount: 0,
+    discovered: true,
+    sig: {rings:2, ringR:56, rays:5, nodeAngle:-3, nodeDist:46, a:"#3D6E80", b:"#7FA3B0"}
+  };
+}
+function placeById(id){
+  const known = PLACES.find(p => p.placeId === id);
+  if (known) return known;
+  const made = placeFromRecommendation(state.aiRecommendations[id]);
+  return made || PLACES[0];
+}
 const reasonFor = (p, moodId) => p.matchReason[moodId] || p.matchReason._;
 /* 按当前情绪（以及已选诉求）给全部空间打分排序 */
 function rankedPlaces(list){
@@ -1496,6 +1541,17 @@ function sigil(p, opts){
   out += '<circle cx="100" cy="100" r="2.4" fill="#122A2E" opacity="0.9"/>';
   return out + '</svg>';
 }
+/* 这个地方到底长什么样。
+   符号图是当初没有稳定图源时的权宜之计——抽象好过错配。
+   现在高德给每个 POI 带回真实照片，能给实景就不该再给符号。
+   拿不到照片时仍然退回符号：宁可抽象，也不放一张别处的图冒充这里。 */
+function photoFor(p){
+  const rec = state.aiRecommendations[p.placeId];
+  if (rec && rec.photos && rec.photos.length) return rec.photos[0];
+  if (p.photos && p.photos.length) return p.photos[0];
+  if (typeof p.coverImage === "string" && p.coverImage.indexOf("photo:") === 0) return p.coverImage.slice(6);
+  return null;
+}
 function coverHTML(p, o){
   o = o || {};
   const style = o.style ? ' style="' + o.style + '"' : '';
@@ -1503,6 +1559,12 @@ function coverHTML(p, o){
                ' 52%, rgba(234,240,239,.92) 100%), linear-gradient(160deg,#EAF0EF,#DDE6E4)';
   let h = '<div class="cover ' + (o.cls||'') + '"' + style + '>';
   h += '<div class="grad" style="' + grad + '"></div><div class="grain"></div>';
+  const photo = photoFor(p);
+  if (photo){
+    // 图挂了就把自己藏起来，露出下面那层符号——不留一个破图图标。
+    h += '<img class="shot" src="' + escapeHTML(photo) + '" alt="" loading="lazy" referrerpolicy="no-referrer" ' +
+         'onerror="this.remove()">';
+  }
   h += sigil(p, o);
   if (o.badge) h += '<span class="cat-badge">' + catSVG() + '</span>';
   if (o.caption) h += '<div class="cap"><small>' + p.area + ' · ' + p.category + '</small><strong>' + p.action + '</strong></div>';
@@ -2995,6 +3057,7 @@ function renderOffer(){
   h += '<ul class="chain">' + (main.reason_chain || []).map(c => '<li>' + escapeHTML(c) + '</li>').join("") + '</ul>';
   h += '<div class="cost-rows">';
   h += '<div><i>到达</i><span>' + escapeHTML(reachLine(main, p)) + '</span></div>';
+  h += mapStrip(main);
   h += '<div class="' + (main.open_state === "likely_closed" || main.open_state === "closed" ? "pay" : "") +
        '"><i>营业</i><span>' + escapeHTML(main.open_label || "营业时间不确定") + '</span></div>';
   h += '<div class="pay"><i>代价</i><span>' + (main.tradeoffs || []).map(escapeHTML).join(' · ') + '</span></div>';
@@ -3061,6 +3124,18 @@ function mapSheet(){
   h += '<button class="cancel" id="map-cancel">先不去</button>';
   h += '</div></div>';
   return h;
+}
+
+/* 推荐一个地方却不给看它在哪，是说不过去的。
+   一张以这个地点为中心的地图，服务端代理，key 不露给浏览器。
+   拿不到坐标就不画——不画好过画一个错的位置。 */
+function mapStrip(rec){
+  if (!rec || typeof rec.latitude !== "number" || typeof rec.longitude !== "number") return "";
+  const url = CurrentAI.staticMapUrl(rec.latitude, rec.longitude, 640, 240);
+  if (!url) return "";
+  return '<div class="mapstrip"><img src="' + escapeHTML(url) + '" alt="' +
+         escapeHTML(rec.place_name) + '在地图上的位置" loading="lazy" ' +
+         'onerror="this.closest(\'.mapstrip\').remove()"><span class="pin"></span></div>';
 }
 
 function shorten(text, max){

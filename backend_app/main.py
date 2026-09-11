@@ -7,10 +7,11 @@ import os
 import time
 import uuid
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from .interpretation import interpret
+from .map_provider import MapProviderError, static_map_png
 from .realtime_asr import build_asr_connect_url
 from .presence import verify as verify_presence
 from .recommender import load_catalog, recommend_with_live_context, warm_discovery
@@ -65,6 +66,29 @@ async def asr_signature() -> dict[str, str | int]:
         return build_asr_connect_url()
     except RuntimeError as error:
         raise HTTPException(status_code=503, detail=str(error)) from error
+
+
+@app.get("/api/v1/map/static")
+async def static_map_route(lat: float, lng: float, w: int = 640, h: int = 260) -> Response:
+    """地图图片代理。key 留在服务端，浏览器只看得见我们的域名。
+
+    只接受地点坐标（公开信息）。用户自己的位置不经过这里，也不该经过。
+    """
+    if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+        raise HTTPException(status_code=400, detail="坐标超出范围")
+    # 限死尺寸：这是给我们自己的卡片用的，不是一个通用图片代理。
+    width, height = max(120, min(w, 1024)), max(80, min(h, 512))
+    try:
+        png = await static_map_png(lng, lat, width, height)
+    except MapProviderError:
+        # 地图挂了不该让整张卡片出错，前端会把这块藏掉。
+        raise HTTPException(status_code=503, detail="地图暂时取不到")
+    return Response(
+        content=png,
+        media_type="image/png",
+        # 地点不会动，缓存一天，省配额也省等待。
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
 
 
 @app.post("/api/v1/interpret", response_model=InterpretResponse)

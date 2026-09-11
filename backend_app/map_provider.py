@@ -204,6 +204,41 @@ class AmapClient:
 TRUSTWORTHY_COORDINATES = ("verified", "provider_exact")
 
 
+STATIC_MAP_URL = "https://restapi.amap.com/v3/staticmap"
+
+
+async def static_map_png(longitude: float, latitude: float, width: int, height: int) -> bytes:
+    """一张以这个地点为中心的地图图片。
+
+    必须走服务端：静态地图接口把 key 放在 URL 里，直接让浏览器去请求
+    等于把 key 贴在页面上。这里只接受地点坐标——地点坐标是公开信息，
+    用户自己的坐标一次都不上传（守则 6）。
+    """
+    key = os.getenv("AMAP_WEB_SERVICE_KEY") or ""
+    if not key:
+        raise MapProviderError("没有配置高德 Key")
+    params = {
+        "key": key,
+        "location": f"{longitude:.6f},{latitude:.6f}",
+        "zoom": 15,
+        "size": f"{width}*{height}",
+        "scale": 2,
+        "markers": f"mid,0xC4703C,:{longitude:.6f},{latitude:.6f}",
+    }
+    last: Exception | None = None
+    for attempt in range(1, 4):
+        try:
+            async with httpx.AsyncClient(timeout=20) as client:
+                response = await client.get(STATIC_MAP_URL, params=params)
+            if response.status_code != 200 or "image" not in (response.headers.get("content-type") or ""):
+                raise MapProviderError("静态地图返回的不是图片")
+            return response.content
+        except httpx.HTTPError as error:  # 跨境抖动，重试（见交接文档 §3①）
+            last = error
+            await asyncio.sleep(0.4 * attempt)
+    raise MapProviderError(str(last or "静态地图请求失败"))
+
+
 def navigation_url(place: dict[str, Any]) -> str | None:
     amap = place.get("amap") or {}
     if amap.get("verification_status") not in TRUSTWORTHY_COORDINATES:

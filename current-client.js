@@ -354,8 +354,18 @@
     return beginVoice(callbacks).then(function () { return 'recording'; });
   }
 
+  /* 地图图片的地址。key 在服务端，这里只拼我们自己的路径。
+     只传地点坐标——地点坐标是公开信息，用户自己的位置不往这儿送。 */
+  function staticMapUrl(latitude, longitude, width, height) {
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') return null;
+    // API_BASE 本身就以 /api/v1 结尾，这里再拼一次会变成 /api/v1/api/v1/…
+    return API_BASE + '/map/static?lat=' + latitude.toFixed(6) +
+           '&lng=' + longitude.toFixed(6) + '&w=' + (width || 640) + '&h=' + (height || 260);
+  }
+
   window.CurrentAI = {
     api: api,
+    staticMapUrl: staticMapUrl,
     sessionId: sessionId,
     track: track,
     interpretAndRecommend: interpretAndRecommend,
