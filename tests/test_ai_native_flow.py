@@ -85,13 +85,31 @@ def test_first_result_is_the_primary_and_the_rest_are_alternates():
     assert [item.role for item in results] == ["primary", "alternate", "alternate"]
 
 
-def test_reason_chain_is_state_then_need_then_matched_attribute():
+def test_reason_chain_is_what_you_said_then_what_this_place_is():
+    """两行，不是三行。
+
+    中间那行「所以要找：…」是模板套话——need_keys 为空时只会说
+    「一个人待着不奇怪的地方」——读起来像填充物，删掉。
+    """
     results = recommend(RecommendRequest(state=NeedState(mood_id="tight", need_keys=["slow"]), limit=1))
     chain = results[0].reason_chain
-    assert len(chain) == 3
+    assert len(chain) == 2
     assert chain[0].startswith("你说：")
-    assert chain[1].startswith("所以要找：")
-    assert chain[2].startswith("这里命中：") or "不太确定" in chain[2]
+    assert chain[1].startswith("这里：") or "不太确定" in chain[1]
+    assert not any(line.startswith("所以要找：") for line in chain)
+
+
+def test_what_the_user_ruled_out_is_shown_back_to_them():
+    """用户明说的「不想要」必须出现在理由链里，而且一行最多三样。"""
+    results = recommend(
+        RecommendRequest(
+            state=NeedState(mood_id="tired", need_keys=["hide", "sit"], avoid_tags=["people"]),
+            limit=1,
+        )
+    )
+    said = results[0].reason_chain[0]
+    assert "不想见人" in said
+    assert said.removeprefix("你说：").count("、") <= 2
 
 
 def test_hurried_state_prefers_somewhere_reachable_now():

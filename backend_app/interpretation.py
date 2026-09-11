@@ -72,6 +72,18 @@ STATE_LABELS: dict[str, str] = {
     "okay": "状态还行",
 }
 
+# 「不想要」不能靠给 NEED_LABELS 加个「不」前缀凑出来：
+# 「周围有人就行」加个不字会变成「不要周围有人就行」，不像人话。
+AVOID_LABELS: dict[str, str] = {
+    "people": "不想见人",
+    "loud": "不想吵",
+    "sound": "不想听声音",
+    "hands": "什么都不想做",
+    "new": "不想看新东西",
+    "walk": "不想一直走",
+    "green": "不想看绿色",
+}
+
 NEED_LABELS: dict[str, str] = {
     "hide": "不被人看见",
     "sit": "能坐很久",
@@ -130,6 +142,15 @@ CLARIFY_QUESTIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
 }
 
 
+# 「不想要」在中文里几乎总是明说的，规则也接得住——模型没跑的时候
+# （没配 Key、契约失败）不能连这个都丢。词表和 need_keys 是同一套。
+AVOID_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("people", ("不想见人", "不想见到人", "别跟人说话", "不想说话", "不想社交", "人少点", "不想应付")),
+    ("loud", ("不想吵", "别太吵", "太吵了", "怕吵", "安静点", "不要吵")),
+    ("hands", ("什么都不做", "啥都不想做", "不想动手", "不想干活", "不用动脑")),
+)
+
+
 def _contains_any(text: str, patterns: tuple[str, ...]) -> bool:
     return any(item in text for item in patterns)
 
@@ -154,9 +175,13 @@ def interpret_with_rules(text: str) -> InterpretResponse:
     budget = "free" if _contains_any(text, ("不花钱", "不想花钱", "没钱", "免费")) else "low" if _contains_any(text, ("便宜", "不想花很多钱", "预算低", "少花点")) else "unknown"
     social = "alone" if _contains_any(text, ("不想见人", "一个人", "别跟人说话")) else "with_people" if _contains_any(text, ("想有人", "热闹", "陪我")) else "either"
 
+    # 同一个词表两边都出现时，「想要」压过「不想要」：用户刚说了想要它。
+    avoid = [key for key, tokens in AVOID_RULES if _contains_any(text, tokens) and key not in needs]
+
     state = NeedState(
         mood_id=mood_id,
         need_keys=needs[:6],
+        avoid_tags=avoid[:8],
         energy=energy,
         social_mode=social,
         budget_level=budget,
@@ -266,6 +291,12 @@ def _quotes_the_user(line: str, text: str) -> bool:
 
 def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[str] | None = None) -> InterpretResponse:
     state = response.state
+    # 代码侧护栏：avoid_tags 现在真的会压分，所以它必须和 need_keys 用同一套词表，
+    # 且不能自相矛盾。模型编出来的词直接丢掉，两边都出现时「想要」压过「不想要」。
+    state.avoid_tags = [
+        key for key in dict.fromkeys(state.avoid_tags)
+        if key in NEED_LABELS and key not in state.need_keys
+    ][:8]
     response.state_label = STATE_LABELS.get(state.mood_id, "说不太清楚")
     response.acknowledgement = _restatement(state)
 
@@ -322,7 +353,7 @@ SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户的中文自然�
   "max_travel_minutes": 5-180 或 null,
   "budget_level": "free|low|medium|high|unknown",
   "environment": "indoor|outdoor|either",
-  "avoid_tags": [],
+  "avoid_tags": ["和 need_keys 同一套词表；放用户明说不想要的那些"],
   "confidence": 0-1,
   "needs_clarification": boolean,
   "clarifying_question": string 或 null,
@@ -331,6 +362,10 @@ SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户的中文自然�
   "evidence": ["1-3 条，见下面的写法"]
 }
 只有缺失会改变推荐的关键事实时才追问一个问题。不要根据语气、身份或疾病做推断。
+
+need_keys 放用户想要的，avoid_tags 放他明说不想要的，两边都用上面那套词表。
+「不想见人」→ avoid_tags 里放 people；「不想吵」→ 放 loud；「什么都不做」→ 放 hands。
+别把同一个词同时放进两边。没明说的不要替他填。
 
 evidence 的写法（这是给用户看的，不是给程序看的）：
 - 每条必须包含用户真的说过的词，用「」括起来。编造用户没说过的话属于失败。

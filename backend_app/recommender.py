@@ -61,6 +61,43 @@ def _match_score(place: dict, state: NeedState, catalog: dict) -> float:
 ENERGY_DISTANCE_LIMIT_KM = 8
 
 
+# 用户明说的「不想要」比他没说出口的偏好重，但还不到一票否决——
+# 说「不想见人」的人，不该被拿掉全北京所有有人的地方。
+AVOID_WEIGHT = 0.25
+
+# 「避开某个需求」到底该避开哪个维度，必须一条条写出来，不能拿 NEEDS 的 target 反推。
+# 反推过一版：need「想手上有事做」的 target 是 {创作刺激, 可久待}，于是用户说「什么都不做」
+# 会连「能坐很久」一起扣分——而那恰恰是一个累坏的人最需要的。
+# 只列「不想要」讲得通的那几个，其余的说了也不扣分。
+AVOID_DIMENSIONS: dict[str, tuple[str, ...]] = {
+    "people": ("co", "c"),   # 不想见人 → 避开生活气重、人挤人
+    "loud": ("l", "c"),      # 不想吵 → 避开热闹、人挤人
+    "sound": ("l",),
+    "hands": ("cr",),        # 什么都不做 → 避开需要动手动脑的
+    "new": ("e",),           # 不想看新东西
+    "walk": ("w",),          # 不想一直走
+    "green": ("g",),
+}
+
+
+def _avoid_penalty(place: dict, state: NeedState) -> float:
+    """把「我不想要什么」真的算进分数里。
+
+    模型一直在从原话里抽这个字段（「不想见人」→ avoid_tags 里有 people），
+    但在这之前没有任何地方读它——用户说了等于没说，这正是「推荐和我说的对不上」的来源。
+    """
+    tags = place.get("tags", {})
+    worst = 0.0
+    for key in state.avoid_tags:
+        for dimension in AVOID_DIMENSIONS.get(key, ()):
+            if dimension not in tags:
+                continue
+            # 0.5 是中性。只惩罚明显就是用户想避开的那一面的地方，
+            # 中性和更弱的一律不扣——否则等于给所有地点齐刷刷减一个数，白扣。
+            worst = max(worst, max(0.0, tags[dimension] - 0.5) * 2)
+    return -AVOID_WEIGHT * worst
+
+
 def _hard_filter(place: dict, state: NeedState, rejected: set[str], now: datetime | None = None) -> bool:
     if place["placeId"] in rejected:
         return False
@@ -152,19 +189,21 @@ LOW_TAG_LABELS: dict[str, str] = {
 
 
 def _reason_chain(place: dict, state: NeedState, catalog: dict) -> list[str]:
-    """状态 → 需求 → 命中属性. Every line points at a stored field (FR-20)."""
-    from .interpretation import NEED_LABELS, STATE_LABELS
+    """两行：你说了什么 → 这里是什么。每一行都指向真实存下来的字段（FR-20）。
 
-    chain = [f"你说：{STATE_LABELS.get(state.mood_id, '说不太清楚')}"]
-    needs = [NEED_LABELS[key] for key in state.need_keys if key in NEED_LABELS][:2]
-    if needs:
-        chain.append("所以要找：" + "、".join(needs))
-    elif state.social_mode == "alone":
-        chain.append("所以要找：一个人待着不奇怪的地方")
-    elif state.budget_level == "free":
-        chain.append("所以要找：不用消费也能待的地方")
-    else:
-        chain.append("所以要找：" + MOOD_NEED_HINTS.get(state.mood_id, "能让你慢下来的地方"))
+    原来是三行：「你说：X」「所以要找：Y」「这里命中：Z」。中间那行是模板生成的套话
+    （need_keys 空的时候尤其明显，只会说「一个人待着不奇怪的地方」），
+    读起来像填充物，反而把「我说的」和「你给的」之间那根线冲淡了。
+    现在把用户明说的「想要」和「不想要」并到第一行，让这根线自己看得见。
+    """
+    from .interpretation import AVOID_LABELS, NEED_LABELS, STATE_LABELS
+
+    # 一行最多三样，不然它自己就变成了同事说的那种「可以不要的小字」。
+    # 「不想要」是用户自己说出口的，比任何推断都硬，所以它占掉那三样里的一个。
+    avoided = [AVOID_LABELS[key] for key in state.avoid_tags if key in AVOID_LABELS][:1]
+    wanted = [NEED_LABELS[key] for key in state.need_keys if key in NEED_LABELS]
+    said = [STATE_LABELS.get(state.mood_id, "说不太清楚")] + wanted[: 2 - len(avoided)] + avoided
+    chain = ["你说：" + "、".join(said)]
 
     target, _ = _target_for(state, catalog)
     tags = place.get("tags", {})
@@ -177,7 +216,7 @@ def _reason_chain(place: dict, state: NeedState, catalog: dict) -> list[str]:
         for key in hits
         if key in catalog["TAGS"]
     ][:3]
-    chain.append("这里命中：" + "、".join(labels) if labels else "这里只是大致接近，我不太确定")
+    chain.append("这里：" + "、".join(labels) if labels else "这里只是大致接近，我不太确定")
     return chain
 
 
@@ -241,6 +280,10 @@ def _rank(request: RecommendRequest, now: datetime | None = None) -> list[tuple[
             "budget_fit": round(budget_fit, 4),
         }
         score = need_match * 0.45 + energy_fit * 0.20 + travel_fit * 0.15 + social_fit * 0.10 + budget_fit * 0.10
+        avoid_penalty = _avoid_penalty(place, request.state)
+        if avoid_penalty:
+            score += avoid_penalty
+            breakdown = {**breakdown, "avoid_penalty": round(avoid_penalty, 4)}
         if hurried:
             tier, _ = _relief_tier(_estimate_reach_minutes(place))
             score += RELIEF_BONUS[tier]
