@@ -242,3 +242,7 @@ CurrentHRVDemo/            Swift / HealthKit HRV demo（Phase 2 入口）
   若当事人希望撤下，改成转述即可（搜索 `quote:` 定位）。
 - 界面上**不再出现任何平均变化分**。真实到访反馈还没攒够，所以推荐页、详情页、瀑布流一律显示「样本还少」（PRD FR-10b / FR-19b）。`places.json` 里残留的 `averageChange` / `feedbackCount` 已无人读取，别再把它们接回 UI。
 - 物料里的二维码是占位图形，扫不出东西。
+
+## 项目成员
+- **组长**：Estelle Ma
+- **核心组员**：Jue Chen, Camille Yu, PuffyFish Yang
