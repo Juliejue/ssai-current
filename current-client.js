@@ -16,7 +16,9 @@
   // 第一屏只告诉用户下一步能做什么，不把供应商后台文案直接甩给人。
   function voiceErrorMessage(message) {
     var code = Number(message && message.code);
-    if (code === 6001) return '当前网络像是经过了境外代理。关闭 VPN 后再试，或者直接打字。';
+    // 6001 是腾讯判定这条连接「跨境」。原因可能是用户挂了 VPN，也可能是
+    // 账号没开跨境流量——我们分不清是哪种，所以别一口咬定是用户的错。
+    if (code === 6001) return '语音服务这条线路没通，先直接打字吧。';
     if (code === 4003) return '语音功能还没有开通，请先直接打字。';
     if (code === 4004 || code === 4005) return '语音额度暂时不可用，请先直接打字。';
     if (code === 4006) return '现在说话的人有点多，请稍后再试或直接打字。';

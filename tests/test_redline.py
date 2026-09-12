@@ -393,7 +393,13 @@ def test_voice_provider_errors_are_translated_into_user_actions():
     source = (pathlib.Path(__file__).parents[1] / "current-client.js").read_text(encoding="utf-8")
     assert "function voiceErrorMessage(message)" in source
     assert "code === 6001" in source
-    assert "关闭 VPN 后再试，或者直接打字" in source
+    # 守的是「给用户下一步能做什么」，不是某一句原话。
+    # 原来这句一口咬定是用户挂了 VPN——6001 也可能是账号没开跨境流量，
+    # 我们分不清，就不该把责任推给用户。
+    import re as _re
+    handler = source[source.index("function voiceErrorMessage(message)"):][:1200]
+    assert "打字" in handler, "每条语音错误都要给出「改用打字」这条出路"
+    assert "console.cloud.tencent.com" not in handler, "不能把供应商控制台链接甩给用户"
     assert "fail(voiceErrorMessage(message))" in source
     assert "fail(message.message" not in source
 

@@ -410,7 +410,7 @@ def _to_recommendation(
     tier, relief_label = _relief_tier(reach_minutes)
     if lang == "en":
         relief_label = RELIEF_LABELS_EN.get(tier, relief_label)
-    status, open_label, hours_source = open_state(place, now)
+    status, open_label, hours_source = open_state(place, now, lang)
     amap = place.get("amap") or {}
     fence = (
         Geofence(

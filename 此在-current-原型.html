@@ -585,13 +585,34 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .alts .alt .relief{margin-top:7px}
 
 /* 行程条：出发 → 到达 → 离开，闭环显式可见 */
+/* 行程条要一直够得着。同事反馈「我到了」的横幅在最下端，得下拉才看得见，
+   那等于这一步走不下去了。钉在视口底部。 */
 .trip{flex:none;border-top:1px solid var(--line);background:var(--sun-wash);padding:10px 14px;
-  display:flex;align-items:center;gap:10px}
+  display:flex;align-items:center;gap:10px;
+  position:sticky;bottom:0;z-index:30;box-shadow:0 -6px 18px rgba(18,42,46,.07)}
 .trip .txt{flex:1;min-width:0}
 .trip .txt b{display:block;font:500 12.5px/1.5 var(--sans);color:var(--ink)}
 .trip .txt small{display:block;font:10.5px var(--mono);color:var(--ink-dim);letter-spacing:.04em}
 .trip button{flex:none;padding:8px 13px;border-radius:20px;background:var(--ink);color:var(--paper);font:500 12px var(--sans)}
 .trip button.ghost{background:none;color:var(--ink-dim);border:1px solid var(--line-2)}
+
+/* 记完之后那一下的回报。不是徽章，是「你刚刚改变了什么」。 */
+.payoff{margin:14px 0 4px;padding:13px 15px;border-radius:14px;
+  background:var(--sun-wash);border:1px solid var(--line-2)}
+.payoff b{display:block;font:500 13px/1.6 var(--sans);color:var(--ink);margin-bottom:5px}
+.payoff span{display:block;font:11.5px/1.75 var(--mono);color:var(--ink-dim);letter-spacing:.02em}
+
+/* 到达提示。它只是让人知道「系统认出来了」，不索取动作——
+   守则是到了不打扰，所以它自己会消失。 */
+.arrived-toast{position:absolute;left:14px;right:14px;bottom:74px;z-index:40;
+  background:var(--ink);color:var(--paper);border-radius:14px;padding:12px 15px;
+  display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(18,42,46,.22);
+  animation:toastIn .28s ease-out}
+.arrived-toast b{font:500 13px/1.5 var(--sans)}
+.arrived-toast small{display:block;font:10.5px var(--mono);opacity:.72;letter-spacing:.04em}
+.arrived-toast button{margin-left:auto;flex:none;background:rgba(255,255,255,.14);
+  color:var(--paper);border-radius:18px;padding:6px 12px;font:500 11.5px var(--sans)}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 /* 安全响应 */
 .safe{padding:26px 20px}
@@ -1648,6 +1669,7 @@ const state = {
   askAnswered: false,
   fixLink: "state",
   mapSheet: null,
+  arrivedToast: null, arrivedTimer: null,
   pendingDelete: null,
   reach: null,
   reachContext: null,
@@ -1911,6 +1933,10 @@ function syncPresenceWatch(){
       if (info.inside && trip.status === "departed"){
         trip.status = "arrived";
         trip.arrivedAt = new Date().toISOString();
+        // 让他知道系统认出来了，但不要他做任何事——到了不打扰。
+        state.arrivedToast = placeById(trip.placeId).placeName.replace(/ · .*/, "");
+        clearTimeout(state.arrivedTimer);
+        state.arrivedTimer = setTimeout(() => { state.arrivedToast = null; render(); }, 6000);
         CurrentAI.track("arrival_confirmed", {place_id:trip.placeId, recommendation_id:trip.recommendationId, presence_level:info.level, dwell_minutes:info.dwellMinutes});
       }
       saveTrip(trip);
@@ -1945,6 +1971,13 @@ function syncPresenceWatch(){
 
 // 一趟开着超过这么久，多半是忘了收，不是真的还在那儿。
 const STALE_TRIP_MINUTES = 6 * 60;
+
+function arrivedToast(){
+  if (!state.arrivedToast) return "";
+  return '<div class="arrived-toast"><div><b>你到' + escapeHTML(state.arrivedToast) + '了</b>' +
+         '<small>我知道了 · 到了不打扰</small></div>' +
+         '<button id="toast-close">知道了</button></div>';
+}
 
 function tripStrip(){
   const t = state.trip;
@@ -2458,6 +2491,30 @@ function presenceLine(rec){
   return "这条算你自己说的：没有围栏核验，停留也不到 5 分钟。它会进你的轨迹，但不进任何地点的匿名汇总。";
 }
 
+/* 记完之后，立刻告诉他这条记录改变了什么。
+   这是「为什么要记」的答案，而且是能兑现的那种。
+
+   刻意不做徽章、连续打卡、成就解锁：客群是情绪状态不好的人，
+   断签和进度条对他们是压力，不是动力。而且 PRD 里那条
+   「奖励和情绪变化脱钩」就是为了防止数据往好看的方向偏——
+   给「变好了」发奖章，等于在教用户怎么填这个表。
+   能给的回报只有一个：你说的话，真的改变了下一次。 */
+function payoffBanner(rec){
+  const lines = [];
+  const factor = (rec.factors || [])[0];
+  if (factor){
+    lines.push(rec.changeScore > 0
+      ? '下次我会多给你带「' + escapeHTML(factor) + '」的地方'
+      : '下次我会避开「' + escapeHTML(factor) + '」这一类');
+  }
+  const mine = state.records.length;
+  lines.push(mine < AGGREGATE_MIN
+    ? '这是第 ' + mine + ' 条 · 攒够 ' + AGGREGATE_MIN + ' 条，我就用你的记录替掉原来的估计'
+    : '你的 ' + mine + ' 条记录已经在替你改排序了');
+  return '<div class="payoff"><b>记下了，下次会不一样</b>' +
+         lines.map(l => '<span>' + l + '</span>').join("") + '</div>';
+}
+
 function renderCard(recId, backTo){
   const rec = state.records.find(r => r.id === recId) || state.records[0];
   if (!rec) return renderRecords();
@@ -2472,6 +2529,7 @@ function renderCard(recId, backTo){
   if (isNew){
     h += '<p class="eyebrow">记录完成</p><h1 class="title sm">这次到访，已经<br>收进你的轨迹。</h1>' +
          '<p class="lead">卡片有两面，点一下翻过去。</p>';
+    h += payoffBanner(rec);
   }
   h += '<div class="flip-stage">';
   if (!state.flipped){
@@ -3393,6 +3451,11 @@ const EN = {
     "Staying in isn't a problem. If nothing has felt worth it for a while, talking to someone you trust helps more than any place I could find.",
   "我不会因为你没去就少给你什么。": "I won't give you less because you didn't go.",
   "回到开头": "Back to start", "回到": "Back to ",
+  "记下了，下次会不一样": "Noted — next time will be different",
+  "下次我会多给你带「": "I'll favour places with 「", "」的地方": "」",
+  "下次我会避开「": "I'll steer away from 「", "」这一类": "」",
+  "这是第 ": "That's #", " 条 · 攒够 ": " · at ", " 条，我就用你的记录替掉原来的估计": " I'll use your records instead of my estimate",
+  "条记录已经在替你改排序了": " records are already reordering your picks",
   "说 30 秒": "Thirty seconds", "以后再说": "Later", "收起来": "Close it",
   "走了我自己知道": "I'll know when you leave", "说三十秒？": "Thirty seconds?",
   "过去挺久了，要不收了它": "that was a while ago — want to close it?",
@@ -3597,7 +3660,7 @@ function render(){
   else if (r === "#/records")            inner = renderRecords();
   else { state.route = "#/talk"; inner = renderTalk(); }
 
-  root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + mapSheet() + '</div>' +
+  root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + arrivedToast() + mapSheet() + '</div>' +
     '<p class="stage-note">390 × 844 · AI 后端试运行 · <a href="#/compare" data-go="#/compare">会议总览页</a></p></div>';
 
   if (isCompare) scaleMinis();
@@ -3711,6 +3774,15 @@ function bind(){
   const locationInput = root.querySelector("#location-input");
   const demoLocation = root.querySelector("#demo-location");
   const naturalStatus = root.querySelector("#natural-status") || root.querySelector("#mic-cap");
+  /* 语音失败 → 立刻展开打字框并聚焦。错误提示留在原地，但下一步已经摆好了。 */
+  function failToTyping(message){
+    state.talkTyping = true;
+    state.reachNote = message;
+    render();
+    const box = document.getElementById("natural-input");
+    if (box) box.focus();
+  }
+
   function setNaturalStatus(message, error){
     if (!naturalStatus) return;
     naturalStatus.textContent = message;
@@ -3803,8 +3875,10 @@ function bind(){
       onPartial: text => { state.talkText = text; if (naturalInput) naturalInput.value = text; setNaturalStatus("「" + text + "」"); },
       // 语音优先：说完直接进入理解，不再要求用户按第二个按钮。
       onText: text => { voiceInput.classList.remove("listening"); state.talkText = text; if (naturalInput) naturalInput.value = text; submitNatural(text); },
-      onError: message => { voiceInput.classList.remove("listening"); setNaturalStatus(message, true); }
-    }).catch(error => { voiceInput.classList.remove("listening"); setNaturalStatus(error.message, true); });
+      // 语音挂了不能是死路。直接把打字框推到他面前并聚焦——
+      // 一个正难受的人不该还要自己去找「那我怎么办」。
+      onError: message => { voiceInput.classList.remove("listening"); failToTyping(message); }
+    }).catch(error => { voiceInput.classList.remove("listening"); failToTyping(error.message); });
   };
   if (locationInput) locationInput.onclick = () => {
     locationInput.disabled = true;
@@ -3951,6 +4025,9 @@ function bind(){
     state.mapSheet = null;
     setTimeout(render, 0);   // 让 <a> 先完成跳转，再收面板
   });
+  const toastClose = root.querySelector("#toast-close");
+  if (toastClose) toastClose.onclick = () => { clearTimeout(state.arrivedTimer); state.arrivedToast = null; render(); };
+
   const mapCancel = root.querySelector("#map-cancel");
   if (mapCancel) mapCancel.onclick = () => { state.mapSheet = null; render(); };
 

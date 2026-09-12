@@ -106,34 +106,44 @@ def _within(now: datetime, opens: time, closes: time) -> bool:
     return current >= opens or current < closes
 
 
-def open_state(place: dict, now: datetime | None = None) -> tuple[OpenState, str, str]:
-    """返回 (状态, 给用户看的一句话, 数据来源)。"""
+def open_state(place: dict, now: datetime | None = None, lang: str = "zh") -> tuple[OpenState, str, str]:
+    """返回 (状态, 给用户看的一句话, 数据来源)。
+
+    这句话是后端生成的，所以英文版必须在这里就分叉——
+    交给前端去翻，就会出现英文界面里夹着一行中文营业时间。
+    """
     now = now or datetime.now(BEIJING)
     hours = resolve_hours(place)
     source = hours["source"]
+    en = lang == "en"
 
     if source == "always_open":
-        return ALWAYS_OPEN, "没有门，什么时候都能去", source
+        return ALWAYS_OPEN, ("No door. Open whenever." if en else "没有门，什么时候都能去"), source
     if source == "unknown":
-        return "unknown", "营业时间不确定，去之前最好查一下", source
+        return "unknown", ("Hours unclear — worth checking first" if en else "营业时间不确定，去之前最好查一下"), source
 
     if now.weekday() in (hours["closed_days"] or []):
-        return "closed", "今天闭馆", source
+        return "closed", ("Closed today" if en else "今天闭馆"), source
 
     spans = hours.get("spans") or [[hours["open"], hours["close"]]]
     inside = any(_within(now, _parse(a), _parse(b)) for a, b in spans)
 
     if source == "verified":
-        return ("open", f"现在开着 · {hours['close']} 关门", source) if inside else ("closed", f"现在没开 · {hours['open']} 才开门", source)
+        if inside:
+            return "open", (f"Open now · closes {hours['close']}" if en else f"现在开着 · {hours['close']} 关门"), source
+        return "closed", (f"Closed now · opens {hours['open']}" if en else f"现在没开 · {hours['open']} 才开门"), source
 
     if source == "provider":
         # 高德的数据，比类目估算准，但仍然可能过期，所以只降权不过滤。
-        window = "、".join(f"{a}–{b}" for a, b in spans)
+        window = "、".join(f"{a}–{b}" for a, b in spans) if not en else ", ".join(f"{a}–{b}" for a, b in spans)
         if inside:
-            return "open", f"高德记的营业时间是 {window}", source
-        return "likely_closed", f"高德记的营业时间是 {window}，现在应该没开", source
+            return "open", (f"Amap lists {window}" if en else f"高德记的营业时间是 {window}"), source
+        return "likely_closed", (f"Amap lists {window} — probably shut now" if en
+                                 else f"高德记的营业时间是 {window}，现在应该没开"), source
 
     # 估算：说清楚这是「一般来说」，不冒充确定
     if inside:
-        return "open", f"这一类一般开到 {hours['close']}（未经核对）", source
-    return "likely_closed", f"这个点大概率关着门（这一类一般 {hours['open']}–{hours['close']}，未经核对）", source
+        return "open", (f"This kind usually closes around {hours['close']} (unverified)" if en
+                        else f"这一类一般开到 {hours['close']}（未经核对）"), source
+    return "likely_closed", (f"Probably shut now (this kind usually {hours['open']}–{hours['close']}, unverified)" if en
+                             else f"这个点大概率关着门（这一类一般 {hours['open']}–{hours['close']}，未经核对）"), source
