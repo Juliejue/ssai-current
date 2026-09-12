@@ -44,7 +44,7 @@ def test_live_route_replaces_estimate_and_respects_max_travel(monkeypatch):
             # 返回空 = 候选集只有人工那 26 个，正是这些断言假设的前提。
             return []
 
-        async def walking_route(self, **_):
+        async def route(self, **_):
             return WalkingRoute(distance_meters=1600, duration_seconds=1200)
 
     request = RecommendRequest(
@@ -106,7 +106,7 @@ def test_measured_walk_cancels_the_estimated_relief_bonus(monkeypatch):
         def __init__(self):
             self.calls = 0
 
-        async def walking_route(self, **_):
+        async def route(self, **_):
             route = routes[self.order[self.calls]]
             self.calls += 1
             return route
@@ -151,7 +151,7 @@ def test_measured_distance_applies_the_same_limit_as_the_estimate(monkeypatch):
         def __init__(self):
             self.calls = 0
 
-        async def walking_route(self, **_):
+        async def route(self, **_):
             route = routes[self.calls]
             self.calls += 1
             return route
@@ -182,7 +182,7 @@ def test_never_returns_empty_when_only_distance_disqualified_everything(monkeypa
             # 返回空 = 候选集只有人工那 26 个，正是这些断言假设的前提。
             return []
 
-        async def walking_route(self, **_):
+        async def route(self, **_):
             return WalkingRoute(distance_meters=9000, duration_seconds=7200)
 
     request = RecommendRequest(
@@ -216,7 +216,7 @@ def test_a_straight_line_distance_from_the_map_is_not_called_a_prototype_estimat
         async def search_around(self, **_):
             return []
 
-        async def walking_route(self, **_):
+        async def route(self, **_):
             raise recommender.MapProviderError("跨境失败")
 
     request = RecommendRequest(
@@ -226,3 +226,39 @@ def test_a_straight_line_distance_from_the_map_is_not_called_a_prototype_estimat
     results = asyncio.run(recommender.recommend_with_live_context(request, map_client=NoRouteClient()))
     assert results[0].distance_source == "amap_straight_line"
     assert results[0].distance_km == 0.53
+
+
+def test_a_far_place_is_not_offered_as_a_two_hour_walk():
+    """同事实测收到「步行 160 多分钟」，说「好吓人」。他是对的。
+
+    步行 8 公里理论上可行，但没人会照做。远的地方要按骑行/公交算——
+    这不是算错了，是问错了问题。
+    """
+    assert recommender.AmapClient.mode_for(0.4) == "walk"
+    assert recommender.AmapClient.mode_for(1.5) == "walk"
+    assert recommender.AmapClient.mode_for(3.0) == "ride"
+    assert recommender.AmapClient.mode_for(8.1) == "transit"
+    # 拿不到距离时退回步行，而不是猜一个交通方式
+    assert recommender.AmapClient.mode_for(None) == "walk"
+
+
+def test_transit_without_a_citycode_falls_back_instead_of_guessing_a_city(monkeypatch):
+    """没有城市编码就问不了公交。退回骑行，绝不硬套一个城市。"""
+    asked = {}
+
+    class Recording:
+        configured = True
+
+        async def _get(self, path, params):
+            asked["path"] = path
+            return {"route": {"paths": [{"distance": "8052", "cost": {"duration": "2953"}}]}}
+
+    client = recommender.AmapClient()
+    monkeypatch.setattr(client, "_get", Recording()._get)
+    route = asyncio.run(client.route(
+        origin_longitude=116.4, origin_latitude=39.94,
+        destination_longitude=116.45, destination_latitude=39.90,
+        mode="transit", citycode=None,
+    ))
+    assert route.mode == "ride"
+    assert "bicycling" in asked["path"]

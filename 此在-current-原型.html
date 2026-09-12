@@ -1916,6 +1916,23 @@ function syncPresenceWatch(){
       saveTrip(trip);
       if (changed) render();
     },
+    // 走出围栏 = 该问那三十秒的时刻。不用用户按「我离开了」。
+    // 但也不把他直接甩到反馈页——他可能正在路上、正在忙。
+    // 行程条变成一句话一个动作，他点了才进去。
+    onLeft: info => {
+      const trip = state.trip;
+      if (!trip) return;
+      trip.status = "left";
+      trip.leftAt = new Date().toISOString();
+      trip.dwellMinutes = info.dwellMinutes;
+      trip.presenceLevel = info.level;
+      trip.autoLeft = true;
+      saveTrip(trip);
+      CurrentAI.track("departure_detected", {place_id:trip.placeId, recommendation_id:trip.recommendationId, presence_level:info.level, dwell_minutes:info.dwellMinutes});
+      CurrentAI.stopPresence();
+      state.watchingPlaceId = null;
+      render();
+    },
     onUnavailable: message => {
       const trip = state.trip;
       if (!trip) return;
@@ -1925,6 +1942,9 @@ function syncPresenceWatch(){
     }
   });
 }
+
+// 一趟开着超过这么久，多半是忘了收，不是真的还在那儿。
+const STALE_TRIP_MINUTES = 6 * 60;
 
 function tripStrip(){
   const t = state.trip;
@@ -1941,10 +1961,30 @@ function tripStrip(){
       '<button data-trip="arrived">我到了</button></div>';
   }
 
-  const dwell = t.dwellMinutes || Math.max(0, Math.round((Date.now() - new Date(t.arrivedAt).getTime()) / 60000));
+  // 自动判定已经走了：这是唯一该主动开口的时刻。
+  if (t.status === "left"){
+    return '<div class="trip"><div class="txt"><b>你离开了' + short + '</b>' +
+      '<small>待了 ' + (t.dwellMinutes || 0) + ' 分钟 · 说三十秒？</small></div>' +
+      '<button data-trip="left">说 30 秒</button>' +
+      '<button class="ghost" data-trip="clear">以后再说</button></div>';
+  }
+
+  const elapsed = Math.max(0, Math.round((Date.now() - new Date(t.arrivedAt).getTime()) / 60000));
+  // 一趟挂了大半天多半是忘了收，不是真待了 2243 分钟。
+  // 显示那个数字比不显示更糟——它会让人觉得这个 App 根本没在算。
+  if (elapsed > STALE_TRIP_MINUTES){
+    return '<div class="trip"><div class="txt"><b>' + short + '那一趟还开着</b>' +
+      '<small>过去挺久了，要不收了它</small></div>' +
+      '<button data-trip="left">说 30 秒</button>' +
+      '<button class="ghost" data-trip="clear">收起来</button></div>';
+  }
+
+  const dwell = t.dwellMinutes || elapsed;
   const level = t.presenceLevel || (dwell >= 5 ? "dwell_only" : "self_reported");
+  // 有围栏就不用他自己按——走了我自己知道。
+  const note = fenced ? "走了我自己知道" : PRESENCE_LABEL[level] + " · 走的时候说 30 秒";
   return '<div class="trip"><div class="txt"><b>你在' + short + ' · 停留 ' + dwell + ' 分钟</b>' +
-    '<small>' + PRESENCE_LABEL[level] + (fenced && t.inside ? " · 围栏内" : "") + ' · 走的时候说 30 秒</small></div>' +
+    '<small>' + note + (fenced && t.inside ? " · 围栏内" : "") + '</small></div>' +
     '<button data-trip="left">我离开了</button>' +
     '<button class="ghost" data-trip="clear">取消</button></div>';
 }
@@ -3181,7 +3221,9 @@ function reachLine(rec, p){
   const locationMode = CurrentAI.getLocationMode();
   if (rec.distance_source === "amap" && rec.walking_minutes){
     const source = locationMode === "demo" ? "高德实测 · 从北京东四起算" : "高德实测";
-    return "步行约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km（" + source + "）";
+    // 8 公里说「步行 108 分钟」不是贴心，是吓人。远的地方按骑行/公交算。
+    const how = {walk:"步行", ride:"骑行", transit:"公交"}[rec.travel_mode] || "步行";
+    return how + "约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km（" + source + "）";
   }
   if (rec.distance_source === "amap_straight_line" && rec.distance_km != null){
     // 直线距离是高德给的，不是我们估的。说成「原型估算」是在冤枉自己的数据。
@@ -3288,7 +3330,8 @@ const EN = {
   "（高德暂未返回路线，使用原型估算）": " (no route from Amap — prototype estimate)",
   "（高德测距，步行路线还没算）": " (Amap distance; walking route not computed yet)",
   "直线 ": "as the crow flies: ",
-  "高德实测": "measured by Amap", "高德实测 · 从北京东四起算": "measured by Amap · from Dongsi, Beijing",
+  "高德实测": "measured by Amap", "步行约": "about a", "骑行约": "about a", "公交约": "about a",
+  "步行": "walk", "骑行": "bike", "公交": "transit", "高德实测 · 从北京东四起算": "measured by Amap · from Dongsi, Beijing",
   "用哪个地图带你去？": "Which map should take you?",
   "· 坐标已按各家的坐标系换算过，不会偏": " · coordinates converted for each provider, so it won't be off",
   "这个地点我还没核对过坐标，": "I haven't checked this place's coordinates yet, ",
@@ -3350,6 +3393,10 @@ const EN = {
     "Staying in isn't a problem. If nothing has felt worth it for a while, talking to someone you trust helps more than any place I could find.",
   "我不会因为你没去就少给你什么。": "I won't give you less because you didn't go.",
   "回到开头": "Back to start", "回到": "Back to ",
+  "说 30 秒": "Thirty seconds", "以后再说": "Later", "收起来": "Close it",
+  "走了我自己知道": "I'll know when you leave", "说三十秒？": "Thirty seconds?",
+  "过去挺久了，要不收了它": "that was a while ago — want to close it?",
+  "那一趟还开着": " trip is still open", "你离开了": "You left ", "待了 ": "stayed ",
   "22–8点": "22–8", "21–9点": "21–9", "20–10点": "20–10",
   "一个匿名 session ID，不含姓名、手机号、设备指纹": "One anonymous session ID — no name, phone, or device fingerprint",
   "依据只有你的": "Based on your ", "条记录": " records",

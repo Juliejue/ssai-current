@@ -312,6 +312,9 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
         "category": profile["label"],
         "category_en": profile.get("label_en") or profile["label"],
         "city": str(poi.get("cityname") or ""),
+        # 公交路线要城市编码。周边搜索本来就返回它，捡起来用，
+        # 免得为了一条公交路线再去做一次逆地理编码。
+        "citycode": str(poi.get("citycode") or ""),
         "coverImage": f"photo:{photos[0]}",
         "photos": photos,
         "ratio": "4/5",

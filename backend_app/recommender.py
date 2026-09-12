@@ -13,7 +13,8 @@ from .discovery import discover, warm as warm_search
 from .i18n import (AVOID_LABELS_EN, LOW_TAG_LABELS_EN, NEED_LABELS_EN, RELIEF_LABELS_EN,
                    STATE_LABELS_EN, TAG_LABELS_EN, ui)
 from .narrate import narrate_quietly
-from .map_provider import AmapClient, MapProviderError, WalkingRoute, map_links, navigation_url
+from .map_provider import (AmapClient, MapProviderError, TRUSTWORTHY_COORDINATES, WalkingRoute,
+                            map_links, navigation_url)
 from .opening_hours import open_state
 from .presence import geofence_radius_m, has_geofence
 from .schemas import Geofence, Location, NeedState, RecommendRequest, Recommendation
@@ -429,6 +430,7 @@ def _to_recommendation(
         score=round(max(0.0, min(1.0, score)), 4),
         distance_km=distance_km,
         walking_minutes=walking_minutes,
+        travel_mode=route.mode if route else "walk",
         distance_source=(
             "amap" if route
             # 现场搜到的地点，距离是高德周边搜索一起返回的，是真的直线距离。
@@ -530,18 +532,27 @@ async def recommend_with_live_context(
     shortlist = ranked[: request.limit + 2]
     semaphore = asyncio.Semaphore(4)
 
+    # 公交要城市编码。现场搜索的结果里本来就带着，捡一个用就行。
+    citycode = next((str(place.get("citycode")) for place in discovered if place.get("citycode")), None)
+
     async def route_for(place: dict) -> WalkingRoute | None:
         amap = place.get("amap") or {}
-        if amap.get("verification_status") != "verified":
+        # 人工核对过的，和高德自己的 POI 记录，两种坐标都可以拿来算路线。
+        if amap.get("verification_status") not in TRUSTWORTHY_COORDINATES:
             return None
+        # 先按直线距离决定「该怎么过去」。只问步行会给出「步行 160 分钟」，
+        # 那不是算错了，是问错了问题——没人会照着走。
+        mode = AmapClient.mode_for(place.get("distanceKm"))
         try:
             async with semaphore:
-                return await client.walking_route(
+                return await client.route(
                     origin_longitude=request.location.longitude,
                     origin_latitude=request.location.latitude,
                     destination_longitude=float(amap["longitude"]),
                     destination_latitude=float(amap["latitude"]),
                     destination_id=amap.get("provider_place_id"),
+                    mode=mode,
+                    citycode=citycode,
                 )
         except (KeyError, TypeError, ValueError, MapProviderError):
             return None

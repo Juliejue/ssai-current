@@ -26,6 +26,9 @@ class MapProviderError(RuntimeError):
 class WalkingRoute:
     distance_meters: int
     duration_seconds: int
+    # 怎么过去。只问步行会给出「步行 160 分钟」这种没人会照做的数字——
+    # 不是算错了，是问错了问题。
+    mode: str = "walk"
 
 
 def parse_location(value: str) -> tuple[float, float]:
@@ -166,7 +169,22 @@ class AmapClient:
             results.append({**poi, "longitude": poi_longitude, "latitude": poi_latitude})
         return results
 
-    async def walking_route(
+    # 多远该用什么方式过去。界限按「一个正难受的人愿不愿意照做」定，
+    # 不是按理论可达性——步行 8 公里理论上可行，但没人会去。
+    WALK_LIMIT_KM = 1.5
+    RIDE_LIMIT_KM = 5.0
+
+    @staticmethod
+    def mode_for(straight_line_km: float | None) -> str:
+        if straight_line_km is None:
+            return "walk"
+        if straight_line_km <= AmapClient.WALK_LIMIT_KM:
+            return "walk"
+        if straight_line_km <= AmapClient.RIDE_LIMIT_KM:
+            return "ride"
+        return "transit"
+
+    async def route(
         self,
         *,
         origin_longitude: float,
@@ -174,26 +192,50 @@ class AmapClient:
         destination_longitude: float,
         destination_latitude: float,
         destination_id: str | None = None,
+        mode: str = "walk",
+        citycode: str | None = None,
     ) -> WalkingRoute:
         params: dict[str, str | int] = {
             "origin": f"{origin_longitude},{origin_latitude}",
             "destination": f"{destination_longitude},{destination_latitude}",
             "show_fields": "cost",
         }
-        if destination_id:
+        if destination_id and mode == "walk":
             params["destination_id"] = destination_id
-        payload = await self._get("/v5/direction/walking", params)
-        paths = (payload.get("route") or {}).get("paths") or []
-        if not paths:
-            raise MapProviderError("没有可用的步行路线")
-        path = paths[0]
+        if mode == "transit":
+            if not citycode:
+                # 没有城市编码就问不了公交。退回骑行，而不是硬套一个城市。
+                mode = "ride"
+            else:
+                params["city1"] = citycode
+                params["city2"] = citycode
+
+        path_key = "transits" if mode == "transit" else "paths"
+        endpoint = {
+            "walk": "/v5/direction/walking",
+            "ride": "/v5/direction/bicycling",
+            "transit": "/v5/direction/transit/integrated",
+        }[mode]
+
+        payload = await self._get(endpoint, params)
+        items = (payload.get("route") or {}).get(path_key) or []
+        if not items:
+            raise MapProviderError("没有可用的路线")
+        item = items[0]
         try:
+            duration = (item.get("cost") or {}).get("duration") or item.get("duration")
             return WalkingRoute(
-                distance_meters=int(float(path["distance"])),
-                duration_seconds=int(float(path["cost"]["duration"])),
+                distance_meters=int(float(item["distance"])),
+                duration_seconds=int(float(duration)),
+                mode=mode,
             )
         except (KeyError, TypeError, ValueError) as error:
             raise MapProviderError("地图服务返回了无效路线") from error
+
+    async def walking_route(self, **kwargs) -> WalkingRoute:
+        """老名字，保留给只关心步行的调用方（测试里的替身也还在用）。"""
+        kwargs.pop("mode", None)
+        return await self.route(mode="walk", **kwargs)
 
 
 # 坐标可信 ≠ 身份是我们认定的。

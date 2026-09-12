@@ -109,6 +109,8 @@ class Recommendation(BaseModel):
     score: float = Field(ge=0, le=1)
     distance_km: float | None = None
     walking_minutes: int | None = None
+    # 怎么过去：走 / 骑 / 公交。8 公里说「步行 108 分钟」不是贴心，是吓人。
+    travel_mode: Literal["walk", "ride", "transit"] = "walk"
     # amap                = 高德实测步行路线
     # amap_straight_line  = 高德周边搜索给的直线距离（现场搜到的地点，还没算路线）
     # prototype_estimate  = 原型里写死的估算值，跟用户从哪儿出发无关

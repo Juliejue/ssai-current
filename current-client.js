@@ -207,9 +207,16 @@
 
     var insideSince = null;
     var lastLevel = 'self_reported';
+    var bestDwell = 0;
+    var wasInside = false;
+    // 出围栏就立刻判「走了」会误判：在室内定位飘一下、绕到建筑背面，
+    // 都会短暂掉出去。要连续在外面这么久，才算真的离开。
+    var LEAVE_GRACE_MS = 3 * 60 * 1000;
+    var outsideSince = null;
 
     function emit(inside, accuracy) {
       var dwellMinutes = insideSince ? Math.floor((Date.now() - insideSince) / 60000) : 0;
+      if (dwellMinutes > bestDwell) bestDwell = dwellMinutes;
       lastLevel = inside && dwellMinutes >= 5 ? 'geofence_dwell' : lastLevel;
       callbacks.onState({ inside: inside, dwellMinutes: dwellMinutes, level: lastLevel, accuracyM: Math.round(accuracy || 0) });
     }
@@ -219,8 +226,24 @@
       var distance = metersBetween(here, fence);
       // 定位误差算进围栏，否则室内定位会把真到了的人判成没到。
       var inside = distance <= fence.radius_m + Math.min(position.coords.accuracy || 0, 200);
-      if (inside && !insideSince) insideSince = Date.now();
-      if (!inside) insideSince = null;
+      if (inside) {
+        if (!insideSince) insideSince = Date.now();
+        outsideSince = null;
+        wasInside = true;
+      } else {
+        insideSince = null;
+        if (wasInside) {
+          if (!outsideSince) outsideSince = Date.now();
+          // 真的待过（够 5 分钟），又真的走出去了 → 这一趟结束。
+          // 用户不用按「我离开了」，这一下就是该问那三十秒的时刻。
+          if (Date.now() - outsideSince >= LEAVE_GRACE_MS && bestDwell >= 5) {
+            wasInside = false;
+            outsideSince = null;
+            if (callbacks.onLeft) callbacks.onLeft({ dwellMinutes: bestDwell, level: lastLevel });
+            return;
+          }
+        }
+      }
       emit(inside, position.coords.accuracy);
     }, function () {
       callbacks.onUnavailable('没有位置权限，到了按一下就行');
