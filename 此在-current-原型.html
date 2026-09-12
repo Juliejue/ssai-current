@@ -670,10 +670,6 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 /* ============================================================
    主动触达（§6.3 路径 A / FR-31）、分层授权（M6 / FR-04）、守护层（FR-14）
    ============================================================ */
-.reach-why{margin:0 0 20px;padding:13px 14px;border-radius:14px;background:var(--sun-wash);
-  border:1px solid rgba(196,112,60,.24)}
-.reach-why .k{display:block;font:9.5px var(--mono);letter-spacing:.14em;color:var(--sun);margin-bottom:6px}
-.reach-why p{margin:0;font:13px/1.75 var(--sans);color:var(--ink)}
 .reach-foot{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
   display:flex;align-items:center;gap:8px;font:11px/1.6 var(--sans);color:var(--ink-faint)}
 .reach-foot button{margin-left:auto;flex:none;font:11px var(--sans);color:var(--water);white-space:nowrap}
@@ -1673,7 +1669,6 @@ const state = {
   reflect: null, reflectTyping: false, reflectText: "", reflectNote: null,
   pendingDelete: null,
   reach: null,
-  reachContext: null,
   reachNote: null,
   offerDeparted: false,
   guardianDismissed: false,
@@ -1822,29 +1817,6 @@ function noteSession(){
 /* 主动触达的「为什么是现在」。
    守则 4 证据先于结论；守则 6 不确定就说不确定——
    我们手上只有时间和这台设备上的历史记录，没有 HRV，就不假装有。 */
-function reachEvidence(){
-  const now = new Date();
-  const hour = now.getHours();
-  const near = state.records.filter(r => {
-    const h = new Date(r.visitStartedAt).getHours();
-    return Math.abs(h - hour) <= 2 && r.changeScore > 0;
-  });
-  if (near.length){
-    const r = near[0];
-    return {
-      why:"上一次这个点前后，你去了" + r.placeName.replace(/ · .*/, "") + "，回来给了 " + signed(r.changeScore) + "。",
-      guess:"我猜你现在也差不多到了想换个地方的时候。"
-    };
-  }
-  if (hour >= 15 && hour < 19){
-    return {why:"现在是 " + String(hour).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0") +
-                "，一天里最容易散掉的那一段。",
-            guess:"我猜你身上现在还绷着点什么。"};
-  }
-  return {why:"我手上只有时间这一个信号，没有别的依据。",
-          guess:"所以这次纯属我瞎猜——猜错了一步就能改。"};
-}
-
 function reachAllowed(){
   return ReachPolicy.canReach(Date.now(), state.reach, {
     enabled:state.reach.enabled, dailyCap:state.reach.dailyCap,
@@ -1852,24 +1824,14 @@ function reachAllowed(){
   });
 }
 
-function openReach(source){
-  const now = Date.now();
-  const today = ReachPolicy.startOfDay(now);
-  const sameDay = state.reach.todayKey === today;
-  saveReach({
-    todayKey:today,
-    todayCount:(sameDay ? state.reach.todayCount : 0) + 1,
-    lastPromptAt:now
-  });
-  state.reachContext = reachEvidence();
-  CurrentAI.track("natural_language_started", {method:source || "proactive"});
-  go("#/reach");
-}
-
 /* FR-31 延迟复看：只回来一次，回来之前不打扰。到点了就在打开页面时接住。 */
 function dueForRecheck(){
   const r = state.reach;
-  return Boolean(r.recheckAt && !r.recheckHandled && Date.now() >= r.recheckAt);
+  if (!(r.recheckAt && !r.recheckHandled && Date.now() >= r.recheckAt)) return false;
+  // 延迟复看是这个产品现在唯一真的会主动打断人的地方，
+  // 所以「让小在主动来找我」「一天最多几次」「静默时段」必须管得住它。
+  // 否则设置页底下那句「关了就是关了」就是假的。
+  return reachAllowed().ok;
 }
 
 /* FR-14 防「越来越不出门」：给了推荐却一次都没出发，累计到阈值就换一种说法 */
@@ -2438,7 +2400,8 @@ function renderVisit(id){
        '<span class="arrow">·</span><div><small>出发前</small><strong>' + moodById(state.mood).name + '</strong></div></div>';
   h += '<div class="actions"><button class="btn" data-reflect="' + p.placeId + '">说说刚才 <span>→</span></button>' +
        '<button class="btn-text" data-remind="1">稍后提醒</button>';
-  if (d.reminder) h += '<p class="hint on" style="text-align:center">好，先去过你的生活。这条会留在记录里等你。</p>';
+  if (d.reminder) h += '<p class="hint on" style="text-align:center">' +
+       escapeHTML(state.reflectNote || "好，先去过你的生活。这条会留在记录里等你。") + '</p>';
   h += '</div></div></div>';
   h += dock('我不评价这个地方。我只想知道它对<b>你</b>做了什么。');
   return h;
@@ -2993,24 +2956,6 @@ function micSVG(){
 /* --- ⓪ 主动触达确认页（§6.3 路径 A）---
    带着「为什么是现在」出现，用户一步确认。三个出口都在同一屏：
    就按这个 / 不太对 / 现在不方便——最后一个不是拒绝，是改约（FR-31）。 */
-function renderReach(){
-  const ctx = state.reachContext || reachEvidence();
-  let h = topbar("小在来找你", "主动触达", "#/talk");
-  h += '<div class="screen mid"><div class="pad">';
-  h += '<div class="say"><span class="zai">' + cloudSVG("withyou") + '</span>' +
-       '<div class="bubble"><span class="tag">小在</span><p>' + escapeHTML(ctx.guess) + '</p></div></div>';
-  h += '<div class="reach-why"><span class="k">为什么是现在</span><p>' + escapeHTML(ctx.why) + '</p></div>';
-  h += '<div class="actions"><button class="btn" id="reach-yes">好，帮我找一个 <span>→</span></button>' +
-       '<div class="btn-row" style="margin-top:10px">' +
-       '<button class="btn ghost sm" data-go="#/fix">不太对</button>' +
-       '<button class="btn ghost sm" id="reach-later">现在不方便</button></div></div>';
-  h += '<div class="reach-foot"><span>这是我主动来找你的，不是你打开的。</span>' +
-       '<button data-go="#/settings">管打扰</button></div>';
-  h += '</div></div>';
-  h += dock('随时可以关，关了我不绕回来。', {records:false});
-  return h;
-}
-
 /* --- ⓪b 延迟复看（FR-31）---
    PRD 原本要对比峰值与当前 HRV。我们没有接手表，就不假装能看出来——
    问一句，然后照着答案办。 */
@@ -3087,8 +3032,7 @@ function renderSettings(){
        '<div class="pick">' + [[22,8],[21,9],[20,10]].map(w =>
          '<button class="' + (r.silentFrom === w[0] ? "on" : "") + '" data-silent="' + w[0] + ':' + w[1] + '">' +
          w[0] + '–' + w[1] + '点</button>').join("") + '</div></div>';
-  h += '<div class="setrow"><div class="txt"><b>看一次主动触达</b><small>演示用</small></div>' +
-       '<div class="pick"><button data-demoreach="1">试一次</button></div></div>';
+
 
   h += '<details class="fold" style="margin-top:26px"><summary>这台设备上存了什么</summary>';
   h += '<div class="tier"><div class="tb" style="padding-top:13px">' +
@@ -3729,7 +3673,6 @@ function render(){
 
   if (r === "#/compare"){ isCompare = true; inner = renderCompare(); }
   else if (r === "#/talk")   inner = renderTalk();
-  else if (r === "#/reach")    inner = renderReach();
   else if (r === "#/recheck")  inner = renderRecheck();
   else if (r === "#/settings") inner = renderSettings();
   else if (r === "#/echo")   inner = renderEcho();
@@ -4239,7 +4182,17 @@ function bind(){
 
 
 
-  root.querySelectorAll("[data-remind]").forEach(el => el.onclick = () => { state.draft.reminder = true; render(); });
+  root.querySelectorAll("[data-remind]").forEach(el => el.onclick = () => {
+    state.draft.reminder = true;
+    // 「稍后提醒」是用户自己开的口，所以这是唯一正当的主动回来时机（FR-31）。
+    // 排期要过打扰设置那一关：推到静默时段就作罢，宁可不回来也不半夜敲人。
+    const at = ReachPolicy.scheduleRecheck(Date.now(), 18, state.reach);
+    saveReach({recheckAt:at, recheckHandled:!at});
+    state.reflectNote = at
+      ? "好，我 " + fmtDate(new Date(at).toISOString()).split(" ")[1] + " 回来问一次。这中间不打扰。"
+      : "好，那今天就不打扰了。";
+    render();
+  });
 
   root.querySelectorAll("[data-reflect]").forEach(el => el.onclick = () => {
     state.reflect = null; state.reflectTyping = false; state.reflectText = ""; state.reflectNote = null;
@@ -4318,25 +4271,6 @@ function bind(){
   root.querySelectorAll("[data-save]").forEach(el => el.onclick = () => { syncNote(); save(el.dataset.save); });
 
   // ---- 主动触达 / 延迟复看 / 守护层 / 分层授权 ----
-  const reachYes = root.querySelector("#reach-yes");
-  if (reachYes) reachYes.onclick = () => {
-    saveReach({declineStreak:0, mutedUntil:null, stopped:false});
-    state.talkTyping = true;
-    go("#/talk");
-  };
-
-  const reachLater = root.querySelector("#reach-later");
-  if (reachLater) reachLater.onclick = () => {
-    // FR-31：这不是拒绝，是改约。记下来，到点回来一次，中间不追问。
-    const at = ReachPolicy.scheduleRecheck(Date.now(), 18);
-    const back = ReachPolicy.backoffAfterDecline(Date.now(), 0);
-    saveReach({recheckAt:at, recheckHandled:!at, mutedUntil:back.mutedUntil});
-    state.reachNote = at
-      ? "好，我 " + fmtDate(new Date(at).toISOString()).split(" ")[1] + " 再回来看你一次。这中间不打扰。"
-      : "好，那今天就不打扰了。";
-    go("#/talk");
-  };
-
   const recheckBetter = root.querySelector("#recheck-better");
   if (recheckBetter) recheckBetter.onclick = () => {
     saveReach({recheckHandled:true, declineStreak:0, mutedUntil:ReachPolicy.startOfDay(Date.now()) + 86400000});
@@ -4399,7 +4333,6 @@ function bind(){
     const [from, to] = el.dataset.silent.split(":").map(Number);
     saveReach({silentFrom:from, silentTo:to}); render();
   });
-  root.querySelectorAll("[data-demoreach]").forEach(el => el.onclick = () => openReach("demo"));
 
   root.querySelectorAll("[data-wipe]").forEach(el => el.onclick = () => { state.pendingWipe = true; render(); });
   root.querySelectorAll("[data-wipecancel]").forEach(el => el.onclick = () => { state.pendingWipe = false; render(); });
@@ -4545,7 +4478,14 @@ function save(placeId){
 /* ---------- 启动 ---------- */
 state.route = location.hash || "#/talk";
 // FR-31：说过会回来一次，就得真的回来——打开页面时到点了直接接住。
-if (dueForRecheck() && state.route === "#/talk") state.route = "#/recheck";
+if (dueForRecheck() && state.route === "#/talk"){
+  state.route = "#/recheck";
+  // 真的打断了就记一次，「一天最多几次」才拦得住第二次。
+  const today = ReachPolicy.startOfDay(Date.now());
+  saveReach({todayKey:today,
+             todayCount:(state.reach.todayKey === today ? state.reach.todayCount : 0) + 1,
+             lastPromptAt:Date.now()});
+}
 render();
 </script>
 

@@ -69,13 +69,16 @@
 
   /* FR-31 延迟复看：选了「现在不方便」之后，挑一个合适的时机回来一次。
      只回来一次；再拒当晚就不再打扰。 */
-  function scheduleRecheck(now, preferredHour) {
+  function scheduleRecheck(now, preferredHour, settings) {
     var target = new Date(now);
     var hour = typeof preferredHour === 'number' ? preferredHour : 18;
     target.setHours(hour, 30, 0, 0);
     if (target.getTime() - now < 45 * 60000) target.setTime(now + 90 * 60000);
-    // 推到静默时段就作罢——宁可不回来，也不半夜敲人
-    if (target.getHours() >= DEFAULTS.silentFrom) return null;
+    // 推到静默时段就作罢——宁可不回来，也不半夜敲人。
+    // 用用户自己设的那个点，不是代码里的默认值：他把静默时段调到 20 点，
+    // 就得按 20 点算，否则设置页那一格是摆设。
+    var from = settings && typeof settings.silentFrom === 'number' ? settings.silentFrom : DEFAULTS.silentFrom;
+    if (target.getHours() >= from) return null;
     return target.getTime();
   }
 
