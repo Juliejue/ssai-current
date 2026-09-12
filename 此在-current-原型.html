@@ -1670,6 +1670,7 @@ const state = {
   fixLink: "state",
   mapSheet: null,
   arrivedToast: null, arrivedTimer: null,
+  reflect: null, reflectTyping: false, reflectText: "", reflectNote: null,
   pendingDelete: null,
   reach: null,
   reachContext: null,
@@ -2350,6 +2351,77 @@ function renderPlace(id){
   return h;
 }
 
+/* --- 4.5 说说刚才：把两道选择题换成一句话 ---
+   原来这一步是先在 −3…+3 里点一个，再从一堆标签里勾。填表当然拿得到干净数据，
+   但它和这个产品的其余部分是两种东西——前面只要说一句话，到这儿突然变成问卷。
+
+   现在和第一屏同一个形态：说一句（或打一行），小在接住，再用人话确认一遍。
+   「自己选」那条路没有删：语音会坏、有人就是不想说话、模型也会失败。 */
+function renderReflect(id){
+  const p = placeById(id);
+  const d = state.draft;
+  const short = p.placeName.replace(/ · .*/, "").slice(0, 6);
+  const r = state.reflect;
+  let h = topbar("说说刚才", "第三步 · 你刚离开", "#/visit/" + id);
+  h += '<div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>';
+  h += '<div class="screen mid"><div class="pad">';
+
+  if (!r){
+    h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
+         '<div class="bubble"><span class="tag">小在</span><p>刚才在' + escapeHTML(short) +
+         '怎么样？说一句就行。</p></div></div>';
+    h += '<button class="mic' + (state.reflectTyping ? ' small' : '') + '" id="reflect-mic" aria-label="用语音说">' + micSVG() + '</button>';
+    h += '<p class="mic-cap" id="reflect-cap">' +
+         (state.reflectNote ? escapeHTML(state.reflectNote)
+          : state.reflectTyping ? '也可以点上面这个改用语音' : '按一下开始说 · 再按一下结束') + '</p>';
+    if (!state.reflectTyping){
+      h += '<button class="type-toggle" id="reflect-type">不想说话，我打字</button>';
+    } else {
+      h += '<div class="typing"><textarea id="reflect-input" maxlength="500" ' +
+           'placeholder="比如：坐了半小时，风挺舒服的，就是人有点多">' + escapeHTML(state.reflectText || "") + '</textarea>' +
+           '<button class="send" id="reflect-submit">说完了</button></div>';
+    }
+    h += '<button class="btn-text" data-step="1" style="margin-top:18px">不想说，自己选</button>';
+  } else {
+    h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
+         '<div class="bubble"><span class="tag">小在</span><p>' +
+         keepQuotedTogether(escapeHTML(r.acknowledgement)) + '</p></div></div>';
+    h += '<div class="beforeafter" style="margin-top:4px"><div><small>出发前</small><strong>' +
+         moodById(state.mood).name + '</strong></div><span class="arrow">→</span>' +
+         '<div><small>现在</small><strong class="hit">' + escapeHTML(scoreLabel(r.change_score)) + '</strong></div>' +
+         '<div style="margin-left:auto"><b class="num">' + signed(r.change_score) + '</b></div></div>';
+    if (r.factors && r.factors.length){
+      h += '<div class="tags" style="margin-top:14px">' +
+           r.factors.map(f => '<span class="tag">' + escapeHTML(f) + '</span>').join("") + '</div>';
+    }
+    // 「为什么要记」的答案，接在这句话后面，不另起一屏（不给他加一步）。
+    h += '<div class="say" style="margin-top:16px"><span class="zai">' + cloudSVG() + '</span>' +
+         '<div class="bubble"><p>' + escapeHTML(reflectPayoff(r)) + '</p></div></div>';
+    h += '<div class="actions"><button class="btn" id="reflect-save">就这样记下 <span>→</span></button>' +
+         '<button class="btn-text" data-step="1">我说错了，自己改</button></div>';
+  }
+  h += '</div></div>';
+  h += dock('这是同一个人前后的差，不是这个地方的星级。');
+  return h;
+}
+
+/* 接在小在那句话后面的一句：你刚刚改变了什么。
+   刻意不做徽章、连续打卡、成就解锁：客群是情绪状态不好的人，
+   断签和进度条对他们是压力不是动力。而且 PRD 里「奖励和情绪变化脱钩」
+   就是为了防数据往好看的方向偏——给「变好了」发奖章等于教用户怎么填这个表。
+   能给的回报只有一个：你说的话，真的改变了下一次。 */
+function reflectPayoff(r){
+  const factor = (r.factors || [])[0];
+  const mine = state.records.length + 1;
+  if (factor){
+    return (r.change_score > 0 ? '记下了。下次我会多给你带「' + factor + '」的地方。'
+                               : '记下了。下次我会避开「' + factor + '」这一类。');
+  }
+  return mine < AGGREGATE_MIN
+    ? '记下了。这是第 ' + mine + ' 条，攒够 ' + AGGREGATE_MIN + ' 条我就用你的记录替掉估计值。'
+    : '记下了。你的 ' + mine + ' 条记录已经在替你改排序了。';
+}
+
 /* --- 5. 到访提醒（反馈 step 0）--- */
 function renderVisit(id){
   const p = placeById(id);
@@ -2364,7 +2436,7 @@ function renderVisit(id){
   h += coverHTML(p, {caption:true, style:"aspect-ratio:16/10"});
   h += '<div class="beforeafter" style="margin-top:16px"><div><small>本次停留</small><strong>约 ' + d.stayMin + ' 分钟</strong></div>' +
        '<span class="arrow">·</span><div><small>出发前</small><strong>' + moodById(state.mood).name + '</strong></div></div>';
-  h += '<div class="actions"><button class="btn" data-step="1">记录现在 <span>→</span></button>' +
+  h += '<div class="actions"><button class="btn" data-reflect="' + p.placeId + '">说说刚才 <span>→</span></button>' +
        '<button class="btn-text" data-remind="1">稍后提醒</button>';
   if (d.reminder) h += '<p class="hint on" style="text-align:center">好，先去过你的生活。这条会留在记录里等你。</p>';
   h += '</div></div></div>';
@@ -2400,9 +2472,42 @@ function renderScore(id){
 }
 
 /* --- 7. 因素 + 一句话 + 隐私（step 2）--- */
+/* 授权：两条路径（对话 / 自己选）共用同一份文案和绑定。
+   这一步不能替用户跳过——要不要匿名贡献，永远由他自己点。 */
+function privacyChoice(d){
+  let h = '<p class="sec-k">这条记录放在哪里</p>';
+  h += '<div class="priv" style="margin-top:0">';
+  h += '<button class="opt' + (d.visibility === "private" ? " on" : "") + '" data-vis="private"><span class="mark"></span>' +
+       '<div><strong>只存进我的记录</strong><small>默认，没有人看得到</small></div></button>';
+  h += '<button class="opt' + (d.visibility === "anonymous" ? " on" : "") + '" data-vis="anonymous"><span class="mark"></span>' +
+       '<div><strong>匿名进入这个地点的汇总</strong><small>只算进一个数，单条不展示</small></div></button>';
+  h += '</div>';
+  return h;
+}
+
 function renderFactors(id){
   const p = placeById(id);
   const d = state.draft;
+
+  // 刚刚已经说过一遍了，就别把同一批问题再摆一屏。
+  // 对话已经把分数、因素、哪一环都拿到了，这里只剩「这条放哪里」——
+  // 那是授权，不能替他决定，所以它是唯一保留的一步。
+  if (state.reflect){
+    let lean = topbar("放在哪里", "第四步 · 最后一下", "#/reflect/" + p.placeId);
+    lean += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>';
+    lean += '<div class="screen mid"><div class="pad">';
+    lean += '<div class="say"><span class="zai">' + cloudSVG() + '</span>' +
+            '<div class="bubble"><span class="tag">小在</span><p>我记的是：' +
+            escapeHTML(scoreLabel(d.score)) + (d.factors.length ? '，' + d.factors.map(escapeHTML).join("、") : "") +
+            '。最后一件事——这条放哪里？</p></div></div>';
+    lean += privacyChoice(d);
+    lean += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">记下来 <span>→</span></button>' +
+            '<button class="btn-text" data-step="1">我想自己改一下</button></div>';
+    lean += '</div></div>';
+    lean += dock('不选匿名，它就只是你的。');
+    return lean;
+  }
+
   let h = topbar("到访反馈", "02 · 发生了什么", "#/feedback/" + p.placeId + "?s=1");
   h += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
@@ -2430,13 +2535,7 @@ function renderFactors(id){
   h += '</div></div>';
   h += '<div class="note-wrap"><label><span>如果愿意，留下一句话（可跳过）</span><em class="num">' + d.note.length + ' / 80</em></label>' +
        '<textarea id="note" maxlength="80" placeholder="比如：风吹过来的时候，脑子终于安静了一点。">' + escapeHTML(d.note) + '</textarea></div>';
-  h += '<p class="sec-k">这条记录放在哪里</p>';
-  h += '<div class="priv" style="margin-top:0">';
-  h += '<button class="opt' + (d.visibility === "private" ? " on" : "") + '" data-vis="private"><span class="mark"></span>' +
-       '<div><strong>只存进我的记录</strong><small>默认，没有人看得到</small></div></button>';
-  h += '<button class="opt' + (d.visibility === "anonymous" ? " on" : "") + '" data-vis="anonymous"><span class="mark"></span>' +
-       '<div><strong>匿名进入这个地点的汇总</strong><small>只算进一个数，单条不展示</small></div></button>';
-  h += '</div>';
+  h += privacyChoice(d);
   h += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">保存这次感受 <span>→</span></button>' +
        '<button class="btn-text" data-step="1">回上一步改分数</button></div>';
   h += '</div></div>';
@@ -2529,7 +2628,7 @@ function renderCard(recId, backTo){
   if (isNew){
     h += '<p class="eyebrow">记录完成</p><h1 class="title sm">这次到访，已经<br>收进你的轨迹。</h1>' +
          '<p class="lead">卡片有两面，点一下翻过去。</p>';
-    h += payoffBanner(rec);
+    if (!state.reflect) h += payoffBanner(rec);
   }
   h += '<div class="flip-stage">';
   if (!state.flipped){
@@ -3648,6 +3747,11 @@ function render(){
     if (!state.draft || state.draft.placeId !== id){ state.draft = newDraft(id); state.draft.stayMin = 28 + Math.floor(Math.random()*22); }
     inner = renderVisit(id);
   }
+  else if (r.indexOf("#/reflect/") === 0){
+    const id = r.slice(10);
+    if (!state.draft || state.draft.placeId !== id){ state.draft = newDraft(id); state.draft.stayMin = 34; }
+    inner = renderReflect(id);
+  }
   else if (r.indexOf("#/feedback/") === 0){
     const raw = r.slice(11), id = raw.split("?")[0];
     const step = raw.indexOf("s=1") > -1 ? 1 : 2;
@@ -3781,6 +3885,38 @@ function bind(){
     render();
     const box = document.getElementById("natural-input");
     if (box) box.focus();
+  }
+
+  function setReflectCap(message){
+    const cap = document.getElementById("reflect-cap");
+    if (cap) cap.textContent = message;
+  }
+
+  /* 一句话 → 这次到访的结构化反馈。模型没接住就退回自己选，绝不替他猜一个分数。 */
+  function submitReflect(text){
+    const said = (text || state.reflectText || "").trim();
+    if (!said) return;
+    const p = placeById(state.draft.placeId);
+    setReflectCap("我在听你刚才说的…");
+    const submit = document.getElementById("reflect-submit");
+    if (submit) submit.disabled = true;
+    CurrentAI.reflectOn(said, {
+      placeName: p.placeName,
+      preMood: moodById(state.mood).name,
+      options: (p.factorOptions || []).map(o => o.label)
+    }).then(result => {
+      if (result && result.change_score !== null && result.acknowledgement){
+        state.reflect = result;
+        render();
+        return;
+      }
+      // 没听清就直说，然后把选择题给他——不猜。
+      state.reflectNote = "这句我没太抓准，你自己点一下更快。";
+      go("#/feedback/" + state.draft.placeId + "?s=1");
+    }).catch(() => {
+      state.reflectNote = "刚才没接住，你自己点一下更快。";
+      go("#/feedback/" + state.draft.placeId + "?s=1");
+    });
   }
 
   function setNaturalStatus(message, error){
@@ -4104,6 +4240,46 @@ function bind(){
 
 
   root.querySelectorAll("[data-remind]").forEach(el => el.onclick = () => { state.draft.reminder = true; render(); });
+
+  root.querySelectorAll("[data-reflect]").forEach(el => el.onclick = () => {
+    state.reflect = null; state.reflectTyping = false; state.reflectText = ""; state.reflectNote = null;
+    go("#/reflect/" + el.dataset.reflect);
+  });
+
+  const reflectType = root.querySelector("#reflect-type");
+  if (reflectType) reflectType.onclick = () => {
+    state.reflectTyping = true; render();
+    const box = document.getElementById("reflect-input");
+    if (box) box.focus();
+  };
+  const reflectInput = root.querySelector("#reflect-input");
+  if (reflectInput) reflectInput.oninput = () => { state.reflectText = reflectInput.value; };
+  const reflectSubmit = root.querySelector("#reflect-submit");
+  if (reflectSubmit) reflectSubmit.onclick = () => submitReflect();
+
+  const reflectMic = root.querySelector("#reflect-mic");
+  if (reflectMic) reflectMic.onclick = () => {
+    CurrentAI.toggleVoice({
+      onStatus: m => { reflectMic.classList.add("listening"); state.reflectNote = m; setReflectCap(m); },
+      onPartial: t => { state.reflectText = t; setReflectCap("「" + t + "」"); },
+      onText: t => { reflectMic.classList.remove("listening"); state.reflectText = t; submitReflect(t); },
+      // 语音坏了不能是死路——和第一屏一样，直接把打字框推到他面前。
+      onError: m => { reflectMic.classList.remove("listening"); state.reflectTyping = true; state.reflectNote = m; render();
+                      const box = document.getElementById("reflect-input"); if (box) box.focus(); }
+    }).catch(error => { reflectMic.classList.remove("listening"); state.reflectTyping = true;
+                        state.reflectNote = error.message; render(); });
+  };
+
+  const reflectSave = root.querySelector("#reflect-save");
+  if (reflectSave) reflectSave.onclick = () => {
+    const r = state.reflect;
+    if (!r) return;
+    state.draft.score = r.change_score;
+    state.draft.factors = (r.factors || []).slice();
+    state.draft.mismatchStage = r.mismatch_stage || "none";
+    // 授权那一步不跳过：默认只存自己的，要不要匿名贡献仍然由他单独决定。
+    go("#/feedback/" + state.draft.placeId);
+  };
 
   root.querySelectorAll("[data-step]").forEach(el => el.onclick = () => {
     const s = parseInt(el.dataset.step, 10);

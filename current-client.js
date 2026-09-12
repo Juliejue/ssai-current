@@ -88,6 +88,21 @@
     });
   }
 
+  /* 离开之后说的那一句话 → 这次到访的结构化反馈。
+     原话不入库，只把结果存下来（守则 6）。 */
+  function reflectOn(text, context) {
+    return api('/reflect', {
+      method: 'POST',
+      body: JSON.stringify({
+        text: text,
+        place_name: context.placeName || '',
+        pre_mood: context.preMood || '',
+        options: context.options || [],
+        lang: lang()
+      })
+    });
+  }
+
   // FR-12：删除是个承诺，不能只在本地抹掉、服务端还留着。
   function deleteOutcome(recommendationId) {
     return api('/outcomes/delete', {
@@ -406,6 +421,7 @@
     track: track,
     interpretAndRecommend: interpretAndRecommend,
     recommendFor: recommendFor,
+    reflectOn: reflectOn,
     deleteOutcome: deleteOutcome,
     hasLocation: function () { return Boolean(activeLocation); },
     getLocationMode: function () { return activeLocationMode; },

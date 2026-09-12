@@ -15,6 +15,7 @@ from .i18n import ui
 from .map_provider import MapProviderError, static_map_png
 from .realtime_asr import build_asr_connect_url
 from .presence import verify as verify_presence
+from .reflect import reflect_quietly
 from .recommender import load_catalog, recommend_with_live_context, warm_discovery
 from .schemas import (
     InterpretRequest,
@@ -23,6 +24,8 @@ from .schemas import (
     OutcomeRequest,
     ProductEvent,
     RecommendRequest,
+    ReflectRequest,
+    ReflectResponse,
     RecommendResponse,
     RiskLevel,
 )
@@ -104,6 +107,22 @@ async def interpret_route(payload: InterpretRequest) -> InterpretResponse:
         if warm and not warm.done():
             # 预热失败不影响任何事，但也不能留一个没人管的任务。
             warm.add_done_callback(lambda task: task.exception())
+
+
+@app.post("/api/v1/reflect", response_model=ReflectResponse)
+async def reflect_route(payload: ReflectRequest) -> ReflectResponse:
+    """把离开之后的一句话变成这次到访的反馈。
+
+    模型没接住就返回空分数，前端退回自己选——绝不替用户猜一个分数塞进他的记录。
+    """
+    result = await reflect_quietly(
+        payload.text,
+        place_name=payload.place_name,
+        pre_mood=payload.pre_mood,
+        options=payload.options,
+        lang=payload.lang,
+    )
+    return ReflectResponse(**result)
 
 
 @app.post("/api/v1/recommendations", response_model=RecommendResponse)

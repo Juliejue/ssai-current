@@ -92,6 +92,24 @@ class Geofence(BaseModel):
     radius_m: int = Field(ge=50, le=2000)
 
 
+class ReflectRequest(BaseModel):
+    """离开之后说的那一句话。原话不入库——只把结构化结果存下来（守则 6）。"""
+
+    text: str = Field(min_length=1, max_length=500)
+    place_name: str = Field(default="", max_length=80)
+    pre_mood: str = Field(default="", max_length=40)
+    # 这个地点自己的因素选项。模型只能从这里挑，编出来的词服务端会丢掉。
+    options: list[str] = Field(default_factory=list, max_length=16)
+    lang: Literal["zh", "en"] = "zh"
+
+
+class ReflectResponse(BaseModel):
+    change_score: int | None = Field(default=None, ge=-3, le=3)
+    factors: list[str] = Field(default_factory=list, max_length=3)
+    mismatch_stage: Literal["none", "state", "need", "constraint", "place"] = "none"
+    acknowledgement: str | None = None
+
+
 class RecommendRequest(BaseModel):
     state: NeedState
     lang: Literal["zh", "en"] = "zh"
