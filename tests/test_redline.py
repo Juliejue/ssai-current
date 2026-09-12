@@ -464,3 +464,59 @@ def test_model_supplied_evidence_must_quote_words_the_user_actually_said():
     honest = ["「吵完架」——所以我猜你现在还绷着", "「谁都不想理」——所以我只找人少的地方"]
     read = _decorate(interpret_with_rules(text), text, model_evidence=honest)
     assert read.evidence == honest
+
+
+# ---------------------------------------------------------------------------
+# 英文版。中文标签天然比英文短，所以 schema 的字数上限是照着中文定的——
+# 英文很容易悄悄超出去，而且只有在「恰好那个词进了纠错选项」时才炸。
+# 线上真炸过一次：NEED_LABELS_EN["people"] 是 25 个字符，上限 24，
+# /interpret 直接 500。所以这里把每一条英文标签都塞进真实的 schema 过一遍。
+# ---------------------------------------------------------------------------
+
+def test_every_english_label_fits_the_schema():
+    from backend_app import i18n
+    from backend_app.schemas import ClarifyOption
+
+    tables = {
+        "STATE_LABELS_EN": i18n.STATE_LABELS_EN,
+        "NEED_LABELS_EN": i18n.NEED_LABELS_EN,
+        "AVOID_LABELS_EN": i18n.AVOID_LABELS_EN,
+        "TAG_LABELS_EN": i18n.TAG_LABELS_EN,
+        "LOW_TAG_LABELS_EN": i18n.LOW_TAG_LABELS_EN,
+    }
+    for name, table in tables.items():
+        for key, label in table.items():
+            ClarifyOption(key=key, label=label)  # 超长会直接 ValidationError
+
+    for field, (_question, options) in i18n.CLARIFY_EN.items():
+        for key, label in options:
+            ClarifyOption(key=key, label=label)
+
+    for key, label in i18n.CORRECTION_CHIPS_EN:
+        ClarifyOption(key=key, label=label)
+    for key, label in i18n.CONSTRAINT_CORRECTIONS_EN:
+        ClarifyOption(key=key, label=label)
+
+
+def test_english_and_chinese_cover_the_same_keys():
+    """漏一个 key，英文版就会当场掉回中文，而且没人会注意到。"""
+    from backend_app import i18n
+    from backend_app.interpretation import AVOID_LABELS, NEED_LABELS, STATE_LABELS
+
+    assert set(i18n.STATE_LABELS_EN) == set(STATE_LABELS)
+    assert set(i18n.NEED_LABELS_EN) == set(NEED_LABELS)
+    assert set(i18n.AVOID_LABELS_EN) == set(AVOID_LABELS)
+
+
+def test_the_english_path_survives_a_full_interpret():
+    """线上那次 500 是走完 /interpret 才炸的，所以这里也得走完整条。"""
+    response = client.post(
+        "/api/v1/interpret",
+        json={"text": "Long day at work, I am wiped out and I want to see nobody.", "lang": "en"},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["state_label"]
+    # 纠错选项正是线上炸掉的地方——它们必须真的被构造出来。
+    assert body["corrections"]["state"]
+    assert body["corrections"]["need"]

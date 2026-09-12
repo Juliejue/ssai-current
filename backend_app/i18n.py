@@ -38,7 +38,7 @@ NEED_LABELS_EN: dict[str, str] = {
     "green": "see something green",
     "new": "see something new",
     "sound": "hear something",
-    "people": "people around, no talking",
+    "people": "people around",  # ClarifyOption.label 上限 24 字，别超
     "loud": "somewhere loud",
     "slow": "slow down",
     "hands": "keep my hands busy",
