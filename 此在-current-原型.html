@@ -1383,7 +1383,9 @@ PLACES.forEach(p => {
   p.distance = p.distanceKm.toFixed(1) + " km";
 });
 /* 到访样本诚实（FR-10b / FR-19b）：没有真实反馈之前，任何平均分都是假的。 */
-const SAMPLE_EMPTY = "样本还少：这里还没有攒够真实到访反馈，所以我不给平均分，也不承诺你去了会变好。";
+// 承诺还是那个承诺（没数据就不打分），但用不着每张卡片上讲一遍道理。
+// 完整的口径在 #/nearby，卡片上一句话交代清楚就够。
+const SAMPLE_EMPTY = "还没有真实到访反馈，这里不打分。";
 /* 现场从地图上搜出来的地点不在本地 PLACES 里，只存在于后端这次返回的推荐中。
    以前这里找不到就退回 PLACES[0]，于是「和光书社」会显示成水果店的数据——
    静默地展示错的地方，比报错还糟。 */
@@ -2038,7 +2040,6 @@ function renderMood(){
   h += '<div class="screen"><div class="pad">';
   h += '<p class="eyebrow">自己挑 · 备用入口</p>';
   h += '<h1 class="title">此刻，你更接近<br>哪一种？</h1>';
-  h += '<p class="lead">这一屏是留给「就是不想说话」的时候的。<br>平常直接跟小在说一句就行。</p>';
   h += '<button class="btn ghost sm" data-go="#/talk" style="margin-bottom:20px">回去直接说一句 →</button>';
   h += '<div class="mood-grid">';
   MOODS.forEach(m => {
@@ -2047,7 +2048,7 @@ function renderMood(){
   });
   h += '</div><div class="actions"><button class="btn" data-go="#/needs">接着走 <span>→</span></button></div>';
   h += '</div></div>';
-  h += dock('我先记着：<b>' + moodById(state.mood).name + '</b>。不会告诉任何人。', {records:false});
+  h += dock('我先记着：<b>' + moodById(state.mood).name + '</b>。', {records:false});
   return h;
 }
 
@@ -2073,7 +2074,7 @@ function renderNeeds(){
   h += '<div class="screen"><div class="pad">';
   h += '<p class="eyebrow">你说：' + m.name + '</p>';
   h += '<h1 class="title sm">那你现在<br>需要什么样的地方？</h1>';
-  h += '<p class="lead">可以多选，也可以一个都不选。这一步不是问你想去哪，是问你需要什么样的环境。</p>';
+  h += '<p class="lead">可以多选，也可以都不选。</p>';
   ["空间", "刺激", "恢复"].forEach(dir => {
     h += '<p class="need-dir">' + dir + '</p><div class="need-grid">';
     (by[dir] || []).forEach(k => {
@@ -2097,7 +2098,6 @@ function renderMode(){
   let h = topbar("怎么找", "第二步 · 挑一种方式", "#/mood");
   h += '<div class="screen"><div class="pad">';
   h += '<p class="eyebrow">现在需要</p><h1 class="title sm">' + m.name + '</h1>';
-  h += '<p class="lead">两种模式共用同一批空间、同一个详情页、同一套到访反馈。只是翻找的方式不一样。</p>';
   h += '<div style="display:flex;flex-direction:column;gap:12px">';
   h += '<button class="mode-card" data-go="#/pick"><div class="visual"><div class="mock-one"></div></div>' +
        '<div class="txt"><h3>替我选</h3><p>一次只给你一个空间。没力气比较的时候，用这个。</p>' +
@@ -2108,7 +2108,7 @@ function renderMode(){
   h += '</div>';
   h += '<div class="actions"><button class="btn-text" data-go="#/records">先看看我的情绪空间轨迹</button></div>';
   h += '</div></div>';
-  h += dock('两条路都会回到同一个地方：你走之后的那 30 秒。');
+  h += dock('两条路都会回到同一个地方。');
   return h;
 }
 
@@ -2133,7 +2133,7 @@ function renderPick(){
        '</span><b>小在眼中的这里</b></div>';
   /* 卡片只显示最强的一条；第二条留给详情页 —— 替我选是给低能量用户的，选择负担要低 */
   const x = p.placeInsights[0];
-  h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong><small>' + x.d + '</small></div></div>';
+  h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong></div></div>';
   h += '</div>';
   h += '<div class="sample-note">' + SAMPLE_EMPTY + '</div>';
   h += '</div></div>';
@@ -2149,7 +2149,7 @@ function renderPick(){
        '<button class="btn ghost sm" data-fav="' + p.placeId + '">' + (state.favs.has(p.placeId) ? "已收藏" : "收藏") + '</button>' +
        '<button class="btn ghost sm" data-card="1">换一个</button></div></div>';
   h += '</div></div>';
-  h += dock('你说「' + m.name + '」，我先把这个放在最上面。左右滑，或者用按钮。');
+  h += dock('你说「' + m.name + '」，这个放最上面。');
   return h;
 }
 function catDot(p){
@@ -2200,7 +2200,7 @@ function renderBrowse(){
     h += '</div>';
   }
   h += '</div>';
-  h += dock('这里没有评分和排名。攒够真实到访反馈之前，我不给任何地方打分。');
+  h += dock('没有评分，也没有排名。');
   return h;
 }
 function chip(group, val, label){
@@ -2227,7 +2227,7 @@ function renderPlace(id){
   h += '<p class="sec-k">小在眼中的这里</p>';
   h += '<div class="insights" style="margin-top:0">';
   p.placeInsights.forEach(x => {
-    h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong><small>' + x.d + '</small></div></div>';
+    h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong></div></div>';
   });
   h += '</div>';
   h += '<div class="why" style="margin-top:16px"><span class="k">为什么此刻推荐给你</span><p>' + reasonFor(p, state.mood) + '</p></div>';
@@ -2239,10 +2239,10 @@ function renderPlace(id){
        catSVG() + '</span><b>只聚合，不展示单条</b><button data-go="#/nearby">怎么算的 →</button></div>';
   if (agg.enough){
     h += '<div class="e">到访前后平均变化 <b class="num">' + signed(agg.average) + '</b>' +
-         '<u>' + agg.count + ' 条核验过的反馈 · 最常被勾到的是「' + agg.factors.join("、") + '」</u></div>';
+         '<u>' + agg.count + ' 条核验反馈 · 最常勾到「' + agg.factors.join("、") + '」</u></div>';
   } else {
-    h += '<div class="e">' + escapeHTML(agg.line) + '<u>攒够 ' + AGGREGATE_MIN +
-         ' 条核验过的到访，这里才会出现汇总</u></div>';
+    // 样本量和门槛是承诺（US-04 / FR-19b），不能删；但用不着写成一段话。
+    h += '<div class="e">样本 ' + agg.count + ' / ' + AGGREGATE_MIN + '，还不够出汇总</div>';
   }
   h += '</div>';
 
@@ -2252,7 +2252,7 @@ function renderPlace(id){
     h += '<p class="sec-k">一手描述</p>';
     h += '<div class="here" style="margin-top:0"><div class="h"><span style="width:14px;height:14px;display:inline-block">' +
          catSVG() + '</span><b>档案来源，不是到访反馈</b></div>';
-    h += '<div class="e">「' + escapeHTML(p.quote) + '」<u>来自真人的一手经验，用来生成这个地方的档案。不带分数，也不进汇总。</u></div>';
+    h += '<div class="e">「' + escapeHTML(p.quote) + '」</div>';
     h += '</div>';
   }
   // 有核对过的坐标 → 点下去弹三选地图；没有 → 一个地图都给不了。
@@ -2273,7 +2273,7 @@ function renderPlace(id){
           : '') +
        '<button class="btn-text" data-go="' + back + '">回到' + (back === "#/browse" ? "瀑布流" : back === "#/offer" ? "推荐" : "卡片推荐") + '</button></div>';
   h += '</div></div>';
-  h += tripStrip() || dock('你到了之后我不打扰。等你走了，再问你三十秒。');
+  h += tripStrip() || dock('到了不打扰，走了问你 30 秒。');
   return h;
 }
 
@@ -2287,7 +2287,7 @@ function renderVisit(id){
   h += '<div class="screen"><div class="pad">';
   h += '<p class="eyebrow">一次轻轻的回望</p>';
   h += '<h1 class="title">刚从' + short + '回来吗？</h1>';
-  h += '<p class="lead">花 30 秒，看看这个地方有没有接住你。不想现在说也可以。</p>';
+  h += '<p class="lead">花 30 秒。不想现在说也可以。</p>';
   h += coverHTML(p, {caption:true, style:"aspect-ratio:16/10"});
   h += '<div class="beforeafter" style="margin-top:16px"><div><small>本次停留</small><strong>约 ' + d.stayMin + ' 分钟</strong></div>' +
        '<span class="arrow">·</span><div><small>出发前</small><strong>' + moodById(state.mood).name + '</strong></div></div>';
@@ -2307,7 +2307,7 @@ function renderScore(id){
   h += '<div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
   h += '<h1 class="title sm">现在，心里松了一点吗？</h1>';
-  h += '<p class="lead">这不是给' + p.placeName + '打分，是记录你自己从出发到现在的变化。没有标准答案。</p>';
+  h += '<p class="lead">不是给它打分，是记你自己的变化。</p>';
   h += '<div class="beforeafter"><div><small>出发前</small><strong>' + moodById(state.mood).name + '</strong></div>' +
        '<span class="arrow">→</span><div><small>现在</small><strong class="' + (d.score === null ? "dim" : "hit") + '">' +
        scoreLabel(d.score) + '</strong></div>' +
@@ -2334,7 +2334,7 @@ function renderFactors(id){
   h += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
   h += '<h1 class="title sm">是什么参与了这次变化？</h1>';
-  h += '<p class="lead">下面这些是' + p.category.split(" · ")[0] + '类空间常见的影响因素。可以多选，也可以一个都不选。</p>';
+  h += '<p class="lead">可以多选，也可以都不选。</p>';
   h += '<div class="fac-grid">';
   p.factorOptions.forEach(o => {
     const on = d.factors.indexOf(o.label) > -1;
@@ -2360,16 +2360,14 @@ function renderFactors(id){
   h += '<p class="sec-k">这条记录放在哪里</p>';
   h += '<div class="priv" style="margin-top:0">';
   h += '<button class="opt' + (d.visibility === "private" ? " on" : "") + '" data-vis="private"><span class="mark"></span>' +
-       '<div><strong>只存进我的记录</strong><small>默认。不进入这个地点的公开统计，也不会被任何人看到。</small></div></button>';
+       '<div><strong>只存进我的记录</strong><small>默认，没有人看得到</small></div></button>';
   h += '<button class="opt' + (d.visibility === "anonymous" ? " on" : "") + '" data-vis="anonymous"><span class="mark"></span>' +
-       '<div><strong>匿名进入这个地点的汇总</strong><small>变化分和因素会和别人的一起算成一个数，' +
-       '并且永远附上样本量。<b>没有人会看到你这一条本身</b>——我们不展示单条反馈。' +
-       '你写的那句话只到我们这里，用来改推荐，不出现在任何人的界面上。</small></div></button>';
+       '<div><strong>匿名进入这个地点的汇总</strong><small>只算进一个数，单条不展示</small></div></button>';
   h += '</div>';
   h += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">保存这次感受 <span>→</span></button>' +
        '<button class="btn-text" data-step="1">回上一步改分数</button></div>';
   h += '</div></div>';
-  h += dock('你不选匿名，它就只是你的。这一步不会自动往前走。');
+  h += dock('不选匿名，它就只是你的。');
   return h;
 }
 function escapeHTML(s){
@@ -2397,8 +2395,7 @@ function placeAggregate(placeId){
   const n = counted.length;
   if (n < AGGREGATE_MIN){
     return {count:n, enough:false,
-            line:n ? "样本还少：这里目前 " + n + " 条真实到访反馈，不到 " + AGGREGATE_MIN +
-                     " 条我不给平均分，也不承诺你去了会变好。"
+            line:n ? "样本 " + n + " / " + AGGREGATE_MIN + "，还不够出汇总。"
                    : SAMPLE_EMPTY};
   }
   const sum = counted.reduce((a, r) => a + r.changeScore, 0);
@@ -2434,7 +2431,7 @@ function renderCard(recId, backTo){
   h += '<div class="screen"><div class="pad">';
   if (isNew){
     h += '<p class="eyebrow">记录完成</p><h1 class="title sm">这次到访，已经<br>收进你的轨迹。</h1>' +
-         '<p class="lead">卡片有两面。正面是你去过的地方，背面是这个地方对你做了什么。</p>';
+         '<p class="lead">卡片有两面，点一下翻过去。</p>';
   }
   h += '<div class="flip-stage">';
   if (!state.flipped){
@@ -2469,7 +2466,7 @@ function renderCard(recId, backTo){
   h += '<div class="insights" style="margin-top:16px"><div class="head"><span style="width:14px;height:14px;display:inline-block">' +
        catSVG() + '</span><b>小在眼中的这次到访</b></div>';
   ins.forEach(x => {
-    h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong><small>' + x.d + '</small></div></div>';
+    h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong></div></div>';
   });
   h += '</div></div></div>';
   }
@@ -2538,10 +2535,10 @@ function renderRecords(){
        '<div class="who"><h1>你的轨迹</h1><p>' + read.line + '</p></div>' +
        '<div class="av"><span>' + catSVG() + '</span></div></div>';
   h += '<div class="eye"><div class="head"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
-       '</span><b>我们的此在</b><span style="margin-left:auto;font:10px var(--mono);color:var(--ink-faint)">只用你打过的分说话</span></div>';
+       '</span><b>我们的此在</b></div>';
   read.rows.forEach(r => {
     h += '<div class="row"><span class="dot">' + catDot(placeById(all.length ? all[0].placeId : "liangmahe")) +
-         '</span><div><strong>' + r.t + '</strong><small>' + r.d + '</small><em>依据 · ' + r.e + '</em></div></div>';
+         '</span><div><strong>' + r.t + '</strong><em>依据 · ' + r.e + '</em></div></div>';
   });
   h += '</div>';
   h += '<div style="padding:13px 18px 16px"><button class="btn ghost sm" data-go="#/nearby">匿名汇总是怎么算的 →</button></div></div>';
@@ -2557,17 +2554,19 @@ function renderRecords(){
     h += '<div class="pad" style="padding-bottom:0"><div class="learned">';
     h += '<div class="lh"><span>' + catSVG() + '</span>下次推荐我会怎么改</div>';
     learned.rows.forEach(row => {
-      h += '<div class="lr"><strong>' + row.t + '</strong><small>' + row.d + '</small></div>';
+      // 标题已经是结论，依据行已经是证据，中间那句解释是把结论再说一遍。
+      h += '<div class="lr"><strong>' + row.t + '</strong>' +
+           (row.e ? '<small>' + row.e + '</small>' : '') + '</div>';
     });
     h += '<div class="lr"><strong>依据只有你的 ' + learned.count + ' 条记录</strong>' +
-         '<small>这些计算都在你这台设备上完成，没有上传。攒到 5 条以上，我才会用它覆盖原来的估计值。</small></div>';
+         '<small>本机计算，没有上传</small></div>';
     h += '</div></div>';
   }
   h += '<div class="rec-head" style="padding-top:18px"><p class="eyebrow">你去过的地方</p>' +
        '<h1 class="title sm">' + all.length + ' 次到访，<br>攒成了一片。</h1></div>';
-  h += '<div class="rec-stat"><div><b class="num">' + (avg >= 0 ? "+" : "") + avg.toFixed(1) + '</b><small>你的平均变化<br>只算你的记录</small></div>' +
-       '<div><b class="num">' + anon + '</b><small>匿名贡献<br>进入了地点汇总</small></div>' +
-       '<div><b class="num">' + (all.length - anon) + '</b><small>私密记录<br>只有你能看到</small></div></div>';
+  h += '<div class="rec-stat"><div><b class="num">' + (avg >= 0 ? "+" : "") + avg.toFixed(1) + '</b><small>平均变化</small></div>' +
+       '<div><b class="num">' + anon + '</b><small>匿名贡献</small></div>' +
+       '<div><b class="num">' + (all.length - anon) + '</b><small>只有你能看到</small></div></div>';
   h += '<div class="filterbar" style="margin-top:14px">';
   REC_FILTERS.forEach(f => {
     h += '<button class="chip' + (state.recFilter === f.id ? " on" : "") + '" data-recf="' + f.id + '">' + f.label + '</button>';
@@ -2598,9 +2597,9 @@ function renderRecords(){
     h += '</div>';
   }
   h += '<p style="padding:0 18px 22px;margin:0;font:11px/1.8 var(--mono);color:var(--ink-faint)">' +
-       '前三条为原型示例记录。所有内容只存在本页运行时内存中，刷新即清空：没有后端、没有账号、没有定位。</p>';
+       '前三条是示例记录。你的记录存在这台设备上，没有账号。</p>';
   h += '</div>';
-  h += dock('这些是你的。要不要给别人看，每一条你都单独决定过。');
+  h += dock('给不给别人看，每条你自己定。');
   return h;
 }
 
@@ -2622,15 +2621,14 @@ function renderNearby(placeFilter){
   h += '<div class="screen"><div class="pad">';
   h += '<p class="eyebrow">只聚合 · 不展示单条</p>';
   h += '<h1 class="title sm">别人去了怎么样，<br>只以汇总的形式出现。</h1>';
-  h += '<p class="lead">这里不会逐条给你看别人写了什么。单条反馈会被当成对空间的评分，' +
-       '而评分是可以刷的——所以我们只给聚合，并且永远附上样本量。</p>';
+  h += '<p class="lead">单条评分可以刷，聚合不行。</p>';
 
   h += '<div class="learned" style="margin-bottom:20px">';
   h += '<div class="lh"><span>' + catSVG() + '</span>一条反馈要满足什么才算数</div>';
-  h += '<div class="lr"><strong>你得真的去过</strong><small>只有核验过的到访才进汇总。自己按一下「我到了」但没待够 5 分钟的，不算。</small></div>';
-  h += '<div class="lr"><strong>你得明确选了匿名贡献</strong><small>默认是只存进你自己的记录。不选就永远不进。</small></div>';
-  h += '<div class="lr"><strong>一个地点攒够 ' + AGGREGATE_MIN + ' 条才出汇总</strong><small>不够就显示「样本还少」，不给平均分。一个人说安静，可能只是那天安静。</small></div>';
-  h += '<div class="lr"><strong>奖励和情绪变化脱钩</strong><small>完成反馈本身才算数，不是「变好了」才算数——否则数据会往好看的方向偏。</small></div>';
+  h += '<div class="lr"><strong>你得真的去过，而且待够 5 分钟</strong></div>';
+  h += '<div class="lr"><strong>你得自己选「匿名贡献」，默认不进</strong></div>';
+  h += '<div class="lr"><strong>一个地点攒够 ' + AGGREGATE_MIN + ' 条才出汇总</strong></div>';
+  h += '<div class="lr"><strong>反馈了就算数，不看你变好没有</strong></div>';
   h += '</div>';
 
   h += '<p class="eyebrow">现在攒到哪一步</p>';
@@ -2812,7 +2810,7 @@ function renderReach(){
   h += '<div class="reach-foot"><span>这是我主动来找你的，不是你打开的。</span>' +
        '<button data-go="#/settings">管打扰</button></div>';
   h += '</div></div>';
-  h += dock('不想被打扰随时可以关，关了我不会绕回来。', {records:false});
+  h += dock('随时可以关，关了我不绕回来。', {records:false});
   return h;
 }
 
@@ -2838,7 +2836,7 @@ function renderRecheck(){
 function tierCard(o){
   let h = '<div class="tier' + (o.locked ? " locked" : "") + (o.pending ? " pending" : "") + '">';
   h += '<div class="th"><div class="txt"><span class="lv">' + o.level + '</span>' +
-       '<h4>' + o.title + '</h4><p>' + o.what + '</p></div>';
+       '<h4>' + o.title + '</h4></div>';
   if (o.pending) h += '<span class="lv" style="flex:none;color:var(--ink-faint);margin-top:4px">还没做</span>';
   else h += '<button class="switch' + (o.on ? " on" : "") + (o.locked ? " fixed" : "") + '"' +
             (o.locked ? '' : ' data-grant="' + o.key + '"') + ' aria-pressed="' + Boolean(o.on) + '"><i></i></button>';
@@ -2856,28 +2854,27 @@ function renderSettings(){
 
   h += '<p class="eyebrow">信号分层 · 逐项可关</p>';
   h += '<h1 class="title sm">我拿什么来猜<br>你此刻需要什么</h1>';
-  h += '<p class="lead">三层信号，一层比一层贴近你。默认只开最外面那层。<br>每一层都写清楚：拿它做什么、存什么、不存什么。</p>';
+  h += '<p class="lead">默认只开最外面那层。</p>';
 
+  // 这一页的全部意义就是「存什么、不存什么」，所以只留这两行。
+  // 原来每层还有一段解释，那段是把标题再说一遍。
   h += tierCard({
     level:"默认层", key:"base", locked:true, on:true,
     title:"时间，和你自己说的话",
-    what:"没有这一层产品就不成立，所以它不能关。你不说话我就不猜。",
-    keep:"存：结构化之后的需求（情绪档、诉求、预算档）",
-    drop:"不存：你说的原话、语音本身"
+    keep:"存：结构化之后的需求",
+    drop:"不存：原话、语音"
   });
   h += tierCard({
     level:"手机层", key:"location", on:r.grants.location,
     title:"当前位置",
-    what:"用来算真实路程，以及到了之后无感核验到访。判定在你手机上完成。",
-    keep:"存：到访结论（进没进围栏、待了多久）",
-    drop:"不存：你的经纬度，一次都不上传"
+    keep:"存：到访结论",
+    drop:"不存：你的坐标"
   });
   h += tierCard({
     level:"身体层", key:"body", pending:true, on:false,
     title:"心率变化（HRV）",
-    what:"只用来校准——比如「要不要换个更安静、人更少的地方」。不做诊断，不下结论。",
-    keep:"接入后会存：到访前后的匿名差值 + 空间 ID + 时段",
-    drop:"永远不存：原始连续生理流、人脸"
+    keep:"接入后存：到访前后的差值",
+    drop:"永远不存：原始生理流、人脸"
   });
 
   h += '<p class="eyebrow" style="margin-top:26px">打扰</p>';
@@ -2889,11 +2886,11 @@ function renderSettings(){
        '<div class="pick">' + [1,2,3].map(n =>
          '<button class="' + (r.dailyCap === n ? "on" : "") + '" data-cap="' + n + '">' + n + '</button>').join("") + '</div></div>';
   h += '<div class="setrow"><div class="txt"><b>静默时段</b>' +
-       '<small>' + r.silentFrom + ' 点到第二天 ' + r.silentTo + ' 点，我一句话都不说。</small></div>' +
+       '<small>' + r.silentFrom + ':00 到次日 ' + r.silentTo + ':00 不说话</small></div>' +
        '<div class="pick">' + [[22,8],[21,9],[20,10]].map(w =>
          '<button class="' + (r.silentFrom === w[0] ? "on" : "") + '" data-silent="' + w[0] + ':' + w[1] + '">' +
          w[0] + '–' + w[1] + '点</button>').join("") + '</div></div>';
-  h += '<div class="setrow"><div class="txt"><b>看一次主动触达长什么样</b><small>演示用。</small></div>' +
+  h += '<div class="setrow"><div class="txt"><b>看一次主动触达</b><small>演示用</small></div>' +
        '<div class="pick"><button data-demoreach="1">试一次</button></div></div>';
 
   h += '<details class="fold" style="margin-top:26px"><summary>这台设备上存了什么</summary>';
@@ -2940,7 +2937,6 @@ function renderTalk(){
   h += '<div class="talk">';
   h += '<div class="zai">' + cloudSVG("withyou") + '</div>';
   h += '<h1>现在，说点什么都行。</h1>';
-  h += '<p class="sub">不用组织语言，也不用先想清楚要去哪。<br>你说，我来找。</p>';
   // 打字时麦克风退成小圆钮：一屏一个主动作，语音的优先级靠体量表达
   h += '<button class="mic' + (state.talkTyping ? ' small' : '') + '" id="mic-button" aria-label="用语音说">' + micSVG() + '</button>';
   h += '<p class="mic-cap" id="mic-cap">' +
@@ -2955,10 +2951,10 @@ function renderTalk(){
   }
   if (guardianState() === "leaning"){
     // 守则 12 防依赖：不劝阻，只提一句「我不是唯一的出口」
-    h += '<p class="privacy" style="color:var(--ink-dim);max-width:30ch">今天你回来好几次了。<br>' +
-         '我能做的只是找个地方——真难受的时候，找个人说说比找个地方管用。</p>';
+    h += '<p class="privacy" style="color:var(--ink-dim);max-width:30ch">' +
+         '今天你回来好几次了。真难受的时候，找个人说说比找个地方管用。</p>';
   }
-  h += '<p class="privacy">语音不保存 · 原话不上传 · 位置不入库<br>只用来找一个此刻能接住你的地方</p>';
+  h += '<p class="privacy">语音不保存 · 原话不上传 · 位置不入库</p>';
   h += '<div class="foot">' +
        '<button id="location-input"' + (locationMode === "real" ? ' class="on"' : '') + '>' +
        (locationMode === "real" ? '✓ 北京真实定位 · 高德算路' : '⌖ 我在北京，用当前位置算路') + '</button>' +
@@ -3029,7 +3025,7 @@ function renderFix(){
   if (link === "place"){
     h += '<button class="place-out" id="fix-place">' +
          '<strong>这几个都不想去，换一批</strong>' +
-         '<small>刚才那些我记下来，这一轮不会再给你。状态和需求都保持不变。</small></button>';
+         '<small>这一轮不会再出现</small></button>';
   } else {
     const chips = groups[link] || [];
     if (!chips.length){
@@ -3129,7 +3125,7 @@ function renderOffer(){
   }
   h += '<p class="status" id="natural-status" style="min-height:18px;margin-top:14px;font:11.5px/1.55 var(--sans);color:var(--ink-faint)"></p>';
   h += '</div></div>';
-  h += tripStrip() || dock('到了我不打扰。等你走了，再问你三十秒。');
+  h += tripStrip() || dock('到了不打扰，走了问你 30 秒。');
   return h;
 }
 
@@ -3197,9 +3193,9 @@ function reachLine(rec, p){
 /* 样本诚实（FR-10b / FR-19b）：没有真实到访数据时，不给任何平均分 */
 function sampleLine(rec){
   if (rec.low_support || !rec.sample_size){
-    return "样本还少：这里还没有攒够真实到访反馈，所以我不给平均分，也不承诺你去了会变好。";
+    return SAMPLE_EMPTY;
   }
-  return "来自 " + rec.sample_size + " 份真实到访反馈的匿名汇总。它描述已经发生的记录，不是疗效承诺。";
+  return "来自 " + rec.sample_size + " 份真实到访反馈的汇总。";
 }
 
 /* ============================================================
@@ -3280,8 +3276,7 @@ const EN = {
   "一手描述": "First-hand", "档案来源，不是到访反馈": "Profile source, not visit feedback",
   "来自真人的一手经验，用来生成这个地方的档案。不带分数，也不进汇总。":
     "A real person's first-hand account, used to build this place's profile. No score, never counted in the aggregate.",
-  "样本还少：这里还没有攒够真实到访反馈，所以我不给平均分，也不承诺你去了会变好。":
-    "Thin sample: not enough real visits here yet, so I won't give an average, and I won't promise you'll feel better.",
+  "还没有真实到访反馈，这里不打分。": "No real visits logged here yet, so there's no score.",
   "匿名汇总": "Anonymous aggregate", "只聚合，不展示单条": "Aggregate only, never a single entry",
   "怎么算的 →": "how it's counted →", "匿名汇总是怎么算的 →": "how the aggregate is counted →",
   "条核验过的到访，这里才会出现汇总": " verified visits before an aggregate shows up here",
@@ -3303,8 +3298,8 @@ const EN = {
 
   "我到了": "I'm here", "我离开了": "I've left",
   "到了我自己知道，不用按": "I'll know when I'm there — no need to tap",
-  "到了我不打扰。等你走了，再问你三十秒。": "I won't bother you there. When you leave, I'll ask for thirty seconds.",
-  "你到了之后我不打扰。等你走了，再问你三十秒。": "I won't bother you once you're there. When you leave, I'll ask for thirty seconds.",
+  "到了不打扰，走了问你 30 秒。": "I won't bother you there. When you leave, I'll ask for thirty seconds.",
+  "到了不打扰，走了问你 30 秒。": "I won't bother you once you're there. When you leave, I'll ask for thirty seconds.",
   "花 30 秒，看看这个地方有没有接住你。不想现在说也可以。":
     "Thirty seconds — did this place hold you? You don't have to answer now.",
   "我不评价这个地方。我只想知道它对": "I'm not rating this place. I only want to know what it did for",
@@ -3327,12 +3322,11 @@ const EN = {
   "只用你打过的分说话": "Speaks only from scores you gave",
   "这些计算都在你这台设备上完成，没有上传。攒到 5 条以上，我才会用它覆盖原来的估计值。":
     "All of this is computed on your device and never uploaded. Only past five entries will I let it override the original estimate.",
-  "份真实到访反馈的匿名汇总。它描述已经发生的记录，不是疗效承诺。":
-    " real visits, aggregated anonymously. It describes what happened, not a promised effect.",
-  "这些是你的。要不要给别人看，每一条你都单独决定过。":
+  "份真实到访反馈的汇总。": " real visits, aggregated.",
+  "给不给别人看，每条你自己定。":
     "These are yours. Whether anyone else sees them, you decided one by one.",
-  "前三条为原型示例记录。所有内容只存在本页运行时内存中，刷新即清空：没有后端、没有账号、没有定位。":
-    "The first three are prototype samples. Everything lives in this page's memory and clears on refresh: no backend, no account, no location.",
+  "前三条是示例记录。你的记录存在这台设备上，没有账号。":
+    "The first three are samples. Your records stay on this device. No account.",
 
   "听起来你现在": "It sounds like right now you're",
   "非常难受。": "having a really hard time.",
@@ -3342,8 +3336,8 @@ const EN = {
   "身边一个你信得过的人": "someone you trust",
   "北京心理援助热线 010-82951332": "Beijing crisis line 010-82951332",
   "全国 24 小时 400-161-9995": "National 24h line 400-161-9995",
-  "我能做的只是找个地方——真难受的时候，找个人说说比找个地方管用。":
-    "All I can do is find a place. When it's really bad, talking to a person helps more than a place does.",
+  "今天你回来好几次了。真难受的时候，找个人说说比找个地方管用。":
+    "You've been back a few times today. When it's really bad, a person helps more than a place.",
   "我不做诊断，也不替代任何专业帮助。你随时可以回来。":
     "I don't diagnose, and I don't replace professional help. You can come back any time.",
 
@@ -3355,7 +3349,40 @@ const EN = {
   "不出门不是问题。如果最近一直提不起劲，找个信得过的人说说，比找个地方更管用。":
     "Staying in isn't a problem. If nothing has felt worth it for a while, talking to someone you trust helps more than any place I could find.",
   "我不会因为你没去就少给你什么。": "I won't give you less because you didn't go.",
-  "回到开头": "Back to start",
+  "回到开头": "Back to start", "回到": "Back to ",
+  "22–8点": "22–8", "21–9点": "21–9", "20–10点": "20–10",
+  "一个匿名 session ID，不含姓名、手机号、设备指纹": "One anonymous session ID — no name, phone, or device fingerprint",
+  "依据只有你的": "Based on your ", "条记录": " records",
+  "次到访，": " visits,", "攒成了一片。": "so far.",
+  "单条评分可以刷，聚合不行。": "Single ratings can be gamed. Aggregates can't.",
+  "你得真的去过，而且待够 5 分钟": "You have to have actually gone, and stayed 5 minutes",
+  "你得自己选「匿名贡献」，默认不进": "You have to opt in — off by default",
+  "反馈了就算数，不看你变好没有": "Responding counts; feeling better isn't required",
+  "这里空着是真的空着——我们不拿原型示例数据冒充统计。": "Empty means empty — we don't pass sample data off as statistics.",
+  "宁可空着，也不给你一个刷得出来的分数。": "Better empty than a score someone gamed.",
+  "还不够出汇总": "not enough for an aggregate yet", "样本 ": "Sample ",
+  "到次日": "to", "不说话": "— no messages",
+  "还没有真实到访反馈，这里不打分。": "No real visits logged here yet, so there's no score.",
+  "前三条是示例记录。你的记录存在这台设备上，没有账号。":
+    "The first three are samples. Your records stay on this device. No account.",
+  "今天你回来好几次了。真难受的时候，找个人说说比找个地方管用。":
+    "You've been back a few times today. When it's really bad, a person helps more than a place.",
+  "给不给别人看，每条你自己定。": "You decide, entry by entry, who sees what.",
+  "到了不打扰，走了问你 30 秒。": "I won't bother you there. Thirty seconds after you leave.",
+  "没有评分，也没有排名。": "No scores. No rankings.",
+  "不选匿名，它就只是你的。": "Skip anonymous and it stays yours alone.",
+  "只存进我的记录": "Keep it to myself", "默认，没有人看得到": "default — nobody sees it",
+  "匿名进入这个地点的汇总": "Add it to this place's aggregate",
+  "只算进一个数，单条不展示": "counted into one number; never shown on its own",
+  "这一轮不会再出现": "won't come up again this round",
+  "可以多选，也可以都不选。": "Pick several, or none.",
+  "花 30 秒。不想现在说也可以。": "Thirty seconds. Or not now.",
+  "不是给它打分，是记你自己的变化。": "Not rating the place — tracking your own change.",
+  "卡片有两面，点一下翻过去。": "Two sides. Tap to flip.",
+  "本机计算，没有上传": "computed on this device, never uploaded",
+  "平均变化": "average change", "只有你能看到": "only you can see",
+  "到访记录": "Visits", "条（含 3 条演示数据）": " (3 are samples)",
+  "打扰记录：今天": "Check-ins today:", "行程状态 无": "No trip in progress",
   "那次没接住": " didn't hold you that time", "出发前是": "You left feeling ",
   "，离开时": ", and came back at ", "。这条会让同类空间在": ". This pushes similar places down in ",
   "的推荐里往后退。": "your picks.",
@@ -3381,26 +3408,22 @@ const EN = {
 
   "授权与打扰": "Permissions", "你说了算": "Your call",
   "信号分层 · 逐项可关": "Layered signals · each one optional",
-  "三层信号，一层比一层贴近你。默认只开最外面那层。": "Three layers, each closer to you than the last. Only the outermost is on by default.",
-  "每一层都写清楚：拿它做什么、存什么、不存什么。": "Each one spells out what it's for, what's kept, and what isn't.",
+  "默认只开最外面那层。": "Only the outermost layer is on by default.",
   "默认层": "Default layer", "手机层": "Phone layer", "身体层": "Body layer",
   "时间，和你自己说的话": "The time, and what you tell me",
   "没有这一层产品就不成立，所以它不能关。你不说话我就不猜。": "Without this there's no product, so it can't be turned off. If you say nothing, I guess nothing.",
-  "存：结构化之后的需求（情绪档、诉求、预算档）": "Kept: your need, structured (state, ask, budget band)",
-  "不存：你说的原话、语音本身": "Not kept: your exact words, or the audio",
+  "存：结构化之后的需求": "Kept: your need, structured", "不存：原话、语音": "Not kept: your words, or the audio",
   "当前位置": "Your location",
   "用来算真实路程，以及到了之后无感核验到访。判定在你手机上完成。": "Used for real travel time, and to confirm a visit without you doing anything. The check runs on your phone.",
-  "存：到访结论（进没进围栏、待了多久）": "Kept: the conclusion (inside the fence or not, how long)",
-  "不存：你的经纬度，一次都不上传": "Not kept: your coordinates. They are never uploaded.",
+  "存：到访结论": "Kept: the visit conclusion", "不存：你的坐标": "Not kept: your coordinates",
   "心率变化（HRV）": "Heart rate variability (HRV)",
   "只用来校准——比如「要不要换个更安静、人更少的地方」。不做诊断，不下结论。": "Only for calibration — e.g. whether to find somewhere quieter. No diagnosis, no conclusions.",
   "还没做": "not built yet",
-  "接入后会存：到访前后的匿名差值 + 空间 ID + 时段": "Would keep: an anonymous before/after delta + place ID + time of day",
-  "永远不存：原始连续生理流、人脸": "Never kept: raw physiological streams, or faces",
+  "接入后存：到访前后的差值": "Would keep: a before/after delta", "永远不存：原始生理流、人脸": "Never kept: raw body data, or faces",
   "打扰": "Interruptions", "让小在主动来找我": "Let Xiaozai reach out",
   "现在在静默时段里，我不说话。": "Quiet hours right now — I won't say anything.",
   "一天最多几次": "How many times a day", "静默时段": "Quiet hours",
-  "看一次主动触达长什么样": "See what a check-in looks like", "演示用。": "Demo only.",
+  "看一次主动触达": "See a check-in", "演示用": "demo",
   "试一次": "Try it", "这台设备上存了什么": "What's stored on this device",
   "行程状态 无": "Trip: none", "清空这台设备上的全部记录": "Erase everything on this device",
   "不会变的三条": "Three things that won't change",
@@ -3435,6 +3458,7 @@ const EN_FRAGMENTS = [
   ["刚从", "Just back from "], ["回来吗", ""],
   ["你做了什么", "you"], ["它对", "it did for "],
   ["分钟", " min"], ["约 ", "about "], ["条记录", " records"],
+  ["到次日", "to"], ["不说话", "— no messages"], ["次", ""],
   ["你", "you"]
 ];
 

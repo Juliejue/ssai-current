@@ -342,7 +342,11 @@ def test_the_consent_copy_does_not_promise_a_feed_that_no_longer_exists():
     source = PROTOTYPE.read_text(encoding="utf-8")
     for lie in ("匿名出现在别人的到访流里", "匿名出现在到访流里", "分享给需要的人"):
         assert lie not in source, f"授权文案还在承诺已经删掉的东西：{lie}"
-    assert "没有人会看到你这一条本身" in source, "要明说单条不展示"
+    # 守的是承诺，不是某一句原话——文案会被改短，承诺不能被改没。
+    # 授权那一屏必须明说「单条不展示」，用哪种说法都行。
+    consent = source[source.index('data-vis="anonymous"'):][:600]
+    assert any(claim in consent for claim in ("单条不展示", "不展示单条", "没有人会看到你这一条本身")), \
+        "授权文案要明说单条不展示"
 
 
 def test_the_detail_page_shows_exactly_one_aggregate_block():
