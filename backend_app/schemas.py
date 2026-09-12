@@ -109,7 +109,11 @@ class Recommendation(BaseModel):
     score: float = Field(ge=0, le=1)
     distance_km: float | None = None
     walking_minutes: int | None = None
-    distance_source: Literal["amap", "prototype_estimate"] = "prototype_estimate"
+    # amap                = 高德实测步行路线
+    # amap_straight_line  = 高德周边搜索给的直线距离（现场搜到的地点，还没算路线）
+    # prototype_estimate  = 原型里写死的估算值，跟用户从哪儿出发无关
+    # 这三件事必须分得开：把第二种说成第三种，是在自己抹黑自己的数据。
+    distance_source: Literal["amap", "amap_straight_line", "prototype_estimate"] = "prototype_estimate"
     map_verified: bool = False
     navigation_url: str | None = None
     transport: str | None = None

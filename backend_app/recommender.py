@@ -429,7 +429,12 @@ def _to_recommendation(
         score=round(max(0.0, min(1.0, score)), 4),
         distance_km=distance_km,
         walking_minutes=walking_minutes,
-        distance_source="amap" if route else "prototype_estimate",
+        distance_source=(
+            "amap" if route
+            # 现场搜到的地点，距离是高德周边搜索一起返回的，是真的直线距离。
+            else "amap_straight_line" if place.get("source") == "discovered" and distance_km is not None
+            else "prototype_estimate"
+        ),
         map_verified=(place.get("amap") or {}).get("verification_status") == "verified",
         source=place.get("source") or "curated",
         photos=[url for url in (place.get("photos") or []) if isinstance(url, str)][:3],

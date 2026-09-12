@@ -192,3 +192,37 @@ def test_never_returns_empty_when_only_distance_disqualified_everything(monkeypa
     results = asyncio.run(recommender.recommend_with_live_context(request, map_client=FakeMapClient()))
     assert len(results) == 1
     assert results[0].time_to_relief == "later"
+
+
+def test_a_straight_line_distance_from_the_map_is_not_called_a_prototype_estimate(monkeypatch):
+    """现场搜到的地点带着高德给的直线距离，不能标成「原型估算」。
+
+    三种来源必须分得开：实测步行路线 / 高德直线距离 / 原型里写死的常数。
+    把第二种说成第三种，是在自己抹黑自己的数据——而这个产品的立身之本
+    就是「数据从哪来，说清楚」。
+    """
+    found = dict(_verified("liangmahe"))
+    found["source"] = "discovered"
+    found["distanceKm"] = 0.53
+    # 不要把这个局部变量叫 discovered——会遮住 lambda 自己的同名参数。
+    monkeypatch.setattr(
+        recommender, "_rank",
+        lambda _request, _now=None, discovered=None: [(0.8, found, {"travel_fit": 0.9})],
+    )
+
+    class NoRouteClient:
+        configured = True
+
+        async def search_around(self, **_):
+            return []
+
+        async def walking_route(self, **_):
+            raise recommender.MapProviderError("跨境失败")
+
+    request = RecommendRequest(
+        state=NeedState(mood_id="tired"),
+        location=Location(latitude=39.9432, longitude=116.4022),
+    )
+    results = asyncio.run(recommender.recommend_with_live_context(request, map_client=NoRouteClient()))
+    assert results[0].distance_source == "amap_straight_line"
+    assert results[0].distance_km == 0.53

@@ -3187,6 +3187,10 @@ function reachLine(rec, p){
     const source = locationMode === "demo" ? "高德实测 · 从北京东四起算" : "高德实测";
     return "步行约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km（" + source + "）";
   }
+  if (rec.distance_source === "amap_straight_line" && rec.distance_km != null){
+    // 直线距离是高德给的，不是我们估的。说成「原型估算」是在冤枉自己的数据。
+    return "直线 " + rec.distance_km + " km（高德测距，步行路线还没算）";
+  }
   if (locationMode) return "约 " + rec.reach_minutes + " 分钟 · " + p.transport + "（高德暂未返回路线，使用原型估算）";
   return "约 " + rec.reach_minutes + " 分钟 · " + p.transport + "（未开启定位，使用原型估算）";
 }
@@ -3287,6 +3291,8 @@ const EN = {
   "可能关门": "may be closed",
   "（未开启定位，使用原型估算）": " (location off — prototype estimate)",
   "（高德暂未返回路线，使用原型估算）": " (no route from Amap — prototype estimate)",
+  "（高德测距，步行路线还没算）": " (Amap distance; walking route not computed yet)",
+  "直线 ": "as the crow flies: ",
   "高德实测": "measured by Amap", "高德实测 · 从北京东四起算": "measured by Amap · from Dongsi, Beijing",
   "用哪个地图带你去？": "Which map should take you?",
   "· 坐标已按各家的坐标系换算过，不会偏": " · coordinates converted for each provider, so it won't be off",
