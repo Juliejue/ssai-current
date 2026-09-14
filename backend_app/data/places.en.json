@@ -1,0 +1,780 @@
+{
+  "places": {
+    "fruityshop": {
+      "placeName": "fRUITYSHOP",
+      "action": "Ask them to play one for you",
+      "category": "record shop · indoors",
+      "see": "A wall of vinyl, a good sound system",
+      "cost": "Low. You can just listen without buying; staff won't push.",
+      "suggestedDuration": "20–60 minutes",
+      "transport": "Metro Line 8, Shichahai",
+      "matchReason": {
+        "spark": "When you need inspiration, letting someone else pick is easier than searching—ask for one and they'll play it.",
+        "fresh": "The stock here isn't the same batch you see on streaming apps. Ten minutes of browsing turns up things you haven't heard.",
+        "low": "No talking required, no purchase needed. Standing there listening to one side counts as a win.",
+        "_": "Few places let your hands be busy and your ears engaged at the same time."
+      },
+      "placeInsights": [
+        {
+          "t": "Listen without buying",
+          "d": "Ask for a track and they play it; the staff know their inventory well. This alone lowers the pressure."
+        },
+        {
+          "t": "Fair prices",
+          "d": "A new Aphex Twin record costs 320 here, versus 588 at the shop on Chaoyue's fifth floor."
+        }
+      ],
+      "environmentTags": [
+        "audition available",
+        "no purchase necessary",
+        "good sound",
+        "jazz/electronic/rock"
+      ]
+    },
+    "postpost": {
+      "placeName": "postpost",
+      "action": "Grab a book off the shelf and sit down",
+      "category": "bookstore · concept store · coffee",
+      "see": "Walls of browsable books, full Genelec audio setup, own-brand and curated clothing",
+      "cost": "Medium. You can just sit and read, but the curry rice and pour-over are worth ordering",
+      "suggestedDuration": "60–120 minutes",
+      "transport": "Line 10, Tuanjiehu Station",
+      "matchReason": {
+        "spark": "The selection and new arrivals move fast enough that you’ll likely find something in an hour.",
+        "tired": "Every corner on the first floor sounds good. Sit down without deciding where to go next; stay until you don’t want to anymore.",
+        "fresh": "Books, clothes, curry, and drinks under one roof. A quick walk around fills your senses.",
+        "_": "All shelf books are available for borrowing—you can finish them without buying, which is rare for a bookstore."
+      },
+      "placeInsights": [
+        {
+          "t": "Shelf books borrowable",
+          "d": "As a bookstore, this matters most. You don’t have to pay upfront to read."
+        },
+        {
+          "t": "Club-grade sound system",
+          "d": "Full Genelec setup. Every corner on the first floor offers a good listening experience."
+        }
+      ],
+      "environmentTags": [
+        "borrowable shelves",
+        "great sound",
+        "curated selection",
+        "easy to linger"
+      ]
+    },
+    "fusheng": {
+      "placeName": "Fusheng Records",
+      "action": "Browse a round after the movie",
+      "category": "record shop · indoors",
+      "see": "Shelves packed tight. If the owner is there, you might chat.",
+      "cost": "Low. It's fine to browse without buying.",
+      "suggestedDuration": "20–40 mins",
+      "transport": "Line 4, Xinjiekou Station",
+      "matchReason": {
+        "spark": "It's on the same line as the Film Archive and Douzai Coffee. You can string them together in one afternoon without making new decisions.",
+        "noisy": "Flipping through records is repetitive. Your hands keep moving, and your thoughts slow down with them.",
+        "_": "Places you pass by are easier to start than places you go out of your way for."
+      },
+      "placeInsights": [
+        {
+          "t": "Easy chain",
+          "d": "Watch a film at the Archive, get coffee at Douzai, flip through records here—all on one street."
+        },
+        {
+          "t": "The search is the thing",
+          "d": "No goal needed. Whatever you find, you find."
+        }
+      ],
+      "environmentTags": [
+        "next to archive",
+        "easy chain",
+        "no purchase required"
+      ]
+    },
+    "kule": {
+      "placeName": "Kule Records",
+      "action": "Squeeze into the rock section to grab a spot",
+      "category": "record shop · indoors",
+      "see": "Narrow aisles, the rock section is always standing room only",
+      "cost": "Low. But it's tight, staying long feels cramped",
+      "suggestedDuration": "20–40 minutes",
+      "transport": "Metro Line 5, Zhangzizhonglu",
+      "matchReason": {
+        "fresh": "Stock is complete, but it's crowded. If you want something new and don't mind being close to people, this is it.",
+        "okay": "When you're feeling okay, squeezing in can actually be fun.",
+        "_": "Bookstores and record shops are clustered around Dongsi, easy to visit together."
+      },
+      "placeInsights": [
+        {
+          "t": "Really crowded",
+          "d": "The rock section often gets blocked by people, so you can't see everything. Good to know beforehand."
+        },
+        {
+          "t": "On the Dongsi line",
+          "d": "Sanlian, Paper Sound, and Maybe Books are nearby, making for a good combined trip."
+        }
+      ],
+      "environmentTags": [
+        "very crowded",
+        "full stock",
+        "dongsi book street"
+      ]
+    },
+    "wansheng": {
+      "placeName": "All Sages Bookstore",
+      "action": "Browse the social sciences section until closing",
+      "category": "bookshop · indoors",
+      "see": "Floor-to-ceiling shelves of social science books, with a coffee area nearby",
+      "cost": "Low. You can just look; if you sit in the coffee area, you need to order.",
+      "suggestedDuration": "60–150 minutes",
+      "transport": "Metro Line 4, Peking University East Gate",
+      "matchReason": {
+        "quiet": "The quiet here isn't luck; it's how the space is built.",
+        "tired": "You can sit without being watched or asked how long you're staying.",
+        "tight": "High shelves and narrow aisles hold your gaze, which often helps you loosen up.",
+        "_": "Being alone here requires no explanation to anyone."
+      },
+      "placeInsights": [
+        {
+          "t": "Staying long is normal",
+          "d": "Sitting from afternoon until close isn't strange; it's the default here."
+        },
+        {
+          "t": "Pizza next door",
+          "d": "Fire Ghost Paro is a short walk away, with buy-one-get-one pizza on Tuesdays."
+        }
+      ],
+      "environmentTags": [
+        "quiet",
+        "easy to sit",
+        "academic",
+        "no purchase needed"
+      ]
+    },
+    "sanlian": {
+      "placeName": "Sanlian Taofen Bookstore",
+      "action": "Sit on the steps and finish a book",
+      "category": "bookstore · indoors",
+      "see": "Steps you can sit on, sunken reading area",
+      "cost": "Low. Sitting on the steps to read requires no purchase",
+      "suggestedDuration": "40–90 minutes",
+      "transport": "Line 5, Zhangzizhonglu Station",
+      "matchReason": {
+        "low": "No need to sit up straight. Any posture works on the steps. Two pages is enough.",
+        "tired": "The seat here isn't bought with consumption; it's just allowed.",
+        "_": "Holding a book gives you a valid reason to be alone."
+      },
+      "placeInsights": [
+        {
+          "t": "Sitting without buying",
+          "d": "The steps and sunken area are for sitting, not decoration."
+        },
+        {
+          "t": "On Dongsi book line",
+          "d": "Next to Paper Sound, Maybe Books, and Zuoshu; easy to chain into half a day."
+        }
+      ],
+      "environmentTags": [
+        "sit on floor",
+        "no purchase needed",
+        "Dongsi line"
+      ]
+    },
+    "zhishang": {
+      "placeName": "Zhishang Shengyin",
+      "action": "Flip through indie publications you haven't seen before",
+      "category": "bookstore · indoors",
+      "see": "Indie publications, zines, uncommon prints",
+      "cost": "Low. Browsing is free",
+      "suggestedDuration": "20–50 mins",
+      "transport": "Line 5, Zhangzizhonglu",
+      "matchReason": {
+        "spark": "Most items here aren't in algorithmic feeds; you might stumble on something.",
+        "fresh": "The upside of indie publishing is a high ratio of unknowns.",
+        "_": "Small shops have a different kind of quiet—not empty, just unmonitored."
+      },
+      "placeInsights": [
+        {
+          "t": "High ratio of unknowns",
+          "d": "These items rarely show up in your feed."
+        },
+        {
+          "t": "Very small space",
+          "d": "It gets cramped when busy; weekday afternoons are better."
+        }
+      ],
+      "environmentTags": [
+        "indie publishing",
+        "small and quiet",
+        "dongsi area"
+      ]
+    },
+    "zuoshu": {
+      "placeName": "Zuoshu · Longfu Temple",
+      "action": "Stand for a long time in front of the feminism shelf",
+      "category": "bookstore · coffee · market",
+      "see": "Shelves for feminism, non-fiction, and niche philosophy; doubles as a cafe",
+      "cost": "Medium. Browsing is free, but sitting down requires ordering a drink",
+      "suggestedDuration": "40–90 minutes",
+      "transport": "Metro Line 6, Dongsi",
+      "matchReason": {
+        "spark": "The selection has a stance—feminism, non-fiction, and lesser-known philosophy are all here.",
+        "near": "People around you are reading similar things, but no one will interrupt.",
+        "_": "You can read, sit, and have a drink; three things for an afternoon, all in one place."
+      },
+      "placeInsights": [
+        {
+          "t": "Curated with intent",
+          "d": "Not arranged by bestseller lists, but carefully chosen by someone."
+        },
+        {
+          "t": "Also a cafe",
+          "d": "No need to move when you're tired; this removes one decision."
+        }
+      ],
+      "environmentTags": [
+        "good curation",
+        "coffee available",
+        "occasional markets"
+      ]
+    },
+    "soloist": {
+      "placeName": "soloist coffee",
+      "action": "Watch the sunset hit the grey tiles",
+      "category": "coffee · hutong",
+      "see": "Grey roof tiles and a hutong outside the window; light in the evening",
+      "cost": "Medium. The price of a coffee",
+      "suggestedDuration": "40–80 minutes",
+      "transport": "Metro Line 2, Qianmen",
+      "matchReason": {
+        "low": "Sit and watch the sky change. You don't have to do anything.",
+        "tight": "Outside is slow: tiles, the alley, people walking by. Tension might loosen on its own.",
+        "empty": "Life happens around you. You don't need to join in, just watch.",
+        "_": "Go in the evening. Half the appeal here is the light."
+      },
+      "placeInsights": [
+        {
+          "t": "Light is the main event",
+          "d": "Sunset on grey tiles doesn't require your participation."
+        },
+        {
+          "t": "Street isn't polished",
+          "d": "It feels lived-in. Walking in and out shifts your pace."
+        }
+      ],
+      "environmentTags": [
+        "sunset view",
+        "lived-in feel",
+        "best at dusk"
+      ]
+    },
+    "douzai": {
+      "placeName": "Douzai Coffee",
+      "action": "Wait for a movie to start",
+      "category": "coffee · indoors",
+      "see": "Most people are waiting for a film; many sit alone",
+      "cost": "Medium. Price of a cup",
+      "suggestedDuration": "30–60 mins",
+      "transport": "Metro Line 4, Xinjiekou",
+      "matchReason": {
+        "quiet": "Most others are here alone too, so sitting by yourself feels normal.",
+        "tired": "You have a clear reason to wait, so resting doesn't need an excuse.",
+        "_": "It's on the same line as the Film Archive and Fusheng Records, good for a chain."
+      },
+      "placeInsights": [
+        {
+          "t": "Alone is default",
+          "d": "Sitting here solo requires no explanation."
+        },
+        {
+          "t": "Valid reason to wait",
+          "d": "Waiting for the start time makes staying put feel justified."
+        }
+      ],
+      "environmentTags": [
+        "next to archive",
+        "mostly solo visitors",
+        "quiet"
+      ]
+    },
+    "beipingjiqi": {
+      "placeName": "Beiping Machine",
+      "action": "Sit at the bar alone with a drink",
+      "category": "craft beer · indoors",
+      "see": "Long bar counter, many solo visitors, frequent menu changes",
+      "cost": "Mid-high. Price of one craft beer",
+      "suggestedDuration": "40–90 minutes",
+      "transport": "Metro Line 8, Gulou Dajie",
+      "matchReason": {
+        "empty": "The bar means people are nearby, but no one expects you to talk.",
+        "near": "If you want company without the effort of socializing, the bar is the easiest spot.",
+        "okay": "When you're doing fine, one drink is enough; no need to stay late.",
+        "_": "Sitting at the bar alone here is normal, not something that needs explaining."
+      },
+      "placeInsights": [
+        {
+          "t": "Solo is normal",
+          "d": "Half the seats at the bar are taken by people drinking alone."
+        },
+        {
+          "t": "Leave anytime",
+          "d": "Finish your drink and pay; there's no pressure to stay until closing."
+        }
+      ],
+      "environmentTags": [
+        "solo bar seating",
+        "no socializing required",
+        "Gulou area"
+      ]
+    },
+    "liangmahe": {
+      "placeName": "Liangma River",
+      "action": "Walk along the river, thinking as you go",
+      "category": "riverbank · outdoors",
+      "see": "Riverside paths, lights across the water, people walking at dusk",
+      "cost": "Free. No spending required",
+      "suggestedDuration": "30–90 minutes",
+      "transport": "Metro Line 10, Liangmaqiao Station",
+      "matchReason": {
+        "noisy": "The water keeps moving; your looping thoughts might struggle to keep up.",
+        "low": "This place doesn't ask you to cheer up, just pulls your gaze further than your thoughts.",
+        "tight": "As you walk, your breathing lengthens on its own, without you having to adjust it.",
+        "empty": "A long line with no choices to make; however far you go counts.",
+        "_": "No consumption needed, and no one asks how long you're staying."
+      },
+      "placeInsights": [
+        {
+          "t": "Keep walking",
+          "d": "When your body is moving, you don't have to force clarity."
+        },
+        {
+          "t": "Dusk is best",
+          "d": "The half-hour when daylight swaps with the lights is worth rushing for."
+        }
+      ],
+      "environmentTags": [
+        "walkable",
+        "waterfront",
+        "best at dusk",
+        "free"
+      ]
+    },
+    "shichahai": {
+      "placeName": "Shichahai",
+      "action": "Walk along the water. You don't have to finish the loop.",
+      "category": "waterfront · outdoors",
+      "see": "Willows on the bank, people rowing boats, the quieter stretch further along",
+      "cost": "Free. Unless you want a drink to sit with.",
+      "suggestedDuration": "40–120 mins",
+      "transport": "Line 8, Shichahai Station",
+      "matchReason": {
+        "noisy": "Walking by the water is a mindless motion. Go as far as you feel like.",
+        "empty": "Life keeps happening on the banks. You don't need to join in, just pass through.",
+        "low": "If you get tired or hot, there are shops right at the subway exit. Sit down, rest, then keep going.",
+        "_": "Following the water from Xihai is the most comfortable part of this route."
+      },
+      "placeInsights": [
+        {
+          "t": "Stop anytime",
+          "d": "No need to complete the full circle; turn back when you're done."
+        },
+        {
+          "t": "Quieter to the north",
+          "d": "It gets calmer closer to the Xihai side."
+        }
+      ],
+      "environmentTags": [
+        "walkable",
+        "waterfront",
+        "free",
+        "long walk"
+      ]
+    },
+    "beihai": {
+      "placeName": "Beihai Park",
+      "action": "Sit by the shore and look at the White Pagoda",
+      "category": "park · outdoors",
+      "see": "Water, the White Pagoda, benches; people skating on the ice in winter",
+      "cost": "Low. Ticket is a few yuan",
+      "suggestedDuration": "60–120 minutes",
+      "transport": "Metro Line 6, Beihai North Station",
+      "matchReason": {
+        "tight": "The water and trees don't ask anything of you.",
+        "tired": "There are benches. Just sit down; no need to keep walking.",
+        "low": "Your gaze can travel far, making thoughts feel smaller.",
+        "_": "It's next to Shichahai, so you can keep walking."
+      },
+      "placeInsights": [
+        {
+          "t": "Places to sit",
+          "d": "Unlike some parks where you have to keep moving, here you can stop."
+        },
+        {
+          "t": "Long sightlines",
+          "d": "The distance takes over some of your attention for you."
+        }
+      ],
+      "environmentTags": [
+        "has water",
+        "has benches",
+        "good for sitting long"
+      ]
+    },
+    "tiantan": {
+      "placeName": "Temple of Heaven",
+      "action": "Walk to the far end of the cypress grove",
+      "category": "park · outdoors",
+      "see": "Rows of old cypresses; few people if you go deeper",
+      "cost": "Low. Ticket is a few yuan",
+      "suggestedDuration": "60–150 minutes",
+      "transport": "Line 5, Temple of Heaven East Gate",
+      "matchReason": {
+        "quiet": "Head northwest and the crowd thins out; quiet comes from distance.",
+        "tight": "The air in the cypress grove is cool; your breathing slows down on its own.",
+        "noisy": "It’s big enough to walk until tired, without needing to make decisions halfway.",
+        "_": "Beautiful at dusk, when there are the fewest people."
+      },
+      "placeInsights": [
+        {
+          "t": "Quiet takes walking",
+          "d": "The main path is always busy; ten minutes inward feels like another world."
+        },
+        {
+          "t": "Trees are old",
+          "d": "Rows of cypresses make looking up feel natural here."
+        }
+      ],
+      "environmentTags": [
+        "large grove",
+        "long walks",
+        "crowds thin out"
+      ]
+    },
+    "langyuan": {
+      "placeName": "Langyuan",
+      "action": "Wander the grounds without a destination",
+      "category": "campus · semi-outdoor",
+      "see": "Converted old factories, bookstores, occasional exhibitions and markets",
+      "cost": "Low. Browsing is free",
+      "suggestedDuration": "40–90 minutes",
+      "transport": "Line 1, Dawanglu Station",
+      "matchReason": {
+        "spark": "Exhibitions and markets pop up in these factory spaces; see what you find.",
+        "fresh": "The content changes each time, so it never feels stale.",
+        "okay": "Walk around here, then head to Liangma River for a complete evening.",
+        "_": "No tickets, no reservations. Just walk in."
+      },
+      "placeInsights": [
+        {
+          "t": "Content rotates",
+          "d": "Exhibitions and markets take turns, keeping the place fresh."
+        },
+        {
+          "t": "Easy to continue",
+          "d": "From here, walking toward Liangma River is a smooth route."
+        }
+      ],
+      "environmentTags": [
+        "free entry",
+        "exhibitions",
+        "not crowded",
+        "near Liangma River"
+      ]
+    },
+    "yangmeizhu": {
+      "placeName": "Yangmeizhu Xiejie",
+      "action": "Walk a hutong that hasn't been polished up yet",
+      "category": "hutong · outdoors",
+      "see": "Courtyards where people live, a few small shops, grey bricks and wires",
+      "cost": "Free. Walking costs nothing",
+      "suggestedDuration": "30–60 mins",
+      "transport": "Line 2, Qianmen Station",
+      "matchReason": {
+        "empty": "People actually live here; life happens alongside you, just pass through.",
+        "fresh": "Unlike the renovated commercial streets, this feels denser and real.",
+        "_": "A street you can walk slowly to the end, where there's a cafe to sit."
+      },
+      "placeInsights": [
+        {
+          "t": "Not yet fixed up",
+          "d": "It has a raw, everyday feel—something rare in Beijing now."
+        },
+        {
+          "t": "Somewhere to sit",
+          "d": "soloist is on this line, good for when your feet get tired."
+        }
+      ],
+      "environmentTags": [
+        "everyday feel",
+        "not crowded",
+        "free",
+        "has cafes"
+      ]
+    },
+    "wudaoying": {
+      "placeName": "Guozijian · Wudaoying",
+      "action": "Walk from the ginkgo street to Wudaoying",
+      "category": "hutong · outdoors",
+      "see": "Old trees at Guozijian, small shops lining Wudaoying",
+      "cost": "Low. Walking is free, sitting down means ordering",
+      "suggestedDuration": "40–90 mins",
+      "transport": "Line 2, Yonghegong Station",
+      "matchReason": {
+        "fresh": "The density shifts between the two streets—one quiet, one busy—so a walk switches your state twice.",
+        "okay": "The street isn't long; you finish it just right without getting tired.",
+        "_": "It's next to the Gulou area, so you can link them into one route."
+      },
+      "placeInsights": [
+        {
+          "t": "Two rhythms",
+          "d": "The Guozijian side has trees and quiet; the Wudaoying side has shops and people."
+        },
+        {
+          "t": "Continue to Gulou",
+          "d": "It's not far from here, so you can connect both areas in one go."
+        }
+      ],
+      "environmentTags": [
+        "old trees",
+        "many small shops",
+        "good for walking"
+      ]
+    },
+    "ziliaoguan": {
+      "placeName": "China Film Archive",
+      "action": "Buy a matinee ticket, turn off your phone",
+      "category": "cinema · indoors",
+      "see": "Screenings don't follow mainstream chains; most people come alone",
+      "cost": "Low. Tickets are cheap",
+      "suggestedDuration": "120–180 minutes",
+      "transport": "Metro Line 4, Xinjiekou",
+      "matchReason": {
+        "noisy": "For two hours you don't have to make any decisions—that's the real function of this place.",
+        "tired": "Once the lights go down, you don't have to keep up any expression.",
+        "low": "No need to talk to anyone, or pretend you're doing something important.",
+        "_": "After the film, keep walking: Yunnan Kitchen, Fusheng Records, and Douzai Coffee are nearby."
+      },
+      "placeInsights": [
+        {
+          "t": "Two hours no choices",
+          "d": "When the lights dim, you hand over the decision-making."
+        },
+        {
+          "t": "Start of a route",
+          "d": "Walk east from here and you can fill the whole day."
+        }
+      ],
+      "environmentTags": [
+        "good curation",
+        "mostly solo visitors",
+        "no decisions for two hours"
+      ]
+    },
+    "yunnanxiaochu": {
+      "placeName": "Yunnan Xiaochu",
+      "action": "Get a bowl of stinky tofu rice noodles, done in twenty minutes",
+      "category": "eat · indoors",
+      "see": "Tiny spot, packed at lunch",
+      "cost": "Low. Price of one noodle bowl",
+      "suggestedDuration": "20–40 mins",
+      "transport": "Opposite the Film Archive",
+      "matchReason": {
+        "tired": "Hot food helps more than thinking it through; you’re done in twenty.",
+        "empty": "Small room, lots of people and steam. You don’t have to participate.",
+        "_": "Right across from the Film Archive. No need to make another 'where to eat' decision after the movie."
+      },
+      "placeInsights": [
+        {
+          "t": "Low decision cost",
+          "d": "It’s right there, no need to choose again."
+        },
+        {
+          "t": "Crowded is normal",
+          "d": "Full at lunch; go off-peak if you’re in a rush."
+        }
+      ],
+      "environmentTags": [
+        "cheap",
+        "fast",
+        "opposite archive"
+      ]
+    },
+    "huogui": {
+      "placeName": "Huogui paro",
+      "action": "Go on a Tuesday for the buy-one-get-one pizza deal",
+      "category": "eat · indoors",
+      "see": "Pizza oven, busier on Tuesdays",
+      "cost": "Mid. Buy-one-get-one on Tuesdays, regular price otherwise",
+      "suggestedDuration": "40–80 mins",
+      "transport": "Metro Line 4, Peking Univ East Gate",
+      "matchReason": {
+        "near": "Better value for two people with the Tuesday deal.",
+        "okay": "A short walk from Wansheng Bookstore, no extra planning needed.",
+        "_": "Having a specific reason to go out sometimes matters more than the reason itself."
+      },
+      "placeInsights": [
+        {
+          "t": "Tuesday has a hook",
+          "d": "Buy-one-get-one is a reason to leave the house."
+        },
+        {
+          "t": "Next to Wansheng",
+          "d": "Eat after browsing books to complete the afternoon."
+        }
+      ],
+      "environmentTags": [
+        "Tuesday BOGO",
+        "Near Wansheng",
+        "Good for pairs"
+      ]
+    },
+    "niaozhouli": {
+      "placeName": "Niaozhouli",
+      "action": "Eat yakitori at Liangmaqiao after dusk",
+      "category": "food · indoors",
+      "see": "Counter seats face the grill; sitting alone is normal",
+      "cost": "Mid-high. Japanese cuisine prices",
+      "suggestedDuration": "60–90 minutes",
+      "transport": "Line 10, Liangmaqiao Station",
+      "matchReason": {
+        "near": "The counter faces the grill, so you have something to watch without needing to talk.",
+        "okay": "Finish a walk along the Liangma River and eat here; it makes for a complete evening.",
+        "_": "Sitting alone at the counter is common here, no explanation needed."
+      },
+      "placeInsights": [
+        {
+          "t": "Something to watch",
+          "d": "The grill is right in front of you, so eating alone feels natural."
+        },
+        {
+          "t": "After the river walk",
+          "d": "Walking first then eating feels better than the other way around."
+        }
+      ],
+      "environmentTags": [
+        "counter seating",
+        "after river walk",
+        "solo friendly"
+      ]
+    },
+    "qmex": {
+      "placeName": "qmex",
+      "action": "Stand in the courtyard and drink, leave whenever",
+      "category": "bar · semi-outdoor",
+      "see": "People standing in the yard, music not too loud",
+      "cost": "Mid-high. Drink prices.",
+      "suggestedDuration": "60–120 minutes",
+      "transport": "Subway Line 10 Tuanjiehu",
+      "matchReason": {
+        "fresh": "The courtyard is busy; staying a while shifts your state.",
+        "okay": "Standing to drink means you can leave anytime, no getting stuck.",
+        "near": "Surrounded by people, but you can just stand there without talking.",
+        "_": "It only works at night. Daytime is a different story."
+      },
+      "placeInsights": [
+        {
+          "t": "Easy exit",
+          "d": "Standing to drink doesn't require ending a session; you just walk away."
+        },
+        {
+          "t": "Really crowded",
+          "d": "Not suitable if you want quiet; know this beforehand."
+        }
+      ],
+      "environmentTags": [
+        "semi-outdoor",
+        "easy exit",
+        "night only",
+        "social"
+      ]
+    },
+    "lasocial": {
+      "placeName": "la social",
+      "action": "Grab a bite at the Japanese place next door first",
+      "category": "bar · indoors",
+      "see": "Packed, with a Japanese restaurant right next door for a pre-drink meal",
+      "cost": "High. Drinks plus dinner",
+      "suggestedDuration": "90–150 mins",
+      "transport": "Line 10, Tuanjiehu",
+      "matchReason": {
+        "fresh": "Fastest shift if you want a change and have the energy to handle people.",
+        "okay": "Only come when you're feeling okay. It drains more when you're not.",
+        "_": "There's a Japanese spot next door—eat first before going in. That's how locals do it."
+      },
+      "placeInsights": [
+        {
+          "t": "Takes effort",
+          "d": "The barrier here isn't money, it's the energy to deal with people."
+        },
+        {
+          "t": "Eat then drink",
+          "d": "Pre-drinking at the Japanese place next door beats entering on an empty stomach."
+        }
+      ],
+      "environmentTags": [
+        "very lively",
+        "social effort",
+        "next-door predrink"
+      ]
+    },
+    "school": {
+      "placeName": "School",
+      "action": "Stand at the back and listen to the whole set",
+      "category": "livehouse · indoors",
+      "see": "Small venue, packed, loud sound",
+      "cost": "Medium. Ticket plus drinks",
+      "suggestedDuration": "90–180 minutes",
+      "transport": "Subway Line 8, Gulou Dajie",
+      "matchReason": {
+        "fresh": "The live sound drowns out everything else; that is its most practical function.",
+        "spark": "The lineup isn't sorted by popularity, so stumbling upon unknown bands is common.",
+        "_": "You can stand at the very back and still hear the entire show without pushing forward."
+      },
+      "placeInsights": [
+        {
+          "t": "Sound drowns thoughts",
+          "d": "When the volume is high enough, your mind stops queuing up worries."
+        },
+        {
+          "t": "Back row works",
+          "d": "No need to crowd the front; the last row hears it all just fine."
+        }
+      ],
+      "environmentTags": [
+        "live music",
+        "loud",
+        "standing room",
+        "Gulou area"
+      ]
+    },
+    "zhaodai": {
+      "placeName": "zhaodai",
+      "action": "Dance until your brain shuts off",
+      "category": "club · indoors",
+      "see": "Gets busy late, great sound system",
+      "cost": "High. Ticket plus drinks",
+      "suggestedDuration": "120–240 minutes",
+      "transport": "Line 10, Tuanjiehu Station",
+      "matchReason": {
+        "fresh": "If you want a total change of scene, this is the furthest end of the spectrum.",
+        "okay": "You need energy to spare. If you're tired, this will drain you twice as fast.",
+        "_": "Move your body first, let your mind stop later—it works better in that order."
+      },
+      "placeInsights": [
+        {
+          "t": "Body moves first",
+          "d": "You don't need to figure it out; just start moving."
+        },
+        {
+          "t": "Very draining",
+          "d": "Count how you feel the next day as part of the cost."
+        }
+      ],
+      "environmentTags": [
+        "late night",
+        "electronic music",
+        "physical"
+      ]
+    }
+  }
+}

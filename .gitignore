@@ -7,6 +7,13 @@
 # 本地工具目录
 .claude/
 node_modules/
+.venv/
+__pycache__/
+*.pyc
+.env
+.vercel/
+backend_app/data/amap_candidates.json
 
 # 渲染产物
 *.pdf
+.env*

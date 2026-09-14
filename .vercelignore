@@ -1,0 +1,35 @@
+.env*
+.vercel/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+.claude/
+node_modules/
+.DS_Store
+
+# 部署跨境上传，包体每大一分，ECONNRESET 的概率就高一分。
+# 线上只需要：此在-current-原型.html + current-client.js + reach-policy.js
+# + api/ + backend_app/ + requirements.txt + vercel.json。其余一律不上传。
+
+# 原始素材与设计稿（各数 MB）
+*.zip
+*.docx
+*.pptx
+*.rtf
+*.pdf
+*.png
+*.svg
+brand/
+CurrentHRVDemo/
+
+# 文档与本地工具，不属于网站
+*.md
+填Key.sh
+ocr_vision.m
+
+# 测试与离线脚本，线上不执行
+tests/
+scripts/
+pytest.ini
