@@ -1,0 +1,27 @@
+{
+  "id": "/current/",
+  "name": "此在 Current",
+  "short_name": "此在",
+  "description": "在说不清的时刻，帮你找到此刻适合你的空间。",
+  "lang": "zh-CN",
+  "start_url": "/current/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F0F3F2",
+  "theme_color": "#F0F3F2",
+  "icons": [
+    {
+      "src": "/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

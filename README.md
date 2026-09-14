@@ -42,6 +42,7 @@ python3 -m http.server 8000
 ```bash
 .venv/bin/pytest -q                    # 含红线回归测试集（FR-29）
 node --check current-client.js
+node --test tests/*.test.js             # 主动触达 + 语音握手/重采样/清理
 node scripts/extract_place_data.mjs
 ```
 

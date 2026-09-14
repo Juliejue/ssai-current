@@ -57,8 +57,23 @@ NEED_RULES: dict[str, tuple[str, ...]] = {
     "nothing": ("不想决定", "你替我选", "随便", "都可以"),
 }
 
-URGENT_PATTERNS = ("不想活", "想死", "结束生命", "自杀", "伤害自己")
-ELEVATED_PATTERNS = ("撑不住", "失控", "崩溃", "活不下去")
+# Safety routing is deliberately rule-first: explicit risk language must never be
+# delegated to a model that could miss or downgrade it. Keep self-harm and harm
+# to others separate so downstream safety UX can evolve without reclassifying
+# historical signals.
+URGENT_SELF_HARM_PATTERNS = (
+    "不想活", "活不下去", "想死", "结束生命", "结束自己的生命", "轻生", "寻死",
+    "自杀", "伤害自己", "杀了自己", "一了百了",
+    "want to die", "wanna die", "kill myself", "hurt myself", "harm myself",
+    "end my life", "take my own life", "suicidal",
+)
+URGENT_HARM_TO_OTHERS_PATTERNS = (
+    "想杀人", "我要杀", "杀了他", "杀了她", "杀了他们", "杀了她们", "伤害别人",
+    "伤害他人", "想砍人", "捅死", "砍死",
+    "kill someone", "kill him", "kill her", "kill them", "hurt someone",
+    "hurt other people", "harm someone", "harm other people",
+)
+ELEVATED_PATTERNS = ("撑不住", "失控", "崩溃", "can't go on", "cannot go on")
 
 # Body-level wording only. No clinical or personality labels ever leave this file.
 STATE_LABELS: dict[str, str] = {
@@ -164,9 +179,20 @@ def interpret_with_rules(text: str) -> InterpretResponse:
         mood_id = "low"
 
     needs = [key for key, tokens in NEED_RULES.items() if _contains_any(text, tokens)]
-    urgent = _contains_any(text, URGENT_PATTERNS)
-    elevated = not urgent and _contains_any(text, ELEVATED_PATTERNS)
+    risk_text = text.casefold()
+    self_harm = _contains_any(risk_text, URGENT_SELF_HARM_PATTERNS)
+    harm_to_others = _contains_any(risk_text, URGENT_HARM_TO_OTHERS_PATTERNS)
+    urgent = self_harm or harm_to_others
+    elevated = not urgent and _contains_any(risk_text, ELEVATED_PATTERNS)
     risk_level = RiskLevel.urgent if urgent else RiskLevel.elevated if elevated else RiskLevel.ordinary
+
+    risk_signals: list[str] = []
+    if self_harm:
+        risk_signals.append("explicit_self_harm_language")
+    if harm_to_others:
+        risk_signals.append("explicit_harm_to_others_language")
+    if elevated:
+        risk_signals.append("severe_distress_language")
 
     energy = 2
     if _contains_any(text, ("没力气", "很累", "动不了", "不想动")):
@@ -189,7 +215,7 @@ def interpret_with_rules(text: str) -> InterpretResponse:
         budget_level=budget,
         confidence=0.58 if mood_scores[mood_id] else 0.35,
         risk_level=risk_level,
-        risk_signals=["explicit_self_harm_language"] if urgent else ["severe_distress_language"] if elevated else [],
+        risk_signals=risk_signals,
     )
     return InterpretResponse(
         state=state,

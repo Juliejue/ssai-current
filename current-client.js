@@ -11,6 +11,14 @@
   var activeLocationMode = null;
   // 公开的演示起点，不代表评委当前位置。坐标采用高德使用的 GCJ-02。
   var BEIJING_DEMO_ORIGIN = { latitude: 39.9244, longitude: 116.4173 };
+  var tripDemoEnabled = false;
+  try { tripDemoEnabled = new URLSearchParams(location.search || '').get('demo') === 'trip'; } catch (_) {}
+
+  if ('serviceWorker' in navigator && window.addEventListener) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {});
+    });
+  }
 
   // 第三方服务的错误原文可能很长，甚至夹带控制台和付费链接。
   // 第一屏只告诉用户下一步能做什么，不把供应商后台文案直接甩给人。
@@ -23,6 +31,8 @@
     if (code === 4004 || code === 4005) return '语音额度暂时不可用，请先直接打字。';
     if (code === 4006) return '现在说话的人有点多，请稍后再试或直接打字。';
     if (code === 4007) return '这段声音没有识别出来，可以再说一次或直接打字。';
+    if (code === 4000 || code === 4008 || code === 4009) return '语音连接刚刚中断，可以再试一次或直接打字。';
+    if (code === 4001 || code === 4002 || code === 4010) return '语音服务配置没有通过，请先直接打字。';
     if (code === 5000 || code === 5001 || code === 5002) return '语音连接刚刚抖了一下，可以再试一次或直接打字。';
     return '语音暂时没有接住，请再试一次或直接打字。';
   }
@@ -160,7 +170,7 @@
   function useBeijingDemo() {
     stopPresence();
     activeLocation = { latitude: BEIJING_DEMO_ORIGIN.latitude, longitude: BEIJING_DEMO_ORIGIN.longitude };
-    activeLocationMode = 'demo';
+    activeLocationMode = tripDemoEnabled ? 'trip-demo' : 'demo';
     return activeLocation;
   }
 
@@ -220,16 +230,24 @@
       callbacks.onUnavailable('北京体验模式不启用到访验证');
       return null;
     }
+    if (activeLocationMode === 'trip-demo' || callbacks.demoMode) {
+      callbacks.onState({ inside: false, dwellMinutes: 0, level: 'self_reported', accuracyM: 0, demo: true });
+      activePresence = { demo: true, callbacks: callbacks, inside: false };
+      return activePresence;
+    }
     if (!fence || !navigator.geolocation) return null;
 
-    var insideSince = null;
-    var lastLevel = 'self_reported';
-    var bestDwell = 0;
-    var wasInside = false;
+    var initialDwell = Math.max(0, Number(callbacks.initialDwellMinutes) || 0);
+    var wasInside = Boolean(callbacks.initialInside);
+    var currentlyInside = wasInside;
+    var insideSince = wasInside ? Date.now() - initialDwell * 60000 : null;
+    var lastLevel = callbacks.initialLevel || 'self_reported';
+    var bestDwell = initialDwell;
     // 出围栏就立刻判「走了」会误判：在室内定位飘一下、绕到建筑背面，
     // 都会短暂掉出去。要连续在外面这么久，才算真的离开。
     var LEAVE_GRACE_MS = 3 * 60 * 1000;
     var outsideSince = null;
+    var stopped = false;
 
     function emit(inside, accuracy) {
       var dwellMinutes = insideSince ? Math.floor((Date.now() - insideSince) / 60000) : 0;
@@ -238,103 +256,192 @@
       callbacks.onState({ inside: inside, dwellMinutes: dwellMinutes, level: lastLevel, accuracyM: Math.round(accuracy || 0) });
     }
 
-    var id = navigator.geolocation.watchPosition(function (position) {
+    function processPosition(position) {
+      if (stopped) return;
       var here = wgs2gcj(position.coords.latitude, position.coords.longitude);
       var distance = metersBetween(here, fence);
-      // 定位误差算进围栏，否则室内定位会把真到了的人判成没到。
-      var inside = distance <= fence.radius_m + Math.min(position.coords.accuracy || 0, 200);
+      var accuracy = Math.min(position.coords.accuracy || 0, 150);
+      // 进入和离开使用不同半径。已经进过围栏后多给 50 米余量，避免室内
+      // GPS 漂移让状态在「到了 / 没到」之间来回跳。
+      var radius = fence.radius_m + accuracy + (wasInside ? 50 : 0);
+      var inside = distance <= radius;
+      currentlyInside = inside;
       if (inside) {
         if (!insideSince) insideSince = Date.now();
         outsideSince = null;
         wasInside = true;
       } else {
-        insideSince = null;
         if (wasInside) {
           if (!outsideSince) outsideSince = Date.now();
-          // 真的待过（够 5 分钟），又真的走出去了 → 这一趟结束。
-          // 用户不用按「我离开了」，这一下就是该问那三十秒的时刻。
-          if (Date.now() - outsideSince >= LEAVE_GRACE_MS && bestDwell >= 5) {
+          // 连续在围栏外达到缓冲时间就提示离开。是否停够 5 分钟只影响
+          // 证明等级，不应该阻止产品识别一趟很短的真实到访。
+          if (Date.now() - outsideSince >= LEAVE_GRACE_MS) {
             wasInside = false;
             outsideSince = null;
+            insideSince = null;
             if (callbacks.onLeft) callbacks.onLeft({ dwellMinutes: bestDwell, level: lastLevel });
             return;
           }
         }
       }
       emit(inside, position.coords.accuracy);
-    }, function () {
-      callbacks.onUnavailable('没有位置权限，到了按一下就行');
-    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
+    }
 
-    var ticker = setInterval(function () { if (insideSince) emit(true, 0); }, 30000);
-    activePresence = { id: id, ticker: ticker };
+    function locationUnavailable() {
+      callbacks.onUnavailable('没有位置权限，到了按一下就行');
+    }
+
+    var locationOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 };
+    var id = navigator.geolocation.watchPosition(processPosition, locationUnavailable, locationOptions);
+
+    // watchPosition 在页面隐藏时不会可靠交付更新。用户从地图 App 回来时
+    // 立即补取一次当前位置，让抵达/离开状态不必等下一次自然更新。
+    function refreshOnReturn() {
+      if (document.visibilityState && document.visibilityState !== 'visible') return;
+      navigator.geolocation.getCurrentPosition(processPosition, locationUnavailable, locationOptions);
+    }
+    function onVisibilityChange() { if (document.visibilityState === 'visible') refreshOnReturn(); }
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('pageshow', refreshOnReturn);
+
+    var ticker = setInterval(function () { if (insideSince) emit(currentlyInside, 0); }, 30000);
+    activePresence = {
+      id: id,
+      ticker: ticker,
+      stop: function () {
+        stopped = true;
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+        window.removeEventListener('pageshow', refreshOnReturn);
+      }
+    };
     return activePresence;
+  }
+
+  function demoPresence(action) {
+    if (!activePresence || !activePresence.demo) return false;
+    if (action === 'arrive') {
+      activePresence.inside = true;
+      activePresence.callbacks.onState({ inside: true, dwellMinutes: 0, level: 'self_reported', accuracyM: 0, demo: true });
+      return true;
+    }
+    if (action === 'leave' && activePresence.inside) {
+      activePresence.inside = false;
+      activePresence.callbacks.onLeft({ dwellMinutes: 6, level: 'self_reported', demo: true });
+      return true;
+    }
+    return false;
   }
 
   function stopPresence() {
     if (!activePresence) return;
-    try { navigator.geolocation.clearWatch(activePresence.id); } catch (_) {}
-    clearInterval(activePresence.ticker);
+    if (activePresence.stop) activePresence.stop();
+    if (activePresence.id !== undefined) {
+      try { navigator.geolocation.clearWatch(activePresence.id); } catch (_) {}
+    }
+    if (activePresence.ticker) clearInterval(activePresence.ticker);
     activePresence = null;
   }
 
-  var WORKLET_SOURCE = `
-    class CurrentPcmProcessor extends AudioWorkletProcessor {
-      process(inputs) {
-        const channel = inputs[0] && inputs[0][0];
-        if (!channel) return true;
-        const count = Math.max(1, Math.round(channel.length * 16000 / sampleRate));
-        const out = new Int16Array(count);
-        for (let i = 0; i < count; i++) {
-          const sourceIndex = Math.min(channel.length - 1, Math.floor(i * sampleRate / 16000));
-          const sample = Math.max(-1, Math.min(1, channel[sourceIndex]));
-          out[i] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
-        }
-        this.port.postMessage(out.buffer, [out.buffer]);
-        return true;
-      }
-    }
-    registerProcessor('current-pcm', CurrentPcmProcessor);
-  `;
+  function voiceSetupError(error) {
+    var name = error && error.name;
+    var message = String(error && error.message || '');
+    if (name === 'NotAllowedError' || name === 'SecurityError') return '没有麦克风权限。允许访问后可以再试，或者直接打字。';
+    if (name === 'NotFoundError') return '没有找到可用的麦克风，请直接打字。';
+    if (name === 'NotReadableError' || name === 'AbortError') return '麦克风正被其他应用占用，请关掉占用它的应用后再试。';
+    if (message.indexOf('ASR is not configured') >= 0) return '语音功能还没有配置完成，请先直接打字。';
+    return '语音暂时没有启动成功，请再试一次或直接打字。';
+  }
 
   async function beginVoice(callbacks) {
     if (activeVoice) throw new Error('录音已经开始');
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.AudioWorkletNode) {
+    var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.AudioWorkletNode || !AudioContextClass) {
       throw new Error('当前浏览器不支持语音录入，请改用文字');
     }
 
+    // Prevent a fast double-tap from opening two microphones while permissions
+    // and the ASR signature are still being requested.
+    var stopDuringSetup = false;
+    activeVoice = { stop: function () { stopDuringSetup = true; } };
     callbacks.onStatus('正在请求麦克风…');
     track('natural_language_started', { method: 'voice' });
-    var signature = await api('/asr/signature');
-    var stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true } });
-    var context = new (window.AudioContext || window.webkitAudioContext)();
-    var source = context.createMediaStreamSource(stream);
-    var analyser = context.createAnalyser();
-    analyser.fftSize = 512;
-    source.connect(analyser);
+    var stream = null;
+    var context = null;
+    var source = null;
+    var analyser = null;
+    var processor = null;
+    var sink = null;
+    var socket = null;
 
-    var blobUrl = URL.createObjectURL(new Blob([WORKLET_SOURCE], { type: 'application/javascript' }));
-    await context.audioWorklet.addModule(blobUrl);
-    URL.revokeObjectURL(blobUrl);
-    var processor = new AudioWorkletNode(context, 'current-pcm', { numberOfInputs: 1, numberOfOutputs: 1, channelCount: 1 });
-    source.connect(processor);
-    processor.connect(context.destination);
+    function cleanupSetup() {
+      try { if (processor) processor.disconnect(); } catch (_) {}
+      try { if (sink) sink.disconnect(); } catch (_) {}
+      try { if (source) source.disconnect(); } catch (_) {}
+      try { if (analyser) analyser.disconnect(); } catch (_) {}
+      if (stream) stream.getTracks().forEach(function (track) { track.stop(); });
+      if (context) context.close().catch(function () {});
+      try { if (socket) socket.close(); } catch (_) {}
+      activeVoice = null;
+    }
 
-    var socket = new WebSocket(signature.url);
+    try {
+      var signature = await api('/asr/signature');
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+      });
+      context = new AudioContextClass();
+      if (!context.audioWorklet) throw new Error('AudioWorklet is unavailable');
+      await context.resume();
+      // The prototype is reachable at both /current and /current/. Keep the
+      // worklet rooted so the trailing slash cannot turn this into
+      // /current/voice-worklet.mjs.
+      await context.audioWorklet.addModule(new URL('/voice-worklet.mjs', location.origin).href);
+
+      source = context.createMediaStreamSource(stream);
+      analyser = context.createAnalyser();
+      analyser.fftSize = 512;
+      processor = new AudioWorkletNode(context, 'current-pcm', {
+        numberOfInputs: 1,
+        numberOfOutputs: 1,
+        channelCount: 1
+      });
+      // Keep the worklet in the active audio graph without playing microphone
+      // audio back to the user.
+      sink = context.createGain();
+      sink.gain.value = 0;
+      source.connect(analyser);
+      processor.connect(sink);
+      sink.connect(context.destination);
+
+      socket = new WebSocket(signature.url);
+      socket.binaryType = 'arraybuffer';
+    } catch (error) {
+      cleanupSetup();
+      throw new Error(voiceSetupError(error));
+    }
+
     var latestText = '';
     var finished = false;
     var stopRequested = false;
+    var providerReady = false;
+    var workletFlushed = false;
+    var endSent = false;
     var quietSince = 0;
     var timer = null;
     var finishTimer = null;
+    var connectTimer = null;
 
     function cleanup() {
       if (timer) clearInterval(timer);
       if (finishTimer) clearTimeout(finishTimer);
+      if (connectTimer) clearTimeout(connectTimer);
       try { processor.port.onmessage = null; processor.disconnect(); } catch (_) {}
+      try { sink.disconnect(); } catch (_) {}
       try { source.disconnect(); analyser.disconnect(); } catch (_) {}
       stream.getTracks().forEach(function (track) { track.stop(); });
       context.close().catch(function () {});
+      socket.onopen = socket.onmessage = socket.onerror = socket.onclose = null;
+      try { socket.close(); } catch (_) {}
       activeVoice = null;
     }
 
@@ -354,32 +461,82 @@
       else callbacks.onError('没有听清，可以再说一次或改用文字');
     }
 
+    function sendAudio(buffer) {
+      if (finished || endSent || !buffer) return;
+      // The microphone processor is connected only after Tencent's code=0
+      // handshake. Drop any impossible early frame instead of buffering and
+      // bursting stale audio faster than real time after the handshake.
+      if (!providerReady || socket.readyState !== WebSocket.OPEN) return;
+      try { socket.send(buffer); } catch (_) { fail('语音连接中断，请再试一次或直接打字'); }
+    }
+
+    function sendEndWhenReady() {
+      if (!stopRequested || !workletFlushed || !providerReady || endSent || finished) return;
+      if (socket.readyState !== WebSocket.OPEN) return;
+      try {
+        socket.send(JSON.stringify({ type: 'end' }));
+        endSent = true;
+      } catch (_) {
+        fail('语音连接中断，请再试一次或直接打字');
+      }
+    }
+
     function stop() {
       if (finished || stopRequested) return;
       stopRequested = true;
       callbacks.onStatus('正在整理你刚才说的…');
-      if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'end' }));
-      finishTimer = setTimeout(finish, 5000);
+      // Stop feeding new samples before flushing the resampler. Message order
+      // on this port then guarantees that every audio frame precedes `end`.
+      try { source.disconnect(processor); } catch (_) {}
+      processor.port.postMessage({ type: 'flush' });
+      finishTimer = setTimeout(finish, 8000);
     }
 
     activeVoice = { stop: stop };
     processor.port.onmessage = function (event) {
-      if (!finished && socket.readyState === WebSocket.OPEN) socket.send(event.data);
+      var data = event.data || {};
+      if (data.type === 'audio') sendAudio(data.buffer);
+      if (data.type === 'flushed') {
+        workletFlushed = true;
+        sendEndWhenReady();
+      }
     };
-    socket.onopen = function () { callbacks.onStatus('我在听，再按一次结束'); };
+    socket.onopen = function () {
+      callbacks.onStatus('正在连接语音识别…');
+    };
     socket.onmessage = function (event) {
       if (typeof event.data !== 'string') return;
       try {
         var message = JSON.parse(event.data);
         if (message.code !== undefined && message.code !== 0) return fail(voiceErrorMessage(message));
+        if (!providerReady && Number(message.code) === 0) {
+          providerReady = true;
+          if (connectTimer) clearTimeout(connectTimer);
+          if (!stopRequested) {
+            source.connect(processor);
+          }
+          callbacks.onStatus(stopRequested ? '正在整理你刚才说的…' : '我在听，再按一次结束');
+          sendEndWhenReady();
+        }
         var result = message.result || {};
         var text = result.voice_text_str || message.text || '';
         if (text) { latestText = text; callbacks.onPartial(text); }
-        if (message.final === 1 || (result.slice_type === 2 && latestText)) finish();
+        // slice_type=2 only stabilizes one sentence. The stream is complete
+        // exclusively when Tencent returns final=1 after our end message.
+        if (message.final === 1) finish();
       } catch (_) {}
     };
     socket.onerror = function () { fail('语音连接失败，请改用文字'); };
-    socket.onclose = function () { if (!finished) finish(); };
+    socket.onclose = function () {
+      if (finished) return;
+      if (stopRequested || latestText) finish();
+      else fail('语音连接中断，请再试一次或直接打字');
+    };
+    connectTimer = setTimeout(function () {
+      if (!providerReady) fail('语音连接超时，请再试一次或直接打字');
+    }, 8000);
+
+    if (stopDuringSetup) stop();
 
     var samples = new Uint8Array(analyser.fftSize);
     timer = setInterval(function () {
@@ -428,6 +585,7 @@
     useBeijingDemo: useBeijingDemo,
     requestLocation: requestLocation,
     watchPresence: watchPresence,
+    demoPresence: demoPresence,
     stopPresence: stopPresence,
     toggleVoice: toggleVoice
   };

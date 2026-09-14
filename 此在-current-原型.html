@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F0F3F2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="此在">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/pwa/icon-180.png">
 <title>此在 Current · 情绪空间闭环</title>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1851,18 +1857,20 @@ function saveTrip(trip){
   try { trip ? localStorage.setItem(TRIP_KEY, JSON.stringify(trip)) : localStorage.removeItem(TRIP_KEY); } catch(e){}
 }
 function startTrip(id, rec){
-  if (CurrentAI.getLocationMode() === "demo"){
+  const locationMode = CurrentAI.getLocationMode();
+  if (locationMode === "demo"){
     // 体验模式可以打开真实地图，但不能制造一条并未发生的行程或到访反馈。
     CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:rec.recommendation_id || null, experience_mode:true});
     state.offerDeparted = true;
     saveReach({offersWithoutDeparture:0});
     return;
   }
+  const experienceMode = locationMode === "trip-demo";
   saveTrip({placeId:id, recommendationId:rec.recommendation_id || ("local_" + id),
             startedAt:new Date().toISOString(), status:"departed",
             geofence:rec.geofence || null, dwellMinutes:0, inside:false,
-            presenceLevel:"self_reported"});
-  CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:rec.recommendation_id || null});
+            presenceLevel:"self_reported", experienceMode:experienceMode});
+  CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:rec.recommendation_id || null, experience_mode:experienceMode});
   state.offerDeparted = true;
   saveReach({offersWithoutDeparture:0});
 }
@@ -1880,44 +1888,48 @@ const PRESENCE_LABEL = {
 
 function syncPresenceWatch(){
   const t = state.trip;
-  if (!t || !t.geofence){ if (state.watchingPlaceId){ CurrentAI.stopPresence(); state.watchingPlaceId = null; } return; }
+  if (!t || (!t.geofence && !t.experienceMode)){ if (state.watchingPlaceId){ CurrentAI.stopPresence(); state.watchingPlaceId = null; } return; }
   if (state.watchingPlaceId === t.placeId) return;   // 已经在盯了，不要每次 render 都重开
   state.watchingPlaceId = t.placeId;
   CurrentAI.watchPresence(t.geofence, {
+    demoMode:Boolean(t.experienceMode),
+    initialInside:Boolean(t.inside || t.status === "arrived"),
+    initialDwellMinutes:t.dwellMinutes || 0,
+    initialLevel:t.presenceLevel || "self_reported",
     onState: info => {
       const trip = state.trip;
       if (!trip) return;
+      const previousStatus = trip.status;
       const changed = trip.inside !== info.inside || trip.dwellMinutes !== info.dwellMinutes;
       trip.inside = info.inside;
       trip.dwellMinutes = info.dwellMinutes;
       trip.presenceLevel = info.level;
       trip.accuracyM = info.accuracyM;
-      // 无感核验：进了围栏就不用再按「我到了」（§14 L1 默认无感）
-      if (info.inside && trip.status === "departed"){
-        trip.status = "arrived";
-        trip.arrivedAt = new Date().toISOString();
-        // 让他知道系统认出来了，但不要他做任何事——到了不打扰。
-        state.arrivedToast = placeById(trip.placeId).placeName.replace(/ · .*/, "");
-        clearTimeout(state.arrivedTimer);
-        state.arrivedTimer = setTimeout(() => { state.arrivedToast = null; render(); }, 6000);
-        CurrentAI.track("arrival_confirmed", {place_id:trip.placeId, recommendation_id:trip.recommendationId, presence_level:info.level, dwell_minutes:info.dwellMinutes});
+      if (!info.inside && trip.arrivalDismissedInside) trip.arrivalDismissedInside = false;
+      // 定位只能说「看起来到了」，最终由用户一键确认，避免 GPS 漂移替人做决定。
+      if (info.inside && trip.status === "departed" && !trip.arrivalDismissedInside){
+        trip.status = "arrival_pending";
+        trip.arrivalDetectedAt = new Date().toISOString();
+      } else if (!info.inside && trip.status === "arrival_pending") {
+        trip.status = "departed";
       }
       saveTrip(trip);
-      if (changed) render();
+      if (changed || previousStatus !== trip.status) render();
     },
     // 走出围栏 = 该问那三十秒的时刻。不用用户按「我离开了」。
     // 但也不把他直接甩到反馈页——他可能正在路上、正在忙。
     // 行程条变成一句话一个动作，他点了才进去。
     onLeft: info => {
       const trip = state.trip;
-      if (!trip) return;
-      trip.status = "left";
-      trip.leftAt = new Date().toISOString();
+      if (!trip || trip.status !== "arrived") return;
+      trip.status = "leave_pending";
+      trip.departureDetectedAt = new Date().toISOString();
       trip.dwellMinutes = info.dwellMinutes;
       trip.presenceLevel = info.level;
       trip.autoLeft = true;
+      trip.inside = false;
       saveTrip(trip);
-      CurrentAI.track("departure_detected", {place_id:trip.placeId, recommendation_id:trip.recommendationId, presence_level:info.level, dwell_minutes:info.dwellMinutes});
+      CurrentAI.track("departure_detected", {place_id:trip.placeId, recommendation_id:trip.recommendationId, presence_level:info.level, dwell_minutes:info.dwellMinutes, experience_mode:Boolean(trip.experienceMode)});
       CurrentAI.stopPresence();
       state.watchingPlaceId = null;
       render();
@@ -1948,17 +1960,34 @@ function tripStrip(){
   const p = placeById(t.placeId);
   const short = p.placeName.replace(/ · .*/, "").slice(0, 8);
   const fenced = Boolean(t.geofence);
+  const demo = Boolean(t.experienceMode);
+
+  if (t.status === "arrival_pending"){
+    return '<div class="trip"><div class="txt"><b>看起来你已经到' + short + '了</b>' +
+      '<small>' + (demo ? '演示定位 · ' : '') + '是这里吗？</small></div>' +
+      '<button data-trip="confirm-arrived">已抵达</button>' +
+      '<button class="ghost" data-trip="not-arrived">还没有</button></div>';
+  }
+
+  if (t.status === "leave_pending"){
+    return '<div class="trip"><div class="txt"><b>检测到你已经离开' + short + '</b>' +
+      '<small>' + (demo ? '演示定位 · ' : '') + '要结束这次到访吗？</small></div>' +
+      '<button data-trip="left">已离开</button>' +
+      '<button class="ghost" data-trip="still-here">我还在这里</button></div>';
+  }
 
   if (t.status === "departed"){
     const line = t.presenceNote ? t.presenceNote
       : fenced ? "到了我自己知道，不用按" : "这个地点还没核对坐标，到了按一下";
     return '<div class="trip"><div class="txt"><b>在去' + short + '的路上</b>' +
       '<small>' + fmtDate(t.startedAt) + ' 出发 · ' + line + '</small></div>' +
-      '<button data-trip="arrived">我到了</button></div>';
+      '<button data-trip="' + (demo ? 'demo-arrive' : 'arrived') + '">' + (demo ? '模拟抵达' : '我到了') + '</button></div>';
   }
 
   // 自动判定已经走了：这是唯一该主动开口的时刻。
   if (t.status === "left"){
+    if (demo) return '<div class="trip"><div class="txt"><b>演示状态：已离开' + short + '</b>' +
+      '<small>这次模拟不会写入到访记录</small></div><button class="ghost" data-trip="clear">结束演示</button></div>';
     return '<div class="trip"><div class="txt"><b>你离开了' + short + '</b>' +
       '<small>待了 ' + (t.dwellMinutes || 0) + ' 分钟 · 说三十秒？</small></div>' +
       '<button data-trip="left">说 30 秒</button>' +
@@ -1981,7 +2010,7 @@ function tripStrip(){
   const note = fenced ? "走了我自己知道" : PRESENCE_LABEL[level] + " · 走的时候说 30 秒";
   return '<div class="trip"><div class="txt"><b>你在' + short + ' · 停留 ' + dwell + ' 分钟</b>' +
     '<small>' + note + (fenced && t.inside ? " · 围栏内" : "") + '</small></div>' +
-    '<button data-trip="left">我离开了</button>' +
+    '<button data-trip="' + (demo ? 'demo-leave' : 'left') + '">' + (demo ? '模拟离开' : '我离开了') + '</button>' +
     '<button class="ghost" data-trip="clear">取消</button></div>';
 }
 
@@ -3095,12 +3124,12 @@ function renderTalk(){
     h += '<p class="privacy" style="color:var(--ink-dim);max-width:30ch">' +
          '今天你回来好几次了。真难受的时候，找个人说说比找个地方管用。</p>';
   }
-  h += '<p class="privacy">语音不保存 · 原话不上传 · 位置不入库</p>';
+  h += '<p class="privacy">本产品不保存录音 · 内容仅用于本次理解 · 位置不入库</p>';
   h += '<div class="foot">' +
        '<button id="location-input"' + (locationMode === "real" ? ' class="on"' : '') + '>' +
        (locationMode === "real" ? '✓ 北京真实定位 · 高德算路' : '⌖ 我在北京，用当前位置算路') + '</button>' +
-       '<button id="demo-location"' + (locationMode === "demo" ? ' class="on"' : '') + '>' +
-       (locationMode === "demo" ? '✓ 体验北京 · 以东四为起点' : '不在北京？体验北京路线') + '</button>' +
+       '<button id="demo-location"' + (locationMode === "demo" || locationMode === "trip-demo" ? ' class="on"' : '') + '>' +
+       (locationMode === "trip-demo" ? '✓ 演示定位 · 可模拟抵达/离开' : locationMode === "demo" ? '✓ 体验北京 · 以东四为起点' : '不在北京？体验北京路线') + '</button>' +
        '<button class="quiet" data-go="#/mood">我不想说，自己挑</button></div>';
   h += '</div>';
   h += tripStrip();
@@ -3391,7 +3420,7 @@ const EN = {
   "不在北京？体验北京路线": "Not in Beijing? Try it from Beijing",
   "✓ 体验北京 · 以东四为起点": "✓ Beijing demo · starting from Dongsi",
   "✓ 北京真实定位 · 高德算路": "✓ Live location · routed by Amap",
-  "语音不保存 · 原话不上传 · 位置不入库": "Voice isn't kept · your words aren't uploaded · your location isn't stored",
+  "本产品不保存录音 · 内容仅用于本次理解 · 位置不入库": "We don't retain recordings · content is used only for this request · location isn't stored",
   "只用来找一个此刻能接住你的地方": "Used only to find somewhere that can hold you right now",
   "说完了，替我看看": "That's it — take a look",
   "比如：今天脑子很乱，不想见人，也不想花很多钱……": "e.g. my head's noisy today, I don't want to see anyone, and I don't want to spend much…",
@@ -3977,7 +4006,9 @@ function bind(){
     CurrentAI.track("natural_language_started", {method:"beijing_demo"});
     render();
     const cap = document.getElementById("mic-cap");
-    if (cap) cap.textContent = "体验模式：路线从北京东四起算，不启用到访验证。";
+    if (cap) cap.textContent = CurrentAI.getLocationMode() === "trip-demo"
+      ? "演示定位：路线从北京东四起算，可模拟抵达和离开，不写入真实到访。"
+      : "体验模式：路线从北京东四起算，不启用到访验证。";
   };
 
   const acceptRead = root.querySelector("#accept-read");
@@ -4114,13 +4145,38 @@ function bind(){
     const action = el.dataset.trip;
     const trip = state.trip;
     if (!trip) return;
-    if (action === "arrived"){
-      saveTrip(Object.assign({}, trip, {status:"arrived", arrivedAt:new Date().toISOString()}));
-      CurrentAI.track("arrival_confirmed", {place_id:trip.placeId, recommendation_id:trip.recommendationId, presence_level:"self_reported", dwell_minutes:0});
+    if (action === "demo-arrive"){ CurrentAI.demoPresence("arrive"); return; }
+    if (action === "demo-leave"){ CurrentAI.demoPresence("leave"); return; }
+    if (action === "arrived" || action === "confirm-arrived"){
+      const arrivedAt = trip.arrivalDetectedAt || new Date().toISOString();
+      saveTrip(Object.assign({}, trip, {status:"arrived", arrivedAt:arrivedAt, inside:true, arrivalDismissedInside:false}));
+      CurrentAI.track("arrival_confirmed", {place_id:trip.placeId, recommendation_id:trip.recommendationId, presence_level:trip.presenceLevel || "self_reported", dwell_minutes:trip.dwellMinutes || 0, experience_mode:Boolean(trip.experienceMode)});
+      state.arrivedToast = placeById(trip.placeId).placeName.replace(/ · .*/, "");
+      clearTimeout(state.arrivedTimer);
+      state.arrivedTimer = setTimeout(() => { state.arrivedToast = null; render(); }, 6000);
+      render();
+      return;
+    }
+    if (action === "not-arrived"){
+      saveTrip(Object.assign({}, trip, {status:"departed", inside:false, arrivalDismissedInside:true}));
+      render();
+      return;
+    }
+    if (action === "still-here"){
+      CurrentAI.stopPresence();
+      state.watchingPlaceId = null;
+      saveTrip(Object.assign({}, trip, {status:"arrived", inside:true, departureDetectedAt:null}));
       render();
       return;
     }
     if (action === "clear"){ CurrentAI.stopPresence(); state.watchingPlaceId = null; saveTrip(null); render(); return; }
+    if (trip.experienceMode){
+      CurrentAI.stopPresence();
+      state.watchingPlaceId = null;
+      saveTrip(Object.assign({}, trip, {status:"left", leftAt:new Date().toISOString(), inside:false}));
+      render();
+      return;
+    }
     state.draft = newDraft(trip.placeId);
     // 停留时长来自真实的到达时间，反馈页和到访卡必须算出同一个数
     state.draft.visitStartedAt = trip.arrivedAt || trip.startedAt;
