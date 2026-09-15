@@ -1769,6 +1769,10 @@ function fmtDate(iso){
     String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
 }
 function stayMinutes(rec){
+  // 围栏累计/演示声明的停留时长是反馈页已经展示给用户的那个数；
+  // 到访卡必须沿用它，不能保存时又按挂钟重算出另一个答案。
+  const dwell = Math.round(Number(rec.dwellMinutes));
+  if (Number.isFinite(dwell) && dwell >= 1 && dwell < 600) return dwell;
   const a = new Date(rec.visitStartedAt).getTime(), b = new Date(rec.createdAt).getTime();
   const m = Math.round((b - a) / 60000);
   if (m >= 1 && m < 600) return m;
@@ -2507,6 +2511,9 @@ function privacyChoice(d){
 function renderFactors(id){
   const p = placeById(id);
   const d = state.draft;
+  const privacyDock = d.demo
+    ? '演示反馈不会上传，刷新页面后消失。'
+    : '不选匿名，它就只是你的。';
 
   // 刚刚已经说过一遍了，就别把同一批问题再摆一屏。
   // 对话已经把分数、因素、哪一环都拿到了，这里只剩「这条放哪里」——
@@ -2523,7 +2530,7 @@ function renderFactors(id){
     lean += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">记下来 <span>→</span></button>' +
             '<button class="btn-text" data-step="1">我想自己改一下</button></div>';
     lean += '</div></div>';
-    lean += dock('不选匿名，它就只是你的。');
+    lean += dock(privacyDock);
     return lean;
   }
 
@@ -2558,7 +2565,7 @@ function renderFactors(id){
   h += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">保存这次感受 <span>→</span></button>' +
        '<button class="btn-text" data-step="1">回上一步改分数</button></div>';
   h += '</div></div>';
-  h += dock('不选匿名，它就只是你的。');
+  h += dock(privacyDock);
   return h;
 }
 function escapeHTML(s){
@@ -2600,6 +2607,9 @@ function placeAggregate(placeId){
 /* 到访凭据（FR-08）：等级由服务端裁定，这里只如实转述，不替它抬高。 */
 function presenceLine(rec){
   const dwell = rec.dwellMinutes || stayMinutes(rec);
+  if (rec.demo){
+    return "演示记录：抵达和离开由演示按钮模拟，只用于展示流程，不会保存，也不会进入任何地点汇总。";
+  }
   if (rec.presenceLevel === "geofence_dwell"){
     return "到访已核验：进入这个地点的围栏并停留 " + dwell + " 分钟。位置判定在你手机上完成，坐标没有上传。";
   }
@@ -2641,7 +2651,7 @@ function renderCard(recId, backTo){
   const isNew = rec.id === state.lastRecordId;
   // 反馈后符号"重新长一次"：光点按分数向环内 / 环外移动
   const moved = Math.max(12, p.sig.nodeDist - rec.changeScore * 11);
-  let h = topbar("到访卡", isNew ? "第四步 · 已保存" : "历史记录", backTo || "#/records");
+  let h = topbar("到访卡", isNew ? (rec.demo ? "第四步 · 演示完成" : "第四步 · 已保存") : "历史记录", backTo || "#/records");
   if (isNew) h += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>';
   h += '<div class="screen"><div class="pad">';
   if (isNew){
@@ -2678,7 +2688,9 @@ function renderCard(recId, backTo){
           return '<span class="tag ' + (o && o.tone === "neg" ? "neg" : "pos") + '" style="margin:0 4px 4px 0;display:inline-block">' + f + '</span>';
        }).join("") : '<span style="color:var(--ink-faint)">没有勾选</span>') + '</span></div>';
   h += '<div class="rear-line" style="border:none"><span class="k">可见性</span><span class="v">' +
-       (rec.visibility === "anonymous"
+       (rec.demo
+         ? "仅用于本次演示 · 不上传，刷新后消失"
+         : rec.visibility === "anonymous"
          ? "匿名贡献 · 变化分和因素进入地点汇总，单条不展示" + (rec.note ? "；那句话只给我们看" : "")
          : "仅自己可见 · 不进入任何汇总") + '</span></div>';
   if (rec.note) h += '<blockquote>' + escapeHTML(rec.note) + '</blockquote>';
@@ -2710,7 +2722,8 @@ function renderCard(recId, backTo){
     h += '<div class="avg" style="margin-top:14px;background:var(--card)"><b style="color:var(--ink-dim)">—</b>' +
          '<p>这条没有进入 ' + p.placeName + ' 的汇总<em>你选了只存进自己的记录。地点的平均分里没有你。</em></p></div>';
   }
-  h += '<div class="actions"><button class="btn" data-go="#/records">进入情绪空间轨迹 <span>→</span></button>' +
+  h += '<div class="actions"><button class="btn" data-go="#/records">' +
+       (rec.demo ? '查看本次演示轨迹' : '进入情绪空间轨迹') + ' <span>→</span></button>' +
        '<button class="btn-text" data-reset="1">重新体验</button>';
   // FR-12 / §M6：记忆可删除。承诺过「只存进我的记录」，就要给得出出口。
   if (state.pendingDelete === rec.id){
