@@ -64,6 +64,24 @@ def test_happy_and_sad_are_not_collapsed_to_the_same_state():
     assert happy.state_label != sad.state_label
 
 
+def test_natural_tired_breeze_request_keeps_every_concrete_constraint():
+    read = _read("好累，想找个人少的地方，最好能吹到微风")
+    assert read.state.mood_id == "tired"
+    assert read.state.energy == 1
+    assert read.state.environment == "outdoor"
+    assert "breathe" in read.state.need_keys
+    assert "people" in read.state.avoid_tags
+    assert read.clarify_field is None
+    assert any("人少" in line for line in read.evidence)
+
+    results = recommend(RecommendRequest(state=read.state, limit=3))
+    assert results
+    from backend_app.recommender import load_catalog
+    places = {place["placeId"]: place for place in load_catalog()["PLACES"]}
+    assert all(not places[item.place_id]["indoor"] for item in results)
+    assert all(item.place_name not in {"北平机器", "la social", "zhaodai"} for item in results)
+
+
 def test_specific_activity_without_a_catalog_match_never_returns_an_unrelated_place():
     results = recommend(RecommendRequest(state=NeedState(place_types=["craft"]), limit=3))
     assert results == []
@@ -136,7 +154,7 @@ def test_what_the_user_ruled_out_is_shown_back_to_them():
         )
     )
     said = results[0].reason_chain[0]
-    assert "不想见人" in said
+    assert "避开人多" in said
     assert said.removeprefix("你说：").count("、") <= 2
 
 

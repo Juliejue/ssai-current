@@ -32,7 +32,7 @@ MOOD_RULES: dict[str, tuple[str, ...]] = {
     "quiet": ("安静", "太吵", "不想听", "别说话"),
     "noisy": ("脑子停不下来", "想太多", "一直想", "坐不住", "很乱"),
     "spark": ("灵感", "没方向", "想创作", "想看看"),
-    "tired": ("很累", "没睡", "困", "疲惫", "躺不住"),
+    "tired": ("很累", "好累", "累坏了", "累死了", "没睡", "困", "疲惫", "躺不住"),
     "empty": ("空落落", "没着落", "空空", "没意思"),
     "tight": ("发紧", "绷着", "喘不过", "心慌"),
     "near": ("想有人", "陪我", "一个人难受", "有人在"),
@@ -93,7 +93,7 @@ NEED_RULES: dict[str, tuple[str, ...]] = {
     "loud": ("吵一点", "热闹", "蹦迪", "跳舞", "嗨一点"),
     "slow": ("慢下来", "安静", "缓一缓"),
     "hands": ("手上有事", "做点什么", "翻书"),
-    "breathe": ("喘口气", "透气", "发紧"),
+    "breathe": ("喘口气", "透气", "发紧", "吹吹风", "吹风", "微风", "有风"),
     "nothing": ("不想决定", "你替我选", "随便", "都可以"),
 }
 
@@ -133,7 +133,7 @@ STATE_LABELS: dict[str, str] = {
 # 「不想要」不能靠给 NEED_LABELS 加个「不」前缀凑出来：
 # 「周围有人就行」加个不字会变成「不要周围有人就行」，不像人话。
 AVOID_LABELS: dict[str, str] = {
-    "people": "不想见人",
+    "people": "想避开人多",
     "loud": "不想吵",
     "sound": "不想听声音",
     "hands": "什么都不想做",
@@ -205,7 +205,8 @@ CLARIFY_QUESTIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
 # 「不想要」在中文里几乎总是明说的，规则也接得住——模型没跑的时候
 # （没配 Key、契约失败）不能连这个都丢。词表和 need_keys 是同一套。
 AVOID_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("people", ("不想见人", "不想见到人", "别跟人说话", "不想说话", "不想社交", "人少点", "不想应付")),
+    ("people", ("不想见人", "不想见到人", "别跟人说话", "不想说话", "不想社交",
+                "人少点", "人少的", "少点人", "没什么人", "不要太多人", "别太多人", "不想应付")),
     ("loud", ("不想吵", "别太吵", "太吵了", "怕吵", "安静点", "不要吵")),
     ("hands", ("什么都不做", "啥都不想做", "不想动手", "不想干活", "不用动脑")),
 )
@@ -244,7 +245,7 @@ def interpret_with_rules(text: str) -> InterpretResponse:
         risk_signals.append("severe_distress_language")
 
     energy = 2
-    if _contains_any(text, ("没力气", "很累", "动不了", "不想动")):
+    if _contains_any(text, ("没力气", "很累", "好累", "累坏了", "累死了", "动不了", "不想动")):
         energy = 1
     elif _contains_any(text, ("有力气", "想运动", "想跳", "想跑", "跳舞", "蹦迪", "想动", "出去嗨")):
         energy = 4
@@ -254,6 +255,12 @@ def interpret_with_rules(text: str) -> InterpretResponse:
         "alone" if _contains_any(text, ("不想见人", "想一个人", "自己待着", "别跟人说话"))
         else "low_contact" if _contains_any(text, ("有人但不说话", "不用说话", "有人就行", "有人在旁边"))
         else "with_people" if _contains_any(text, ("想有人", "热闹", "很闹", "陪我", "想聊天", "和人说话", "认识人", "想社交"))
+        else "either"
+    )
+    environment = (
+        "outdoor" if _contains_any(text, ("想去户外", "想在户外", "想去外面", "露天", "晒太阳",
+                                                  "能吹风", "吹吹风", "微风", "有风", "河边", "江边", "水边", "湖边"))
+        else "indoor" if _contains_any(text, ("想待在室内", "想去室内", "不要户外", "不想在外面"))
         else "either"
     )
 
@@ -268,6 +275,7 @@ def interpret_with_rules(text: str) -> InterpretResponse:
         energy=energy,
         social_mode=social,
         budget_level=budget,
+        environment=environment,
         confidence=0.58 if mood_scores[mood_id] else 0.35,
         risk_level=risk_level,
         risk_signals=risk_signals,
@@ -321,7 +329,8 @@ def _evidence_for(text: str, state: NeedState) -> list[str]:
         constraints: list[tuple[bool, tuple[str, ...], str]] = [
             (state.budget_level in {"free", "low"}, ("不花钱", "不想花钱", "不想花很多钱", "没钱", "免费", "便宜", "预算低", "少花点"), "所以我只找花不了什么钱的地方"),
             (state.social_mode == "alone", ("不想见人", "一个人", "别跟人说话", "躲"), "所以我把人多的地方去掉了"),
-            (state.energy <= 1, ("没力气", "很累", "动不了", "不想动", "困", "疲惫"), "所以我把远的地方往后放了"),
+            ("people" in state.avoid_tags, ("不想见人", "不想见到人", "人少点", "人少的", "少点人", "没什么人", "不要太多人", "别太多人"), "所以我把人多的地方往后放了"),
+            (state.energy <= 1, ("没力气", "很累", "好累", "累坏了", "累死了", "动不了", "不想动", "困", "疲惫"), "所以我把远的地方往后放了"),
         ]
         for applies, tokens, consequence in constraints:
             if not applies:
@@ -351,6 +360,11 @@ def _needs_clarification(state: NeedState) -> str | None:
     """Ask at most one question, and only when the answer changes the shortlist."""
     if state.place_types:
         # 用户已经明确说了去哪类地方 / 做什么，就先给结果，别把他拉回抽象选择题。
+        return None
+    concrete_constraints = len(state.need_keys) + len(state.avoid_tags) + int(state.environment != "either")
+    if concrete_constraints >= 2:
+        # 「人少 + 能吹风」已经足够排序。再追问陪伴感或路程，会把一次自然表达
+        # 拆回问卷，也违背“一次最多问一个、只有必要时才问”的约束。
         return None
     if state.social_mode == "either" and len(state.need_keys) < 2:
         return "social_mode"
@@ -641,6 +655,12 @@ async def interpret(text: str, lang: str = "zh") -> InterpretResponse:
             state.avoid_tags = list(dict.fromkeys(rule_result.state.avoid_tags + state.avoid_tags))[:8]
             if rule_result.state.social_mode != "either":
                 state.social_mode = rule_result.state.social_mode
+            if rule_result.state.environment != "either":
+                state.environment = rule_result.state.environment
+            if rule_result.state.energy != 2:
+                state.energy = rule_result.state.energy
+            if rule_result.state.budget_level != "unknown":
+                state.budget_level = rule_result.state.budget_level
             if any(score > 0 for score in (
                 sum(text.count(token) for token in tokens) for tokens in MOOD_RULES.values()
             )):

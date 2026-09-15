@@ -60,7 +60,7 @@ NEED_LABELS_EN: dict[str, str] = {
 }
 
 AVOID_LABELS_EN: dict[str, str] = {
-    "people": "no people",
+    "people": "fewer people",
     "loud": "nothing loud",
     "sound": "no noise",
     "hands": "nothing to do",
