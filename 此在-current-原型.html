@@ -778,6 +778,7 @@ const moodById = id => MOODS.find(m => m.id === id) || MOODS[0];
    ============================================================ */
 
 /* ---------- 12 个标准化标签（0–1）。组员那 10 个 + 消费压力 + 能一直走 ---------- */
+/* CURRENT_PLACE_DATA_START */
 const TAGS = {
   q :"安静",     g :"绿意",     c :"拥挤",     s :"独自自在",
   co:"生活气",   e :"新鲜感",   r :"恢复",     cr:"创作刺激",
@@ -1413,6 +1414,7 @@ PLACES.forEach(p => {
   p.factorOptions = p.factors.map(k => FACTORS[k]);
   p.distance = p.distanceKm.toFixed(1) + " km";
 });
+/* CURRENT_PLACE_DATA_END */
 /* 到访样本诚实（FR-10b / FR-19b）：没有真实反馈之前，任何平均分都是假的。 */
 // 承诺还是那个承诺（没数据就不打分），但用不着每张卡片上讲一遍道理。
 // 完整的口径在 #/nearby，卡片上一句话交代清楚就够。
