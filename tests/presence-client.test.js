@@ -6,7 +6,7 @@ const vm = require('node:vm');
 
 const CLIENT_SOURCE = fs.readFileSync(path.join(__dirname, '..', 'current-client.js'), 'utf8');
 
-function makePresenceRuntime(search = '') {
+function makePresenceRuntime(search = '', options = {}) {
   let now = 1_700_000_000_000;
   let watchSuccess;
   let currentPosition = null;
@@ -34,21 +34,23 @@ function makePresenceRuntime(search = '') {
   const FakeDate = class extends Date {
     static now() { return now; }
   };
+  const navigator = {};
+  if (options.geolocation !== false) {
+    navigator.geolocation = {
+      watchPosition: success => { watchSuccess = success; return 7; },
+      getCurrentPosition: success => {
+        getCurrentPositionCalls += 1;
+        if (currentPosition) success(currentPosition);
+      },
+      clearWatch: id => { clearedWatch = id; },
+    };
+  }
 
   const sandbox = {
     window,
     document,
     location: { hostname: 'current.test', port: '', origin: 'https://current.test', search },
-    navigator: {
-      geolocation: {
-        watchPosition: success => { watchSuccess = success; return 7; },
-        getCurrentPosition: success => {
-          getCurrentPositionCalls += 1;
-          if (currentPosition) success(currentPosition);
-        },
-        clearWatch: id => { clearedWatch = id; },
-      },
-    },
+    navigator,
     localStorage: {
       getItem: key => storage.get(key) || null,
       setItem: (key, value) => storage.set(key, value),
@@ -140,4 +142,21 @@ test('trip demo uses explicit simulated arrival and departure callbacks', () => 
   assert.equal(runtime.current.demoPresence('leave'), true);
   assert.equal(departures.length, 1);
   assert.equal(departures[0].demo, true);
+});
+
+test('a browser without geolocation reports an honest manual fallback', () => {
+  const runtime = makePresenceRuntime('', { geolocation: false });
+  const unavailable = [];
+
+  const watcher = runtime.current.watchPresence(
+    { latitude: 0, longitude: 0, radius_m: 100 },
+    {
+      onState: state => assert.fail(`unexpected state: ${JSON.stringify(state)}`),
+      onLeft: state => assert.fail(`unexpected departure: ${JSON.stringify(state)}`),
+      onUnavailable: message => unavailable.push(message),
+    },
+  );
+
+  assert.equal(watcher, null);
+  assert.deepEqual(unavailable, ['当前浏览器不支持定位，到了按一下就行']);
 });

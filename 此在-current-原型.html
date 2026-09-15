@@ -1740,7 +1740,7 @@ const STAGE_OPTIONS = [
 
 function newDraft(placeId){
   return {placeId, step:0, score:null, factors:[], note:"", visibility:"private",
-          mismatchStage:null, reminder:false, visitStartedAt:new Date().toISOString()};
+          mismatchStage:null, reminder:false, demo:false, visitStartedAt:new Date().toISOString()};
 }
 
 /* ---------- 文案 ---------- */
@@ -1879,7 +1879,8 @@ function startTrip(id, rec){
   saveTrip({placeId:id, recommendationId:rec.recommendation_id || ("local_" + id),
             startedAt:new Date().toISOString(), status:"departed",
             geofence:rec.geofence || null, dwellMinutes:0, inside:false,
-            presenceLevel:"self_reported", experienceMode:experienceMode});
+            presenceLevel:"self_reported", presenceAvailable:experienceMode,
+            experienceMode:experienceMode});
   CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:rec.recommendation_id || null, experience_mode:experienceMode});
   state.offerDeparted = true;
   saveReach({offersWithoutDeparture:0});
@@ -1914,6 +1915,8 @@ function syncPresenceWatch(){
       trip.inside = info.inside;
       trip.dwellMinutes = info.dwellMinutes;
       trip.presenceLevel = info.level;
+      trip.presenceAvailable = true;
+      trip.presenceNote = null;
       trip.accuracyM = info.accuracyM;
       if (!info.inside && trip.arrivalDismissedInside) trip.arrivalDismissedInside = false;
       // 定位只能说「看起来到了」，最终由用户一键确认，避免 GPS 漂移替人做决定。
@@ -1948,6 +1951,9 @@ function syncPresenceWatch(){
       const trip = state.trip;
       if (!trip) return;
       trip.presenceNote = message;
+      trip.presenceAvailable = false;
+      trip.inside = false;
+      trip.presenceLevel = "self_reported";
       saveTrip(trip);
       render();
     }
@@ -1971,6 +1977,7 @@ function tripStrip(){
   const short = p.placeName.replace(/ · .*/, "").slice(0, 8);
   const fenced = Boolean(t.geofence);
   const demo = Boolean(t.experienceMode);
+  const confirmedInside = demo || (fenced && t.presenceAvailable && t.inside);
 
   if (t.status === "arrival_pending"){
     return '<div class="trip"><div class="txt"><b>看起来你已经到' + short + '了</b>' +
@@ -1988,7 +1995,10 @@ function tripStrip(){
 
   if (t.status === "departed"){
     const line = t.presenceNote ? t.presenceNote
-      : fenced ? "到了我自己知道，不用按" : "这个地点还没核对坐标，到了按一下";
+      : demo ? "演示定位 · 可模拟抵达"
+      : (fenced && t.presenceAvailable) ? "到了我自己知道，也可以手动确认"
+      : fenced ? "正在等待定位，也可以手动确认"
+      : "这个地点还没核对坐标，到了按一下";
     return '<div class="trip"><div class="txt"><b>在去' + short + '的路上</b>' +
       '<small>' + fmtDate(t.startedAt) + ' 出发 · ' + line + '</small></div>' +
       '<button data-trip="' + (demo ? 'demo-arrive' : 'arrived') + '">' + (demo ? '模拟抵达' : '我到了') + '</button></div>';
@@ -2016,10 +2026,12 @@ function tripStrip(){
 
   const dwell = t.dwellMinutes || elapsed;
   const level = t.presenceLevel || (dwell >= 5 ? "dwell_only" : "self_reported");
-  // 有围栏就不用他自己按——走了我自己知道。
-  const note = fenced ? "走了我自己知道" : PRESENCE_LABEL[level] + " · 走的时候说 30 秒";
+  // 只有定位真的回报过「围栏内」，才承诺能自动识别离开。
+  const note = demo ? "演示定位 · 可模拟离开"
+    : confirmedInside ? "走了我自己知道"
+    : PRESENCE_LABEL[level] + " · 离开时按一下";
   return '<div class="trip"><div class="txt"><b>你在' + short + ' · 停留 ' + dwell + ' 分钟</b>' +
-    '<small>' + note + (fenced && t.inside ? " · 围栏内" : "") + '</small></div>' +
+    '<small>' + note + (confirmedInside && !demo ? " · 围栏内" : "") + '</small></div>' +
     '<button data-trip="' + (demo ? 'demo-leave' : 'left') + '">' + (demo ? '模拟离开' : '我离开了') + '</button>' +
     '<button class="ghost" data-trip="clear">取消</button></div>';
 }
@@ -2477,6 +2489,11 @@ function renderScore(id){
 /* 授权：两条路径（对话 / 自己选）共用同一份文案和绑定。
    这一步不能替用户跳过——要不要匿名贡献，永远由他自己点。 */
 function privacyChoice(d){
+  if (d.demo){
+    return '<p class="sec-k">这条记录放在哪里</p><div class="priv" style="margin-top:0">' +
+      '<button class="opt on" disabled><span class="mark"></span><div><strong>仅用于本次演示</strong>' +
+      '<small>反馈内容不会上传，不进入地点汇总，刷新页面后消失</small></div></button></div>';
+  }
   let h = '<p class="sec-k">这条记录放在哪里</p>';
   h += '<div class="priv" style="margin-top:0">';
   h += '<button class="opt' + (d.visibility === "private" ? " on" : "") + '" data-vis="private"><span class="mark"></span>' +
@@ -2628,9 +2645,12 @@ function renderCard(recId, backTo){
   if (isNew) h += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>';
   h += '<div class="screen"><div class="pad">';
   if (isNew){
-    h += '<p class="eyebrow">记录完成</p><h1 class="title sm">这次到访，已经<br>收进你的轨迹。</h1>' +
+    h += '<p class="eyebrow">' + (rec.demo ? '演示完成' : '记录完成') + '</p><h1 class="title sm">' +
+         (rec.demo ? '完整闭环，已经<br>跑通一次。' : '这次到访，已经<br>收进你的轨迹。') + '</h1>' +
          '<p class="lead">卡片有两面，点一下翻过去。</p>';
-    if (!state.reflect) h += payoffBanner(rec);
+    if (rec.demo){
+      h += '<div class="payoff"><b>这是一条演示记录</b><span>反馈内容不会上传，不进入匿名汇总，刷新页面后消失</span></div>';
+    } else if (!state.reflect) h += payoffBanner(rec);
   }
   h += '<div class="flip-stage">';
   if (!state.flipped){
@@ -2640,8 +2660,8 @@ function renderCard(recId, backTo){
   h += '<div class="b"><h3>' + rec.placeName + '</h3>' +
        '<div class="meta-row"><span><i>到访</i>' + fmtDate(rec.visitStartedAt) + '</span>' +
        '<span><i>停留</i>约 ' + stayMinutes(rec) + ' 分钟</span></div>' +
-       '<div style="margin-top:11px">' + '<span class="stamp' + (rec.visibility === "anonymous" ? " anon" : "") + '">' +
-       (rec.visibility === "anonymous" ? "已匿名贡献" : "仅自己可见") + '</span></div>' +
+       '<div style="margin-top:11px">' + '<span class="stamp' + (rec.visibility === "anonymous" && !rec.demo ? " anon" : "") + '">' +
+       (rec.demo ? "演示记录 · 不保存" : rec.visibility === "anonymous" ? "已匿名贡献" : "仅自己可见") + '</span></div>' +
        // 这条记录凭什么算数（FR-08）。写清楚才敢拿去做匿名汇总。
        '<div class="sample-note" style="margin-top:12px">' + escapeHTML(presenceLine(rec)) + '</div>' +
        '</div></div>';
@@ -2676,7 +2696,9 @@ function renderCard(recId, backTo){
        '<div class="share-row"><button class="btn sm" data-share-card="' + escapeHTML(rec.id) + '">分享心情轨迹卡</button>' +
        '<button class="btn ghost sm" data-save-card="' + escapeHTML(rec.id) + '">下载 PNG</button></div>' +
        '<p class="share-status" role="status" aria-live="polite"></p></section>';
-  if (rec.visibility === "anonymous"){
+  if (rec.demo){
+    h += '<div class="sample-note" style="margin-top:14px">演示反馈不会上传，也不会进入任何地点的统计。</div>';
+  } else if (rec.visibility === "anonymous"){
     const agg = placeAggregate(p.placeId);
     h += '<div class="sample-note" style="margin-top:14px">' +
          (countsTowardAggregate(rec)
@@ -2701,7 +2723,7 @@ function renderCard(recId, backTo){
   }
   h += '</div>';
   h += '</div></div>';
-  h += dock('我替你记住了这里。你也随时可以让我忘掉。');
+  h += dock(rec.demo ? '演示完成。这条记录只活在当前页面里。' : '我替你记住了这里。你也随时可以让我忘掉。');
   return h;
 }
 
@@ -4169,7 +4191,10 @@ function bind(){
     if (action === "demo-leave"){ CurrentAI.demoPresence("leave"); return; }
     if (action === "arrived" || action === "confirm-arrived"){
       const arrivedAt = trip.arrivalDetectedAt || new Date().toISOString();
-      saveTrip(Object.assign({}, trip, {status:"arrived", arrivedAt:arrivedAt, inside:true, arrivalDismissedInside:false}));
+      // 「我到了」只是自述；只有围栏回报后出现的「已抵达」才能保留 inside=true。
+      const confirmedByFence = action === "confirm-arrived" && trip.presenceAvailable && trip.inside;
+      saveTrip(Object.assign({}, trip, {status:"arrived", arrivedAt:arrivedAt,
+        inside:Boolean(confirmedByFence), arrivalDismissedInside:false}));
       CurrentAI.track("arrival_confirmed", {place_id:trip.placeId, recommendation_id:trip.recommendationId, presence_level:trip.presenceLevel || "self_reported", dwell_minutes:trip.dwellMinutes || 0, experience_mode:Boolean(trip.experienceMode)});
       state.arrivedToast = placeById(trip.placeId).placeName.replace(/ · .*/, "");
       clearTimeout(state.arrivedTimer);
@@ -4191,10 +4216,18 @@ function bind(){
     }
     if (action === "clear"){ CurrentAI.stopPresence(); state.watchingPlaceId = null; saveTrip(null); render(); return; }
     if (trip.experienceMode){
+      // 演示也要走完回访和心情卡，但只能生成明确标记的本次临时记录：
+      // 不调用 outcomes API，也不进入匿名汇总。
+      state.draft = newDraft(trip.placeId);
+      state.draft.demo = true;
+      state.draft.visitStartedAt = trip.arrivedAt || trip.startedAt;
+      state.draft.stayMin = Math.max(1, trip.dwellMinutes || 6);
+      state.draft.dwellMinutes = state.draft.stayMin;
+      state.draft.presenceLevel = "self_reported";
       CurrentAI.stopPresence();
       state.watchingPlaceId = null;
-      saveTrip(Object.assign({}, trip, {status:"left", leftAt:new Date().toISOString(), inside:false}));
-      render();
+      saveTrip(null);
+      go("#/visit/" + trip.placeId);
       return;
     }
     state.draft = newDraft(trip.placeId);
@@ -4206,7 +4239,8 @@ function bind(){
     // 声明必须和自己报的数字自洽：待不满 5 分钟就别声称核验过。
     // 服务端还会再降一次——它才是权威（FR-08 L3）。
     state.draft.presenceLevel =
-      (trip.geofence && trip.inside && state.draft.dwellMinutes >= 5) ? "geofence_dwell" : "self_reported";
+      (trip.presenceAvailable && trip.inside && trip.presenceLevel === "geofence_dwell")
+        ? "geofence_dwell" : "self_reported";
     CurrentAI.stopPresence();
     state.watchingPlaceId = null;
     saveTrip(null);
@@ -4581,29 +4615,37 @@ function save(placeId){
     presenceLevel: d.presenceLevel || "self_reported",
     presenceReason: null,
     dwellMinutes: d.dwellMinutes || 0,
+    demo: Boolean(d.demo),
     visitStartedAt: d.visitStartedAt,
     createdAt: new Date().toISOString()
   };
   state.records.unshift(rec);
-  CurrentAI.track("outcome_saved", {place_id:p.placeId, change_score:d.score, factor_count:d.factors.length, visibility:d.visibility, mismatch_stage:d.mismatchStage || "none", presence_level:d.presenceLevel || "self_reported", dwell_minutes:d.dwellMinutes || 0});
-  CurrentAI.api("/outcomes", {method:"POST", body:JSON.stringify({
-    session_id:CurrentAI.sessionId(),
-    recommendation_id:rec.recommendationId,
-    place_id:p.placeId,
-    change_score:d.score,
-    factor_keys:d.factors.map(f => Object.keys(FACTORS).find(k => FACTORS[k].label === f)).filter(Boolean),
-    visibility:d.visibility,
-    note:d.visibility === "anonymous" ? d.note.trim() : null,
-    mismatch_stage:d.mismatchStage || "none",
-    presence_level:d.presenceLevel || "self_reported",
-    dwell_minutes:Math.min(1440, d.dwellMinutes || 0)
-  })}).then(result => {
-    // 服务端可能把等级降下来。到访卡显示的是它认可的那个，不是我们声明的。
-    if (result && result.presence_level){
-      const rec = state.records.find(r => r.id === state.lastRecordId);
-      if (rec){ rec.presenceLevel = result.presence_level; rec.presenceReason = result.presence_reason; render(); }
-    }
-  }).catch(() => {});
+  if (d.demo){
+    CurrentAI.track("demo_loop_completed", {place_id:p.placeId, experience_mode:true});
+  } else {
+    CurrentAI.track("outcome_saved", {place_id:p.placeId, change_score:d.score,
+      factor_count:d.factors.length, visibility:d.visibility,
+      mismatch_stage:d.mismatchStage || "none", presence_level:d.presenceLevel || "self_reported",
+      dwell_minutes:d.dwellMinutes || 0, experience_mode:false});
+    CurrentAI.api("/outcomes", {method:"POST", body:JSON.stringify({
+      session_id:CurrentAI.sessionId(),
+      recommendation_id:rec.recommendationId,
+      place_id:p.placeId,
+      change_score:d.score,
+      factor_keys:d.factors.map(f => Object.keys(FACTORS).find(k => FACTORS[k].label === f)).filter(Boolean),
+      visibility:d.visibility,
+      note:d.visibility === "anonymous" ? d.note.trim() : null,
+      mismatch_stage:d.mismatchStage || "none",
+      presence_level:d.presenceLevel || "self_reported",
+      dwell_minutes:Math.min(1440, d.dwellMinutes || 0)
+    })}).then(result => {
+      // 服务端可能把等级降下来。到访卡显示的是它认可的那个，不是我们声明的。
+      if (result && result.presence_level){
+        const rec = state.records.find(r => r.id === state.lastRecordId);
+        if (rec){ rec.presenceLevel = result.presence_level; rec.presenceReason = result.presence_reason; render(); }
+      }
+    }).catch(() => {});
+  }
   state.lastRecordId = rec.id;
   state.flipped = false;
   go("#/card/" + rec.id);
