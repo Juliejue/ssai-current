@@ -516,6 +516,7 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
   border:2px solid var(--water);opacity:.45;animation:mic-ring 1.5s ease-out infinite}
 @keyframes mic-ring{0%{transform:scale(.9);opacity:.5}100%{transform:scale(1.22);opacity:0}}
 .mic-cap{margin:14px 0 0;font:12px/1.6 var(--sans);color:var(--ink-dim);min-height:20px}
+.mic-cap:empty{display:none}
 .mic-cap.error{color:var(--d-n2)}
 .talk .type-toggle{margin-top:20px;font:12px var(--sans);color:var(--water);border-bottom:1px solid rgba(30,110,114,.3);padding-bottom:2px}
 .talk .typing{width:100%;max-width:320px;margin-top:18px;text-align:left}
@@ -2389,14 +2390,13 @@ function renderReflect(id){
          '怎么样？说一句就行。</p></div></div>';
     h += '<button class="mic' + (state.reflectTyping ? ' small' : '') + '" id="reflect-mic" aria-label="用语音说">' + micSVG() + '</button>';
     h += '<p class="mic-cap" id="reflect-cap">' +
-         (state.reflectNote ? escapeHTML(state.reflectNote)
-          : state.reflectTyping ? '也可以点上面这个改用语音' : '按一下开始说 · 再按一下结束') + '</p>';
+         (state.reflectNote ? escapeHTML(state.reflectNote) : '') + '</p>';
     if (!state.reflectTyping){
-      h += '<button class="type-toggle" id="reflect-type">不想说话，我打字</button>';
+      h += '<button class="type-toggle" id="reflect-type">改用文字</button>';
     } else {
       h += '<div class="typing"><textarea id="reflect-input" maxlength="500" ' +
            'placeholder="比如：坐了半小时，风挺舒服的，就是人有点多">' + escapeHTML(state.reflectText || "") + '</textarea>' +
-           '<button class="send" id="reflect-submit">说完了</button></div>';
+           '<button class="send" id="reflect-submit">发送</button></div>';
     }
     h += '<button class="btn-text" data-step="1" style="margin-top:18px">不想说，自己选</button>';
   } else {
@@ -3156,25 +3156,23 @@ function renderTalk(){
           '<button class="k" data-go="#/records" style="letter-spacing:.14em">记录</button></div></div>';
   h += '<div class="talk">';
   h += '<div class="zai">' + cloudSVG("withyou") + '</div>';
-  h += '<h1>现在，说点什么都行。</h1>';
+  h += '<h1>说一句，小在帮你找地方。</h1>';
   // 打字时麦克风退成小圆钮：一屏一个主动作，语音的优先级靠体量表达
   h += '<button class="mic' + (state.talkTyping ? ' small' : '') + '" id="mic-button" aria-label="用语音说">' + micSVG() + '</button>';
   h += '<p class="mic-cap" id="mic-cap">' +
-       (state.reachNote ? escapeHTML(state.reachNote)
-        : state.talkTyping ? '也可以点上面这个改用语音' : '按一下开始说 · 再按一下结束') + '</p>';
+       (state.reachNote ? escapeHTML(state.reachNote) : '') + '</p>';
   if (!state.talkTyping){
-    h += '<button class="type-toggle" id="type-toggle">不想说话，我打字</button>';
+    h += '<button class="type-toggle" id="type-toggle">改用文字</button>';
   } else {
     h += '<div class="typing"><textarea id="natural-input" maxlength="2000" ' +
-         'placeholder="比如：今天脑子很乱，不想见人，也不想花很多钱……">' + escapeHTML(state.talkText) + '</textarea>' +
-         '<button class="send" id="natural-submit">说完了，替我看看</button></div>';
+         'placeholder="比如：好累，想找个人少、能吹风的地方">' + escapeHTML(state.talkText) + '</textarea>' +
+         '<button class="send" id="natural-submit">发送</button></div>';
   }
   if (guardianState() === "leaning"){
     // 守则 12 防依赖：不劝阻，只提一句「我不是唯一的出口」
     h += '<p class="privacy" style="color:var(--ink-dim);max-width:30ch">' +
          '今天你回来好几次了。真难受的时候，找个人说说比找个地方管用。</p>';
   }
-  h += '<p class="privacy">本产品不保存录音 · 语音由腾讯或浏览器服务识别 · 内容仅用于本次理解 · 位置不入库</p>';
   h += '<div class="foot">' +
        '<button id="location-input"' + (locationMode === "real" ? ' class="on"' : '') + '>' +
        (locationMode === "real" ? '✓ 北京真实定位 · 高德算路' : '⌖ 我在北京，用当前位置算路') + '</button>' +
@@ -3459,10 +3457,12 @@ const EN = {
   "刚刚保存": "just saved", "回到开头": "Back to start", "先停一下": "Hold on",
   "先不去": "Not now", "取消": "Cancel",
 
-  "现在，说点什么都行。": "Say anything. Right now.",
+  "说一句，小在帮你找地方。": "Say one thing. Xiaozai will find you a place.",
   "不用组织语言，也不用先想清楚要去哪。": "You don't have to phrase it well, or know where you want to go.",
   "你说，我来找。": "You talk. I'll look.",
   "不想说话，我打字": "I'd rather type",
+  "改用文字": "Type instead",
+  "发送": "Send",
   "按一下开始说 · 再按一下结束": "Tap to start · tap again to stop",
   "也可以点上面这个改用语音": "Or tap above to use your voice instead",
   "我不想说，自己挑": "I'd rather just browse",
@@ -3474,6 +3474,7 @@ const EN = {
   "只用来找一个此刻能接住你的地方": "Used only to find somewhere that can hold you right now",
   "说完了，替我看看": "That's it — take a look",
   "比如：今天脑子很乱，不想见人，也不想花很多钱……": "e.g. my head's noisy today, I don't want to see anyone, and I don't want to spend much…",
+  "比如：好累，想找个人少、能吹风的地方": "e.g. I'm tired — somewhere quiet with a breeze",
 
   "我是这么听出来的": "How I heard it",
   "猜错了不用客气。改一下比忍着强。": "Say so if I got it wrong. Correcting me beats putting up with it.",
@@ -4036,8 +4037,8 @@ function bind(){
     CurrentAI.toggleVoice({
       onStatus: message => { voiceInput.classList.add("listening"); setNaturalStatus(message); },
       onPartial: text => { state.talkText = text; if (naturalInput) naturalInput.value = text; setNaturalStatus("「" + text + "」"); },
-      // 语音优先：说完直接进入理解，不再要求用户按第二个按钮。
-      onText: text => { voiceInput.classList.remove("listening"); state.talkText = text; if (naturalInput) naturalInput.value = text; submitNatural(text); },
+      // 识别结束只把文字交还给用户。短暂停顿、浏览器自行结束识别，都不是发送授权。
+      onText: text => { voiceInput.classList.remove("listening"); state.talkText = text; state.talkTyping = true; render(); },
       // 语音挂了不能是死路。直接把打字框推到他面前并聚焦——
       // 一个正难受的人不该还要自己去找「那我怎么办」。
       onError: message => { voiceInput.classList.remove("listening"); failToTyping(message); }
@@ -4338,7 +4339,7 @@ function bind(){
     CurrentAI.toggleVoice({
       onStatus: m => { reflectMic.classList.add("listening"); state.reflectNote = m; setReflectCap(m); },
       onPartial: t => { state.reflectText = t; setReflectCap("「" + t + "」"); },
-      onText: t => { reflectMic.classList.remove("listening"); state.reflectText = t; submitReflect(t); },
+      onText: t => { reflectMic.classList.remove("listening"); state.reflectText = t; state.reflectTyping = true; render(); },
       // 语音坏了不能是死路——和第一屏一样，直接把打字框推到他面前。
       onError: m => { reflectMic.classList.remove("listening"); state.reflectTyping = true; state.reflectNote = m; render();
                       const box = document.getElementById("reflect-input"); if (box) box.focus(); }

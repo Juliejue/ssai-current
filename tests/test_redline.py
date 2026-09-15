@@ -451,6 +451,38 @@ def test_voice_provider_errors_are_translated_into_user_actions():
     assert "fail(message.message" not in source
 
 
+def test_voice_waits_for_an_explicit_send_instead_of_treating_a_pause_as_consent():
+    client = (pathlib.Path(__file__).parents[1] / "current-client.js").read_text(encoding="utf-8")
+    prototype = PROTOTYPE.read_text(encoding="utf-8")
+
+    browser_voice = client[client.index("function beginBrowserVoice"):client.index("async function beginTencentVoice")]
+    assert "recognition.continuous = true" in browser_voice
+    assert "if (!stopRequested) recognition.stop()" not in browser_voice
+
+    tencent_voice = client[client.index("async function beginTencentVoice"):client.index("function toggleVoice")]
+    assert "quietSince" not in tencent_voice
+    assert "rms <" not in tencent_voice
+
+    talk_handler = prototype.split("if (voiceInput) voiceInput.onclick", 1)[1].split("if (locationInput)", 1)[0]
+    assert "state.talkTyping = true" in talk_handler
+    assert "submitNatural(text)" not in talk_handler
+
+    reflect_handler = prototype.split("if (reflectMic) reflectMic.onclick", 1)[1].split("const reflectSave", 1)[0]
+    assert "state.reflectTyping = true" in reflect_handler
+    assert "submitReflect(t)" not in reflect_handler
+
+
+def test_primary_voice_screen_keeps_operational_copy_out_of_the_way():
+    prototype = PROTOTYPE.read_text(encoding="utf-8")
+    talk = prototype[slice(*_function_body(prototype, "function renderTalk()"))]
+    reflect = prototype[slice(*_function_body(prototype, "function renderReflect(id)"))]
+    assert "按一下开始说" not in talk
+    assert "按一下开始说" not in reflect
+    assert "本产品不保存录音" not in talk
+    assert "说一句，小在帮你找地方" in talk
+    assert 'id="natural-submit">发送' in talk
+
+
 def test_beijing_demo_mode_is_explicit_and_completes_without_uploading_fake_visits():
     """异地评委能走完整闭环，但演示反馈不能冒充真实到访上传。"""
     client = (pathlib.Path(__file__).parents[1] / "current-client.js").read_text(encoding="utf-8")

@@ -238,7 +238,7 @@ test('browser dictation is a real first-tap fallback when Tencent is not configu
   const recognition = runtime.recognitions[0];
   assert.equal(recognition.started, true);
   assert.equal(recognition.lang, 'zh-CN');
-  assert.equal(recognition.continuous, false);
+  assert.equal(recognition.continuous, true);
   assert.equal(recognition.interimResults, true);
   assert.equal(recognition.maxAlternatives, 1);
   assert.ok(runtime.statuses.includes('我在听（浏览器听写），再按一次结束'));
@@ -247,9 +247,11 @@ test('browser dictation is a real first-tap fallback when Tencent is not configu
 
   recognition.result([{ text: '想去安静一点的地方', final: false }]);
   assert.ok(runtime.transcripts.includes('想去安静一点的地方'));
+  recognition.result([{ text: '想去安静一点的地方', final: true }]);
+  assert.equal(recognition.stopped, undefined, 'a stable phrase is not permission to stop');
+  assert.equal(runtime.transcripts.some(text => text.startsWith('final:')), false);
   await runtime.current.toggleVoice(runtime.callbacks);
   assert.equal(recognition.stopped, true);
-  recognition.result([{ text: '想去安静一点的地方', final: true }]);
   recognition.end();
 
   assert.equal(runtime.transcripts.filter(text => text === 'final:想去安静一点的地方').length, 1);
