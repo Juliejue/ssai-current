@@ -451,8 +451,8 @@ def test_voice_provider_errors_are_translated_into_user_actions():
     assert "fail(message.message" not in source
 
 
-def test_beijing_demo_mode_is_explicit_and_never_creates_fake_visits():
-    """异地评委可以看真实北京路线，但模拟起点不能污染到访闭环。"""
+def test_beijing_demo_mode_is_explicit_and_completes_without_uploading_fake_visits():
+    """异地评委能走完整闭环，但演示反馈不能冒充真实到访上传。"""
     client = (pathlib.Path(__file__).parents[1] / "current-client.js").read_text(encoding="utf-8")
     prototype = PROTOTYPE.read_text(encoding="utf-8")
     assert "BEIJING_DEMO_ORIGIN" in client
@@ -464,9 +464,43 @@ def test_beijing_demo_mode_is_explicit_and_never_creates_fake_visits():
     demo_guard = prototype.split('if (locationMode === "demo")', 1)[1].split("const experienceMode", 1)[0]
     assert "saveTrip" not in demo_guard
     assert "experience_mode:true" in demo_guard
-    assert "这次模拟不会写入到访记录" in prototype
-    no_fake_outcome = prototype.split("if (trip.experienceMode)", 1)[1].split("state.draft =", 1)[0]
-    assert "return" in no_fake_outcome, "演示行程必须在生成真实反馈前结束"
+    demo_departure = prototype.split("if (trip.experienceMode)", 1)[1].split(
+        'if (action === "clear")', 1
+    )[0]
+    assert "state.draft = newDraft(trip.placeId)" in demo_departure
+    assert "state.draft.demo = true" in demo_departure
+    assert 'go("#/visit/" + trip.placeId)' in demo_departure
+
+    save_block = prototype[slice(*_function_body(prototype, "function save(placeId)"))]
+    assert "demo: Boolean(d.demo)" in save_block
+    assert "if (d.demo)" in save_block
+    assert 'CurrentAI.track("demo_loop_completed"' in save_block
+    outcome_event = save_block.index('CurrentAI.track("outcome_saved"')
+    api_call = save_block.index('CurrentAI.api("/outcomes"')
+    demo_else = save_block.index("} else {")
+    assert demo_else < outcome_event < api_call
+    assert "演示反馈不会上传" in prototype
+
+
+def test_manual_arrival_never_claims_a_geofence_confirmation():
+    """拒绝定位后点「我到了」只能算自述，不能显示围栏内或升级证明等级。"""
+    prototype = PROTOTYPE.read_text(encoding="utf-8")
+    trip_handler = prototype.split('root.querySelectorAll("[data-trip]")', 1)[1].split(
+        'root.querySelectorAll("[data-need]")', 1
+    )[0]
+    assert 'action === "confirm-arrived" && trip.presenceAvailable && trip.inside' in trip_handler
+    assert "inside:Boolean(confirmedByFence)" in trip_handler
+    assert 'trip.presenceLevel === "geofence_dwell"' in trip_handler
+
+    unavailable = prototype.split("onUnavailable: message =>", 1)[1].split("});", 1)[0]
+    assert "trip.presenceAvailable = false" in unavailable
+    assert "trip.inside = false" in unavailable
+    assert 'trip.presenceLevel = "self_reported"' in unavailable
+
+    strip = prototype[slice(*_function_body(prototype, "function tripStrip()"))]
+    assert "confirmedInside" in strip
+    assert 'confirmedInside && !demo ? " · 围栏内" : ""' in strip
+    assert 'const note = fenced ? "走了我自己知道"' not in strip
 
 
 def test_transient_provider_errors_are_retried_but_bad_requests_are_not():

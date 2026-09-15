@@ -264,7 +264,14 @@
       activePresence = { demo: true, callbacks: callbacks, inside: false };
       return activePresence;
     }
-    if (!fence || !navigator.geolocation) return null;
+    if (!fence) {
+      callbacks.onUnavailable('这个地点还没有可用的围栏，到了按一下就行');
+      return null;
+    }
+    if (!navigator.geolocation) {
+      callbacks.onUnavailable('当前浏览器不支持定位，到了按一下就行');
+      return null;
+    }
 
     var initialDwell = Math.max(0, Number(callbacks.initialDwellMinutes) || 0);
     var wasInside = Boolean(callbacks.initialInside);
@@ -321,7 +328,13 @@
     }
 
     var locationOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 };
-    var id = navigator.geolocation.watchPosition(processPosition, locationUnavailable, locationOptions);
+    var id;
+    try {
+      id = navigator.geolocation.watchPosition(processPosition, locationUnavailable, locationOptions);
+    } catch (_) {
+      locationUnavailable();
+      return null;
+    }
 
     // watchPosition 在页面隐藏时不会可靠交付更新。用户从地图 App 回来时
     // 立即补取一次当前位置，让抵达/离开状态不必等下一次自然更新。
