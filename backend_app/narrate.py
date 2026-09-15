@@ -125,14 +125,17 @@ def _clean(line: Any, limit: int) -> str | None:
 
 
 def _state_line(state: NeedState, lang: str = "zh") -> str:
-    from .i18n import AVOID_LABELS_EN, NEED_LABELS_EN, STATE_LABELS_EN
-    from .interpretation import AVOID_LABELS, NEED_LABELS, STATE_LABELS
+    from .i18n import AVOID_LABELS_EN, NEED_LABELS_EN, PLACE_TYPE_LABELS_EN, STATE_LABELS_EN
+    from .interpretation import AVOID_LABELS, NEED_LABELS, PLACE_TYPE_LABELS, STATE_LABELS
 
     english = lang == "en"
     states = STATE_LABELS_EN if english else STATE_LABELS
     needs = NEED_LABELS_EN if english else NEED_LABELS
     avoids = AVOID_LABELS_EN if english else AVOID_LABELS
-    parts = [states.get(state.mood_id, "hard to name" if english else "说不太清楚")]
+    place_types = PLACE_TYPE_LABELS_EN if english else PLACE_TYPE_LABELS
+    # 明确活动放在状态前面，避免文案模型再次把「想吃烤串」抽象成“需要安静”。
+    parts = [place_types[key] for key in state.place_types if key in place_types][:2]
+    parts += [states.get(state.mood_id, "hard to name" if english else "说不太清楚")]
     parts += [needs[key] for key in state.need_keys if key in needs][:2]
     parts += [avoids[key] for key in state.avoid_tags if key in avoids][:1]
     return (", " if english else "、").join(parts)

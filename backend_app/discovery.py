@@ -60,7 +60,8 @@ KEYWORD_PROFILES: tuple[tuple[str, str, tuple[str, ...], tuple[str, ...]], ...] 
     ("黑胶",      "records",  ("sound", "hands", "new"),         ("spark", "fresh", "low")),
     ("中古店",     "vintage",  ("new", "hands"),                  ("spark", "fresh")),
     ("陶艺",      "craft",    ("hands",),                        ("spark", "empty")),
-    ("花店",      "craft",    ("hands", "green"),                ("low", "empty", "near")),
+    ("花艺",      "flower",   ("hands", "green"),                ("low", "empty", "near")),
+    ("运动馆",     "sports",   ("hands", "loud"),                 ("bright", "okay", "fresh")),
     ("livehouse", "music",    ("sound", "people", "loud"),       ("spark", "empty", "near")),
     ("剧场",      "cinema",   ("hide", "nothing"),               ("noisy", "tired")),
     ("电影院",     "cinema",   ("hide", "nothing"),               ("noisy", "tired", "low")),
@@ -68,6 +69,35 @@ KEYWORD_PROFILES: tuple[tuple[str, str, tuple[str, ...], tuple[str, ...]], ...] 
     ("胡同",      "lane",     ("walk", "new"),                   ("fresh", "okay", "spark")),
     ("文创园",     "lane",     ("walk", "new"),                   ("fresh", "spark")),
 )
+
+# 用户点名活动时先搜这一组。一个类型最多两个关键词，既提高召回，也不让
+# 六次跨境请求全耗在同一种叫法上。
+PLACE_TYPE_SEARCHES: dict[str, tuple[tuple[str, str], ...]] = {
+    "barbecue": (("烧烤", "barbecue"), ("烤串", "barbecue")),
+    "restaurant": (("餐厅", "restaurant"),),
+    "hotpot": (("火锅", "hotpot"),),
+    "dessert": (("甜品", "dessert"),),
+    "craft": (("手作", "craft"), ("陶艺", "craft")),
+    "flower": (("花艺", "flower"), ("插花", "flower")),
+    "sports": (("运动馆", "sports"), ("健身房", "sports")),
+    "climbing": (("攀岩馆", "climbing"),),
+    "swimming": (("游泳馆", "swimming"),),
+    "badminton": (("羽毛球馆", "badminton"),),
+    "music": (("livehouse", "music"),),
+    "bar": (("酒吧", "bar"),),
+    "club": (("夜店", "club"),),
+    "karaoke": (("KTV", "karaoke"),),
+    "books": (("书店", "books"),),
+    "records": (("黑胶", "records"),),
+    "cafe": (("咖啡", "cafe"),),
+    "tea": (("茶室", "tea"),),
+    "park": (("公园", "park"),),
+    "gallery": (("美术馆", "gallery"),),
+    "cinema": (("电影院", "cinema"),),
+    "river": (("河", "river"),),
+    "vintage": (("中古店", "vintage"),),
+    "lane": (("胡同", "lane"),),
+}
 
 # 不管什么状态都先搜这几个：它们是这份需求里最通用的三样。
 BASELINE_KEYWORDS = ("书店", "咖啡", "公园")
@@ -85,6 +115,10 @@ def keywords_for(state: NeedState) -> list[str]:
     needs = set(state.need_keys)
     avoided = set(state.avoid_tags)
     chosen: list[str] = []
+    for place_type in state.place_types:
+        for keyword, _category in PLACE_TYPE_SEARCHES.get(place_type, ()):
+            if keyword not in chosen:
+                chosen.append(keyword)
     scored: list[tuple[int, str]] = []
     for keyword, _category, need_keys, moods in KEYWORD_PROFILES:
         # 用户明说不想要的，对应的关键词直接不搜——搜了也是白搜。
@@ -104,6 +138,7 @@ def keywords_for(state: NeedState) -> list[str]:
 
 
 KEYWORD_CATEGORY = {keyword: category for keyword, category, _, _ in KEYWORD_PROFILES}
+KEYWORD_CATEGORY.update({keyword: category for pairs in PLACE_TYPE_SEARCHES.values() for keyword, category in pairs})
 
 
 # 缓存下沉到「一个关键词一次搜索」这一层，而不是整次 discover。
@@ -217,6 +252,94 @@ CATEGORY_PROFILE: dict[str, dict[str, Any]] = {
     },
 }
 
+
+def _dynamic_profile(
+    label: str,
+    label_en: str,
+    action: str,
+    *,
+    indoor: bool,
+    free: bool,
+    crowd: str,
+    duration: str,
+    cost: str,
+    see: str,
+    place_types: tuple[str, ...],
+    tags: dict[str, float],
+) -> dict[str, Any]:
+    """让动态类别字段齐全；缺一个字段就会在推荐卡渲染时整条消失。"""
+    baseline = {"q": .5, "g": .2, "c": .5, "s": .7, "co": .5, "e": .65,
+                "r": .6, "cr": .5, "l": .45, "st": .65, "cp": .55, "w": .2}
+    baseline.update(tags)
+    return {
+        "label": label, "label_en": label_en, "action": action, "indoor": indoor,
+        "free": free, "crowd": crowd, "suggested_duration": duration, "cost": cost,
+        "see": see, "place_types": list(place_types), "tags": baseline,
+    }
+
+
+# 这些关键词原来能搜到，却因为缺 CATEGORY_PROFILE 被 to_place 静默丢掉。
+# 现在每一类都有完整形状，手作、花艺、运动等结果才能真正进入候选集。
+CATEGORY_PROFILE.update({
+    "tea": _dynamic_profile("茶室 · 室内", "tea house · indoors", "坐下来喝一壶茶",
+        indoor=True, free=False, crowd="low", duration="40–90 分钟", cost="需要点茶",
+        see="一张能慢慢坐着的茶桌", place_types=("tea",), tags={"q":.85,"r":.8,"l":.15,"st":.85,"c":.25}),
+    "records": _dynamic_profile("唱片店 · 室内", "record shop · indoors", "翻一轮唱片，听一张再走",
+        indoor=True, free=True, crowd="low", duration="20–60 分钟", cost="可以只听不买",
+        see="唱片和可以慢慢翻找的货架", place_types=("records",), tags={"q":.65,"e":.85,"cr":.9,"st":.7,"cp":.25}),
+    "vintage": _dynamic_profile("中古店 · 室内", "vintage shop · indoors", "慢慢翻一轮旧物",
+        indoor=True, free=True, crowd="low", duration="20–60 分钟", cost="可以只逛不买",
+        see="旧衣和旧物，每一件都不太一样", place_types=("vintage",), tags={"e":.95,"cr":.7,"q":.65,"cp":.3}),
+    "craft": _dynamic_profile("手作 · 室内", "craft studio · indoors", "选一件手作，把注意力放到手上",
+        indoor=True, free=False, crowd="low", duration="60–150 分钟", cost="需要购买体验",
+        see="材料、工具和一件能带走的作品", place_types=("craft",), tags={"cr":.95,"r":.75,"q":.7,"st":.9,"cp":.7}),
+    "flower": _dynamic_profile("花艺 · 室内", "flower studio · indoors", "挑几枝花，动手做一束",
+        indoor=True, free=False, crowd="low", duration="45–120 分钟", cost="需要购买花材或体验",
+        see="花材、颜色和能动手完成的东西", place_types=("flower",), tags={"g":.8,"cr":.9,"r":.8,"q":.7,"cp":.7}),
+    "music": _dynamic_profile("现场音乐 · 室内", "live music · indoors", "看看最近一场演出",
+        indoor=True, free=False, crowd="high", duration="90–180 分钟", cost="通常需要门票",
+        see="舞台、音乐和一起听的人", place_types=("music",), tags={"q":.1,"c":.8,"co":.85,"l":.95,"cr":.85,"cp":.65}),
+    "river": _dynamic_profile("水边 · 户外", "waterfront · outdoors", "沿着水走一段，随时停下",
+        indoor=False, free=True, crowd="low", duration="30–90 分钟", cost="不用花钱",
+        see="水面和一条可以继续走的路", place_types=("river",), tags={"g":.65,"q":.75,"r":.9,"w":.95,"cp":.05}),
+    "lane": _dynamic_profile("街巷 · 户外", "neighbourhood · outdoors", "沿街慢慢走一圈",
+        indoor=False, free=True, crowd="mid", duration="30–90 分钟", cost="走路不用花钱",
+        see="街巷、小店和正在发生的生活", place_types=("lane",), tags={"co":.85,"e":.8,"w":.85,"cp":.1}),
+    "restaurant": _dynamic_profile("餐厅 · 室内", "restaurant · indoors", "先坐下来吃顿饭",
+        indoor=True, free=False, crowd="mid", duration="40–90 分钟", cost="需要用餐",
+        see="一顿具体的饭，不用再想下一步", place_types=("restaurant",), tags={"co":.75,"r":.65,"st":.55,"cp":.6}),
+    "barbecue": _dynamic_profile("烧烤 · 室内", "barbecue · indoors", "点一份烤串，先把饭吃了",
+        indoor=True, free=False, crowd="mid", duration="60–100 分钟", cost="需要用餐",
+        see="烤串、热气和一顿具体的饭", place_types=("barbecue","restaurant"), tags={"co":.8,"l":.65,"r":.6,"cp":.65}),
+    "hotpot": _dynamic_profile("火锅 · 室内", "hotpot · indoors", "坐下来吃一顿热的",
+        indoor=True, free=False, crowd="high", duration="80–150 分钟", cost="需要用餐",
+        see="一锅热气和围桌吃饭的人", place_types=("hotpot","restaurant"), tags={"co":.9,"l":.75,"c":.75,"cp":.7}),
+    "dessert": _dynamic_profile("甜品 · 室内", "dessert · indoors", "挑一份现在想吃的甜点",
+        indoor=True, free=False, crowd="mid", duration="25–70 分钟", cost="需要消费",
+        see="一份甜的东西和能坐下的桌子", place_types=("dessert","restaurant"), tags={"r":.7,"st":.65,"cp":.55}),
+    "sports": _dynamic_profile("运动场馆 · 室内", "sports venue · indoors", "选一个项目，让身体先动起来",
+        indoor=True, free=False, crowd="mid", duration="60–120 分钟", cost="可能需要购票或预约",
+        see="可以活动身体的场地", place_types=("sports",), tags={"q":.3,"l":.8,"r":.7,"cr":.4,"st":.75,"cp":.6}),
+    "climbing": _dynamic_profile("攀岩馆 · 室内", "climbing gym · indoors", "挑一条简单线路爬一次",
+        indoor=True, free=False, crowd="mid", duration="60–120 分钟", cost="需要购票或预约",
+        see="岩壁和一条明确的路线", place_types=("climbing","sports"), tags={"q":.45,"l":.65,"r":.75,"cr":.75,"cp":.65}),
+    "swimming": _dynamic_profile("游泳馆 · 室内", "swimming pool · indoors", "按自己的速度游几趟",
+        indoor=True, free=False, crowd="mid", duration="60–120 分钟", cost="需要购票",
+        see="泳池和重复的往返", place_types=("swimming","sports"), tags={"q":.55,"r":.9,"l":.45,"cp":.55}),
+    "badminton": _dynamic_profile("羽毛球馆 · 室内", "badminton court · indoors", "约一场球，让身体先接手",
+        indoor=True, free=False, crowd="mid", duration="60–120 分钟", cost="需要订场",
+        see="球场和能一起打球的人", place_types=("badminton","sports"), tags={"co":.8,"l":.8,"r":.75,"cp":.6}),
+    "bar": _dynamic_profile("酒吧 · 室内", "bar · indoors", "找个位子喝一杯",
+        indoor=True, free=False, crowd="mid", duration="60–120 分钟", cost="需要点单",
+        see="酒、音乐和周围的人", place_types=("bar",), tags={"q":.25,"co":.85,"l":.8,"c":.65,"cp":.75}),
+    "club": _dynamic_profile("夜店 · 室内", "club · indoors", "进去跳一会儿，想走就走",
+        indoor=True, free=False, crowd="high", duration="90–240 分钟", cost="通常需要门票和饮品",
+        see="很响的音乐和一起跳舞的人", place_types=("club",), tags={"q":.05,"co":.9,"l":1.0,"c":.9,"cp":.85}),
+    "karaoke": _dynamic_profile("KTV · 室内", "karaoke · indoors", "点一首现在想唱的歌",
+        indoor=True, free=False, crowd="mid", duration="90–180 分钟", cost="需要订房",
+        see="一个可以大声唱歌的房间", place_types=("karaoke",), tags={"q":.1,"co":.85,"l":.9,"s":.2,"cp":.75}),
+})
+
 # 高德会把「打卡点」「出入口」「停车场」这类东西也当 POI 返回。
 # 它们不是能待的地方，推给一个正难受的人是冒犯。
 # 连锁店没有叙事。一个正难受的人不需要被推荐去楼下那家瑞幸——
@@ -326,6 +449,7 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
         "crowd": profile["crowd"],
         "see": profile["see"],
         "cost": profile["cost"],
+        "placeTypes": list(profile.get("place_types") or [category]),
         "environmentTags": [],
         "tags": dict(profile["tags"]),
         # 这一类的常识，不是对这一家的判断——所以只有一条 "_"，而且措辞留余地。

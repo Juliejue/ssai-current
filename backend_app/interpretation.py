@@ -11,14 +11,14 @@ import httpx
 from pydantic import ValidationError
 
 from .i18n import (AVOID_LABELS_EN, CLARIFY_EN, CONSTRAINT_CORRECTIONS_EN, CORRECTION_CHIPS_EN,
-                    NEED_LABELS_EN, state_label, ui)
+                    NEED_LABELS_EN, PLACE_TYPE_LABELS_EN, state_label, ui)
 from .schemas import ClarifyOption, CorrectionOptions, InterpretResponse, NeedState, RiskLevel
 
 
 logger = logging.getLogger("current.interpretation")
 
 # 每次改 SYSTEM_PROMPT 都要抬版本号——留痕靠它才能对得上（FR-30）。
-PROMPT_VERSION = "sp2-interpret-v0.4"
+PROMPT_VERSION = "sp2-interpret-v0.5"
 
 # 限流和 schema 失败是两回事，重试方式也不一样：
 # 429/5xx 是「现在排不上队」，立刻重试等于白试，要等一下；
@@ -32,13 +32,53 @@ MOOD_RULES: dict[str, tuple[str, ...]] = {
     "quiet": ("安静", "太吵", "不想听", "别说话"),
     "noisy": ("脑子停不下来", "想太多", "一直想", "坐不住", "很乱"),
     "spark": ("灵感", "没方向", "想创作", "想看看"),
-    "tired": ("很累", "没睡", "困", "疲惫", "躺不住"),
+    "tired": ("很累", "好累", "累坏了", "累死了", "没睡", "困", "疲惫", "躺不住"),
     "empty": ("空落落", "没着落", "空空", "没意思"),
     "tight": ("发紧", "绷着", "喘不过", "心慌"),
     "near": ("想有人", "陪我", "一个人难受", "有人在"),
     "fresh": ("换个地方", "待腻", "没见过", "出去看看"),
+    "bright": ("很开心", "挺开心", "开心", "高兴", "快乐", "心情很好", "状态不错", "兴致很好"),
     "okay": ("还行", "挺好", "没事", "随便走走", "跳舞", "蹦迪", "想动", "出去嗨", "想玩"),
-    "low": ("低落", "难受", "委屈", "没力气", "不开心", "糟糕"),
+    "low": ("低落", "难过", "伤心", "难受", "委屈", "想哭", "没力气", "不开心", "心情不好", "糟糕"),
+}
+
+
+# 明确的地点 / 活动诉求。它们和情绪向量不是一回事：前者是用户自己说的，
+# 后者是系统的推断，所以排序时必须让前者优先。只保存枚举，不保存原句。
+PLACE_TYPE_RULES: dict[str, tuple[str, ...]] = {
+    "barbecue": ("烤串", "烧烤", "串烧", "撸串", "烤肉", "yakitori", "barbecue", "bbq"),
+    "restaurant": ("餐厅", "饭店", "吃饭", "吃点东西", "找吃的", "正餐", "restaurant"),
+    "hotpot": ("火锅", "涮肉", "麻辣烫", "hotpot"),
+    "dessert": ("甜品", "蛋糕", "冰淇淋", "面包店", "糖水", "dessert"),
+    "craft": ("手作", "手工", "陶艺", "做陶", "木工", "编织", "银饰", "craft"),
+    "flower": ("插花", "花艺", "花店", "鲜花", "flower"),
+    "sports": ("运动馆", "体育馆", "健身房", "健身", "想运动", "workout", "gym"),
+    "climbing": ("攀岩", "抱石", "climbing", "bouldering"),
+    "swimming": ("游泳", "泳池", "swimming"),
+    "badminton": ("羽毛球", "badminton"),
+    "music": ("livehouse", "现场音乐", "看演出", "听演出", "听音乐", "音乐现场", "concert"),
+    "bar": ("酒吧", "喝一杯", "喝酒", "精酿", "cocktail", "pub"),
+    "club": ("夜店", "蹦迪", "跳舞", "club"),
+    "karaoke": ("ktv", "KTV", "唱歌", "卡拉ok", "karaoke"),
+    "books": ("书店", "看书", "逛书", "bookstore"),
+    "records": ("唱片店", "黑胶", "唱片", "records"),
+    "cafe": ("咖啡馆", "咖啡店", "喝咖啡", "cafe", "coffee"),
+    "tea": ("茶馆", "茶室", "喝茶", "tea house"),
+    "park": ("公园", "park"),
+    "gallery": ("美术馆", "画廊", "展览", "看展", "gallery"),
+    "cinema": ("电影院", "影院", "看电影", "电影资料馆", "cinema"),
+    "river": ("河边", "江边", "水边", "湖边", "river", "waterfront"),
+    "vintage": ("中古店", "古着", "二手店", "vintage"),
+    "lane": ("胡同", "小巷", "街区", "lane", "alley"),
+}
+
+PLACE_TYPE_LABELS: dict[str, str] = {
+    "barbecue": "吃烤串", "restaurant": "吃顿饭", "hotpot": "吃火锅", "dessert": "吃甜品",
+    "craft": "做手作", "flower": "插花", "sports": "运动", "climbing": "攀岩",
+    "swimming": "游泳", "badminton": "打羽毛球", "music": "听现场音乐", "bar": "去酒吧",
+    "club": "跳舞", "karaoke": "唱歌", "books": "逛书店", "records": "逛唱片店",
+    "cafe": "去咖啡馆", "tea": "喝茶", "park": "去公园", "gallery": "看展",
+    "cinema": "看电影", "river": "去水边", "vintage": "逛中古店", "lane": "逛街巷",
 }
 
 NEED_RULES: dict[str, tuple[str, ...]] = {
@@ -49,11 +89,11 @@ NEED_RULES: dict[str, tuple[str, ...]] = {
     "green": ("树", "绿色", "公园", "自然"),
     "new": ("没见过", "新鲜", "换个地方"),
     "sound": ("听音乐", "听点声音", "唱片"),
-    "people": ("有人在", "有人就行", "生活气"),
+    "people": ("有人在", "有人就行", "生活气", "想聊天", "和人说话", "找人聊", "认识人", "想社交"),
     "loud": ("吵一点", "热闹", "蹦迪", "跳舞", "嗨一点"),
     "slow": ("慢下来", "安静", "缓一缓"),
     "hands": ("手上有事", "做点什么", "翻书"),
-    "breathe": ("喘口气", "透气", "发紧"),
+    "breathe": ("喘口气", "透气", "发紧", "吹吹风", "吹风", "微风", "有风"),
     "nothing": ("不想决定", "你替我选", "随便", "都可以"),
 }
 
@@ -77,7 +117,7 @@ ELEVATED_PATTERNS = ("撑不住", "失控", "崩溃", "can't go on", "cannot go 
 
 # Body-level wording only. No clinical or personality labels ever leave this file.
 STATE_LABELS: dict[str, str] = {
-    "low": "没什么力气",
+    "low": "心情有点沉",
     "quiet": "需要安静",
     "noisy": "脑子停不下来",
     "spark": "想要点灵感",
@@ -86,13 +126,14 @@ STATE_LABELS: dict[str, str] = {
     "tight": "心里发紧",
     "near": "想有人在旁边",
     "fresh": "想换个地方",
+    "bright": "心情很明亮",
     "okay": "状态还行",
 }
 
 # 「不想要」不能靠给 NEED_LABELS 加个「不」前缀凑出来：
 # 「周围有人就行」加个不字会变成「不要周围有人就行」，不像人话。
 AVOID_LABELS: dict[str, str] = {
-    "people": "不想见人",
+    "people": "想避开人多",
     "loud": "不想吵",
     "sound": "不想听声音",
     "hands": "什么都不想做",
@@ -126,7 +167,8 @@ CORRECTION_CHIPS: tuple[tuple[str, str], ...] = (
     ("near", "想有人在旁边"),
     ("fresh", "想换个地方"),
     ("quiet", "需要安静"),
-    ("low", "没什么力气"),
+    ("low", "心情有点沉"),
+    ("bright", "心情很明亮"),
 )
 
 # 诉求这一环：按「空间 / 刺激 / 恢复」各挑最常被说错的，凑够但不超过 6 个。
@@ -145,8 +187,9 @@ CONSTRAINT_CORRECTIONS: tuple[tuple[str, str], ...] = (
 
 CLARIFY_QUESTIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
     "social_mode": (
-        "只问一句：现在想一个人待着，还是周围有人、但不用说话？",
-        (("alone", "想一个人"), ("low_contact", "有人但不说话"), ("either", "都行")),
+        "只问一句：现在想要哪种陪伴感？",
+        (("alone", "想一个人"), ("low_contact", "有人但不说话"),
+         ("with_people", "热闹，能和人说话"), ("either", "都行")),
     ),
     "max_travel_minutes": (
         "只问一句：现在最多愿意在路上花多久？",
@@ -162,7 +205,8 @@ CLARIFY_QUESTIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
 # 「不想要」在中文里几乎总是明说的，规则也接得住——模型没跑的时候
 # （没配 Key、契约失败）不能连这个都丢。词表和 need_keys 是同一套。
 AVOID_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("people", ("不想见人", "不想见到人", "别跟人说话", "不想说话", "不想社交", "人少点", "不想应付")),
+    ("people", ("不想见人", "不想见到人", "别跟人说话", "不想说话", "不想社交",
+                "人少点", "人少的", "少点人", "没什么人", "不要太多人", "别太多人", "不想应付")),
     ("loud", ("不想吵", "别太吵", "太吵了", "怕吵", "安静点", "不要吵")),
     ("hands", ("什么都不做", "啥都不想做", "不想动手", "不想干活", "不用动脑")),
 )
@@ -174,11 +218,17 @@ def _contains_any(text: str, patterns: tuple[str, ...]) -> bool:
 
 def interpret_with_rules(text: str) -> InterpretResponse:
     mood_scores = {mood: sum(text.count(token) for token in tokens) for mood, tokens in MOOD_RULES.items()}
-    mood_id = max(mood_scores, key=mood_scores.get)
+    # 「难过 + 想找个安静的地方」里，难过是状态，安静是要求；不能因为词表
+    # 顺序把要求反过来当成情绪。明确的身体/情绪词先决定 mood，环境仍进 need_keys。
+    felt_moods = ("low", "bright", "tired", "empty", "tight")
+    felt_scores = {mood: mood_scores[mood] for mood in felt_moods}
+    mood_id = max(felt_scores, key=felt_scores.get) if max(felt_scores.values()) else max(mood_scores, key=mood_scores.get)
     if mood_scores[mood_id] == 0:
-        mood_id = "low"
+        # 没提情绪，不等于低落。后面的复述会按低置信度明确说“不硬猜”。
+        mood_id = "okay"
 
     needs = [key for key, tokens in NEED_RULES.items() if _contains_any(text, tokens)]
+    place_types = [key for key, tokens in PLACE_TYPE_RULES.items() if _contains_any(text.casefold(), tuple(t.casefold() for t in tokens))]
     risk_text = text.casefold()
     self_harm = _contains_any(risk_text, URGENT_SELF_HARM_PATTERNS)
     harm_to_others = _contains_any(risk_text, URGENT_HARM_TO_OTHERS_PATTERNS)
@@ -195,13 +245,24 @@ def interpret_with_rules(text: str) -> InterpretResponse:
         risk_signals.append("severe_distress_language")
 
     energy = 2
-    if _contains_any(text, ("没力气", "很累", "动不了", "不想动")):
+    if _contains_any(text, ("没力气", "很累", "好累", "累坏了", "累死了", "动不了", "不想动")):
         energy = 1
     elif _contains_any(text, ("有力气", "想运动", "想跳", "想跑", "跳舞", "蹦迪", "想动", "出去嗨")):
         energy = 4
 
     budget = "free" if _contains_any(text, ("不花钱", "不想花钱", "没钱", "免费")) else "low" if _contains_any(text, ("便宜", "不想花很多钱", "预算低", "少花点")) else "unknown"
-    social = "alone" if _contains_any(text, ("不想见人", "一个人", "别跟人说话")) else "with_people" if _contains_any(text, ("想有人", "热闹", "陪我")) else "either"
+    social = (
+        "alone" if _contains_any(text, ("不想见人", "想一个人", "自己待着", "别跟人说话"))
+        else "low_contact" if _contains_any(text, ("有人但不说话", "不用说话", "有人就行", "有人在旁边"))
+        else "with_people" if _contains_any(text, ("想有人", "热闹", "很闹", "陪我", "想聊天", "和人说话", "认识人", "想社交"))
+        else "either"
+    )
+    environment = (
+        "outdoor" if _contains_any(text, ("想去户外", "想在户外", "想去外面", "露天", "晒太阳",
+                                                  "能吹风", "吹吹风", "微风", "有风", "河边", "江边", "水边", "湖边"))
+        else "indoor" if _contains_any(text, ("想待在室内", "想去室内", "不要户外", "不想在外面"))
+        else "either"
+    )
 
     # 同一个词表两边都出现时，「想要」压过「不想要」：用户刚说了想要它。
     avoid = [key for key, tokens in AVOID_RULES if _contains_any(text, tokens) and key not in needs]
@@ -209,10 +270,12 @@ def interpret_with_rules(text: str) -> InterpretResponse:
     state = NeedState(
         mood_id=mood_id,
         need_keys=needs[:6],
+        place_types=place_types[:3],
         avoid_tags=avoid[:8],
         energy=energy,
         social_mode=social,
         budget_level=budget,
+        environment=environment,
         confidence=0.58 if mood_scores[mood_id] else 0.35,
         risk_level=risk_level,
         risk_signals=risk_signals,
@@ -242,6 +305,16 @@ def _evidence_for(text: str, state: NeedState) -> list[str]:
         cited.add(token)
         break
 
+    # 具体行动比抽象情绪更接近用户真正要求的东西，必须原样指出它是排序依据。
+    for key in state.place_types:
+        tokens = [t for t in _matched_tokens(text.casefold(), tuple(v.casefold() for v in PLACE_TYPE_RULES.get(key, ()))) if t not in cited]
+        if not tokens:
+            continue
+        evidence.append(f"「{tokens[0]}」——我先按这个找")
+        cited.add(tokens[0])
+        if len(evidence) >= 3:
+            break
+
     for key in state.need_keys:
         tokens = [t for t in _matched_tokens(text, NEED_RULES.get(key, ())) if t not in cited]
         if not tokens:
@@ -256,7 +329,8 @@ def _evidence_for(text: str, state: NeedState) -> list[str]:
         constraints: list[tuple[bool, tuple[str, ...], str]] = [
             (state.budget_level in {"free", "low"}, ("不花钱", "不想花钱", "不想花很多钱", "没钱", "免费", "便宜", "预算低", "少花点"), "所以我只找花不了什么钱的地方"),
             (state.social_mode == "alone", ("不想见人", "一个人", "别跟人说话", "躲"), "所以我把人多的地方去掉了"),
-            (state.energy <= 1, ("没力气", "很累", "动不了", "不想动", "困", "疲惫"), "所以我把远的地方往后放了"),
+            ("people" in state.avoid_tags, ("不想见人", "不想见到人", "人少点", "人少的", "少点人", "没什么人", "不要太多人", "别太多人"), "所以我把人多的地方往后放了"),
+            (state.energy <= 1, ("没力气", "很累", "好累", "累坏了", "累死了", "动不了", "不想动", "困", "疲惫"), "所以我把远的地方往后放了"),
         ]
         for applies, tokens, consequence in constraints:
             if not applies:
@@ -284,6 +358,14 @@ def _already_holds(state: NeedState, encoded: str) -> bool:
 
 def _needs_clarification(state: NeedState) -> str | None:
     """Ask at most one question, and only when the answer changes the shortlist."""
+    if state.place_types:
+        # 用户已经明确说了去哪类地方 / 做什么，就先给结果，别把他拉回抽象选择题。
+        return None
+    concrete_constraints = len(state.need_keys) + len(state.avoid_tags) + int(state.environment != "either")
+    if concrete_constraints >= 2:
+        # 「人少 + 能吹风」已经足够排序。再追问陪伴感或路程，会把一次自然表达
+        # 拆回问卷，也违背“一次最多问一个、只有必要时才问”的约束。
+        return None
     if state.social_mode == "either" and len(state.need_keys) < 2:
         return "social_mode"
     if state.energy <= 1 and state.max_travel_minutes is None:
@@ -294,16 +376,34 @@ def _needs_clarification(state: NeedState) -> str | None:
 
 
 def _restatement(state: NeedState, lang: str = "zh") -> str:
+    if state.place_types:
+        labels = (PLACE_TYPE_LABELS_EN if lang == "en" else PLACE_TYPE_LABELS)
+        named = [labels[key] for key in state.place_types if key in labels][:2]
+        if lang == "en":
+            return "I hear the feeling, and your request is specific: " + " and ".join(named) + ". I'll start there, not replace it with a guess."
+        empathy = {
+            "low": "听起来今天有点不好受。", "tight": "听起来你现在还绷着。",
+            "tired": "听起来你真的累了。", "empty": "听起来心里有点空。",
+            "bright": "听起来你现在兴致不错。",
+        }.get(state.mood_id, "")
+        return empathy + "你说得很具体：" + "、".join(named) + "。我先按这个找，不把它换成别的。"
     if lang == "en":
         label = state_label(state.mood_id, "en") or "hard to name"
         needs = [NEED_LABELS_EN[key] for key in state.need_keys if key in NEED_LABELS_EN][:2]
         if needs:
             return ui("restate_with_need", "en", label=label, needs=" and ".join(needs)) or ""
         return ui("restate", "en", label=label) or ""
+    if state.confidence < 0.45:
+        return "我还没听准你的状态，先不硬猜。只问一个会改变推荐的问题。"
     label = STATE_LABELS.get(state.mood_id, "说不太清楚")
     needs = [NEED_LABELS[key] for key in state.need_keys if key in NEED_LABELS][:2]
     tail = "，需要一个" + "、".join(needs) + "的地方" if needs else ""
-    return f"我猜你现在更接近「{label}」{tail}。猜错了就说一声，我马上换。"
+    empathy = {
+        "low": "听起来今天有点不好受。", "tight": "听起来你现在还绷着。",
+        "tired": "听起来你真的累了。", "empty": "听起来心里有点空。",
+        "bright": "听起来你现在兴致不错。",
+    }.get(state.mood_id, "我听见了。")
+    return f"{empathy}我理解你更接近「{label}」{tail}。不对的话，我马上换。"
 
 
 # 模型会把 prompt 里的字段名、占位符原样吐给用户。这些一出现就整条丢掉。
@@ -384,8 +484,9 @@ def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[st
 SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户的中文自然表达转换为 JSON，不能诊断、不能给人格贴标签。
 只输出 JSON，字段必须符合：
 {
-  "mood_id": "low|quiet|noisy|spark|tired|empty|tight|near|fresh|okay",
+  "mood_id": "low|quiet|noisy|spark|tired|empty|tight|near|fresh|bright|okay",
   "need_keys": ["hide|sit|walk|free|green|new|sound|people|loud|slow|hands|breathe|nothing"],
+  "place_types": ["barbecue|restaurant|hotpot|dessert|craft|flower|sports|climbing|swimming|badminton|music|bar|club|karaoke|books|records|cafe|tea|park|gallery|cinema|river|vintage|lane"],
   "energy": 0-4,
   "social_mode": "alone|low_contact|with_people|either",
   "time_minutes": 10-720 或 null,
@@ -405,6 +506,11 @@ SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户的中文自然�
 need_keys 放用户想要的，avoid_tags 放他明说不想要的，两边都用上面那套词表。
 「不想见人」→ avoid_tags 里放 people；「不想吵」→ 放 loud；「什么都不做」→ 放 hands。
 别把同一个词同时放进两边。没明说的不要替他填。
+
+place_types 只放用户明确说出的地点或活动，不许从情绪猜。
+「心情不好，我想吃烤串」→ mood_id=low，place_types=["barbecue"]。
+「很累，想做陶艺」→ mood_id=tired，place_types=["craft"]。
+明确地点/活动是硬要求，绝不能用推断出的情绪把它替换成另一类空间。
 
 evidence 的写法（这是给用户看的，不是给程序看的）：
 - 每条必须包含用户真的说过的词，用「」括起来。编造用户没说过的话属于失败。
@@ -542,6 +648,23 @@ async def interpret(text: str, lang: str = "zh") -> InterpretResponse:
             if rule_result.state.risk_level == RiskLevel.elevated and state.risk_level == RiskLevel.ordinary:
                 state.risk_level = RiskLevel.elevated
                 state.risk_signals = rule_result.state.risk_signals
+            # 用户明确说出的词比模型推断更硬。模型即使漏了「烤串 / 手作 / 想聊天」，
+            # 代码也会把规则识别到的信号补回去，不让生产模型把具体诉求抽象掉。
+            state.place_types = list(dict.fromkeys(rule_result.state.place_types + state.place_types))[:3]
+            state.need_keys = list(dict.fromkeys(rule_result.state.need_keys + state.need_keys))[:6]
+            state.avoid_tags = list(dict.fromkeys(rule_result.state.avoid_tags + state.avoid_tags))[:8]
+            if rule_result.state.social_mode != "either":
+                state.social_mode = rule_result.state.social_mode
+            if rule_result.state.environment != "either":
+                state.environment = rule_result.state.environment
+            if rule_result.state.energy != 2:
+                state.energy = rule_result.state.energy
+            if rule_result.state.budget_level != "unknown":
+                state.budget_level = rule_result.state.budget_level
+            if any(score > 0 for score in (
+                sum(text.count(token) for token in tokens) for tokens in MOOD_RULES.values()
+            )):
+                state.mood_id = rule_result.state.mood_id
             _trace(outcome="model_ok", text=text, attempt=attempt, model=model)
             return _decorate(
                 InterpretResponse(

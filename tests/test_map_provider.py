@@ -3,7 +3,7 @@ import asyncio
 import httpx
 import pytest
 
-from backend_app.map_provider import AmapClient, MapProviderError, navigation_url, parse_location
+from backend_app.map_provider import AmapClient, MapProviderError, map_links, navigation_url, parse_location
 
 
 def test_search_places_returns_reviewable_candidates_without_promoting_them():
@@ -81,3 +81,26 @@ def test_navigation_requires_human_verified_identity():
     assert navigation_url(place) is None
     place["amap"]["verification_status"] = "verified"
     assert navigation_url(place).startswith("https://uri.amap.com/navigation?")
+
+
+def test_map_links_publish_native_amap_routes_with_a_web_fallback():
+    place = {
+        "placeName": "测试书店",
+        "amap": {
+            "longitude": 116.4,
+            "latitude": 39.9,
+            "verified_name": "测试书店",
+            "provider_place_id": "B000TEST",
+            "verification_status": "verified",
+        },
+    }
+    links = map_links(place)
+    assert links["amap"].startswith("https://uri.amap.com/navigation?")
+    assert links["amap_ios"].startswith("iosamap://path?")
+    assert links["amap_android"].startswith("amapuri://route/plan/?")
+    for key in ("amap_ios", "amap_android"):
+        assert "did=B000TEST" in links[key]
+        assert "dlat=39.9" in links[key]
+        assert "dlon=116.4" in links[key]
+        assert "dev=0" in links[key]
+        assert "t=2" in links[key]

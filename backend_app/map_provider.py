@@ -332,6 +332,22 @@ def map_links(place: dict[str, Any]) -> dict[str, str]:
             "callnative": 1,
         }
     )
+    # `uri.amap.com` is the universal web fallback.  Mobile in-app browsers
+    # are inconsistent about forwarding that redirect into the installed app,
+    # so also publish Amap's documented native route URIs.  The frontend picks
+    # the URI for the current platform inside the user's click handler and
+    # falls back to the universal URL if the page never becomes hidden.
+    native_route = {
+        "sourceApplication": "current",
+        "dlat": gcj_latitude,
+        "dlon": gcj_longitude,
+        "dname": name,
+        "dev": 0,
+        "t": 2,
+    }
+    if amap.get("provider_place_id"):
+        native_route["did"] = amap["provider_place_id"]
+    native_query = urlencode(native_route)
     apple_query = urlencode({"daddr": f"{wgs_latitude},{wgs_longitude}", "q": name, "dirflg": "w"})
     google_query = urlencode(
         {
@@ -342,6 +358,8 @@ def map_links(place: dict[str, Any]) -> dict[str, str]:
     )
     return {
         "amap": f"https://uri.amap.com/navigation?{amap_query}",
+        "amap_ios": f"iosamap://path?{native_query}",
+        "amap_android": f"amapuri://route/plan/?{native_query}",
         "apple": f"https://maps.apple.com/?{apple_query}",
         "google": f"https://www.google.com/maps/dir/?{google_query}",
     }

@@ -79,8 +79,7 @@ button{background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highligh
   box-shadow:0 18px 50px rgba(18,42,46,.14);
   overflow:hidden;display:flex;flex-direction:column;position:relative;
 }
-.stage-note{font:11px/1.7 var(--mono);color:var(--ink-faint);letter-spacing:.06em;text-align:center;max-width:390px}
-.stage-note a{color:var(--ink-dim)}
+.stage-note{display:none}
 @media (max-width:430px){
   .stage{padding:0;gap:0}
   .phone{width:100%;height:100dvh;border-radius:0;border:none;box-shadow:none}
@@ -118,6 +117,8 @@ button{background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highligh
 
 /* ---------- type ---------- */
 .topright{display:flex;align-items:center;gap:8px;margin-left:auto}
+.topnav{font:11px var(--sans);color:var(--ink-dim);padding:7px 2px;white-space:nowrap}
+.topnav:hover{color:var(--ink)}
 .langsw{border:1px solid var(--line);background:transparent;color:var(--ink-dim);
   font:10px var(--mono);letter-spacing:.12em;padding:4px 8px;border-radius:999px;cursor:pointer}
 .langsw:hover{color:var(--ink);border-color:var(--ink-dim)}
@@ -575,8 +576,9 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .relief i{width:5px;height:5px;border-radius:50%;background:currentColor;font-style:normal}
 .primary-card{border:1px solid var(--line-2);border-radius:20px;background:var(--card);overflow:hidden;margin-bottom:8px}
 .primary-card .pc-head{padding:15px 16px 0}
-.primary-card h3{margin:11px 0 4px;font:400 22px/1.42 var(--serif);letter-spacing:.01em}
-.primary-card .where{margin:0;font:12px var(--sans);color:var(--ink-faint)}
+.primary-card h3{margin:11px 0 3px;font:400 24px/1.32 var(--serif);letter-spacing:.01em}
+.primary-card .where{margin:0;font:11.5px var(--sans);color:var(--ink-faint)}
+.primary-card .place-action{margin:8px 0 0;font:14px/1.55 var(--sans);color:var(--ink)}
 .primary-card .pc-body{padding:14px 16px 16px}
 .chain{margin:0 0 14px;padding:0;list-style:none;counter-reset:step}
 .chain li{position:relative;padding-left:20px;margin-bottom:6px;font:12.5px/1.65 var(--sans);color:var(--ink-dim)}
@@ -602,13 +604,13 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 /* 行程条：出发 → 到达 → 离开，闭环显式可见 */
 /* 行程条要一直够得着。同事反馈「我到了」的横幅在最下端，得下拉才看得见，
    那等于这一步走不下去了。钉在视口底部。 */
-.trip{flex:none;border-top:1px solid var(--line);background:var(--sun-wash);padding:10px 14px;
-  display:flex;align-items:center;gap:10px;
+.trip{flex:none;border-top:1px solid var(--line);background:var(--sun-wash);padding:12px 14px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
   position:sticky;bottom:0;z-index:30;box-shadow:0 -6px 18px rgba(18,42,46,.07)}
-.trip .txt{flex:1;min-width:0}
-.trip .txt b{display:block;font:500 12.5px/1.5 var(--sans);color:var(--ink)}
-.trip .txt small{display:block;font:10.5px var(--mono);color:var(--ink-dim);letter-spacing:.04em}
-.trip button{flex:none;padding:8px 13px;border-radius:20px;background:var(--ink);color:var(--paper);font:500 12px var(--sans)}
+.trip .txt{flex:1 1 170px;min-width:0}
+.trip .txt b{display:block;font:600 14px/1.45 var(--sans);color:var(--ink)}
+.trip .txt small{display:block;margin-top:2px;font:11px/1.4 var(--sans);color:var(--ink-dim)}
+.trip button{flex:1 0 auto;min-width:82px;min-height:44px;padding:9px 13px;border-radius:22px;background:var(--ink);color:var(--paper);font:600 13px var(--sans)}
 .trip button.ghost{background:none;color:var(--ink-dim);border:1px solid var(--line-2)}
 
 /* 记完之后那一下的回报。不是徽章，是「你刚刚改变了什么」。 */
@@ -664,11 +666,11 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .sheet-in{width:100%;background:var(--card);border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
 .sheet-in h4{margin:0 0 3px;font:500 15px/1.5 var(--sans)}
 .sheet-in .sub{margin:0 0 14px;font:11.5px/1.6 var(--sans);color:var(--ink-faint)}
-.sheet-in a{display:flex;align-items:center;justify-content:space-between;gap:10px;
+.sheet-in .map-choice{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:14px 15px;border:1px solid var(--line);border-radius:13px;margin-bottom:8px;
-  font:14px var(--sans);color:var(--ink);text-decoration:none}
-.sheet-in a:hover{border-color:var(--water);color:var(--water)}
-.sheet-in a i{font-style:normal;font:10px var(--mono);letter-spacing:.08em;color:var(--ink-faint)}
+  font:14px var(--sans);color:var(--ink);text-decoration:none;background:transparent;text-align:left}
+.sheet-in .map-choice:hover{border-color:var(--water);color:var(--water)}
+.sheet-in .map-choice i{font-style:normal;font:10px var(--mono);letter-spacing:.08em;color:var(--ink-faint)}
 .sheet-in .cancel{width:100%;margin-top:4px;height:44px;border-radius:22px;color:var(--ink-dim);font:13px var(--sans)}
 
 /* ---- FR-12 删除 ---- */
@@ -762,6 +764,7 @@ const MOODS = [
   {id:"tight", name:"心里发紧",    desc:"说不上为什么，就是绷着"},
   {id:"near",  name:"想有人在旁边",desc:"不用说话，有人就行"},
   {id:"fresh", name:"想换个地方",  desc:"待腻了，想看点没见过的"},
+  {id:"bright",name:"心情很明亮",  desc:"兴致不错，想把它接下去"},
   {id:"okay",  name:"状态还行",    desc:"不用被接住，想出去走走"}
 ];
 const moodById = id => MOODS.find(m => m.id === id) || MOODS[0];
@@ -827,6 +830,7 @@ const MOOD_TARGET = {
   tight: {q:.8,  g:.85, r:.9,  c:.1,  w:.6,  cp:.2},
   near:  {co:.9, l:.6,  c:.5,  s:.75, st:.7},
   fresh: {e:.95, cr:.6, l:.6,  w:.5},
+  bright:{e:.8,  l:.85, co:.8, cr:.7, c:.6, w:.55},
   okay:  {e:.7,  l:.6,  co:.6, w:.6,  cr:.5}
 };
 
@@ -1630,7 +1634,7 @@ function coverHTML(p, o){
   }
   h += sigil(p, o);
   if (o.badge) h += '<span class="cat-badge">' + catSVG() + '</span>';
-  if (o.caption) h += '<div class="cap"><small>' + p.area + ' · ' + p.category + '</small><strong>' + p.action + '</strong></div>';
+  if (o.caption) h += '<div class="cap"><small>' + p.category + ' · ' + p.area + '</small><strong>' + p.placeName + '</strong></div>';
   return h + '</div>';
 }
 function hexA(hex, a){
@@ -1659,9 +1663,9 @@ function cloudSVG(mood){
 }
 function catSVG(mood){ return cloudSVG(mood); }
 function dock(line, opts){
-  opts = opts || {};
-  return '<div class="dock"><span class="cat">' + catSVG() + '</span><p>' + line + '</p>' +
-    (opts.records === false ? '' : '<button class="to-records" data-go="#/records">记录</button>') + '</div>';
+  // 旧版每一屏底部都让小在重复解释流程，真实用户会把它当噪音。
+  // 导航已固定在顶栏，需要说明的内容只在发生决定的那一处出现。
+  return '';
 }
 
 /* ---------- 状态 ---------- */
@@ -1971,8 +1975,7 @@ const STALE_TRIP_MINUTES = 6 * 60;
 function arrivedToast(){
   if (!state.arrivedToast) return "";
   return '<div class="arrived-toast"><div><b>你到' + escapeHTML(state.arrivedToast) + '了</b>' +
-         '<small>我知道了 · 到了不打扰</small></div>' +
-         '<button id="toast-close">知道了</button></div>';
+         '</div><button id="toast-close">知道了</button></div>';
 }
 
 function tripStrip(){
@@ -1986,24 +1989,24 @@ function tripStrip(){
 
   if (t.status === "arrival_pending"){
     return '<div class="trip"><div class="txt"><b>看起来你已经到' + short + '了</b>' +
-      '<small>' + (demo ? '演示定位 · ' : '') + '是这里吗？</small></div>' +
+      '<small>' + (demo ? '演示定位 · ' : '') + '请确认一下</small></div>' +
       '<button data-trip="confirm-arrived">已抵达</button>' +
       '<button class="ghost" data-trip="not-arrived">还没有</button></div>';
   }
 
   if (t.status === "leave_pending"){
     return '<div class="trip"><div class="txt"><b>检测到你已经离开' + short + '</b>' +
-      '<small>' + (demo ? '演示定位 · ' : '') + '要结束这次到访吗？</small></div>' +
+      '<small>' + (demo ? '演示定位 · ' : '') + '请确认一下</small></div>' +
       '<button data-trip="left">已离开</button>' +
       '<button class="ghost" data-trip="still-here">我还在这里</button></div>';
   }
 
   if (t.status === "departed"){
     const line = t.presenceNote ? t.presenceNote
-      : demo ? "演示定位 · 可模拟抵达"
-      : (fenced && t.presenceAvailable) ? "到了我自己知道，也可以手动确认"
-      : fenced ? "正在等待定位，也可以手动确认"
-      : "这个地点还没核对坐标，到了按一下";
+      : demo ? "可模拟抵达"
+      : (fenced && t.presenceAvailable) ? "正在检测抵达"
+      : fenced ? "等待定位"
+      : "到达后请确认";
     return '<div class="trip"><div class="txt"><b>在去' + short + '的路上</b>' +
       '<small>' + fmtDate(t.startedAt) + ' 出发 · ' + line + '</small></div>' +
       '<button data-trip="' + (demo ? 'demo-arrive' : 'arrived') + '">' + (demo ? '模拟抵达' : '我到了') + '</button></div>';
@@ -2014,8 +2017,8 @@ function tripStrip(){
     if (demo) return '<div class="trip"><div class="txt"><b>演示状态：已离开' + short + '</b>' +
       '<small>这次模拟不会写入到访记录</small></div><button class="ghost" data-trip="clear">结束演示</button></div>';
     return '<div class="trip"><div class="txt"><b>你离开了' + short + '</b>' +
-      '<small>待了 ' + (t.dwellMinutes || 0) + ' 分钟 · 说三十秒？</small></div>' +
-      '<button data-trip="left">说 30 秒</button>' +
+      '<small>待了 ' + (t.dwellMinutes || 0) + ' 分钟</small></div>' +
+      '<button data-trip="left">记录变化</button>' +
       '<button class="ghost" data-trip="clear">以后再说</button></div>';
   }
 
@@ -2025,7 +2028,7 @@ function tripStrip(){
   if (elapsed > STALE_TRIP_MINUTES){
     return '<div class="trip"><div class="txt"><b>' + short + '那一趟还开着</b>' +
       '<small>过去挺久了，要不收了它</small></div>' +
-      '<button data-trip="left">说 30 秒</button>' +
+      '<button data-trip="left">记录变化</button>' +
       '<button class="ghost" data-trip="clear">收起来</button></div>';
   }
 
@@ -2123,7 +2126,8 @@ function topbar(title, kicker, backTo){
     (backTo ? '<button class="back" data-go="' + backTo + '" aria-label="返回">←</button>' : '') +
     '<div><div class="k">' + kicker + '</div></div><h2>' + title + '</h2></div>' +
     '<div class="topright">' + langToggle() +
-    '<button class="k" data-go="#/compare" style="letter-spacing:.14em">总览</button></div></div>';
+    '<button class="topnav" data-go="#/talk">首页</button>' +
+    '<button class="topnav" data-go="#/records">轨迹</button></div></div>';
 }
 
 /* --- 1. 情绪 --- */
@@ -2215,7 +2219,7 @@ function renderPick(){
   h += '<div class="deck"><div class="slide" id="slide">';
   h += '<div class="pcard">' + coverHTML(p, {caption:true, badge:true});
   h += '<div class="body">';
-  h += '<p class="place-sub">' + p.placeName + ' · ' + p.area + '</p>';
+  h += '<p class="place-sub" style="font-size:14px;color:var(--ink)">' + p.action + '</p>';
   h += '<div class="meta-row"><span><i>距离</i>' + p.distance +
        '</span><span><i>建议停留</i>' + p.suggestedDuration + '</span></div>';
   h += '<div class="detail-rows"><div><i>会看到什么</i><span>' + p.see + '</span></div>' +
@@ -2283,8 +2287,8 @@ function renderBrowse(){
     list.forEach(p => {
       h += '<button class="fcard" data-go="#/place/' + p.placeId + '">';
       h += coverHTML(p, {style:"aspect-ratio:" + p.ratio});
-      h += '<div class="b"><h4>' + p.action + '</h4><p class="place-sub sm">' + p.placeName + '</p>' +
-           '<p class="rsn">' + reasonFor(p, state.mood) + '</p>';
+      h += '<div class="b"><h4>' + p.placeName + '</h4><p class="place-sub sm">' + p.category + '</p>' +
+           '<p class="rsn">' + p.action + '</p>';
       h += '<div class="foot"><b style="font:10px var(--mono);letter-spacing:.08em;color:var(--ink-faint)">样本还少</b><span>' + p.distance + '</span><span>' + p.category.split(" · ")[0] + '</span></div>';
       h += '<div class="mini-tags">' + p.environmentTags.slice(0,3).map(t => '<span>' + t + '</span>').join("") + '</div>';
       h += '</div></button>';
@@ -2355,14 +2359,10 @@ function renderPlace(id){
   // 说「还没核对」可能是冤枉它，说「选地图」又给不出地图。
   const hasMaps = !!(recommendation && recommendation.map_links &&
                      Object.keys(recommendation.map_links).length > 0);
-  const knowsMapState = !!recommendation;
   h += '<div class="actions">' +
        '<button class="btn" data-depart="' + p.placeId + '">' +
        (hasMaps ? '带我去 · 选地图' : '带我去') + ' <span>→</span></button>' +
-       (knowsMapState && !hasMaps
-          ? '<p class="sub" style="margin:8px 2px 0">这个地点我还没核对过坐标，' +
-            '所以不给导航——怕把你带到同名的另一家去。到了自己按一下「我到了」。</p>'
-          : '') +
+       (!hasMaps && recommendation ? '<p class="sub" style="margin:8px 2px 0">暂时无法导航，可在地图里搜索地点名。</p>' : '') +
        '<button class="btn-text" data-go="' + back + '">回到' + (back === "#/browse" ? "瀑布流" : back === "#/offer" ? "推荐" : "卡片推荐") + '</button></div>';
   h += '</div></div>';
   h += tripStrip() || dock('到了不打扰，走了问你 30 秒。');
@@ -2414,7 +2414,7 @@ function renderReflect(id){
     // 「为什么要记」的答案，接在这句话后面，不另起一屏（不给他加一步）。
     h += '<div class="say" style="margin-top:16px"><span class="zai">' + cloudSVG() + '</span>' +
          '<div class="bubble"><p>' + escapeHTML(reflectPayoff(r)) + '</p></div></div>';
-    h += '<div class="actions"><button class="btn" id="reflect-save">就这样记下 <span>→</span></button>' +
+    h += '<div class="actions"><button class="btn" id="reflect-save">生成心情轨迹卡 <span>→</span></button>' +
          '<button class="btn-text" data-step="1">我说错了，自己改</button></div>';
   }
   h += '</div></div>';
@@ -2447,18 +2447,16 @@ function renderVisit(id){
   let h = topbar("到访反馈", "第三步 · 你刚离开", "#/place/" + p.placeId);
   h += '<div class="steps"><i class="on"></i><i></i><i></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">一次轻轻的回望</p>';
   h += '<h1 class="title">刚从' + short + '回来吗？</h1>';
-  h += '<p class="lead">花 30 秒。不想现在说也可以。</p>';
+  h += '<p class="lead">记下前后的变化，生成今天的心情轨迹卡。</p>';
   h += coverHTML(p, {caption:true, style:"aspect-ratio:16/10"});
   h += '<div class="beforeafter" style="margin-top:16px"><div><small>本次停留</small><strong>约 ' + d.stayMin + ' 分钟</strong></div>' +
        '<span class="arrow">·</span><div><small>出发前</small><strong>' + moodById(state.mood).name + '</strong></div></div>';
-  h += '<div class="actions"><button class="btn" data-reflect="' + p.placeId + '">说说刚才 <span>→</span></button>' +
+  h += '<div class="actions"><button class="btn" data-reflect="' + p.placeId + '">记录这次变化 <span>→</span></button>' +
        '<button class="btn-text" data-remind="1">稍后提醒</button>';
   if (d.reminder) h += '<p class="hint on" style="text-align:center">' +
        escapeHTML(state.reflectNote || "好，先去过你的生活。这条会留在记录里等你。") + '</p>';
   h += '</div></div></div>';
-  h += dock('我不评价这个地方。我只想知道它对<b>你</b>做了什么。');
   return h;
 }
 
@@ -2470,7 +2468,7 @@ function renderScore(id){
   h += '<div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
   h += '<h1 class="title sm">现在，心里松了一点吗？</h1>';
-  h += '<p class="lead">不是给它打分，是记你自己的变化。</p>';
+  h += '<p class="lead">这是你自己的记录，完成后会生成轨迹卡。</p>';
   h += '<div class="beforeafter"><div><small>出发前</small><strong>' + moodById(state.mood).name + '</strong></div>' +
        '<span class="arrow">→</span><div><small>现在</small><strong class="' + (d.score === null ? "dim" : "hit") + '">' +
        scoreLabel(d.score) + '</strong></div>' +
@@ -2527,7 +2525,7 @@ function renderFactors(id){
             escapeHTML(scoreLabel(d.score)) + (d.factors.length ? '，' + d.factors.map(escapeHTML).join("、") : "") +
             '。最后一件事——这条放哪里？</p></div></div>';
     lean += privacyChoice(d);
-    lean += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">记下来 <span>→</span></button>' +
+    lean += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">生成心情轨迹卡 <span>→</span></button>' +
             '<button class="btn-text" data-step="1">我想自己改一下</button></div>';
     lean += '</div></div>';
     lean += dock(privacyDock);
@@ -2562,7 +2560,7 @@ function renderFactors(id){
   h += '<div class="note-wrap"><label><span>如果愿意，留下一句话（可跳过）</span><em class="num">' + d.note.length + ' / 80</em></label>' +
        '<textarea id="note" maxlength="80" placeholder="比如：风吹过来的时候，脑子终于安静了一点。">' + escapeHTML(d.note) + '</textarea></div>';
   h += privacyChoice(d);
-  h += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">保存这次感受 <span>→</span></button>' +
+  h += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">生成心情轨迹卡 <span>→</span></button>' +
        '<button class="btn-text" data-step="1">回上一步改分数</button></div>';
   h += '</div></div>';
   h += dock(privacyDock);
@@ -2766,6 +2764,7 @@ function renderRecords(){
   const anon = all.filter(r => r.visibility === "anonymous").length;
   let h = topbar("情绪空间轨迹", "长期记录", "#/talk");
   h += '<div class="screen">';
+  h += '<div style="padding:14px 18px 0"><button class="btn sm" data-go="#/talk">重新找一个地方 <span>→</span></button></div>';
   // 封面 + 身份：Tara 个人页的结构，对象换成「你自己的记录」
   const read = selfRead(all);
   h += '<div class="profile"><div class="hero">' +
@@ -3039,15 +3038,13 @@ function micSVG(){
    PRD 原本要对比峰值与当前 HRV。我们没有接手表，就不假装能看出来——
    问一句，然后照着答案办。 */
 function renderRecheck(){
-  let h = topbar("我回来了", "说过会回来一次", "#/talk");
+  let h = topbar("现在怎么样", "小在", "#/talk");
   h += '<div class="screen mid"><div class="pad">';
   h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
-       '<div class="bubble"><span class="tag">小在</span><p>到点了，我说过会回来看你一次。现在松一点了吗？</p></div></div>';
-  h += '<p class="lead">接上手表之后这一步我自己就能看出来（对比你的心率变化）。现在还没接，所以只能问你一句。</p>';
+       '<div class="bubble"><span class="tag">小在</span><p>隔了一会儿。现在松一点了吗？</p></div></div>';
   h += '<div class="actions"><button class="btn ghost" id="recheck-better">松了一点，不用管我</button>' +
        '<button class="btn" style="margin-top:10px" id="recheck-same">还是那样，带我出去走走 <span>→</span></button></div>';
-  h += '<div class="reach-foot"><span>不管你选哪个，今晚我都不会再来第二次。</span>' +
-       '<button data-go="#/settings">管打扰</button></div>';
+  h += '<div class="reach-foot"><button data-go="#/settings">管理提醒</button></div>';
   h += '</div></div>';
   h += dock('说过只回来一次，就只回来一次。', {records:false});
   return h;
@@ -3156,7 +3153,7 @@ function renderTalk(){
           '<button class="k" data-go="#/records" style="letter-spacing:.14em">记录</button></div></div>';
   h += '<div class="talk">';
   h += '<div class="zai">' + cloudSVG("withyou") + '</div>';
-  h += '<h1>说一句，小在帮你找地方。</h1>';
+  h += '<h1>想安静，想吃烤串，<br>都可以直接说。</h1>';
   // 打字时麦克风退成小圆钮：一屏一个主动作，语音的优先级靠体量表达
   h += '<button class="mic' + (state.talkTyping ? ' small' : '') + '" id="mic-button" aria-label="用语音说">' + micSVG() + '</button>';
   h += '<p class="mic-cap" id="mic-cap">' +
@@ -3175,9 +3172,9 @@ function renderTalk(){
   }
   h += '<div class="foot">' +
        '<button id="location-input"' + (locationMode === "real" ? ' class="on"' : '') + '>' +
-       (locationMode === "real" ? '✓ 北京真实定位 · 高德算路' : '⌖ 我在北京，用当前位置算路') + '</button>' +
+       (locationMode === "real" ? '✓ 已使用当前位置' : '⌖ 使用当前位置') + '</button>' +
        '<button id="demo-location"' + (locationMode === "demo" || locationMode === "trip-demo" ? ' class="on"' : '') + '>' +
-       (locationMode === "trip-demo" ? '✓ 演示定位 · 可模拟抵达/离开' : locationMode === "demo" ? '✓ 体验北京 · 以东四为起点' : '不在北京？体验北京路线') + '</button>' +
+       (locationMode === "trip-demo" ? '✓ 演示定位' : locationMode === "demo" ? '✓ 体验北京路线' : '体验北京路线') + '</button>' +
        '<button class="quiet" data-go="#/mood">我不想说，自己挑</button></div>';
   h += '</div>';
   h += tripStrip();
@@ -3192,7 +3189,7 @@ function renderEcho(){
   h += '<div class="screen mid"><div class="pad">';
   h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
        '<div class="bubble"><span class="tag">小在</span><p>' + keepQuotedTogether(escapeHTML(r.acknowledgement)) + '</p></div></div>';
-  h += '<p class="eyebrow">我是这么听出来的</p>';
+  h += '<p class="eyebrow">推荐依据</p>';
   h += '<ul class="evidence">' + (r.evidence || []).map(e => '<li>' + keepQuotedTogether(escapeHTML(e)) + '</li>').join("") + '</ul>';
 
   const asking = r.clarify_field && !state.askAnswered;
@@ -3202,14 +3199,13 @@ function renderEcho(){
       h += '<button data-ask="' + escapeHTML(o.key) + '">' + escapeHTML(o.label) + '</button>';
     });
     h += '</div></div>';
-    h += '<p class="lead" style="margin:0">只问这一句。选完我直接去找地方，不会再问第二个问题。</p>';
   } else {
     h += '<div class="actions"><button class="btn" id="accept-read">就按这个，帮我找 <span>→</span></button>' +
          '<button class="btn-text" data-go="#/fix">不太对，我换一个说法</button></div>';
   }
   h += '<p class="status" id="natural-status" style="min-height:18px;margin:12px 0 0;font:11.5px/1.55 var(--sans);color:var(--ink-faint)"></p>';
   h += '</div></div>';
-  h += tripStrip() || dock('猜错了不用客气。改一下比忍着强。', {records:false});
+  h += tripStrip();
   return h;
 }
 
@@ -3293,7 +3289,7 @@ function renderOffer(){
 
   const shut = main.open_state === "likely_closed" || main.open_state === "closed";
   const note = state.offerNote ||
-    (shut ? "这个点它多半已经关门了。营业时间还没人工核对过，所以我不敢说死——要去的话先打个电话。" : null);
+    (shut ? "这个时间可能已经打烊，出发前确认一下。" : null);
   if (note){
     h += '<div class="say"><span class="zai">' + cloudSVG() + '</span><div class="bubble">' +
          '<span class="tag">小在</span><p>' + keepQuotedTogether(escapeHTML(note)) + '</p></div></div>';
@@ -3302,8 +3298,9 @@ function renderOffer(){
   h += '<div class="primary-card">';
   h += coverHTML(p, {style:"aspect-ratio:24/9;border:0;border-radius:0"});
   h += '<div class="pc-head">' + reliefPill(main) +
-       '<h3>' + escapeHTML(main.action) + '</h3>' +
-       '<p class="where">' + escapeHTML(main.place_name) + ' · ' + p.area + '</p></div>';
+       '<h3>' + escapeHTML(main.place_name) + '</h3>' +
+       '<p class="where">' + escapeHTML(main.category || p.category) + ' · ' + p.area + '</p>' +
+       '<p class="place-action">' + escapeHTML(main.action) + '</p></div>';
   h += '<div class="pc-body">';
   h += '<ul class="chain">' + (main.reason_chain || []).map(c => '<li>' + escapeHTML(c) + '</li>').join("") + '</ul>';
   h += '<div class="cost-rows">';
@@ -3314,7 +3311,6 @@ function renderOffer(){
   h += '<div class="pay"><i>代价</i><span>' + (main.tradeoffs || []).map(escapeHTML).join(' · ') + '</span></div>';
   h += '<div><i>待多久</i><span>' + escapeHTML(main.suggested_duration || p.suggestedDuration) + '</span></div>';
   h += '</div>';
-  h += '<p class="sample-note">' + escapeHTML(sampleLine(main)) + '</p>';
   h += '</div></div>';
 
   h += '<div class="actions" style="margin-top:14px">';
@@ -3331,9 +3327,9 @@ function renderOffer(){
       const ap = placeById(a.place_id);
       h += '<button class="alt" data-pick="' + escapeHTML(a.place_id) + '">' +
            '<span class="dot">' + catDot(ap) + '</span><span style="flex:1;min-width:0">' +
-           '<h4>' + escapeHTML(a.action) + '</h4>' +
-           '<p>' + escapeHTML(a.place_name) + '</p>' +
-           '<p style="margin-top:4px;color:var(--ink-dim)">' + escapeHTML(shorten(a.reason, 34)) + '</p>' +
+           '<h4>' + escapeHTML(a.place_name) + '</h4>' +
+           '<p>' + escapeHTML(a.category || ap.category) + '</p>' +
+           '<p style="margin-top:4px;color:var(--ink-dim)">' + escapeHTML(a.action) + '</p>' +
            reliefPill(a) +
            (a.open_state === "likely_closed" || a.open_state === "closed"
              ? '<span class="relief later" style="margin-left:6px"><i></i>可能关门</span>' : '') +
@@ -3355,9 +3351,9 @@ function keepQuotedTogether(escaped){
 /* US-06：给用户选地图，不替他决定。
    高德收 GCJ-02，Apple / Google 收 WGS-84，后端已经按各家坐标系分别转好了。 */
 const MAP_APPS = [
-  {key:"amap",   name:"高德地图",   note:"GCJ-02 · 国内最准"},
-  {key:"apple",  name:"Apple 地图", note:"WGS-84 · iPhone 自带"},
-  {key:"google", name:"Google 地图", note:"WGS-84 · 需要能连上"}
+  {key:"amap",   name:"高德地图",   note:"优先打开 App"},
+  {key:"apple",  name:"Apple 地图", note:"iPhone 自带"},
+  {key:"google", name:"Google 地图", note:"Google Maps"}
 ];
 
 function mapSheet(){
@@ -3366,11 +3362,16 @@ function mapSheet(){
   const links = t.links || {};
   let h = '<div class="sheet" id="map-sheet"><div class="sheet-in">';
   h += '<h4>用哪个地图带你去？</h4>';
-  h += '<p class="sub">' + escapeHTML(t.placeName) + ' · 坐标已按各家的坐标系换算过，不会偏</p>';
+  h += '<p class="sub">' + escapeHTML(t.placeName) + '</p>';
   MAP_APPS.forEach(app => {
     if (!links[app.key]) return;
-    h += '<a href="' + escapeHTML(links[app.key]) + '" target="_blank" rel="noopener" data-mapapp="' + app.key + '">' +
-         '<span>' + app.name + '</span><i>' + app.note + '</i></a>';
+    if (app.key === "amap"){
+      h += '<button type="button" class="map-choice" data-mapapp="amap"><span>' + app.name +
+           '</span><i>' + app.note + '</i></button>';
+    } else {
+      h += '<a class="map-choice" href="' + escapeHTML(links[app.key]) + '" target="_blank" rel="noopener" data-mapapp="' + app.key + '">' +
+           '<span>' + app.name + '</span><i>' + app.note + '</i></a>';
+    }
   });
   h += '<button class="cancel" id="map-cancel">先不去</button>';
   h += '</div></div>';
@@ -3398,17 +3399,14 @@ function shorten(text, max){
 function reachLine(rec, p){
   const locationMode = CurrentAI.getLocationMode();
   if (rec.distance_source === "amap" && rec.walking_minutes){
-    const source = locationMode === "demo" ? "高德实测 · 从北京东四起算" : "高德实测";
     // 8 公里说「步行 108 分钟」不是贴心，是吓人。远的地方按骑行/公交算。
     const how = {walk:"步行", ride:"骑行", transit:"公交"}[rec.travel_mode] || "步行";
-    return how + "约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km（" + source + "）";
+    return how + "约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km";
   }
   if (rec.distance_source === "amap_straight_line" && rec.distance_km != null){
-    // 直线距离是高德给的，不是我们估的。说成「原型估算」是在冤枉自己的数据。
-    return "直线 " + rec.distance_km + " km（高德测距，步行路线还没算）";
+    return "直线约 " + rec.distance_km + " km";
   }
-  if (locationMode) return "约 " + rec.reach_minutes + " 分钟 · " + p.transport + "（高德暂未返回路线，使用原型估算）";
-  return "约 " + rec.reach_minutes + " 分钟 · " + p.transport + "（未开启定位，使用原型估算）";
+  return "约 " + rec.reach_minutes + " 分钟 · " + p.transport;
 }
 /* 样本诚实（FR-10b / FR-19b）：没有真实到访数据时，不给任何平均分 */
 function sampleLine(rec){
@@ -3443,7 +3441,7 @@ function setLang(lang){
    否则会把别的句子切碎。 */
 const EN = {
   "此在 · Current": "Current",
-  "总览": "Overview", "设置": "Settings", "记录": "Records", "推荐": "Picks",
+  "首页": "Home", "轨迹": "Trail", "设置": "Settings", "记录": "Records", "推荐": "Picks",
   "小在": "Xiaozai", "代价": "What it asks", "到达": "Getting there",
   "营业": "Hours", "距离": "Distance", "待多久": "How long", "建议停留": "Suggested stay",
   "匿名": "anonymous", "私密": "private", "取消": "Cancel", "约": "about",
@@ -3457,7 +3455,7 @@ const EN = {
   "刚刚保存": "just saved", "回到开头": "Back to start", "先停一下": "Hold on",
   "先不去": "Not now", "取消": "Cancel",
 
-  "说一句，小在帮你找地方。": "Say one thing. Xiaozai will find you a place.",
+  "想安静，想吃烤串，都可以直接说。": "Say what you feel or what you want to do.",
   "不用组织语言，也不用先想清楚要去哪。": "You don't have to phrase it well, or know where you want to go.",
   "你说，我来找。": "You talk. I'll look.",
   "不想说话，我打字": "I'd rather type",
@@ -3476,7 +3474,7 @@ const EN = {
   "比如：今天脑子很乱，不想见人，也不想花很多钱……": "e.g. my head's noisy today, I don't want to see anyone, and I don't want to spend much…",
   "比如：好累，想找个人少、能吹风的地方": "e.g. I'm tired — somewhere quiet with a breeze",
 
-  "我是这么听出来的": "How I heard it",
+  "推荐依据": "Why this recommendation",
   "猜错了不用客气。改一下比忍着强。": "Say so if I got it wrong. Correcting me beats putting up with it.",
   "只问这一句。选完我直接去找地方，不会再问第二个问题。": "Just this one question. Then I go find somewhere — no second question.",
   "不太对，我换一个说法": "Not quite — let me say it differently",
@@ -3507,6 +3505,7 @@ const EN = {
   "这个点它多半已经关门了。营业时间还没人工核对过，所以我不敢说死——要去的话先打个电话。":
     "It's probably closed by now. Nobody has checked these hours by hand, so I won't state it as fact — call ahead if you're going.",
   "可能关门": "may be closed",
+  "暂时无法导航，可在地图里搜索地点名。": "Navigation isn't ready here. Search the place name in Maps.",
   "（未开启定位，使用原型估算）": " (location off — prototype estimate)",
   "（高德暂未返回路线，使用原型估算）": " (no route from Amap — prototype estimate)",
   "（高德测距，步行路线还没算）": " (Amap distance; walking route not computed yet)",
@@ -3530,6 +3529,10 @@ const EN = {
   "做了什么。": ".",
   "这些都是身体上的感觉，不是病名。": "These are body sensations, not names for conditions.",
   "到访反馈": "Visit feedback", "记录现在": "Save it now", "稍后提醒": "Remind me later",
+  "记录这次变化": "Track this change", "生成心情轨迹卡": "Create my mood trail card",
+  "记下前后的变化，生成今天的心情轨迹卡。": "Track the before and after, then create today's mood trail card.",
+  "这是你自己的记录，完成后会生成轨迹卡。": "This is your own record. It becomes a trail card when you're done.",
+  "重新找一个地方": "Find another place",
   "先别提，一周后再说": "Leave it — ask me in a week",
   "好，先去过你的生活。这条会留在记录里等你。": "Go live your life. This will wait for you in your records.",
   "匿名贡献": "Contribute anonymously", "进入了地点汇总": "counted in the place aggregate",
@@ -3702,9 +3705,10 @@ const EN_FRAGMENTS = [
 
 /* 情绪名来自 MOODS，不在地点数据里，得单独给一份。 */
 const MOODS_EN = {
-  low: "running on empty", quiet: "need it quiet", noisy: "can't stop thinking",
+  low: "feeling low", quiet: "need it quiet", noisy: "can't stop thinking",
   spark: "want something new", tired: "tired but wired", empty: "feeling hollow",
   tight: "wound tight", near: "want someone nearby", fresh: "need a change of scene",
+  bright: "in a bright mood",
   okay: "doing okay"
 };
 
@@ -3792,8 +3796,7 @@ function render(){
   else if (r === "#/records")            inner = renderRecords();
   else { state.route = "#/talk"; inner = renderTalk(); }
 
-  root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + arrivedToast() + mapSheet() + '</div>' +
-    '<p class="stage-note">390 × 844 · AI 后端试运行 · <a href="#/compare" data-go="#/compare">会议总览页</a></p></div>';
+  root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + arrivedToast() + mapSheet() + '</div></div>';
 
   if (isCompare) scaleMinis();
   applyLang(root);
@@ -3810,59 +3813,6 @@ function scaleMinis(){
 }
 window.addEventListener("resize", () => { if (state.route === "#/compare") scaleMinis(); });
 
-  /* ---------- 三大地图 App 唤起与跳转 (新增修复) ---------- */
-function openMapNavigation(placeId) {
-  const p = placeById(placeId);
-  const name = encodeURIComponent(p.placeName);
-  const lat = p.lat, lng = p.lng;
-
-  // 高德 App Scheme 与 网页兜底
-  const amapAppUrl = (lat && lng) 
-    ? `androidamap://viewMap?sourceApplication=CurrentApp&poiname=${name}&lat=${lat}&lon=${lng}&dev=0`
-    : `androidamap://poi?sourceApplication=CurrentApp&keywords=${name}`;
-  const amapWebUrl = (lat && lng)
-    ? `https://uri.amap.com/marker?coordinate=${lng},${lat}&name=${name}`
-    : `https://uri.amap.com/search?keyword=${name}`;
-
-  // 谷歌与苹果地图
-  const googleUrl = (lat && lng)
-    ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
-    : `https://www.google.com/maps/search/?api=1&query=${name}`;
-  const appleUrl = (lat && lng)
-    ? `http://maps.apple.com/?q=${name}&sll=${lat},${lng}`
-    : `http://maps.apple.com/?q=${name}`;
-
-  // 自定义导航选择弹窗，确保高德、苹果、谷歌三个选项一定全部出现
-  const modal = document.createElement("div");
-  modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;z-index:9999;";
-  modal.innerHTML = `
-    <div style="width:100%;max-width:390px;background:#fff;border-radius:20px 20px 0 0;padding:20px;box-shadow:0 -4px 20px rgba(0,0,0,0.15);">
-      <h3 style="margin:0 0 14px;font-size:16px;text-align:center;">选择导航地图</h3>
-      <button id="nav-amap" style="width:100%;height:46px;border-radius:12px;border:1px solid #ccc;margin-bottom:8px;background:#f0f3f2;">高德地图 (优先唤起 App)</button>
-      <button id="nav-apple" style="width:100%;height:46px;border-radius:12px;border:1px solid #ccc;margin-bottom:8px;background:#f0f3f2;">Apple 地图 (Maps App)</button>
-      <button id="nav-google" style="width:100%;height:46px;border-radius:12px;border:1px solid #ccc;margin-bottom:8px;background:#f0f3f2;">Google 地图 (网页/App)</button>
-      <button id="nav-cancel" style="width:100%;height:40px;border:none;background:none;color:#888;margin-top:4px;">取消</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  document.getElementById("nav-amap").onclick = () => {
-    document.body.removeChild(modal);
-    window.location.href = amapAppUrl;
-    setTimeout(() => { window.location.href = amapWebUrl; }, 1500);
-  };
-  document.getElementById("nav-apple").onclick = () => {
-    document.body.removeChild(modal);
-    window.location.href = appleUrl;
-  };
-  document.getElementById("nav-google").onclick = () => {
-    document.body.removeChild(modal);
-    window.location.href = googleUrl;
-  };
-  document.getElementById("nav-cancel").onclick = () => {
-    document.body.removeChild(modal);
-  };
-}
 
 /* ---------- 事件绑定 ---------- */
 function bind(){
@@ -3960,7 +3910,7 @@ function bind(){
       if (result.blocked_by_safety){ go("#/safe"); return; }
       const list = result.recommendations || [];
       if (!list.length){
-        setNaturalStatus("这几个条件叠起来暂时没有合适的地方。去掉一个再试试。", true);
+        setNaturalStatus(result.fallback_note || "这几个条件叠起来暂时没有合适的地方。去掉一个再试试。", true);
         return;
       }
       state.offer = list;
@@ -4046,12 +3996,12 @@ function bind(){
   };
   if (locationInput) locationInput.onclick = () => {
     locationInput.disabled = true;
-    setNaturalStatus("正在获取当前位置，只用于这次路程计算…");
+    setNaturalStatus("正在获取位置…");
     CurrentAI.requestLocation().then(() => {
       locationInput.classList.add("on");
-      locationInput.textContent = "✓ 已用当前位置算真实路程；坐标不会保存";
+      locationInput.textContent = "✓ 已使用当前位置";
       locationInput.disabled = false;
-      setNaturalStatus("位置只保留在本页内存中，不会写入记录。");
+      setNaturalStatus("");
     }).catch(error => {
       locationInput.disabled = false;
       setNaturalStatus(error.message, true);
@@ -4063,8 +4013,8 @@ function bind(){
     render();
     const cap = document.getElementById("mic-cap");
     if (cap) cap.textContent = CurrentAI.getLocationMode() === "trip-demo"
-      ? "演示定位：路线从北京东四起算，可模拟抵达和离开，不写入真实到访。"
-      : "体验模式：路线从北京东四起算，不启用到访验证。";
+      ? "演示定位已开启，可模拟抵达和离开。"
+      : "北京体验路线已开启。";
   };
 
   const acceptRead = root.querySelector("#accept-read");
@@ -4187,8 +4137,13 @@ function bind(){
     const t = state.mapSheet || {};
     const rec = state.aiRecommendations[t.placeId] || {};
     startTrip(t.placeId, rec);
-    CurrentAI.track("navigation_opened", {place_id:t.placeId, recommendation_id:t.recommendationId, method:el.dataset.mapapp});
+    const method = el.dataset.mapapp;
+    CurrentAI.track("navigation_opened", {place_id:t.placeId, recommendation_id:t.recommendationId, method:method});
     state.mapSheet = null;
+    if (method === "amap"){
+      CurrentAI.launchMap("amap", t.links || {});
+      return;
+    }
     setTimeout(render, 0);   // 让 <a> 先完成跳转，再收面板
   });
   const toastClose = root.querySelector("#toast-close");
