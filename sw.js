@@ -1,7 +1,8 @@
-const CACHE_NAME = 'current-shell-v1';
+const CACHE_NAME = 'current-shell-v2';
 const SHELL = [
   '/current/',
   '/current-client.js',
+  '/mood-card.js',
   '/reach-policy.js',
   '/voice-worklet.mjs',
   '/manifest.webmanifest',

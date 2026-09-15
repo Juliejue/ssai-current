@@ -21,6 +21,7 @@
 </script>
 <script src="/reach-policy.js"></script>
 <script src="/current-client.js"></script>
+<script src="/mood-card.js"></script>
 <style>
 :root{
   /* ── 品牌浅色体系 · 与品牌手册 / 路演物料同源 ── */
@@ -394,6 +395,13 @@ h1.title.sm{font-size:23px}
 blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terracotta);
   background:var(--water-wash);border-radius:0 10px 10px 0;font:15px/1.8 var(--serif);color:var(--ink)}
 .flip-btn{margin-top:12px}
+.card-share{margin-top:14px;padding:14px;border:1px solid var(--line-2);border-radius:16px;background:var(--card)}
+.card-share .share-title{margin:0 0 5px;font:500 13.5px/1.5 var(--sans);color:var(--ink)}
+.card-share .share-copy{margin:0;font:11.5px/1.65 var(--sans);color:var(--ink-faint)}
+.card-share .share-row{display:flex;gap:8px;margin-top:12px}
+.card-share .share-row .btn{flex:1;min-width:0;font-size:12.5px;padding:0 10px}
+.card-share .share-status{min-height:17px;margin:8px 2px 0;font:11px/1.55 var(--sans);color:var(--ink-dim)}
+.card-share .share-status.error{color:var(--d-n2)}
 
 /* ---------- records ---------- */
 .rec-head{padding:20px 18px 4px}
@@ -2661,6 +2669,11 @@ function renderCard(recId, backTo){
   }
   h += '</div>';
   h += '<button class="btn ghost flip-btn" data-flip="1">' + (state.flipped ? "← 翻回正面" : "翻到背面 · 看这次的变化 →") + '</button>';
+  h += '<section class="card-share" aria-label="导出心情轨迹卡"><p class="share-title">把今天这段轨迹带走</p>' +
+       '<p class="share-copy">生成 4:5 PNG，不包含你写下的私密原话。手机上会打开系统分享菜单；不支持时自动下载。</p>' +
+       '<div class="share-row"><button class="btn sm" data-share-card="' + escapeHTML(rec.id) + '">分享心情轨迹卡</button>' +
+       '<button class="btn ghost sm" data-save-card="' + escapeHTML(rec.id) + '">下载 PNG</button></div>' +
+       '<p class="share-status" role="status" aria-live="polite"></p></section>';
   if (rec.visibility === "anonymous"){
     const agg = placeAggregate(p.placeId);
     h += '<div class="sample-note" style="margin-top:14px">' +
@@ -3561,6 +3574,11 @@ const EN = {
   "花 30 秒。不想现在说也可以。": "Thirty seconds. Or not now.",
   "不是给它打分，是记你自己的变化。": "Not rating the place — tracking your own change.",
   "卡片有两面，点一下翻过去。": "Two sides. Tap to flip.",
+  "把今天这段轨迹带走": "Take this part of today's trail with you",
+  "生成 4:5 PNG，不包含你写下的私密原话。手机上会打开系统分享菜单；不支持时自动下载。":
+    "Creates a 4:5 PNG without your private note. On mobile it opens the system share sheet, or downloads when unavailable.",
+  "分享心情轨迹卡": "Share mood trail card", "下载 PNG": "Download PNG",
+  "导出心情轨迹卡": "Export mood trail card",
   "本机计算，没有上传": "computed on this device, never uploaded",
   "平均变化": "average change", "只有你能看到": "only you can see",
   "到访记录": "Visits", "条（含 3 条演示数据）": " (3 are samples)",
@@ -4431,6 +4449,64 @@ function bind(){
   });
 
   root.querySelectorAll("[data-flip]").forEach(el => el.onclick = () => { state.flipped = !state.flipped; render(); });
+
+  // 心情轨迹卡只从结构化结果生成；自由文本 note 从不传进导出模块。
+  // navigator.share 必须留在点击的同一调用栈里，所以这里不能先 await 或 render。
+  const setCardExportUi = (scope, busy, message, isError) => {
+    scope.querySelectorAll("[data-share-card],[data-save-card]").forEach(button => { button.disabled = busy; });
+    const status = scope.querySelector(".share-status");
+    if (status){
+      status.textContent = message || "";
+      status.classList.toggle("error", Boolean(isError));
+    }
+  };
+  const exportCard = (recordId, action, trigger) => {
+    const scope = trigger.closest(".card-share") || root;
+    const rec = state.records.find(item => item.id === recordId);
+    if (!rec || !window.CurrentMoodCard){
+      setCardExportUi(scope, false, currentLang() === "en" ? "This browser could not create the image." : "当前浏览器没能生成图片，请稍后再试。", true);
+      return;
+    }
+    const place = placeById(rec.placeId);
+    const exportRecord = {
+      placeName:rec.placeName,
+      placeCategory:rec.placeCategory,
+      preMood:rec.preMood,
+      changeScore:rec.changeScore,
+      factors:Array.isArray(rec.factors) ? rec.factors.slice(0, 3) : [],
+      dwellMinutes:rec.dwellMinutes || stayMinutes(rec),
+      visitStartedAt:rec.visitStartedAt,
+      createdAt:rec.createdAt
+    };
+    setCardExportUi(scope, true, currentLang() === "en" ? "Creating the image…" : "正在生成图片…", false);
+    let result;
+    try {
+      result = action === "share"
+        ? window.CurrentMoodCard.share(exportRecord, place, {lang:currentLang()})
+        : Promise.resolve(window.CurrentMoodCard.save(exportRecord, place, {lang:currentLang()}));
+    } catch (error){
+      setCardExportUi(scope, false, currentLang() === "en" ? "This browser could not create the image." : "当前浏览器没能生成图片，请稍后再试。", true);
+      return;
+    }
+    Promise.resolve(result).then(outcome => {
+      const en = currentLang() === "en";
+      let message;
+      if (outcome.method === "share") message = en ? "Shared through the system share sheet." : "已通过系统分享菜单完成分享。";
+      else if (outcome.method === "cancelled") message = en ? "Share cancelled. Nothing was sent." : "已取消分享，卡片没有发出去。";
+      else if (action === "share") message = en
+        ? "Image sharing is unavailable here, so the PNG was downloaded instead."
+        : "当前浏览器不能直接分享图片，已改为下载 PNG。";
+      else message = en ? "PNG downloaded." : "PNG 已下载。";
+      setCardExportUi(scope, false, message, false);
+      if (outcome.method !== "cancelled") {
+        CurrentAI.track("mood_card_exported", {place_id:place.placeId, method:outcome.method});
+      }
+    }).catch(() => {
+      setCardExportUi(scope, false, currentLang() === "en" ? "This browser could not create the image." : "当前浏览器没能生成图片，请稍后再试。", true);
+    });
+  };
+  root.querySelectorAll("[data-share-card]").forEach(el => el.onclick = () => exportCard(el.dataset.shareCard, "share", el));
+  root.querySelectorAll("[data-save-card]").forEach(el => el.onclick = () => exportCard(el.dataset.saveCard, "save", el));
 
   root.querySelectorAll("[data-rec]").forEach(el => el.onclick = () => { state.flipped = false; go("#/card/" + el.dataset.rec); });
 
