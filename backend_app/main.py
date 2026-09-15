@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .interpretation import interpret
 from .i18n import ui
 from .map_provider import MapProviderError, static_map_png
-from .realtime_asr import build_asr_connect_url
+from .realtime_asr import build_asr_connect_url, is_configured as realtime_asr_is_configured
 from .presence import verify as verify_presence
 from .reflect import reflect_quietly
 from .recommender import load_catalog, recommend_with_live_context, warm_discovery
@@ -70,6 +70,13 @@ async def asr_signature() -> dict[str, str | int]:
         return build_asr_connect_url()
     except RuntimeError as error:
         raise HTTPException(status_code=503, detail=str(error)) from error
+
+
+@app.get("/api/v1/asr/capabilities")
+async def asr_capabilities(response: Response) -> dict[str, bool]:
+    """Tell the client which voice path to start; never expose credentials."""
+    response.headers["Cache-Control"] = "no-store"
+    return {"tencent_realtime": realtime_asr_is_configured()}
 
 
 @app.get("/api/v1/map/static")

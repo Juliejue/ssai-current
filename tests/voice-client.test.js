@@ -15,6 +15,8 @@ function makeVoiceRuntime(options = {}) {
   const processors = [];
   const contexts = [];
   const sources = [];
+  const recognitions = [];
+  const fetchUrls = [];
 
   class FakeNode {
     constructor() { this.connections = []; }
@@ -77,8 +79,29 @@ function makeVoiceRuntime(options = {}) {
     receive(message) { this.onmessage({ data: JSON.stringify(message) }); }
   }
 
+  class FakeSpeechRecognition {
+    constructor() { recognitions.push(this); }
+    start() {
+      if (options.recognitionStartError) throw options.recognitionStartError;
+      this.started = true;
+      if (this.onstart) this.onstart();
+    }
+    stop() { this.stopped = true; }
+    result(entries) {
+      const results = entries.map(entry => {
+        const result = [{ transcript: entry.text }];
+        result.isFinal = Boolean(entry.final);
+        return result;
+      });
+      this.onresult({ results });
+    }
+    error(code) { this.onerror({ error: code }); }
+    end() { if (this.onend) this.onend(); }
+  }
+
   const storage = new Map();
   const window = { CURRENT_API_BASE: '/api/v1', AudioContext: FakeAudioContext, AudioWorkletNode: FakeProcessor };
+  if (options.browserSpeech) window.webkitSpeechRecognition = FakeSpeechRecognition;
   const sandbox = {
     window,
     document: { baseURI: 'https://current.test/' },
@@ -93,12 +116,25 @@ function makeVoiceRuntime(options = {}) {
       setItem: (key, value) => storage.set(key, value),
     },
     crypto: { randomUUID: () => 'voice-test' },
-    fetch: async url => ({
-      ok: true,
-      json: async () => url.endsWith('/asr/signature')
-        ? { url: 'wss://asr.test/session' }
-        : {},
-    }),
+    fetch: async url => {
+      fetchUrls.push(url);
+      if (url.endsWith('/asr/capabilities') && options.capabilityError) {
+        throw options.capabilityError;
+      }
+      return {
+        ok: true,
+        json: async () => {
+          if (url.endsWith('/asr/capabilities')) {
+            return typeof options.tencentConfigured === 'boolean'
+              ? { tencent_realtime: options.tencentConfigured }
+              : {};
+          }
+          return url.endsWith('/asr/signature')
+            ? { url: 'wss://asr.test/session' }
+            : {};
+        },
+      };
+    },
     AudioWorkletNode: FakeProcessor,
     WebSocket: FakeWebSocket,
     URL,
@@ -131,6 +167,9 @@ function makeVoiceRuntime(options = {}) {
     processors,
     contexts,
     sources,
+    recognitions,
+    fetchUrls,
+    settleCapabilities: () => new Promise(resolve => setImmediate(resolve)),
   };
 }
 
@@ -189,4 +228,73 @@ test('voice setup failure releases the microphone and permits retry', async () =
     runtime.current.toggleVoice(runtime.callbacks),
     /语音暂时没有启动成功/,
   );
+});
+
+test('browser dictation is a real first-tap fallback when Tencent is not configured', async () => {
+  const runtime = makeVoiceRuntime({ browserSpeech: true, tencentConfigured: false });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+  const recognition = runtime.recognitions[0];
+  assert.equal(recognition.started, true);
+  assert.equal(recognition.lang, 'zh-CN');
+  assert.equal(recognition.continuous, false);
+  assert.equal(recognition.interimResults, true);
+  assert.equal(recognition.maxAlternatives, 1);
+  assert.ok(runtime.statuses.includes('我在听（浏览器听写），再按一次结束'));
+  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), false);
+  assert.equal(runtime.sockets.length, 0);
+
+  recognition.result([{ text: '想去安静一点的地方', final: false }]);
+  assert.ok(runtime.transcripts.includes('想去安静一点的地方'));
+  await runtime.current.toggleVoice(runtime.callbacks);
+  assert.equal(recognition.stopped, true);
+  recognition.result([{ text: '想去安静一点的地方', final: true }]);
+  recognition.end();
+
+  assert.equal(runtime.transcripts.filter(text => text === 'final:想去安静一点的地方').length, 1);
+  assert.deepEqual(runtime.errors, []);
+});
+
+test('browser dictation errors clean up and allow a fresh retry', async () => {
+  const runtime = makeVoiceRuntime({ browserSpeech: true, tencentConfigured: false });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+  runtime.recognitions[0].error('not-allowed');
+  assert.match(runtime.errors[0], /没有获得语音或麦克风权限/);
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+  assert.equal(runtime.recognitions.length, 2);
+  assert.equal(runtime.recognitions[1].started, true);
+});
+
+test('browser dictation still starts when the capability endpoint is offline', async () => {
+  const runtime = makeVoiceRuntime({
+    browserSpeech: true,
+    capabilityError: new Error('backend offline'),
+  });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+
+  assert.equal(runtime.recognitions.length, 1);
+  assert.equal(runtime.recognitions[0].started, true);
+  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), false);
+});
+
+test('Tencent remains primary when configured and a failed session offers browser retry', async () => {
+  const runtime = makeVoiceRuntime({ browserSpeech: true, tencentConfigured: true });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+  assert.equal(runtime.recognitions.length, 0);
+  const socket = runtime.sockets[0];
+  socket.open();
+  socket.receive({ code: 6001 });
+  assert.match(runtime.errors[0], /再点一次麦克风可改用浏览器听写/);
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+  assert.equal(runtime.recognitions.length, 1);
+  assert.equal(runtime.recognitions[0].started, true);
 });
