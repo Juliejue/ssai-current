@@ -109,8 +109,8 @@ UI_EN: dict[str, str] = {
     "all_shut": "Not much is open at this hour; most of these are probably closed. "
                 "Want to go somewhere without a door instead?",
     "no_good_match": "I'm not confident about these. Here's the closest one — say so if it's wrong.",
-    "safety": "Right now I care more about whether you're safe. Please reach someone you trust; "
-              "if you might hurt yourself soon, contact local emergency services right away.",
+    "safety": "Right now I care more about whether everyone is safe. Please reach someone you trust; "
+              "if you might hurt yourself or someone else soon, contact local emergency services right away.",
     "ack": "I heard you. You don't have to explain it — I'll narrow things down from what you just said.",
     "restate": "My guess is you're closer to 「{label}」. Say so if I got it wrong and I'll switch.",
     "restate_with_need": "My guess is you're closer to 「{label}」, and you want somewhere you can {needs}. "

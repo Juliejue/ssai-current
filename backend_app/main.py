@@ -135,7 +135,7 @@ async def recommendations_route(
         return RecommendResponse(
             recommendations=[],
             blocked_by_safety=True,
-            safety_message=ui("safety", payload.lang) or "我现在更在意你是否安全。请先联系身边可信任的人；如果你可能马上伤害自己，请立即联系当地急救或报警服务。",
+            safety_message=ui("safety", payload.lang) or "我现在更在意你和身边的人是否安全。请先联系身边可信任的人；如果你可能马上伤害自己或他人，请立即联系当地急救或报警服务。",
         )
     recommendations = await recommend_with_live_context(payload)
 

@@ -123,7 +123,20 @@ def test_negative_change_is_never_called_failure_and_never_uses_red():
 # --- 风险转介 ---------------------------------------------------------------
 
 
-@pytest.mark.parametrize("text", ["我不想活了", "想死", "我想结束生命", "想伤害自己"])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "我不想活了",
+        "我真的活不下去了",
+        "想死",
+        "我想结束生命",
+        "想伤害自己",
+        "我想伤害别人",
+        "I want to die",
+        "I'm going to kill myself",
+        "I want to hurt someone",
+    ],
+)
 def test_strong_distress_never_reaches_a_model_and_never_gets_places(text):
     read = _read(text)
     assert read.state.risk_level.value == "urgent"
@@ -139,6 +152,38 @@ def test_strong_distress_never_reaches_a_model_and_never_gets_places(text):
     assert "安全" in body["safety_message"] or "联系" in body["safety_message"]
     for word in BANNED_WORDS:
         assert word not in body["safety_message"]
+
+
+@pytest.mark.parametrize(
+    ("text", "signal"),
+    [
+        ("我想伤害自己", "explicit_self_harm_language"),
+        ("I want to hurt someone", "explicit_harm_to_others_language"),
+    ],
+)
+def test_explicit_risk_short_circuits_the_model(monkeypatch, text, signal):
+    monkeypatch.setenv("LLM_API_KEY", "test-key")
+
+    async def model_must_not_run(*_args, **_kwargs):
+        pytest.fail("explicit risk language must not reach the model")
+
+    monkeypatch.setattr(interpretation, "_call_model", model_must_not_run)
+    result = asyncio.run(interpret(text))
+
+    assert result.state.risk_level.value == "urgent"
+    assert signal in result.state.risk_signals
+    assert result.clarify_field is None
+
+
+def test_harm_to_others_safety_copy_does_not_only_name_self_harm():
+    read = _read("I want to hurt someone")
+    body = client.post(
+        "/api/v1/recommendations",
+        json={"state": read.state.model_dump(mode="json"), "lang": "en"},
+    ).json()
+
+    assert body["blocked_by_safety"] is True
+    assert "yourself or someone else" in body["safety_message"]
 
 
 def test_the_safety_screen_offers_humans_not_places():
@@ -409,14 +454,17 @@ def test_beijing_demo_mode_is_explicit_and_never_creates_fake_visits():
     client = (pathlib.Path(__file__).parents[1] / "current-client.js").read_text(encoding="utf-8")
     prototype = PROTOTYPE.read_text(encoding="utf-8")
     assert "BEIJING_DEMO_ORIGIN" in client
-    assert "activeLocationMode = 'demo'" in client
+    assert "activeLocationMode = tripDemoEnabled ? 'trip-demo' : 'demo'" in client
     assert "北京体验模式不启用到访验证" in client
     assert "wgs2gcj(latitude, longitude)" in client
     assert 'id="demo-location"' in prototype
     assert "高德实测 · 从北京东四起算" in prototype
-    demo_guard = prototype.split('if (CurrentAI.getLocationMode() === "demo")', 1)[1].split("saveTrip({", 1)[0]
+    demo_guard = prototype.split('if (locationMode === "demo")', 1)[1].split("const experienceMode", 1)[0]
     assert "saveTrip" not in demo_guard
     assert "experience_mode:true" in demo_guard
+    assert "这次模拟不会写入到访记录" in prototype
+    no_fake_outcome = prototype.split("if (trip.experienceMode)", 1)[1].split("state.draft =", 1)[0]
+    assert "return" in no_fake_outcome, "演示行程必须在生成真实反馈前结束"
 
 
 def test_transient_provider_errors_are_retried_but_bad_requests_are_not():
