@@ -6,6 +6,15 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator
 
 
+PlaceType = Literal[
+    "barbecue", "restaurant", "hotpot", "dessert",
+    "craft", "flower", "sports", "climbing", "swimming", "badminton",
+    "music", "bar", "club", "karaoke",
+    "books", "records", "cafe", "tea", "park", "gallery", "cinema",
+    "river", "vintage", "lane",
+]
+
+
 class RiskLevel(str, Enum):
     ordinary = "ordinary"
     elevated = "elevated"
@@ -15,6 +24,9 @@ class RiskLevel(str, Enum):
 class NeedState(BaseModel):
     mood_id: str = "low"
     need_keys: list[str] = Field(default_factory=list, max_length=6)
+    # 用户明确说出的地点/活动是硬信号。只存受限枚举，不存原话。
+    # 例如「心情不好，我想吃烤串」不能被情绪推断改写成“去公园”。
+    place_types: list[PlaceType] = Field(default_factory=list, max_length=3)
     energy: int = Field(default=2, ge=0, le=4)
     social_mode: Literal["alone", "low_contact", "with_people", "either"] = "either"
     time_minutes: int | None = Field(default=None, ge=10, le=720)
@@ -31,7 +43,7 @@ class NeedState(BaseModel):
     @field_validator("mood_id")
     @classmethod
     def validate_mood(cls, value: str) -> str:
-        allowed = {"low", "quiet", "noisy", "spark", "tired", "empty", "tight", "near", "fresh", "okay"}
+        allowed = {"low", "quiet", "noisy", "spark", "tired", "empty", "tight", "near", "fresh", "bright", "okay"}
         return value if value in allowed else "low"
 
 
@@ -80,7 +92,7 @@ class InterpretResponse(BaseModel):
     state_label: str = ""
     evidence: list[str] = Field(default_factory=list, max_length=3)
     clarify_field: Literal["social_mode", "max_travel_minutes", "budget_level"] | None = None
-    clarify_options: list[ClarifyOption] = Field(default_factory=list, max_length=3)
+    clarify_options: list[ClarifyOption] = Field(default_factory=list, max_length=4)
     corrections: CorrectionOptions = Field(default_factory=CorrectionOptions)
 
 

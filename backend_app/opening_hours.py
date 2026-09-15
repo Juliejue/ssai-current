@@ -40,6 +40,22 @@ CATEGORY_HOURS: dict[str, tuple[str, str] | None] = {
     "club": ("21:00", "04:00"),
     "影院": ("09:00", "23:00"),
     "吃": ("11:00", "22:00"),
+    "餐厅": ("11:00", "22:00"),
+    "烧烤": ("11:00", "24:00"),
+    "火锅": ("11:00", "23:00"),
+    "甜品": ("10:00", "22:00"),
+    "茶室": ("10:00", "22:00"),
+    "手作": ("10:00", "21:00"),
+    "花艺": ("10:00", "20:00"),
+    "运动场馆": ("09:00", "22:00"),
+    "攀岩馆": ("10:00", "22:00"),
+    "游泳馆": ("09:00", "22:00"),
+    "羽毛球馆": ("09:00", "22:00"),
+    "现场音乐": ("19:00", "02:00"),
+    "KTV": ("12:00", "02:00"),
+    "夜店": ("21:00", "04:00"),
+    "中古店": ("11:00", "21:00"),
+    "街巷": None,
     "公园": ("06:00", "21:00"),
     "园区": ("08:00", "22:00"),
     # 开放街道与河岸没有门，也就没有营业时间。
@@ -143,7 +159,7 @@ def open_state(place: dict, now: datetime | None = None, lang: str = "zh") -> tu
 
     # 估算：说清楚这是「一般来说」，不冒充确定
     if inside:
-        return "open", (f"This kind usually closes around {hours['close']} (unverified)" if en
-                        else f"这一类一般开到 {hours['close']}（未经核对）"), source
-    return "likely_closed", (f"Probably shut now (this kind usually {hours['open']}–{hours['close']}, unverified)" if en
-                             else f"这个点大概率关着门（这一类一般 {hours['open']}–{hours['close']}，未经核对）"), source
+        return "open", (f"May close around {hours['close']} · check before going" if en
+                        else f"可能营业到 {hours['close']} · 去前确认"), source
+    return "likely_closed", ("May be closed · check before going" if en
+                             else "可能已打烊 · 去前确认"), source

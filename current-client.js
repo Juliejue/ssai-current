@@ -737,6 +737,57 @@
     return beginTencentVoice(callbacks).then(function () { return 'recording'; });
   }
 
+  function mapLaunchTarget(method, links, userAgent) {
+    links = links || {};
+    if (method !== 'amap') return { url: links[method] || '', fallback: '' };
+
+    var fallback = links.amap || '';
+    var ua = String(userAgent || (navigator && navigator.userAgent) || '');
+    if (/iPad|iPhone|iPod/i.test(ua) && links.amap_ios) {
+      return { url: links.amap_ios, fallback: fallback };
+    }
+    if (/Android/i.test(ua) && links.amap_android) {
+      return { url: links.amap_android, fallback: fallback };
+    }
+    return { url: fallback, fallback: '' };
+  }
+
+  /* Open Amap from the original tap so Safari may hand the request to the
+     installed app. In-app browsers can block custom schemes; if the document
+     stays visible, continue to Amap's universal web route instead of leaving
+     the user on a dead button. */
+  function launchMap(method, links) {
+    var target = mapLaunchTarget(method, links, navigator.userAgent || '');
+    if (!target.url) return false;
+
+    var timer = null;
+    function cleanup() {
+      if (timer !== null) clearTimeout(timer);
+      timer = null;
+      if (window.removeEventListener) window.removeEventListener('pagehide', cleanup);
+      if (document.removeEventListener) document.removeEventListener('visibilitychange', onVisibility);
+    }
+    function onVisibility() {
+      if (document.hidden) cleanup();
+    }
+    function openFallback() {
+      cleanup();
+      if (!document.hidden && target.fallback) location.href = target.fallback;
+    }
+
+    if (target.fallback) {
+      timer = setTimeout(openFallback, 1500);
+      if (window.addEventListener) window.addEventListener('pagehide', cleanup, { once: true });
+      if (document.addEventListener) document.addEventListener('visibilitychange', onVisibility);
+    }
+    try {
+      location.href = target.url;
+    } catch (_) {
+      openFallback();
+    }
+    return true;
+  }
+
   /* 地图图片的地址。key 在服务端，这里只拼我们自己的路径。
      只传地点坐标——地点坐标是公开信息，用户自己的位置不往这儿送。 */
   function staticMapUrl(latitude, longitude, width, height) {
@@ -762,6 +813,8 @@
     watchPresence: watchPresence,
     demoPresence: demoPresence,
     stopPresence: stopPresence,
-    toggleVoice: toggleVoice
+    toggleVoice: toggleVoice,
+    mapLaunchTarget: mapLaunchTarget,
+    launchMap: launchMap
   };
 })();

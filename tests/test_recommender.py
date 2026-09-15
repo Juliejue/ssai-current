@@ -6,6 +6,33 @@ from backend_app.recommender import load_catalog, recommend
 from backend_app.schemas import Location, NeedState, RecommendRequest
 
 
+def test_discovery_keeps_the_activity_categories_that_used_to_be_dropped():
+    from backend_app.discovery import keywords_for, to_place
+
+    state = NeedState(place_types=["flower", "badminton"])
+    assert keywords_for(state)[:2] == ["花艺", "插花"]
+
+    poi = {
+        "id": "B0TESTFLOWER", "name": "一间花艺工作室", "longitude": 116.4,
+        "latitude": 39.9, "distance": "420", "adname": "朝阳区", "cityname": "北京市",
+        "address": "测试路 1 号", "photos": [{"url": "https://example.com/flower.jpg"}],
+    }
+    place = to_place(poi, "flower")
+    assert place is not None
+    assert place["category"].startswith("花艺")
+    assert "flower" in place["placeTypes"]
+
+
+def test_bad_provider_hours_for_film_archive_are_not_presented_as_fact():
+    from backend_app.opening_hours import resolve_hours
+
+    recommender.load_catalog.cache_clear()
+    place = next(p for p in load_catalog()["PLACES"] if p["placeId"] == "ziliaoguan")
+    hours = resolve_hours(place)
+    assert hours["source"] == "category_estimate"
+    assert hours["close"] == "23:00"
+
+
 def test_catalog_contains_all_prototype_places():
     assert len(load_catalog()["PLACES"]) == 26
 

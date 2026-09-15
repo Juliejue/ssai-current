@@ -38,7 +38,35 @@ def test_at_most_one_follow_up_and_only_when_it_changes_the_shortlist():
     vague = _read("难受")
     assert vague.clarify_field == "social_mode"
     assert vague.state.clarifying_question is not None
-    assert 2 <= len(vague.clarify_options) <= 3
+    assert 2 <= len(vague.clarify_options) <= 4
+    assert "with_people" in {option.key for option in vague.clarify_options}
+
+
+def test_explicit_activity_is_kept_instead_of_abstracted_into_a_mood():
+    read = _read("心情不好，我想吃烤串")
+    assert read.state.mood_id == "low"
+    assert read.state.place_types == ["barbecue"]
+    assert read.clarify_field is None
+    assert "吃烤串" in read.acknowledgement
+    assert any("烤串" in line for line in read.evidence)
+
+    result = recommend(RecommendRequest(state=read.state, limit=3))[0]
+    assert result.place_id == "niaozhouli"
+    assert result.score_breakdown["specific_fit"] == 1.0
+    assert "吃烤串" in "".join(result.reason_chain)
+
+
+def test_happy_and_sad_are_not_collapsed_to_the_same_state():
+    happy = _read("今天很开心，想找个热闹的地方")
+    sad = _read("今天很难过，想找个安静的地方")
+    assert happy.state.mood_id == "bright"
+    assert sad.state.mood_id == "low"
+    assert happy.state_label != sad.state_label
+
+
+def test_specific_activity_without_a_catalog_match_never_returns_an_unrelated_place():
+    results = recommend(RecommendRequest(state=NeedState(place_types=["craft"]), limit=3))
+    assert results == []
 
 
 def test_urgent_language_is_never_asked_a_follow_up_question():
@@ -211,7 +239,8 @@ def test_estimated_hours_never_hard_filter_and_always_say_they_are_estimates():
     status, label, source = open_state(shop, midnight)
     assert status == "likely_closed"
     assert source == "category_estimate"
-    assert "未经核对" in label
+    assert "可能" in label
+    assert "确认" in label
     # 估算只降权，不把地点悄悄拿掉
     assert _hard_filter(shop, NeedState(mood_id="low"), set(), midnight) is True
 
@@ -451,10 +480,14 @@ def test_outside_china_nothing_is_shifted():
 def test_three_maps_are_offered_and_each_gets_its_own_coordinate_system():
     place = dict(_place("beihai"), amap=VERIFIED_AMAP)
     links = map_links(place)
-    assert set(links) == {"amap", "apple", "google"}
+    assert set(links) == {"amap", "amap_ios", "amap_android", "apple", "google"}
 
     gcj = f"{VERIFIED_AMAP['longitude']},{VERIFIED_AMAP['latitude']}"
     assert quote(gcj, safe="") in links["amap"].replace("%2C", quote(",", safe=""))
+    assert links["amap_ios"].startswith("iosamap://path?")
+    assert links["amap_android"].startswith("amapuri://route/plan/?")
+    assert "t=2" in links["amap_ios"]
+    assert "t=2" in links["amap_android"]
     # Apple / Google 必须拿到转换后的 WGS-84，不能是原始的 GCJ-02
     assert str(VERIFIED_AMAP["latitude"]) not in links["apple"]
     assert str(VERIFIED_AMAP["latitude"]) not in links["google"]
@@ -470,7 +503,7 @@ def test_map_links_need_the_same_human_review_as_navigation():
     assert map_links(unreviewed) == {}
     assert _to_recommendation(0.8, unreviewed, {}, NeedState(mood_id="low")).map_links == {}
     verified = _to_recommendation(0.8, dict(unreviewed, amap=VERIFIED_AMAP), {}, NeedState(mood_id="low"))
-    assert set(verified.map_links) == {"amap", "apple", "google"}
+    assert set(verified.map_links) == {"amap", "amap_ios", "amap_android", "apple", "google"}
 
 
 # --- FR-12 记忆可删除 -------------------------------------------------------

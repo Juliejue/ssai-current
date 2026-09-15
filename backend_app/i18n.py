@@ -18,7 +18,7 @@ from typing import Literal
 Lang = Literal["zh", "en"]
 
 STATE_LABELS_EN: dict[str, str] = {
-    "low": "running on empty",
+    "low": "feeling low",
     "quiet": "need it quiet",
     "noisy": "can't stop thinking",
     "spark": "want something new",
@@ -27,7 +27,20 @@ STATE_LABELS_EN: dict[str, str] = {
     "tight": "wound tight",
     "near": "want someone nearby",
     "fresh": "need a change of scene",
+    "bright": "in a bright mood",
     "okay": "doing okay",
+}
+
+
+PLACE_TYPE_LABELS_EN: dict[str, str] = {
+    "barbecue": "eat barbecue", "restaurant": "get a meal", "hotpot": "eat hotpot",
+    "dessert": "get dessert", "craft": "make something", "flower": "arrange flowers",
+    "sports": "work out", "climbing": "go climbing", "swimming": "go swimming",
+    "badminton": "play badminton", "music": "hear live music", "bar": "go to a bar",
+    "club": "go dancing", "karaoke": "sing karaoke", "books": "browse books",
+    "records": "browse records", "cafe": "sit in a cafe", "tea": "have tea",
+    "park": "go to a park", "gallery": "see an exhibition", "cinema": "watch a film",
+    "river": "walk by the water", "vintage": "browse vintage shops", "lane": "walk the lanes",
 }
 
 NEED_LABELS_EN: dict[str, str] = {
@@ -120,8 +133,9 @@ UI_EN: dict[str, str] = {
 
 CLARIFY_EN: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
     "social_mode": (
-        "Just one question: do you want to be alone, or around people without having to talk?",
-        (("alone", "Alone"), ("low_contact", "People, no talking"), ("either", "Either")),
+        "One question: how much company sounds right?",
+        (("alone", "Alone"), ("low_contact", "People, no talking"),
+         ("with_people", "Lively, open to talk"), ("either", "Anything works")),
     ),
     "max_travel_minutes": (
         "Just one question: how long are you willing to be on the way?",
@@ -137,8 +151,8 @@ CLARIFY_EN: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
 CORRECTION_CHIPS_EN: tuple[tuple[str, str], ...] = (
     ("tight", "wound tight"), ("noisy", "can't stop thinking"), ("tired", "tired but wired"),
     ("empty", "feeling hollow"), ("near", "want someone nearby"), ("fresh", "need a change"),
-    ("quiet", "need it quiet"), ("low", "running on empty"), ("spark", "want something new"),
-    ("okay", "doing okay"),
+    ("quiet", "need it quiet"), ("low", "feeling low"), ("spark", "want something new"),
+    ("bright", "in a bright mood"), ("okay", "doing okay"),
 )
 
 CONSTRAINT_CORRECTIONS_EN: tuple[tuple[str, str], ...] = (

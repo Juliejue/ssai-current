@@ -319,8 +319,8 @@ def test_judge_question_are_you_saying_something_is_wrong_with_me():
         for word in BANNED_WORDS:
             assert word not in blob
         assert read.state_label in (
-            "没什么力气", "需要安静", "脑子停不下来", "想要点灵感", "累但静不下来",
-            "空落落的", "心里发紧", "想有人在旁边", "想换个地方", "状态还行",
+            "心情有点沉", "需要安静", "脑子停不下来", "想要点灵感", "累但静不下来",
+            "空落落的", "心里发紧", "想有人在旁边", "想换个地方", "心情很明亮", "状态还行",
         ), "状态标签必须来自身体化白名单"
 
 
@@ -426,6 +426,24 @@ def test_cancelling_map_choice_does_not_start_a_trip():
     assert "saveTrip" not in cancel_handler
 
 
+def test_amap_uses_a_same_page_native_launch_with_a_web_fallback():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    sheet = source[slice(*_function_body(source, "function mapSheet()"))]
+    handler = source.split('root.querySelectorAll("[data-mapapp]")', 1)[1].split(
+        'const mapCancel', 1
+    )[0]
+    client = (pathlib.Path(__file__).parents[1] / "current-client.js").read_text(encoding="utf-8")
+
+    assert 'data-mapapp="amap"' in sheet
+    assert 'data-mapapp="amap"' in sheet.split('target="_blank"', 1)[0]
+    assert 'CurrentAI.launchMap("amap", t.links || {})' in handler
+    assert "links.amap_ios" in client
+    assert "links.amap_android" in client
+    assert "setTimeout(openFallback, 1500)" in client
+    assert "document.hidden" in client
+    assert "function openMapNavigation(" not in source
+
+
 def test_recommendation_logging_does_not_hold_up_the_user_response():
     """跨境数据库冷启动不能挡在推荐结果前面。"""
     source = (pathlib.Path(__file__).parents[1] / "backend_app" / "main.py").read_text(encoding="utf-8")
@@ -479,7 +497,7 @@ def test_primary_voice_screen_keeps_operational_copy_out_of_the_way():
     assert "按一下开始说" not in talk
     assert "按一下开始说" not in reflect
     assert "本产品不保存录音" not in talk
-    assert "说一句，小在帮你找地方" in talk
+    assert "想吃烤串" in talk
     assert 'id="natural-submit">发送' in talk
 
 

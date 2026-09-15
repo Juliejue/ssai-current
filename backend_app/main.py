@@ -172,6 +172,10 @@ async def recommendations_route(
         note = relaxed_note
     elif all_shut:
         note = ui("all_shut", payload.lang) or "这个点开着门的地方不多，下面这几个多半已经打烊了。要不先去没有门的地方走走？"
+    elif not recommendations and payload.state.place_types:
+        note = ("I heard the specific activity, but I need your location to find that kind of place nearby. "
+                "Go Home, enable location, and try once more." if payload.lang == "en" else
+                "我听见了你想去的具体类型，但需要当前位置才能找附近的这一类。回首页打开定位后再试一次。")
     elif no_good_match:
         note = ui("no_good_match", payload.lang) or "这几个我不太有把握，先给你最近的一个；不合适就说一声。"
     else:

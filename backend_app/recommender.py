@@ -10,8 +10,8 @@ from functools import lru_cache
 from pathlib import Path
 
 from .discovery import discover, warm as warm_search
-from .i18n import (AVOID_LABELS_EN, LOW_TAG_LABELS_EN, NEED_LABELS_EN, RELIEF_LABELS_EN,
-                   STATE_LABELS_EN, TAG_LABELS_EN, ui)
+from .i18n import (AVOID_LABELS_EN, LOW_TAG_LABELS_EN, NEED_LABELS_EN, PLACE_TYPE_LABELS_EN,
+                   RELIEF_LABELS_EN, STATE_LABELS_EN, TAG_LABELS_EN, ui)
 from .narrate import narrate_quietly
 from .map_provider import (AmapClient, MapProviderError, TRUSTWORTHY_COORDINATES, WalkingRoute,
                             map_links, navigation_url)
@@ -81,6 +81,77 @@ def _match_score(place: dict, state: NeedState, catalog: dict) -> float:
     return total / weight_total if weight_total else 0.0
 
 
+# 人工库早于「明确活动」这一层，因此没有逐条写 placeTypes。先从已经存在的
+# 地名/类别/动作里做确定性归类；现场地图结果则会直接携带 profile 的 placeTypes。
+PLACE_TYPE_TERMS: dict[str, tuple[str, ...]] = {
+    "barbecue": ("烤串", "烧烤", "串烧", "串烧鸟", "yakitori", "bbq"),
+    "restaurant": ("吃 ·", "餐厅", "饭店", "米线", "披萨", "日料", "food", "restaurant"),
+    "hotpot": ("火锅", "涮肉", "麻辣烫", "hotpot"),
+    "dessert": ("甜品", "蛋糕", "冰淇淋", "面包店", "糖水", "dessert"),
+    "craft": ("手作", "手工", "陶艺", "做陶", "木工", "编织", "银饰", "craft"),
+    "flower": ("插花", "花艺", "花店", "鲜花", "flower"),
+    "sports": ("运动馆", "体育馆", "健身", "workout", "gym"),
+    "climbing": ("攀岩", "抱石", "climbing", "bouldering"),
+    "swimming": ("游泳", "泳池", "swimming"),
+    "badminton": ("羽毛球", "badminton"),
+    "music": ("livehouse", "现场音乐", "音乐现场", "演出", "concert"),
+    "bar": ("酒吧", "精酿", "喝一杯", "cocktail", "pub"),
+    "club": ("club", "夜店", "蹦迪", "跳舞"),
+    "karaoke": ("ktv", "卡拉ok", "karaoke", "唱歌"),
+    "books": ("书店", "书园", "独立出版", "bookshop", "bookstore"),
+    "records": ("唱片", "黑胶", "records"),
+    "cafe": ("咖啡", "cafe", "coffee"),
+    "tea": ("茶馆", "茶室", "喝茶", "tea house"),
+    "park": ("公园", "park"),
+    "gallery": ("美术馆", "画廊", "展览", "gallery"),
+    "cinema": ("影院", "电影资料馆", "看电影", "cinema"),
+    "river": ("河岸", "水边", "河边", "江边", "湖边", "river", "waterfront"),
+    "vintage": ("中古", "古着", "vintage"),
+    "lane": ("胡同", "小巷", "街区", "lane", "alley"),
+}
+
+PLACE_TYPE_FAMILIES: tuple[frozenset[str], ...] = (
+    frozenset({"barbecue", "restaurant", "hotpot", "dessert"}),
+    frozenset({"craft", "flower"}),
+    frozenset({"sports", "climbing", "swimming", "badminton"}),
+    frozenset({"music", "bar", "club", "karaoke"}),
+    frozenset({"books", "records", "cafe", "tea", "gallery", "cinema", "vintage"}),
+    frozenset({"park", "river", "lane"}),
+)
+
+
+def _place_types(place: dict) -> set[str]:
+    explicit = {str(value) for value in (place.get("placeTypes") or [])}
+    blob = " ".join(str(place.get(key) or "") for key in ("placeName", "category", "action", "see"))
+    blob += " " + " ".join(str(value) for value in (place.get("environmentTags") or []))
+    folded = blob.casefold()
+    for key, terms in PLACE_TYPE_TERMS.items():
+        if any(term.casefold() in folded for term in terms):
+            explicit.add(key)
+    # 具体餐饮类型也是餐厅，但“想吃烤串”仍只有 barbecue 才算精确命中。
+    if explicit & {"barbecue", "hotpot", "dessert"}:
+        explicit.add("restaurant")
+    if explicit & {"climbing", "swimming", "badminton"}:
+        explicit.add("sports")
+    return explicit
+
+
+def _specific_fit(place: dict, requested: list[str]) -> float:
+    """用户明确点名的类型占排序的大头；近亲类型只能拿一半左右。"""
+    if not requested:
+        return 0.0
+    actual = _place_types(place)
+    fits: list[float] = []
+    for wanted in requested:
+        if wanted in actual:
+            fits.append(1.0)
+            continue
+        family = next((group for group in PLACE_TYPE_FAMILIES if wanted in group), frozenset())
+        fits.append(0.45 if actual & family else 0.0)
+    # 一个地点很难同时是球馆和烧烤店。多诉求时先给最贴的一条，再让备选覆盖另一条。
+    return max(fits, default=0.0)
+
+
 # 没力气的人走不了太远。估算距离和高德实测距离都按这一条过滤，
 # 常量只此一份——两边各写一个数字，迟早会改岔。
 ENERGY_DISTANCE_LIMIT_KM = 8
@@ -138,7 +209,7 @@ def _hard_filter(place: dict, state: NeedState, rejected: set[str], now: datetim
         return False
     if state.social_mode == "alone" and place.get("crowd") == "high":
         return False
-    if state.energy <= 1 and place.get("distanceKm", 0) > ENERGY_DISTANCE_LIMIT_KM:
+    if state.energy <= 1 and float(place.get("distanceKm") or 0) > ENERGY_DISTANCE_LIMIT_KM:
         return False
     # 估算出来的「大概率关着门」不能当硬约束——估算会错，用户会被无声地少给选项。
     # 只有核对过的营业时间才允许直接把地点拿掉。
@@ -198,6 +269,7 @@ MOOD_NEED_HINTS: dict[str, str] = {
     "tight": "一个能松开肩膀的地方",
     "near": "一个周围有人、但不用说话的地方",
     "fresh": "一个你没去过的地方",
+    "bright": "一个能接住这股兴致的地方",
     "okay": "一个适合随便走走的地方",
 }
 
@@ -225,22 +297,37 @@ def _reason_chain(place: dict, state: NeedState, catalog: dict, lang: str = "zh"
     读起来像填充物，反而把「我说的」和「你给的」之间那根线冲淡了。
     现在把用户明说的「想要」和「不想要」并到第一行，让这根线自己看得见。
     """
-    from .interpretation import AVOID_LABELS, NEED_LABELS, STATE_LABELS
+    from .interpretation import AVOID_LABELS, NEED_LABELS, PLACE_TYPE_LABELS, STATE_LABELS
 
     english = lang == "en"
     need_table = NEED_LABELS_EN if english else NEED_LABELS
     avoid_table = AVOID_LABELS_EN if english else AVOID_LABELS
     state_table = STATE_LABELS_EN if english else STATE_LABELS
+    place_type_table = PLACE_TYPE_LABELS_EN if english else PLACE_TYPE_LABELS
     joiner = ", " if english else "、"
 
     # 一行最多三样，不然它自己就变成了同事说的那种「可以不要的小字」。
     # 「不想要」是用户自己说出口的，比任何推断都硬，所以它占掉那三样里的一个。
     avoided = [avoid_table[key] for key in state.avoid_tags if key in avoid_table][:1]
     wanted = [need_table[key] for key in state.need_keys if key in need_table]
-    said = [state_table.get(state.mood_id, "hard to name" if english else "说不太清楚")] + wanted[: 2 - len(avoided)] + avoided
+    explicit = [place_type_table[key] for key in state.place_types if key in place_type_table][:2]
+    inferred = [state_table.get(state.mood_id, "hard to name" if english else "说不太清楚")] + wanted
+    # 明说“不想要”的信号不能被三个名额挤掉；它比情绪推断更硬。
+    inferred_slots = max(0, 3 - len(explicit) - len(avoided))
+    said = (explicit + inferred[:inferred_slots] + avoided)[:3]
     # 中文用全角冒号，英文用半角——排版上这是两回事，混用会一眼看出不对。
     lead = f'{ui("chain_said", "en")}: ' if english else "你说："
     chain = [lead + joiner.join(said)]
+
+    if state.place_types:
+        actual = _place_types(place)
+        exact = [place_type_table[key] for key in state.place_types if key in actual and key in place_type_table]
+        category = str(place.get("category") or "").split(" · ")[0]
+        if english:
+            chain.append(f'{ui("chain_here", "en")}: ' + (", ".join(exact) if exact else category))
+        else:
+            chain.append("这里：" + ("、".join(exact) if exact else category + "，是最接近的备选"))
+        return chain
 
     target, _ = _target_for(state, catalog)
     tags = place.get("tags", {})
@@ -332,12 +419,22 @@ def _rank(
         if request.state.energy <= 1:
             energy_fit = max(0.0, 1 - place.get("tags", {}).get("l", 0.5) * 0.7 - place.get("tags", {}).get("c", 0.5) * 0.3)
         social_fit = 1.0
+        tags = place.get("tags", {})
         if request.state.social_mode == "alone":
-            social_fit = place.get("tags", {}).get("s", 0.5)
+            social_fit = tags.get("s", 0.5)
+        elif request.state.social_mode == "low_contact":
+            # 有生活气，但不用说话：独自自在和不拥挤也要同时成立。
+            social_fit = (tags.get("co", .5) * .40 + tags.get("s", .5) * .35
+                          + (1 - tags.get("c", .5)) * .15 + (1 - tags.get("l", .5)) * .10)
         elif request.state.social_mode == "with_people":
-            social_fit = place.get("tags", {}).get("co", 0.5)
-        travel_fit = max(0.0, 1 - float(place.get("distanceKm", 0)) / 20)
+            # 真正想社交时，只有“周围有生活气”还不够；热闹和人群也应加分。
+            social_fit = tags.get("co", .5) * .45 + tags.get("l", .5) * .30 + tags.get("c", .5) * .25
+        travel_fit = max(0.0, 1 - float(place.get("distanceKm") or 0) / 20)
         budget_fit = 1.0 if request.state.budget_level == "unknown" else 1 - place.get("tags", {}).get("cp", 0.5)
+        specific_fit = _specific_fit(place, request.state.place_types)
+        if request.state.place_types and specific_fit <= 0:
+            # 宁可明确说附近没搜到，也不在「想做陶艺」之后塞一张酒吧卡。
+            continue
 
         breakdown = {
             "need_match": round(need_match, 4),
@@ -346,7 +443,13 @@ def _rank(
             "social_fit": round(social_fit, 4),
             "budget_fit": round(budget_fit, 4),
         }
-        score = need_match * 0.45 + energy_fit * 0.20 + travel_fit * 0.15 + social_fit * 0.10 + budget_fit * 0.10
+        base_score = need_match * 0.45 + energy_fit * 0.20 + travel_fit * 0.15 + social_fit * 0.10 + budget_fit * 0.10
+        if request.state.place_types:
+            # 具体诉求是用户自己说的；情绪向量只是系统推断。65/35 让二者权级可见。
+            score = specific_fit * 0.65 + base_score * 0.35
+            breakdown["specific_fit"] = round(specific_fit, 4)
+        else:
+            score = base_score
         if place.get("source") == "discovered":
             # 同分时让人工核对过的先出场：它有真人写的理由、核对过的身份、
             # 和能进汇总的到访。现场结果是用来补空缺的，不是用来顶替的。

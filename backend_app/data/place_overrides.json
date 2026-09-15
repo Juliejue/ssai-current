@@ -454,19 +454,6 @@
         "verification_status": "verified",
         "verified_at": "2026-09-10T06:24:48Z"
       },
-      "hours": {
-        "spans": [
-          [
-            "21:00",
-            "02:00"
-          ]
-        ],
-        "open": "21:00",
-        "close": "02:00",
-        "verification_status": "provider",
-        "source_note": "高德随 POI 提供",
-        "verified_at": "2026-09-10T06:24:48Z"
-      },
       "photos": [
         "https://aos-comment.amap.com/B0FFG0ZJY6/comment/BD6B305E_6128_4F1A_BBAE_A63235126932_L0_001_1500_200_1756316589683_38585106.jpg",
         "https://aos-comment.amap.com/B0FFG0ZJY6/comment/E7FD24F5_0384_4163_B474_48003F123901_L0_001_1179_171_1764637326744_20278557.jpg",
