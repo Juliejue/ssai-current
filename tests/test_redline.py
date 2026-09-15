@@ -442,8 +442,10 @@ def test_voice_provider_errors_are_translated_into_user_actions():
     # 原来这句一口咬定是用户挂了 VPN——6001 也可能是账号没开跨境流量，
     # 我们分不清，就不该把责任推给用户。
     import re as _re
-    handler = source[source.index("function voiceErrorMessage(message)"):][:1200]
-    assert "打字" in handler, "每条语音错误都要给出「改用打字」这条出路"
+    handler = source[source.index("function voiceErrorMessage(message)"):][:1400]
+    fallback = source[source.index("function offerBrowserRetry(message)"):][:500]
+    assert "打字" in fallback, "每条腾讯语音错误都要给出浏览器听写或打字这条出路"
+    assert "callbacks.onError(offerBrowserRetry(message))" in source
     assert "console.cloud.tencent.com" not in handler, "不能把供应商控制台链接甩给用户"
     assert "fail(voiceErrorMessage(message))" in source
     assert "fail(message.message" not in source

@@ -17,6 +17,14 @@ from urllib.parse import quote
 ASR_HOST = "asr.cloud.tencent.com"
 
 
+def is_configured() -> bool:
+    """Return whether every server-side value needed to sign ASR is present."""
+    return all(
+        os.getenv(key, "")
+        for key in ("TENCENT_SECRET_ID", "TENCENT_SECRET_KEY", "ASR_APP_ID")
+    )
+
+
 def _sign(secret_key: str, raw: str) -> str:
     digest = hmac.new(secret_key.encode(), raw.encode(), hashlib.sha1).digest()
     return base64.b64encode(digest).decode()
@@ -50,4 +58,3 @@ def build_asr_connect_url(voice_id: str | None = None) -> dict[str, str | int]:
         "voice_id": voice_id,
         "expired": expired,
     }
-

@@ -45,3 +45,16 @@ def test_signature_requires_server_credentials(monkeypatch):
 
     with pytest.raises(RuntimeError, match="ASR is not configured"):
         realtime_asr.build_asr_connect_url("voice-test-id")
+
+
+def test_configuration_check_requires_every_server_secret(monkeypatch):
+    for key in ("TENCENT_SECRET_ID", "TENCENT_SECRET_KEY", "ASR_APP_ID"):
+        monkeypatch.delenv(key, raising=False)
+    assert realtime_asr.is_configured() is False
+
+    monkeypatch.setenv("TENCENT_SECRET_ID", "id")
+    monkeypatch.setenv("TENCENT_SECRET_KEY", "key")
+    assert realtime_asr.is_configured() is False
+
+    monkeypatch.setenv("ASR_APP_ID", "app")
+    assert realtime_asr.is_configured() is True
