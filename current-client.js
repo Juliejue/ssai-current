@@ -488,7 +488,10 @@
     controller = { provider: 'browser', stop: stop };
     activeVoice = controller;
     recognition.lang = lang() === 'en' ? 'en-US' : 'zh-CN';
-    recognition.continuous = false;
+    // A short pause is not consent to send. Keep listening until the user taps
+    // the microphone again; some iOS browsers otherwise finalize one phrase
+    // and end the session at the first natural pause.
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
     recognition.onstart = function () {
@@ -506,13 +509,10 @@
       }
       latestText = parts.join('').trim();
       if (latestText) callbacks.onPartial(latestText);
-      if (hasFinal) {
-        callbacks.onStatus(voiceCopy('正在整理你刚才说的…', 'Finishing what you just said…'));
-        // A final result is already stable. Finish here as well as in onend so
-        // a browser that delays the end event cannot leave the microphone UI
-        // stuck in its listening state.
-        try { if (!stopRequested) recognition.stop(); } catch (_) {}
-        finish();
+      // `isFinal` means this phrase is stable, not that the user has finished
+      // speaking. Only the explicit second tap may end the capture.
+      if (hasFinal && !stopRequested) {
+        callbacks.onStatus(voiceCopy('我还在听，再按一次结束', 'Still listening · tap again to stop'));
       }
     };
     recognition.onerror = function (event) { finish(browserSpeechErrorMessage(event)); };
@@ -547,7 +547,6 @@
     var stream = null;
     var context = null;
     var source = null;
-    var analyser = null;
     var processor = null;
     var sink = null;
     var socket = null;
@@ -556,7 +555,6 @@
       try { if (processor) processor.disconnect(); } catch (_) {}
       try { if (sink) sink.disconnect(); } catch (_) {}
       try { if (source) source.disconnect(); } catch (_) {}
-      try { if (analyser) analyser.disconnect(); } catch (_) {}
       if (stream) stream.getTracks().forEach(function (track) { track.stop(); });
       if (context) context.close().catch(function () {});
       try { if (socket) socket.close(); } catch (_) {}
@@ -577,8 +575,6 @@
       await context.audioWorklet.addModule(new URL('/voice-worklet.mjs', location.origin).href);
 
       source = context.createMediaStreamSource(stream);
-      analyser = context.createAnalyser();
-      analyser.fftSize = 512;
       processor = new AudioWorkletNode(context, 'current-pcm', {
         numberOfInputs: 1,
         numberOfOutputs: 1,
@@ -588,7 +584,6 @@
       // audio back to the user.
       sink = context.createGain();
       sink.gain.value = 0;
-      source.connect(analyser);
       processor.connect(sink);
       sink.connect(context.destination);
 
@@ -607,18 +602,15 @@
     var providerReady = false;
     var workletFlushed = false;
     var endSent = false;
-    var quietSince = 0;
-    var timer = null;
     var finishTimer = null;
     var connectTimer = null;
 
     function cleanup() {
-      if (timer) clearInterval(timer);
       if (finishTimer) clearTimeout(finishTimer);
       if (connectTimer) clearTimeout(connectTimer);
       try { processor.port.onmessage = null; processor.disconnect(); } catch (_) {}
       try { sink.disconnect(); } catch (_) {}
-      try { source.disconnect(); analyser.disconnect(); } catch (_) {}
+      try { source.disconnect(); } catch (_) {}
       stream.getTracks().forEach(function (track) { track.stop(); });
       context.close().catch(function () {});
       socket.onopen = socket.onmessage = socket.onerror = socket.onclose = null;
@@ -724,20 +716,6 @@
 
     if (stopDuringSetup) stop();
 
-    var samples = new Uint8Array(analyser.fftSize);
-    timer = setInterval(function () {
-      analyser.getByteTimeDomainData(samples);
-      var energy = 0;
-      for (var i = 0; i < samples.length; i++) {
-        var normalized = (samples[i] - 128) / 128;
-        energy += normalized * normalized;
-      }
-      var rms = Math.sqrt(energy / samples.length);
-      if (rms < 0.035) {
-        if (!quietSince) quietSince = Date.now();
-        if (Date.now() - quietSince > 5000) stop();
-      } else quietSince = 0;
-    }, 200);
   }
 
   function toggleVoice(callbacks) {
