@@ -482,6 +482,29 @@ def test_beijing_demo_mode_is_explicit_and_completes_without_uploading_fake_visi
     assert "演示反馈不会上传" in prototype
 
 
+def test_demo_feedback_card_keeps_its_duration_and_copy_honest():
+    """演示前后不能变更停留时长，也不能一边说不保存、一边说进了轨迹。"""
+    prototype = PROTOTYPE.read_text(encoding="utf-8")
+
+    stay = prototype[slice(*_function_body(prototype, "function stayMinutes(rec)"))]
+    assert "Number(rec.dwellMinutes)" in stay
+    assert stay.index("Number(rec.dwellMinutes)") < stay.index("rec.visitStartedAt")
+
+    presence = prototype[slice(*_function_body(prototype, "function presenceLine(rec)"))]
+    assert "if (rec.demo)" in presence
+    assert "由演示按钮模拟" in presence
+    assert "不会保存" in presence
+
+    card = prototype[slice(*_function_body(prototype, "function renderCard(recId, backTo)"))]
+    assert 'rec.demo ? "第四步 · 演示完成" : "第四步 · 已保存"' in card
+    assert "仅用于本次演示 · 不上传，刷新后消失" in card
+    assert "查看本次演示轨迹" in card
+
+    factors = prototype[slice(*_function_body(prototype, "function renderFactors(id)"))]
+    assert "const privacyDock = d.demo" in factors
+    assert factors.count("dock(privacyDock)") == 2
+
+
 def test_manual_arrival_never_claims_a_geofence_confirmation():
     """拒绝定位后点「我到了」只能算自述，不能显示围栏内或升级证明等级。"""
     prototype = PROTOTYPE.read_text(encoding="utf-8")
