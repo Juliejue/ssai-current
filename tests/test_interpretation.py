@@ -1,9 +1,10 @@
 import asyncio
+import re
 
 import pytest
 
 from backend_app import interpretation
-from backend_app.interpretation import interpret, interpret_with_rules
+from backend_app.interpretation import _decorate, interpret, interpret_with_rules
 from backend_app.schemas import NeedState
 from backend_app.schemas import RiskLevel
 
@@ -91,3 +92,41 @@ def test_model_cannot_default_an_ambiguous_work_context_to_tired(monkeypatch):
     assert result.state.mood_id == "okay"
     assert result.state.confidence <= 0.4
     assert all("累" not in line for line in result.evidence)
+
+
+def test_english_rule_fallback_keeps_the_whole_response_in_english():
+    text = "I'm exhausted and don't want to see anyone. I need fresh air and a breeze."
+    result = _decorate(interpret_with_rules(text), text, lang="en")
+
+    assert result.state.mood_id == "tired"
+    assert result.state.social_mode == "alone"
+    assert result.state.environment == "outdoor"
+    assert {"hide", "breathe"}.issubset(result.state.need_keys)
+    assert "tired but wired" in result.acknowledgement
+    assert all(not re.search(r"[\u3400-\u9fff]", line) for line in result.evidence)
+    assert any("「exhausted」" in line for line in result.evidence)
+
+
+def test_natural_english_evidence_is_not_rejected_by_the_chinese_length_limit():
+    text = "Long day at work. I am wiped out."
+    evidence = ["「Long day at work」 — so I’ll keep this low effort and close by"]
+    result = _decorate(
+        interpret_with_rules(text),
+        text,
+        model_evidence=evidence,
+        lang="en",
+    )
+
+    assert result.evidence == evidence
+
+
+def test_english_outdoor_negation_is_not_misread_as_an_outdoor_request():
+    result = interpret_with_rules("I want somewhere quiet, but not outside")
+    assert result.state.environment == "indoor"
+
+
+def test_full_english_negation_keeps_the_private_space_request():
+    state = interpret_with_rules("I need fresh air, but I do not want to see anyone").state
+    assert state.social_mode == "alone"
+    assert "hide" in state.need_keys
+    assert "people" in state.avoid_tags

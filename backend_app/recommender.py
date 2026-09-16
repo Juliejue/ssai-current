@@ -493,11 +493,16 @@ def _to_recommendation(
     category = place.get("category")
     see, cost = place.get("see"), place.get("cost")
     transport, duration = place.get("transport"), place.get("suggestedDuration")
-    # 现场搜出来的地点由模型当场按语言写，已经是对的语言了；
-    # 这里只覆盖人工那 26 个。
+    # 现场搜出来的地点有人工写好的英文保底；文案模型成功时会再覆盖 action/reason。
+    # 人工那 26 个则从 places.en.json 取整套英文。
     if lang == "en" and place.get("source") == "discovered":
         # 名字保留中文——评委要照着招牌找过去，翻成英文反而找不到。
         category = place.get("category_en") or category
+        action = place.get("action_en") or action
+        see = place.get("see_en") or see
+        cost = place.get("cost_en") or cost
+        duration = place.get("suggestedDuration_en") or duration
+        reasons = place.get("matchReason_en") or reasons
     if lang == "en" and place.get("source") != "discovered":
         english = english_places().get(place["placeId"]) or {}
         if english:
@@ -674,8 +679,12 @@ async def recommend_with_live_context(
         line = written.get(place["placeId"])
         if line:
             # 模板那句是保底；模型这句是这个产品的意义所在。
-            place["action"] = line["action"]
-            place["matchReason"] = {"_": line["why_now"]}
+            if request.lang == "en":
+                place["action_en"] = line["action"]
+                place["matchReason_en"] = {"_": line["why_now"]}
+            else:
+                place["action"] = line["action"]
+                place["matchReason"] = {"_": line["why_now"]}
             place["narrated"] = True
     enriched: list[tuple[float, dict, dict[str, float], WalkingRoute | None]] = []
     # 只因为「实测太远」被拿掉的。全军覆没时还得把它们请回来——
