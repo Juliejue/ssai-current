@@ -44,7 +44,7 @@ class NeedState(BaseModel):
     @field_validator("mood_id")
     @classmethod
     def validate_mood(cls, value: str) -> str:
-        allowed = {"low", "quiet", "noisy", "spark", "tired", "empty", "tight", "near", "fresh", "bright", "okay"}
+        allowed = {"low", "quiet", "noisy", "spark", "tired", "empty", "tight", "heated", "near", "fresh", "bright", "okay"}
         return value if value in allowed else "low"
 
 

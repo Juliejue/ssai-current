@@ -53,7 +53,7 @@ KEYWORD_PROFILES: tuple[tuple[str, str, tuple[str, ...], tuple[str, ...]], ...] 
     # 关键词,    类别,       这些 need_keys 会点亮它,        这些 mood 会点亮它
     ("书店",     "books",    ("hide", "sit", "slow", "nothing"), ("quiet", "tired", "low", "noisy")),
     ("咖啡",      "cafe",     ("sit", "slow", "hands"),          ("tired", "empty", "okay", "near")),
-    ("公园",      "park",     ("walk", "green", "breathe"),      ("tight", "noisy", "fresh", "okay")),
+    ("公园",      "park",     ("walk", "green", "breathe"),      ("tight", "heated", "noisy", "fresh", "okay")),
     ("美术馆",     "gallery",  ("new", "slow", "hide"),           ("spark", "fresh", "empty")),
     ("画廊",      "gallery",  ("new",),                          ("spark", "fresh")),
     ("茶室",      "tea",      ("sit", "slow", "breathe"),        ("tight", "tired", "quiet")),
@@ -61,11 +61,11 @@ KEYWORD_PROFILES: tuple[tuple[str, str, tuple[str, ...], tuple[str, ...]], ...] 
     ("中古店",     "vintage",  ("new", "hands"),                  ("spark", "fresh")),
     ("陶艺",      "craft",    ("hands",),                        ("spark", "empty")),
     ("花艺",      "flower",   ("hands", "green"),                ("low", "empty", "near")),
-    ("运动馆",     "sports",   ("hands", "loud"),                 ("bright", "okay", "fresh")),
+    ("运动馆",     "sports",   ("hands", "loud"),                 ("bright", "heated", "okay", "fresh")),
     ("livehouse", "music",    ("sound", "people", "loud"),       ("spark", "empty", "near")),
     ("剧场",      "cinema",   ("hide", "nothing"),               ("noisy", "tired")),
     ("电影院",     "cinema",   ("hide", "nothing"),               ("noisy", "tired", "low")),
-    ("河",        "river",    ("walk", "green", "breathe"),      ("tight", "noisy", "fresh")),
+    ("河",        "river",    ("walk", "green", "breathe"),      ("tight", "heated", "noisy", "fresh")),
     ("胡同",      "lane",     ("walk", "new"),                   ("fresh", "okay", "spark")),
     ("文创园",     "lane",     ("walk", "new"),                   ("fresh", "spark")),
 )
