@@ -90,10 +90,13 @@ PLACE_TYPE_TERMS: dict[str, tuple[str, ...]] = {
     "dessert": ("甜品", "蛋糕", "冰淇淋", "面包店", "糖水", "dessert"),
     "craft": ("手作", "手工", "陶艺", "做陶", "木工", "编织", "银饰", "craft"),
     "flower": ("插花", "花艺", "花店", "鲜花", "flower"),
-    "sports": ("运动馆", "体育馆", "健身", "workout", "gym"),
+    "sports": ("运动馆", "体育馆", "体育中心", "健身", "workout", "gym"),
     "climbing": ("攀岩", "抱石", "climbing", "bouldering"),
     "swimming": ("游泳", "泳池", "swimming"),
     "badminton": ("羽毛球", "badminton"),
+    "basketball": ("篮球", "basketball"),
+    "tennis": ("网球", "tennis"),
+    "yoga": ("瑜伽", "普拉提", "pilates", "yoga"),
     "music": ("livehouse", "现场音乐", "音乐现场", "演出", "concert"),
     "bar": ("酒吧", "精酿", "喝一杯", "cocktail", "pub"),
     "club": ("club", "夜店", "蹦迪", "跳舞"),
@@ -113,7 +116,7 @@ PLACE_TYPE_TERMS: dict[str, tuple[str, ...]] = {
 PLACE_TYPE_FAMILIES: tuple[frozenset[str], ...] = (
     frozenset({"barbecue", "restaurant", "hotpot", "dessert"}),
     frozenset({"craft", "flower"}),
-    frozenset({"sports", "climbing", "swimming", "badminton"}),
+    frozenset({"sports", "climbing", "swimming", "badminton", "basketball", "tennis", "yoga"}),
     frozenset({"music", "bar", "club", "karaoke"}),
     frozenset({"books", "records", "cafe", "tea", "gallery", "cinema", "vintage"}),
     frozenset({"park", "river", "lane"}),
@@ -131,7 +134,7 @@ def _place_types(place: dict) -> set[str]:
     # 具体餐饮类型也是餐厅，但“想吃烤串”仍只有 barbecue 才算精确命中。
     if explicit & {"barbecue", "hotpot", "dessert"}:
         explicit.add("restaurant")
-    if explicit & {"climbing", "swimming", "badminton"}:
+    if explicit & {"climbing", "swimming", "badminton", "basketball", "tennis", "yoga"}:
         explicit.add("sports")
     return explicit
 

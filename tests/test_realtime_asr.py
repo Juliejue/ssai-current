@@ -25,6 +25,8 @@ def test_signature_matches_tencent_websocket_contract(monkeypatch):
     assert parsed.path == "/asr/v2/1234567890"
     assert params["engine_model_type"] == "16k_zh"
     assert params["voice_format"] == "1"
+    assert params["filter_punc"] == "0"
+    assert params["convert_num_mode"] == "1"
     assert params["voice_id"] == "voice-test-id"
     assert params["timestamp"] == "1700000000"
     assert params["expired"] == "1700000120"

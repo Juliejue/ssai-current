@@ -23,6 +23,25 @@ def test_discovery_keeps_the_activity_categories_that_used_to_be_dropped():
     assert "flower" in place["placeTypes"]
 
 
+def test_sports_requests_keep_the_specific_activity_in_live_search():
+    from backend_app.discovery import keywords_for, to_place
+    from backend_app.interpretation import interpret_with_rules
+
+    state = interpret_with_rules("今天想做瑜伽，或者打篮球").state
+    assert state.place_types == ["basketball", "yoga"]
+    assert keywords_for(state)[:4] == ["篮球馆", "篮球场", "瑜伽馆", "普拉提"]
+
+    poi = {
+        "id": "B0TESTYOGA", "name": "一间瑜伽馆", "longitude": 116.4,
+        "latitude": 39.9, "distance": "420", "adname": "朝阳区", "cityname": "北京市",
+        "address": "测试路 2 号", "photos": [{"url": "https://example.com/yoga.jpg"}],
+    }
+    place = to_place(poi, "yoga")
+    assert place is not None
+    assert place["category"].startswith("瑜伽")
+    assert set(place["placeTypes"]) == {"yoga", "sports"}
+
+
 def test_bad_provider_hours_for_film_archive_are_not_presented_as_fact():
     from backend_app.opening_hours import resolve_hours
 

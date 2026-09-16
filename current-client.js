@@ -49,6 +49,62 @@
     return window.SpeechRecognition || window.webkitSpeechRecognition || null;
   }
 
+  function normalizeSpeechText(text) {
+    return String(text || '')
+      .replace(/[\t\r\n ]+/g, ' ')
+      .replace(/\s+([，。！？；：、])/g, '$1')
+      .replace(/([，。！？；：、])\s+/g, '$1')
+      .trim();
+  }
+
+  function speechHasCjk(text) {
+    return /[\u3400-\u9fff]/.test(text);
+  }
+
+  function speechEndsWithMark(text) {
+    return /[。！？.!?…]$/.test(text);
+  }
+
+  function speechLooksLikeQuestion(text) {
+    var clean = text.replace(/[，,；;：:、\s]+$/g, '');
+    if (speechHasCjk(clean)) {
+      return /(?:吗|么|呢|嘛)[啊呀呢嘛]?$/.test(clean) ||
+        /(?:是不是|能不能|可不可以|要不要|有没有|好不好|行不行)[啊呀呢嘛]?$/.test(clean) ||
+        /^(?:为什么|怎么|哪里|哪儿|谁|什么|几|多少|什么时候|几点)/.test(clean);
+    }
+    return /^(?:who|what|when|where|why|how|is|are|am|was|were|do|does|did|can|could|would|will|should|have|has)\b/i.test(clean);
+  }
+
+  // Speech providers disagree about punctuation. Keep every recognized word
+  // untouched, but make the editable hand-off read like a complete sentence.
+  function formatSpeechTranscript(text) {
+    var formatted = normalizeSpeechText(text);
+    if (!formatted || speechEndsWithMark(formatted)) return formatted;
+    formatted = formatted.replace(/[，,；;：:、]+$/g, '');
+    if (!formatted) return '';
+    if (speechHasCjk(formatted)) return formatted + (speechLooksLikeQuestion(formatted) ? '？' : '。');
+    return formatted + (speechLooksLikeQuestion(formatted) ? '?' : '.');
+  }
+
+  function joinSpeechParts(parts) {
+    var output = '';
+    var previousFinal = false;
+    (parts || []).forEach(function (part) {
+      var text = normalizeSpeechText(part && part.text);
+      if (!text) return;
+      if (output) {
+        if (previousFinal && !/[，。！？；：、,.!?;:…]$/.test(output)) {
+          output += speechHasCjk(output + text) ? '，' : ' ';
+        } else if (!speechHasCjk(output + text) && !/\s$/.test(output)) {
+          output += ' ';
+        }
+      }
+      output += text;
+      previousFinal = Boolean(part && part.final);
+    });
+    return output.trim();
+  }
+
   // 第三方服务的错误原文可能很长，甚至夹带控制台和付费链接。
   // 第一屏只告诉用户下一步能做什么，不把供应商后台文案直接甩给人。
   function voiceErrorMessage(message) {
@@ -473,7 +529,7 @@
       finished = true;
       cleanup();
       if (message) callbacks.onError(message);
-      else if (latestText.trim()) callbacks.onText(latestText.trim());
+      else if (latestText.trim()) callbacks.onText(formatSpeechTranscript(latestText));
       else callbacks.onError(voiceCopy('没有听清，可以再说一次或改用文字。', 'I did not catch that. Try again, or type instead.'));
     }
 
@@ -504,10 +560,12 @@
       var hasFinal = false;
       for (var i = 0; i < event.results.length; i++) {
         var result = event.results[i];
-        if (result && result[0] && result[0].transcript) parts.push(result[0].transcript);
+        if (result && result[0] && result[0].transcript) {
+          parts.push({ text: result[0].transcript, final: Boolean(result.isFinal) });
+        }
         if (result && result.isFinal) hasFinal = true;
       }
-      latestText = parts.join('').trim();
+      latestText = joinSpeechParts(parts);
       if (latestText) callbacks.onPartial(latestText);
       // `isFinal` means this phrase is stable, not that the user has finished
       // speaking. Only the explicit second tap may end the capture.
@@ -597,6 +655,7 @@
     }
 
     var latestText = '';
+    var transcriptSlices = {};
     var finished = false;
     var stopRequested = false;
     var providerReady = false;
@@ -630,7 +689,7 @@
       if (finished) return;
       finished = true;
       cleanup();
-      if (latestText.trim()) callbacks.onText(latestText.trim());
+      if (latestText.trim()) callbacks.onText(formatSpeechTranscript(latestText));
       else callbacks.onError(voiceCopy('没有听清，可以再说一次或改用文字。', 'I did not catch that. Try again, or type instead.'));
     }
 
@@ -696,7 +755,17 @@
         }
         var result = message.result || {};
         var text = result.voice_text_str || message.text || '';
-        if (text) { latestText = text; callbacks.onPartial(text); }
+        if (text) {
+          var index = Number(result.index);
+          if (Number.isFinite(index)) {
+            transcriptSlices[index] = { text: text, final: Number(result.slice_type) === 2 };
+            latestText = joinSpeechParts(Object.keys(transcriptSlices).map(Number).sort(function (a, b) { return a - b; })
+              .map(function (key) { return transcriptSlices[key]; }));
+          } else {
+            latestText = normalizeSpeechText(text);
+          }
+          callbacks.onPartial(latestText);
+        }
         // slice_type=2 only stabilizes one sentence. The stream is complete
         // exclusively when Tencent returns final=1 after our end message.
         if (message.final === 1) finish();
@@ -723,17 +792,23 @@
       activeVoice.stop();
       return Promise.resolve('stopping');
     }
-    if (browserSpeechClass() && (preferBrowserVoice || tencentVoiceConfigured !== true)) {
+    if (browserSpeechClass() && preferBrowserVoice) {
       // Do not put this behind an awaited request: Safari and some Chromium
       // builds require start() to remain in the microphone tap's call stack.
       return beginBrowserVoice(callbacks).then(function () { return 'recording'; });
     }
-    if (!browserSpeechClass() && tencentVoiceConfigured === false) {
+    if (tencentVoiceConfigured === false) {
+      if (browserSpeechClass()) {
+        return beginBrowserVoice(callbacks).then(function () { return 'recording'; });
+      }
       return Promise.reject(new Error(voiceCopy(
         '腾讯语音尚未配置，而且这个浏览器不支持听写，请先直接打字。',
         'Tencent speech is not configured and this browser has no dictation support. Please type instead.'
       )));
     }
+    // `null` only means the capability probe has not returned (or was blocked),
+    // not that Tencent is unavailable. Trying the signed Tencent route first
+    // keeps mainland users off browser speech services that may be unreachable.
     return beginTencentVoice(callbacks).then(function () { return 'recording'; });
   }
 

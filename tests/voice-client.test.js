@@ -209,9 +209,24 @@ test('voice capture starts after provider code 0 and flushes before end', async 
   assert.ok(runtime.transcripts.includes('想去安静一点的地方'));
   assert.equal(runtime.tracks[0].stopped, false, 'a stable sentence is not the end of the stream');
   socket.receive({ code: 0, final: 1 });
-  assert.ok(runtime.transcripts.includes('final:想去安静一点的地方'));
+  assert.ok(runtime.transcripts.includes('final:想去安静一点的地方。'));
   assert.equal(runtime.tracks[0].stopped, true);
   assert.deepEqual(runtime.errors, []);
+});
+
+test('Tencent keeps and punctuates every finalized sentence slice', async () => {
+  const runtime = makeVoiceRuntime();
+  await runtime.current.toggleVoice(runtime.callbacks);
+  const socket = runtime.sockets[0];
+  socket.open();
+  socket.receive({ code: 0, message: 'success' });
+  socket.receive({ code: 0, result: { index: 0, voice_text_str: '今天开完会很累', slice_type: 2 } });
+  socket.receive({ code: 0, result: { index: 1, voice_text_str: '想找个人少的地方', slice_type: 2 } });
+  await runtime.current.toggleVoice(runtime.callbacks);
+  socket.receive({ code: 0, final: 1 });
+
+  assert.ok(runtime.transcripts.includes('今天开完会很累，想找个人少的地方'));
+  assert.ok(runtime.transcripts.includes('final:今天开完会很累，想找个人少的地方。'));
 });
 
 test('voice setup failure releases the microphone and permits retry', async () => {
@@ -254,8 +269,38 @@ test('browser dictation is a real first-tap fallback when Tencent is not configu
   assert.equal(recognition.stopped, true);
   recognition.end();
 
-  assert.equal(runtime.transcripts.filter(text => text === 'final:想去安静一点的地方').length, 1);
+  assert.equal(runtime.transcripts.filter(text => text === 'final:想去安静一点的地方。').length, 1);
   assert.deepEqual(runtime.errors, []);
+});
+
+test('browser dictation punctuates stable phrases without changing recognized words', async () => {
+  const runtime = makeVoiceRuntime({ browserSpeech: true, tencentConfigured: false });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+  const recognition = runtime.recognitions[0];
+  recognition.result([
+    { text: '今天开完会很累', final: true },
+    { text: '想找个人少的地方', final: true },
+  ]);
+  await runtime.current.toggleVoice(runtime.callbacks);
+  recognition.end();
+
+  assert.ok(runtime.transcripts.includes('今天开完会很累，想找个人少的地方'));
+  assert.ok(runtime.transcripts.includes('final:今天开完会很累，想找个人少的地方。'));
+});
+
+test('browser dictation uses a question mark for an explicit Chinese question', async () => {
+  const runtime = makeVoiceRuntime({ browserSpeech: true, tencentConfigured: false });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+  const recognition = runtime.recognitions[0];
+  recognition.result([{ text: '附近有可以打羽毛球的地方吗', final: true }]);
+  await runtime.current.toggleVoice(runtime.callbacks);
+  recognition.end();
+
+  assert.ok(runtime.transcripts.includes('final:附近有可以打羽毛球的地方吗？'));
 });
 
 test('browser dictation errors clean up and allow a fresh retry', async () => {
@@ -271,7 +316,7 @@ test('browser dictation errors clean up and allow a fresh retry', async () => {
   assert.equal(runtime.recognitions[1].started, true);
 });
 
-test('browser dictation still starts when the capability endpoint is offline', async () => {
+test('Tencent is tried when the capability endpoint is offline', async () => {
   const runtime = makeVoiceRuntime({
     browserSpeech: true,
     capabilityError: new Error('backend offline'),
@@ -280,9 +325,19 @@ test('browser dictation still starts when the capability endpoint is offline', a
 
   await runtime.current.toggleVoice(runtime.callbacks);
 
-  assert.equal(runtime.recognitions.length, 1);
-  assert.equal(runtime.recognitions[0].started, true);
-  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), false);
+  assert.equal(runtime.recognitions.length, 0);
+  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), true);
+  assert.equal(runtime.sockets.length, 1);
+});
+
+test('a fast first tap does not mistake an unresolved capability probe for Tencent being unavailable', async () => {
+  const runtime = makeVoiceRuntime({ browserSpeech: true, tencentConfigured: true });
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+
+  assert.equal(runtime.recognitions.length, 0);
+  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), true);
+  assert.equal(runtime.sockets.length, 1);
 });
 
 test('Tencent remains primary when configured and a failed session offers browser retry', async () => {
