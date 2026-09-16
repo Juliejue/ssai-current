@@ -150,7 +150,11 @@ async def narrate(places: list[dict], state: NeedState, lang: str = "zh") -> dic
     base_url = (os.getenv("LLM_BASE_URL") or os.getenv("base_url") or "https://api.openai.com/v1").rstrip("/")
     model = os.getenv("LLM_MODEL") or os.getenv("model") or "glm-4.7-flash"
     listing = "\n".join(
-        f'- id={place["placeId"]}  名字「{place["placeName"]}」  类别 {place["category"]}'
+        (
+            f'- id={place["placeId"]}  name="{place["placeName"]}"  category={place.get("category_en") or place["category"]}'
+            if lang == "en"
+            else f'- id={place["placeId"]}  名字「{place["placeName"]}」  类别 {place["category"]}'
+        )
         for place in places
     )
     user_prompt = (f"Right now: {_state_line(state, lang)}\n\nPlaces:\n{listing}" if lang == "en"

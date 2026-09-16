@@ -115,13 +115,13 @@
     var code = Number(message && message.code);
     // 6001 是腾讯判定这条连接「跨境」。原因可能是用户挂了 VPN，也可能是
     // 账号没开跨境流量——我们分不清是哪种，所以别一口咬定是用户的错。
-    if (code === 6001) return voiceCopy('语音服务这条线路没通。', 'The speech service could not connect on this route.');
-    if (code === 4003) return voiceCopy('腾讯语音功能还没有开通。', 'Tencent speech recognition is not enabled.');
-    if (code === 4004 || code === 4005) return voiceCopy('腾讯语音额度暂时不可用。', 'Tencent speech recognition quota is unavailable.');
-    if (code === 4006) return voiceCopy('现在使用腾讯语音的人有点多。', 'Tencent speech recognition is busy right now.');
+    if (code === 6001) return voiceCopy('语音服务没有连上。', 'Voice input could not connect.');
+    if (code === 4003 || code === 4004 || code === 4005 || code === 4006) {
+      return voiceCopy('语音暂时不可用，可以直接打字。', 'Voice input is unavailable. You can type instead.');
+    }
     if (code === 4007) return voiceCopy('这段声音没有识别出来。', 'That speech could not be recognized.');
     if (code === 4000 || code === 4008 || code === 4009) return voiceCopy('语音连接刚刚中断。', 'The speech connection was interrupted.');
-    if (code === 4001 || code === 4002 || code === 4010) return voiceCopy('腾讯语音配置没有通过。', 'Tencent speech recognition rejected its configuration.');
+    if (code === 4001 || code === 4002 || code === 4010) return voiceCopy('语音暂时不可用，可以直接打字。', 'Voice input is unavailable. You can type instead.');
     if (code === 5000 || code === 5001 || code === 5002) return voiceCopy('语音连接刚刚抖了一下。', 'The speech connection dropped for a moment.');
     return voiceCopy('语音暂时没有接住。', 'Speech recognition did not catch that.');
   }
@@ -230,7 +230,7 @@
 
   function requestLocation() {
     if (activeLocation && activeLocationMode === 'real') return Promise.resolve(activeLocation);
-    if (!navigator.geolocation) return Promise.reject(new Error('当前浏览器不支持定位'));
+    if (!navigator.geolocation) return Promise.reject(new Error(voiceCopy('当前浏览器不支持定位', 'Location is unavailable in this browser.')));
     return new Promise(function (resolve, reject) {
       navigator.geolocation.getCurrentPosition(function (position) {
         var latitude = position.coords.latitude;
@@ -241,7 +241,7 @@
         if (!inBeijingPilot) {
           activeLocation = null;
           activeLocationMode = null;
-          reject(new Error('你现在不在北京。可以选择「体验北京」，路线会从北京东四开始算。'));
+          reject(new Error(voiceCopy('当前只开放北京地点，仍可以继续浏览。', 'Current places are in Beijing. You can still browse them.')));
           return;
         }
         // Kept only in page memory. The backend uses it for this route request and
@@ -251,7 +251,7 @@
         activeLocationMode = 'real';
         resolve(activeLocation);
       }, function () {
-        reject(new Error('没有获得位置权限，仍可以按原型距离推荐'));
+        reject(new Error(voiceCopy('没有获得位置权限，仍可以继续推荐。', 'Location is off. Recommendations still work.')));
       }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
     });
   }
@@ -463,43 +463,43 @@
       );
     }
     if (message.indexOf('ASR is not configured') >= 0) {
-      return voiceCopy('腾讯语音还没有配置完成。', 'Tencent speech recognition is not configured.');
+      return voiceCopy('语音暂时不可用，请直接打字。', 'Voice input is unavailable. Please type instead.');
     }
-    return voiceCopy('腾讯语音暂时没有启动成功。', 'Tencent speech recognition could not start.');
+    return voiceCopy('语音暂时没有启动成功。', 'Voice input could not start.');
   }
 
   function browserSpeechErrorMessage(event) {
     var code = event && event.error;
     if (code === 'not-allowed' || code === 'service-not-allowed') {
       return voiceCopy(
-        '浏览器没有获得语音或麦克风权限。允许访问后可以再试，或者直接打字。',
-        'Browser speech or microphone access is blocked. Allow it and try again, or type instead.'
+        '没有获得语音或麦克风权限。允许访问后可以再试，或者直接打字。',
+        'Speech or microphone access is blocked. Allow it and try again, or type instead.'
       );
     }
     if (code === 'audio-capture') {
-      return voiceCopy('浏览器没有找到可用的麦克风，请直接打字。', 'The browser could not find a microphone. Please type instead.');
+      return voiceCopy('没有找到可用的麦克风，请直接打字。', 'No microphone was found. Please type instead.');
     }
     if (code === 'no-speech') {
       return voiceCopy('没有听到声音，可以再说一次或直接打字。', 'I did not hear any speech. Try again, or type instead.');
     }
     if (code === 'network') {
-      return voiceCopy('浏览器听写的网络没有接通，可以再试一次或直接打字。', 'Browser dictation could not reach its service. Try again, or type instead.');
+      return voiceCopy('语音服务没有连上，可以再试一次或直接打字。', 'Voice input could not connect. Try again, or type instead.');
     }
     if (code === 'language-not-supported') {
-      return voiceCopy('浏览器暂不支持当前语言的听写，请直接打字。', 'Browser dictation does not support this language. Please type instead.');
+      return voiceCopy('当前语言暂不支持语音输入，请直接打字。', 'Voice input does not support this language. Please type instead.');
     }
     if (code === 'aborted') {
       return voiceCopy('听写刚刚被中断，可以再试一次或直接打字。', 'Dictation was interrupted. Try again, or type instead.');
     }
-    return voiceCopy('浏览器听写暂时没有接住，可以再试一次或直接打字。', 'Browser dictation did not catch that. Try again, or type instead.');
+    return voiceCopy('语音暂时没有接住，可以再试一次或直接打字。', 'Voice input did not catch that. Try again, or type instead.');
   }
 
   function offerBrowserRetry(message) {
     if (!browserSpeechClass()) return message + voiceCopy(' 请再试一次或直接打字。', ' Try again, or type instead.');
     preferBrowserVoice = true;
     return message + voiceCopy(
-      ' 再点一次麦克风可改用浏览器听写，也可以直接打字。',
-      ' Tap the microphone again to use browser dictation, or type instead.'
+      ' 再点一次麦克风可以重试，也可以直接打字。',
+      ' Tap the microphone again to retry, or type instead.'
     );
   }
 
@@ -557,7 +557,7 @@
     recognition.onstart = function () {
       callbacks.onStatus(stopRequested
         ? voiceCopy('正在整理你刚才说的…', 'Finishing what you just said…')
-        : voiceCopy('我在听（浏览器听写），再按一次结束', 'Listening with browser dictation · tap again to stop'));
+        : voiceCopy('我在听，再按一次结束', 'Listening · tap again to stop'));
     };
     recognition.onresult = function (event) {
       var parts = [];
@@ -583,7 +583,7 @@
     };
     recognition.onend = function () { finish(); };
 
-    callbacks.onStatus(voiceCopy('正在启动浏览器听写…', 'Starting browser dictation…'));
+    callbacks.onStatus(voiceCopy('正在启动语音…', 'Starting voice input…'));
     track('natural_language_started', { method: 'voice_browser' });
     try { recognition.start(); }
     catch (error) {
@@ -597,7 +597,7 @@
     if (activeVoice) throw new Error(voiceCopy('录音已经开始', 'Recording has already started'));
     var AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.AudioWorkletNode || !AudioContextClass) {
-      throw new Error(voiceCopy('当前浏览器不支持腾讯语音录入，请改用文字。', 'This browser cannot use Tencent speech recognition. Please type instead.'));
+      throw new Error(voiceCopy('当前浏览器无法使用语音输入，请改用文字。', 'This browser cannot use voice input. Please type instead.'));
     }
 
     // Prevent a fast double-tap from opening two microphones while permissions
@@ -704,7 +704,7 @@
       // bursting stale audio faster than real time after the handshake.
       if (!providerReady || socket.readyState !== WebSocket.OPEN) return;
       try { socket.send(buffer); }
-      catch (_) { fail(voiceCopy('腾讯语音连接中断。', 'The Tencent speech connection was interrupted.')); }
+      catch (_) { fail(voiceCopy('语音连接中断。', 'The voice connection was interrupted.')); }
     }
 
     function sendEndWhenReady() {
@@ -714,7 +714,7 @@
         socket.send(JSON.stringify({ type: 'end' }));
         endSent = true;
       } catch (_) {
-        fail(voiceCopy('腾讯语音连接中断。', 'The Tencent speech connection was interrupted.'));
+        fail(voiceCopy('语音连接中断。', 'The voice connection was interrupted.'));
       }
     }
 
@@ -739,7 +739,7 @@
       }
     };
     socket.onopen = function () {
-      callbacks.onStatus(voiceCopy('正在连接腾讯语音…', 'Connecting to Tencent speech recognition…'));
+      callbacks.onStatus(voiceCopy('正在连接语音…', 'Connecting voice input…'));
     };
     socket.onmessage = function (event) {
       if (typeof event.data !== 'string') return;
@@ -776,15 +776,15 @@
       } catch (_) {}
     };
     socket.onerror = function () {
-      fail(voiceCopy('腾讯语音连接失败。', 'The Tencent speech connection failed.'));
+      fail(voiceCopy('语音连接失败。', 'The voice connection failed.'));
     };
     socket.onclose = function () {
       if (finished) return;
       if (stopRequested || latestText) finish();
-      else fail(voiceCopy('腾讯语音连接中断。', 'The Tencent speech connection was interrupted.'));
+      else fail(voiceCopy('语音连接中断。', 'The voice connection was interrupted.'));
     };
     connectTimer = setTimeout(function () {
-      if (!providerReady) fail(voiceCopy('腾讯语音连接超时。', 'The Tencent speech connection timed out.'));
+      if (!providerReady) fail(voiceCopy('语音连接超时。', 'The voice connection timed out.'));
     }, 8000);
 
     if (stopDuringSetup) stop();
@@ -806,8 +806,8 @@
         return beginBrowserVoice(callbacks).then(function () { return 'recording'; });
       }
       return Promise.reject(new Error(voiceCopy(
-        '腾讯语音尚未配置，而且这个浏览器不支持听写，请先直接打字。',
-        'Tencent speech is not configured and this browser has no dictation support. Please type instead.'
+        '这台设备暂时无法使用语音输入，请先直接打字。',
+        'Voice input is unavailable on this device. Please type instead.'
       )));
     }
     // `null` only means the capability probe has not returned (or was blocked),

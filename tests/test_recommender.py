@@ -1,4 +1,5 @@
 import asyncio
+import re
 
 from backend_app import recommender
 from backend_app.map_provider import WalkingRoute
@@ -40,6 +41,40 @@ def test_sports_requests_keep_the_specific_activity_in_live_search():
     assert place is not None
     assert place["category"].startswith("瑜伽")
     assert set(place["placeTypes"]) == {"yoga", "sports"}
+
+
+def test_live_search_has_authored_english_even_when_narration_is_offline():
+    from backend_app.discovery import CATEGORY_PROFILE, DISCOVERY_ACTION_EN, DISCOVERY_SEE_EN, to_place
+
+    assert set(DISCOVERY_ACTION_EN) == set(CATEGORY_PROFILE)
+    assert set(DISCOVERY_SEE_EN) == set(CATEGORY_PROFILE)
+
+    poi = {
+        "id": "B0TESTSPORT", "name": "一间运动馆", "longitude": 116.4,
+        "latitude": 39.9, "distance": "420", "adname": "朝阳区", "cityname": "北京市",
+        "address": "测试路 3 号", "photos": [{"url": "https://example.com/sport.jpg"}],
+    }
+    place = to_place(poi, "sports")
+    assert place is not None
+    recommendation = recommender._to_recommendation(
+        0.8,
+        place,
+        {"travel_fit": 0.8},
+        NeedState(mood_id="okay", place_types=["sports"]),
+        lang="en",
+    )
+
+    # The POI name/address stay Chinese so the place remains findable; every
+    # piece of app copy around them must already be English without an LLM call.
+    for value in (
+        recommendation.action,
+        recommendation.category,
+        recommendation.suggested_duration,
+        recommendation.cost,
+        recommendation.see,
+        recommendation.reason,
+    ):
+        assert value and not re.search(r"[\u3400-\u9fff]", value)
 
 
 def test_bad_provider_hours_for_film_archive_are_not_presented_as_fact():

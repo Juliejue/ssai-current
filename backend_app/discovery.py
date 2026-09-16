@@ -352,6 +352,82 @@ CATEGORY_PROFILE.update({
         see="一个可以大声唱歌的房间", place_types=("karaoke",), tags={"q":.1,"co":.85,"l":.9,"s":.2,"cp":.75}),
 })
 
+# Live-search results must still be usable when the copy model is unavailable.
+# These are authored fallbacks, not literal translations of the Chinese profile.
+DISCOVERY_ACTION_EN: dict[str, str] = {
+    "park": "Sit on a bench or take a walk",
+    "books": "Pick a book and sit down",
+    "gallery": "Walk through one room at your own pace",
+    "cafe": "Order one drink and take a table",
+    "cinema": "Pick the next screening and put your phone away",
+    "temple": "Step inside and stay for a while",
+    "tea": "Sit down with a pot of tea",
+    "records": "Browse the records and listen before you leave",
+    "vintage": "Browse the racks at your own pace",
+    "craft": "Pick one small project and use your hands",
+    "flower": "Choose a few stems and make a bouquet",
+    "music": "See what’s playing next",
+    "river": "Walk by the water and stop whenever you like",
+    "lane": "Take a slow walk around the neighborhood",
+    "restaurant": "Sit down and have a meal",
+    "barbecue": "Order some skewers and eat first",
+    "hotpot": "Sit down for something hot",
+    "dessert": "Choose the dessert you want right now",
+    "sports": "Pick one activity and get moving",
+    "climbing": "Try one easy route",
+    "swimming": "Swim a few laps at your own pace",
+    "badminton": "Book a court and play a game",
+    "basketball": "Shoot around for a while",
+    "tennis": "Play for a while and focus on the ball",
+    "yoga": "Take one class and slow your breathing",
+    "bar": "Find a seat and have one drink",
+    "club": "Dance for a while; leave when you want",
+    "karaoke": "Pick one song you want to sing",
+}
+
+DISCOVERY_SEE_EN: dict[str, str] = {
+    "park": "Open space, paths, and somewhere to sit",
+    "books": "Books and somewhere you can pause",
+    "gallery": "Exhibitions and room to move slowly",
+    "cafe": "A table and a drink",
+    "cinema": "A screen and a fixed stretch of time",
+    "temple": "Old trees and a slower pace",
+    "tea": "A tea table you can stay at",
+    "records": "Records and shelves to browse",
+    "vintage": "Clothes and objects that are not all the same",
+    "craft": "Materials, tools, and one thing to finish",
+    "flower": "Flowers, color, and something to make",
+    "music": "A stage, music, and other people listening",
+    "river": "Moving water and room to keep walking",
+    "lane": "Small streets, shops, and everyday life",
+    "restaurant": "One concrete meal",
+    "barbecue": "Skewers, heat, and a full meal",
+    "hotpot": "A hot meal around one table",
+    "dessert": "Something sweet and somewhere to sit",
+    "sports": "Space to move your body",
+    "climbing": "A wall and one clear route",
+    "swimming": "A pool and repeatable laps",
+    "badminton": "A court and a game to focus on",
+    "basketball": "A court, a hoop, and room to move",
+    "tennis": "A court and clear boundary lines",
+    "yoga": "A mat, your breathing, and an uninterrupted class",
+    "bar": "A drink, music, and people nearby",
+    "club": "Loud music and room to dance",
+    "karaoke": "A room where you can sing out loud",
+}
+
+
+def _discovery_cost_en(category: str, profile: dict[str, Any]) -> str:
+    if profile["free"]:
+        return "Free"
+    if category in {"cafe", "tea", "restaurant", "barbecue", "hotpot", "dessert", "bar"}:
+        return "You’ll need to order."
+    if category in {"records", "vintage"}:
+        return "Browsing is free; buying is optional."
+    if category in {"craft", "flower", "sports", "climbing", "swimming", "badminton", "basketball", "tennis", "yoga", "karaoke"}:
+        return "Booking or admission may be required."
+    return "Admission may be required."
+
 # 高德会把「打卡点」「出入口」「停车场」这类东西也当 POI 返回。
 # 它们不是能待的地方，推给一个正难受的人是冒犯。
 # 连锁店没有叙事。一个正难受的人不需要被推荐去楼下那家瑞幸——
@@ -439,13 +515,16 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
 
     provider_id = str(poi.get("id") or "")
     distance_m = float(poi.get("distance") or 0)
+    english_category = profile.get("label_en") or profile["label"]
+    english_kind = str(english_category).split(" · ")[0]
     return {
         "placeId": f"amap:{provider_id}",
         "placeName": name,
         "action": profile["action"],
+        "action_en": DISCOVERY_ACTION_EN.get(category, f"Spend a little time at this {english_kind}"),
         "area": str(poi.get("adname") or poi.get("cityname") or ""),
         "category": profile["label"],
-        "category_en": profile.get("label_en") or profile["label"],
+        "category_en": english_category,
         "city": str(poi.get("cityname") or ""),
         # 公交路线要城市编码。周边搜索本来就返回它，捡起来用，
         # 免得为了一条公交路线再去做一次逆地理编码。
@@ -456,16 +535,20 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
         "distanceKm": round(distance_m / 1000, 2) if distance_m else None,
         "transport": str(poi.get("address") or ""),
         "suggestedDuration": profile["suggested_duration"],
+        "suggestedDuration_en": str(profile["suggested_duration"]).replace(" 分钟", " min"),
         "indoor": profile["indoor"],
         "free": profile["free"],
         "crowd": profile["crowd"],
         "see": profile["see"],
         "cost": profile["cost"],
+        "see_en": DISCOVERY_SEE_EN.get(category, f"A nearby {english_kind}"),
+        "cost_en": _discovery_cost_en(category, profile),
         "placeTypes": list(profile.get("place_types") or [category]),
         "environmentTags": [],
         "tags": dict(profile["tags"]),
         # 这一类的常识，不是对这一家的判断——所以只有一条 "_"，而且措辞留余地。
         "matchReason": {"_": f"{profile['label'].split(' · ')[0]}这一类，通常能接住你现在说的这种状态。"},
+        "matchReason_en": {"_": f"A nearby {english_kind} is one concrete match for what you asked for."},
         "placeInsights": [],
         "factors": [],
         "averageChange": None,

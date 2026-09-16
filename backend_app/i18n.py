@@ -33,8 +33,8 @@ STATE_LABELS_EN: dict[str, str] = {
 
 
 PLACE_TYPE_LABELS_EN: dict[str, str] = {
-    "barbecue": "eat barbecue", "restaurant": "get a meal", "hotpot": "eat hotpot",
-    "dessert": "get dessert", "craft": "make something", "flower": "arrange flowers",
+    "barbecue": "barbecue", "restaurant": "get a meal", "hotpot": "hot pot",
+    "dessert": "dessert", "craft": "make something", "flower": "arrange flowers",
     "sports": "work out", "climbing": "go climbing", "swimming": "go swimming",
     "badminton": "play badminton", "basketball": "play basketball", "tennis": "play tennis",
     "yoga": "do yoga or Pilates", "music": "hear live music", "bar": "go to a bar",
@@ -45,19 +45,19 @@ PLACE_TYPE_LABELS_EN: dict[str, str] = {
 }
 
 NEED_LABELS_EN: dict[str, str] = {
-    "hide": "not be seen",
-    "sit": "sit for a long time",
-    "walk": "keep walking",
-    "free": "not spend much",
-    "green": "see something green",
-    "new": "see something new",
-    "sound": "hear something",
+    "hide": "privacy",
+    "sit": "somewhere to sit",
+    "walk": "room to walk",
+    "free": "little or no spending",
+    "green": "somewhere green",
+    "new": "something new",
+    "sound": "something to hear",
     "people": "people around",  # ClarifyOption.label 上限 24 字，别超
-    "loud": "somewhere loud",
-    "slow": "slow down",
-    "hands": "keep my hands busy",
-    "breathe": "breathe",
-    "nothing": "not decide anything",
+    "loud": "somewhere lively",
+    "slow": "a slower pace",
+    "hands": "something to do",
+    "breathe": "fresh air",
+    "nothing": "no decisions",
 }
 
 AVOID_LABELS_EN: dict[str, str] = {
@@ -126,9 +126,8 @@ UI_EN: dict[str, str] = {
     "safety": "Right now I care more about whether everyone is safe. Please reach someone you trust; "
               "if you might hurt yourself or someone else soon, contact local emergency services right away.",
     "ack": "I heard you. You don't have to explain it — I'll narrow things down from what you just said.",
-    "restate": "My guess is you're closer to 「{label}」. Say so if I got it wrong and I'll switch.",
-    "restate_with_need": "My guess is you're closer to 「{label}」, and you want somewhere you can {needs}. "
-                         "Say so if I got it wrong and I'll switch.",
+    "restate": "My read is 「{label}」. Tell me if I missed it.",
+    "restate_with_need": "My read is 「{label}」. You want {needs}. Tell me if I missed it.",
 }
 
 

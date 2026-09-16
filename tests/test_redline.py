@@ -398,7 +398,7 @@ def test_the_detail_page_shows_exactly_one_aggregate_block():
     """改口径的时候很容易新旧两块并存，屏幕上出现两个「匿名汇总」。"""
     source = PROTOTYPE.read_text(encoding="utf-8")
     block = source[slice(*_function_body(source, "function renderPlace(id)"))]
-    assert block.count('<p class="sec-k">匿名汇总</p>') == 1
+    assert block.count("uiCopy('匿名汇总', 'Anonymous summary')") == 1
 
 
 def test_first_hand_quotes_are_labelled_as_profile_source_not_as_feedback():
@@ -756,3 +756,54 @@ def test_primary_bilingual_copy_is_written_as_app_english():
         # revised render functions must not emit these strings directly.
         renderers = source[source.index("function renderTalk("):source.index("const EN = {")]
         assert awkward not in renderers
+
+
+def test_low_energy_browse_and_settings_do_not_repeat_internal_details():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    pick = source[slice(*_function_body(source, "function renderPick("))]
+    settings = source[slice(*_function_body(source, "function renderSettings("))]
+
+    for repeated in ("SAMPLE_EMPTY", "会看到什么", "消费压力", "样本还少"):
+        assert repeated not in pick
+    for internal in ("匿名会话标识", "Reminders today", "打扰记录：今天"):
+        assert internal not in settings
+
+
+def test_english_place_and_feedback_views_use_localized_display_data():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    ranked = source[slice(*_function_body(source, "function rankedPlaces("))]
+    factors = source[slice(*_function_body(source, "function renderFactors("))]
+    records = source[slice(*_function_body(source, "function renderRecords("))]
+
+    assert ").map(localized)" in ranked, "英文浏览页不能继续直接渲染中文 PLACES"
+    assert "factorCopy(o.label)" in factors
+    assert "factorCopy(f)" in records
+    assert '"Chaoyang"' in source and '"Xicheng"' in source
+
+
+def test_frontend_and_backend_share_the_same_reviewed_english_place_copy():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    match = re.search(r"const PLACES_EN = (\{.*?\});\nconst AREA_EN", source, re.DOTALL)
+    assert match, "找不到前端英文地点表"
+
+    frontend = json.loads(match.group(1))
+    backend_path = PROTOTYPE.parent / "backend_app" / "data" / "places.en.json"
+    backend = json.loads(backend_path.read_text(encoding="utf-8"))["places"]
+    assert frontend == backend
+
+    rendered = json.dumps(frontend, ensure_ascii=False)
+    for awkward in (
+        "Browse a round after the movie",
+        "eat · indoors",
+        "livehouse · indoors",
+        "Dance until your brain shuts off",
+    ):
+        assert awkward not in rendered
+
+
+def test_safety_screen_uses_the_current_national_support_number():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    safe = source[slice(*_function_body(source, "function renderSafe("))]
+
+    assert "12356" in safe
+    assert "400-161-9995" not in safe
