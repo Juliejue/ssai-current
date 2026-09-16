@@ -48,6 +48,10 @@ def build_asr_connect_url(voice_id: str | None = None) -> dict[str, str | int]:
         "expired": expired,
         "nonce": timestamp,
         "voice_format": int(os.getenv("ASR_VOICE_FORMAT", "1")),
+        # Tencent uses 1 to strip sentence-ending punctuation. Keep it off so
+        # the transcript handed back to the user reads like normal prose.
+        "filter_punc": int(os.getenv("ASR_FILTER_PUNC", "0")),
+        "convert_num_mode": int(os.getenv("ASR_CONVERT_NUM_MODE", "1")),
     }
     path = f"/asr/v2/{app_id}"
     query = "&".join(f"{key}={params[key]}" for key in sorted(params))

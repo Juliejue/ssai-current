@@ -519,7 +519,10 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .mic-cap{margin:14px 0 0;font:12px/1.6 var(--sans);color:var(--ink-dim);min-height:20px}
 .mic-cap:empty{display:none}
 .mic-cap.error{color:var(--d-n2)}
-.talk .type-toggle{margin-top:20px;font:12px var(--sans);color:var(--water);border-bottom:1px solid rgba(30,110,114,.3);padding-bottom:2px}
+.talk .type-toggle{margin-top:18px;min-height:44px;padding:0 18px;display:inline-flex;align-items:center;
+  justify-content:center;border:1px solid var(--line-2);border-radius:999px;background:var(--card);
+  font:500 13px var(--sans);color:var(--water);box-shadow:0 4px 14px rgba(18,42,46,.06)}
+.talk .type-toggle:active{transform:translateY(1px)}
 .talk .typing{width:100%;max-width:320px;margin-top:18px;text-align:left}
 .talk .typing textarea{display:block;width:100%;min-height:76px;resize:none;background:var(--card);
   border:1px solid var(--line-2);border-radius:14px;padding:11px 12px;font:13px/1.7 var(--sans);outline:none}
@@ -3159,7 +3162,7 @@ function renderTalk(){
   h += '<p class="mic-cap" id="mic-cap">' +
        (state.reachNote ? escapeHTML(state.reachNote) : '') + '</p>';
   if (!state.talkTyping){
-    h += '<button class="type-toggle" id="type-toggle">改用文字</button>';
+    h += '<button class="type-toggle" id="type-toggle" aria-label="打字输入">⌨ 打字输入</button>';
   } else {
     h += '<div class="typing"><textarea id="natural-input" maxlength="2000" ' +
          'placeholder="比如：好累，想找个人少、能吹风的地方">' + escapeHTML(state.talkText) + '</textarea>' +
@@ -3460,6 +3463,7 @@ const EN = {
   "你说，我来找。": "You talk. I'll look.",
   "不想说话，我打字": "I'd rather type",
   "改用文字": "Type instead",
+  "⌨ 打字输入": "⌨ Type instead",
   "发送": "Send",
   "按一下开始说 · 再按一下结束": "Tap to start · tap again to stop",
   "也可以点上面这个改用语音": "Or tap above to use your voice instead",

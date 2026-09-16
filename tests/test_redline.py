@@ -498,6 +498,9 @@ def test_primary_voice_screen_keeps_operational_copy_out_of_the_way():
     assert "按一下开始说" not in reflect
     assert "本产品不保存录音" not in talk
     assert "想吃烤串" in talk
+    assert 'id="type-toggle"' in talk
+    assert "⌨ 打字输入" in talk
+    assert ".talk .type-toggle{margin-top:18px;min-height:44px" in prototype
     assert 'id="natural-submit">发送' in talk
 
 
