@@ -8,6 +8,7 @@
   var SESSION_KEY = 'current.session.v1';
   var activeVoice = null;
   var tencentVoiceConfigured = null;
+  var preferredVoiceProvider = null;
   var preferBrowserVoice = false;
   var activeLocation = null;
   var activeLocationMode = null;
@@ -35,6 +36,9 @@
         .then(function (capabilities) {
           if (typeof capabilities.tencent_realtime === 'boolean') {
             tencentVoiceConfigured = capabilities.tencent_realtime;
+          }
+          if (capabilities.preferred_provider === 'browser' || capabilities.preferred_provider === 'tencent') {
+            preferredVoiceProvider = capabilities.preferred_provider;
           }
         })
         .catch(function () {});
@@ -792,7 +796,7 @@
       activeVoice.stop();
       return Promise.resolve('stopping');
     }
-    if (browserSpeechClass() && preferBrowserVoice) {
+    if (browserSpeechClass() && (preferBrowserVoice || preferredVoiceProvider === 'browser')) {
       // Do not put this behind an awaited request: Safari and some Chromium
       // builds require start() to remain in the microphone tap's call stack.
       return beginBrowserVoice(callbacks).then(function () { return 'recording'; });

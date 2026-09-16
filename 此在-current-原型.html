@@ -1534,17 +1534,23 @@ function selfSigil(recs){
 --------------------------------- */
 function selfRead(recs){
   if (recs.length < 2){
-    return {line:"还需要一两次记录，我才敢说。", rows:[
-      {t:"证据不够", d:"我只用你自己打过的分和勾过的因素说话。现在这些还太少，凑不出一条站得住的观察。",
-       e:"当前 " + recs.length + " 条记录"}
+    return {line:uiCopy("还需要一两次记录，我才敢说。", "A couple more visits will make patterns easier to see."), rows:[
+      {t:uiCopy("记录还不够", "Not enough visits yet"),
+       d:uiCopy("我只用你自己打过的分和勾过的因素说话。现在这些还太少，凑不出一条站得住的观察。",
+                "This view only uses the changes and factors you recorded."),
+       e:uiCopy("当前 " + recs.length + " 条记录", recs.length + (recs.length === 1 ? " visit" : " visits"))}
     ]};
   }
   // 身份行：偏好的空间类型 + 平均变化
   const outdoor = recs.filter(r => !placeById(r.placeId).indoor).length;
-  const kind = outdoor * 2 > recs.length ? "户外偏多" : (outdoor * 2 === recs.length ? "室内户外各半" : "室内偏多");
+  const kind = outdoor * 2 > recs.length ? uiCopy("户外偏多", "mostly outdoors")
+    : (outdoor * 2 === recs.length ? uiCopy("室内户外各半", "a mix of indoors and outdoors") : uiCopy("室内偏多", "mostly indoors"));
   const avg = recs.reduce((s, r) => s + r.changeScore, 0) / recs.length;
-  const line = "去过 " + new Set(recs.map(r => r.placeId)).size + " 个空间，" + kind + "；平均变化 <b>" +
-               (avg >= 0 ? "+" : "") + avg.toFixed(1) + "</b>";
+  const placeCount = new Set(recs.map(r => r.placeId)).size;
+  const line = uiCopy("去过 " + placeCount + " 个空间，" + kind + "；平均变化 <b>" +
+               (avg >= 0 ? "+" : "") + avg.toFixed(1) + "</b>",
+               placeCount + (placeCount === 1 ? " place" : " places") + ", " + kind +
+               " · average shift <b>" + (avg >= 0 ? "+" : "") + avg.toFixed(1) + "</b>");
   // 观察一：最常勾选的因素
   const tally = {};
   recs.forEach(r => r.factors.forEach(f => { tally[f] = (tally[f] || 0) + 1; }));
@@ -1553,28 +1559,37 @@ function selfRead(recs){
   if (top && tally[top] >= 2){
     const p = recs.map(r => placeById(r.placeId)).find(pp => pp.factorOptions.some(o => o.label === top));
     const o = p && p.factorOptions.find(x => x.label === top);
-    rows.push({t:"你反复在选「" + top + "」", d:(o ? o.insight : "这一条你选了不止一次。"),
-               e:tally[top] + " / " + recs.length + " 次记录里出现"});
+    rows.push({t:uiCopy("你反复在选「" + top + "」", "You keep choosing “" + top + "”"),
+               d:(o ? o.insight : uiCopy("这一条你选了不止一次。", "You chose this more than once.")),
+               e:uiCopy(tally[top] + " / " + recs.length + " 次记录里出现", tally[top] + " of " + recs.length + " visits")});
   }
   // 观察二：变化最大的一次 或 最没用的一次
   const best = recs.slice().sort((a, b) => b.changeScore - a.changeScore)[0];
   const worst = recs.slice().sort((a, b) => a.changeScore - b.changeScore)[0];
   if (worst.changeScore <= 0 && recs.length > 2){
-    rows.push({t:"「" + worst.placeName.replace(/ · .*/, "") + "」那次没接住", d:"出发前是「" + worst.preMood +
-      "」，离开时 " + signed(worst.changeScore) + "。这条会让同类空间在你的推荐里往后退。",
+    rows.push({t:uiCopy("「" + worst.placeName.replace(/ · .*/, "") + "」那次没接住",
+                        worst.placeName.replace(/ · .*/, "") + " did not help that time"),
+      d:uiCopy("出发前是「" + worst.preMood + "」，离开时 " + signed(worst.changeScore) + "。这条会让同类空间在你的推荐里往后退。",
+               "You recorded " + signed(worst.changeScore) + " after this visit. Similar places will move down."),
       e:fmtDate(worst.createdAt) + " · " + worst.placeName});
   } else {
-    rows.push({t:"变化最大的一次在「" + best.placeName.replace(/ · .*/, "") + "」", d:"出发前是「" + best.preMood +
-      "」，离开时 " + signed(best.changeScore) + "。同类空间会被排得靠前一点。",
+    rows.push({t:uiCopy("变化最大的一次在「" + best.placeName.replace(/ · .*/, "") + "」",
+                        "Your biggest shift was at " + best.placeName.replace(/ · .*/, "")),
+      d:uiCopy("出发前是「" + best.preMood + "」，离开时 " + signed(best.changeScore) + "。同类空间会被排得靠前一点。",
+               "You recorded " + signed(best.changeScore) + " after this visit. Similar places will move up."),
       e:fmtDate(best.createdAt) + " · " + best.placeName});
   }
   if (rows.length < 2){
     const kinds = Object.keys(tally).length;
     rows.push(kinds
-      ? {t:"还没有反复出现的因素", d:"你勾过的每一条都只出现过一次。再记几次，我才能说清是什么在稳定地起作用。",
-         e:kinds + " 种因素各出现 1 次"}
-      : {t:"目前只有分数，没有因素", d:"你还没勾过影响因素。只有分数也能用，但有因素之后我才能说清是什么在起作用。",
-         e:"已勾选因素 0 种"});
+      ? {t:uiCopy("还没有反复出现的因素", "No factor repeats yet"),
+         d:uiCopy("你勾过的每一条都只出现过一次。再记几次，我才能说清是什么在稳定地起作用。",
+                  "A few more visits will make the pattern clearer."),
+         e:uiCopy(kinds + " 种因素各出现 1 次", kinds + " factors · once each")}
+      : {t:uiCopy("目前只有分数，没有因素", "No factors recorded yet"),
+         d:uiCopy("你还没勾过影响因素。只有分数也能用，但有因素之后我才能说清是什么在起作用。",
+                  "A mood shift is still useful; factors make future recommendations more precise."),
+         e:uiCopy("已勾选因素 0 种", "0 factors")});
   }
   return {line, rows:rows.slice(0, 2)};
 }
@@ -1714,8 +1729,17 @@ const state = {
   shownRecommendationId: null
 };
 
+const DEMO_MODE = (() => {
+  try { return new URLSearchParams(location.search || "").get("demo") === "trip"; }
+  catch(e){ return false; }
+})();
+
 /* 演示用的既往记录（原型示例数据，非真实用户数据） */
 function seed(){
+  if (!DEMO_MODE){
+    state.records = [];
+    return;
+  }
   /* 地点信息从 placeById 派生，换库时不会再出现旧 id 静默错配 */
   const mk = (id, placeId, preMood, changeScore, factors, note, visibility, start, end) => {
     const p = placeById(placeId);
@@ -1977,8 +2001,9 @@ const STALE_TRIP_MINUTES = 6 * 60;
 
 function arrivedToast(){
   if (!state.arrivedToast) return "";
-  return '<div class="arrived-toast"><div><b>你到' + escapeHTML(state.arrivedToast) + '了</b>' +
-         '</div><button id="toast-close">知道了</button></div>';
+  return '<div class="arrived-toast"><div><b>' + uiCopy('你到' + escapeHTML(state.arrivedToast) + '了',
+         'You\'ve arrived at ' + escapeHTML(state.arrivedToast)) + '</b>' +
+         '</div><button id="toast-close">' + uiCopy('知道了', 'Got it') + '</button></div>';
 }
 
 function tripStrip(){
@@ -1991,60 +2016,60 @@ function tripStrip(){
   const confirmedInside = demo || (fenced && t.presenceAvailable && t.inside);
 
   if (t.status === "arrival_pending"){
-    return '<div class="trip"><div class="txt"><b>看起来你已经到' + short + '了</b>' +
-      '<small>' + (demo ? '演示定位 · ' : '') + '请确认一下</small></div>' +
-      '<button data-trip="confirm-arrived">已抵达</button>' +
-      '<button class="ghost" data-trip="not-arrived">还没有</button></div>';
+    return '<div class="trip"><div class="txt"><b>' + uiCopy('看起来你已经到' + short + '了', 'Looks like you\'re at ' + short) + '</b>' +
+      '<small>' + (demo ? uiCopy('演示定位 · ', 'Demo location · ') : '') + uiCopy('请确认一下', 'Please confirm') + '</small></div>' +
+      '<button data-trip="confirm-arrived">' + uiCopy('已抵达', 'I\'m here') + '</button>' +
+      '<button class="ghost" data-trip="not-arrived">' + uiCopy('还没有', 'Not yet') + '</button></div>';
   }
 
   if (t.status === "leave_pending"){
-    return '<div class="trip"><div class="txt"><b>检测到你已经离开' + short + '</b>' +
-      '<small>' + (demo ? '演示定位 · ' : '') + '请确认一下</small></div>' +
-      '<button data-trip="left">已离开</button>' +
-      '<button class="ghost" data-trip="still-here">我还在这里</button></div>';
+    return '<div class="trip"><div class="txt"><b>' + uiCopy('检测到你已经离开' + short, 'Looks like you left ' + short) + '</b>' +
+      '<small>' + (demo ? uiCopy('演示定位 · ', 'Demo location · ') : '') + uiCopy('请确认一下', 'Please confirm') + '</small></div>' +
+      '<button data-trip="left">' + uiCopy('已离开', 'I left') + '</button>' +
+      '<button class="ghost" data-trip="still-here">' + uiCopy('我还在这里', 'Still here') + '</button></div>';
   }
 
   if (t.status === "departed"){
     const line = t.presenceNote ? t.presenceNote
-      : demo ? "可模拟抵达"
-      : (fenced && t.presenceAvailable) ? "正在检测抵达"
-      : fenced ? "等待定位"
-      : "到达后请确认";
-    return '<div class="trip"><div class="txt"><b>在去' + short + '的路上</b>' +
-      '<small>' + fmtDate(t.startedAt) + ' 出发 · ' + line + '</small></div>' +
-      '<button data-trip="' + (demo ? 'demo-arrive' : 'arrived') + '">' + (demo ? '模拟抵达' : '我到了') + '</button></div>';
+      : demo ? uiCopy("可模拟抵达", "Ready to simulate arrival")
+      : (fenced && t.presenceAvailable) ? uiCopy("正在检测抵达", "Watching for arrival")
+      : fenced ? uiCopy("等待定位", "Waiting for location")
+      : uiCopy("到达后请确认", "Confirm when you arrive");
+    return '<div class="trip"><div class="txt"><b>' + uiCopy('在去' + short + '的路上', 'On the way to ' + short) + '</b>' +
+      '<small>' + fmtDate(t.startedAt) + ' · ' + line + '</small></div>' +
+      '<button data-trip="' + (demo ? 'demo-arrive' : 'arrived') + '">' + uiCopy(demo ? '模拟抵达' : '我到了', demo ? 'Simulate arrival' : 'I\'m here') + '</button></div>';
   }
 
   // 自动判定已经走了：这是唯一该主动开口的时刻。
   if (t.status === "left"){
-    if (demo) return '<div class="trip"><div class="txt"><b>演示状态：已离开' + short + '</b>' +
-      '<small>这次模拟不会写入到访记录</small></div><button class="ghost" data-trip="clear">结束演示</button></div>';
-    return '<div class="trip"><div class="txt"><b>你离开了' + short + '</b>' +
-      '<small>待了 ' + (t.dwellMinutes || 0) + ' 分钟</small></div>' +
-      '<button data-trip="left">记录变化</button>' +
-      '<button class="ghost" data-trip="clear">以后再说</button></div>';
+    if (demo) return '<div class="trip"><div class="txt"><b>' + uiCopy('演示状态：已离开' + short, 'Demo: left ' + short) + '</b>' +
+      '<small>' + uiCopy('这次模拟不会写入到访记录', 'This demo visit will not be saved') + '</small></div><button class="ghost" data-trip="clear">' + uiCopy('结束演示', 'End demo') + '</button></div>';
+    return '<div class="trip"><div class="txt"><b>' + uiCopy('你离开了' + short, 'You left ' + short) + '</b>' +
+      '<small>' + uiCopy('待了 ' + (t.dwellMinutes || 0) + ' 分钟', 'Stayed ' + (t.dwellMinutes || 0) + ' min') + '</small></div>' +
+      '<button data-trip="left">' + uiCopy('记录变化', 'Check in') + '</button>' +
+      '<button class="ghost" data-trip="clear">' + uiCopy('以后再说', 'Later') + '</button></div>';
   }
 
   const elapsed = Math.max(0, Math.round((Date.now() - new Date(t.arrivedAt).getTime()) / 60000));
   // 一趟挂了大半天多半是忘了收，不是真待了 2243 分钟。
   // 显示那个数字比不显示更糟——它会让人觉得这个 App 根本没在算。
   if (elapsed > STALE_TRIP_MINUTES){
-    return '<div class="trip"><div class="txt"><b>' + short + '那一趟还开着</b>' +
-      '<small>过去挺久了，要不收了它</small></div>' +
-      '<button data-trip="left">记录变化</button>' +
-      '<button class="ghost" data-trip="clear">收起来</button></div>';
+    return '<div class="trip"><div class="txt"><b>' + uiCopy(short + '那一趟还开着', 'Your ' + short + ' visit is still open') + '</b>' +
+      '<small>' + uiCopy('过去挺久了，要不收了它', 'It has been a while') + '</small></div>' +
+      '<button data-trip="left">' + uiCopy('记录变化', 'Check in') + '</button>' +
+      '<button class="ghost" data-trip="clear">' + uiCopy('收起来', 'Close') + '</button></div>';
   }
 
   const dwell = t.dwellMinutes || elapsed;
   const level = t.presenceLevel || (dwell >= 5 ? "dwell_only" : "self_reported");
   // 只有定位真的回报过「围栏内」，才承诺能自动识别离开。
-  const note = demo ? "演示定位 · 可模拟离开"
-    : confirmedInside ? "走了我自己知道"
-    : PRESENCE_LABEL[level] + " · 离开时按一下";
-  return '<div class="trip"><div class="txt"><b>你在' + short + ' · 停留 ' + dwell + ' 分钟</b>' +
-    '<small>' + note + (confirmedInside && !demo ? " · 围栏内" : "") + '</small></div>' +
-    '<button data-trip="' + (demo ? 'demo-leave' : 'left') + '">' + (demo ? '模拟离开' : '我离开了') + '</button>' +
-    '<button class="ghost" data-trip="clear">取消</button></div>';
+  const note = demo ? uiCopy("演示定位 · 可模拟离开", "Demo location · ready to simulate leaving")
+    : confirmedInside ? uiCopy("离开后会自动提醒", "I\'ll notice when you leave")
+    : uiCopy(PRESENCE_LABEL[level] + " · 离开时按一下", "Tap when you leave");
+  return '<div class="trip"><div class="txt"><b>' + uiCopy('你在' + short + ' · 停留 ' + dwell + ' 分钟', 'At ' + short + ' · ' + dwell + ' min') + '</b>' +
+    '<small>' + note + '</small></div>' +
+    '<button data-trip="' + (demo ? 'demo-leave' : 'left') + '">' + uiCopy(demo ? '模拟离开' : '我离开了', demo ? 'Simulate leaving' : 'I left') + '</button>' +
+    '<button class="ghost" data-trip="clear">' + uiCopy('取消', 'Cancel') + '</button></div>';
 }
 
 /* ---------- 小在从你的记录里看到的（FR-12）----------
@@ -2117,6 +2142,10 @@ window.addEventListener("hashchange", () => {
    ============================================================ */
 
 /* 语言开关放在顶栏右上角，和「总览」并排——评委第一眼就要找得到。 */
+function uiCopy(zh, en){
+  return currentLang() === "en" ? en : zh;
+}
+
 function langToggle(){
   const en = currentLang() === "en";
   return '<button class="langsw" data-lang="' + (en ? "zh" : "en") + '" ' +
@@ -2126,26 +2155,25 @@ function langToggle(){
 
 function topbar(title, kicker, backTo){
   return '<div class="top"><div class="lead">' +
-    (backTo ? '<button class="back" data-go="' + backTo + '" aria-label="返回">←</button>' : '') +
+    (backTo ? '<button class="back" data-go="' + backTo + '" aria-label="' + uiCopy("返回", "Back") + '">←</button>' : '') +
     '<div><div class="k">' + kicker + '</div></div><h2>' + title + '</h2></div>' +
     '<div class="topright">' + langToggle() +
-    '<button class="topnav" data-go="#/talk">首页</button>' +
-    '<button class="topnav" data-go="#/records">轨迹</button></div></div>';
+    '<button class="topnav" data-go="#/talk">' + uiCopy("首页", "Home") + '</button>' +
+    '<button class="topnav" data-go="#/records">' + uiCopy("轨迹", "Trail") + '</button></div></div>';
 }
 
 /* --- 1. 情绪 --- */
 function renderMood(){
-  let h = topbar("自己挑一种", "备用入口", "#/talk");
+  let h = topbar(uiCopy("自己挑一种", "Choose how you feel"), uiCopy("心情与需求", "Mood and needs"), "#/talk");
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">自己挑 · 备用入口</p>';
-  h += '<h1 class="title">此刻，你更接近<br>哪一种？</h1>';
-  h += '<button class="btn ghost sm" data-go="#/talk" style="margin-bottom:20px">回去直接说一句 →</button>';
+  h += '<h1 class="title">' + uiCopy('此刻，你更接近<br>哪一种？', 'What feels closest<br>right now?') + '</h1>';
+  h += '<button class="btn ghost sm" data-go="#/talk" style="margin-bottom:20px">' + uiCopy('直接说一句 →', 'Say it instead →') + '</button>';
   h += '<div class="mood-grid">';
   MOODS.forEach(m => {
     h += '<button class="mood' + (state.mood === m.id ? " on" : "") + '" data-mood="' + m.id + '">' +
          '<strong>' + m.name + '</strong><small>' + m.desc + '</small></button>';
   });
-  h += '</div><div class="actions"><button class="btn" data-go="#/needs">接着走 <span>→</span></button></div>';
+  h += '</div><div class="actions"><button class="btn" data-go="#/needs">' + uiCopy('继续', 'Continue') + ' <span>→</span></button></div>';
   h += '</div></div>';
   h += dock('我先记着：<b>' + moodById(state.mood).name + '</b>。', {records:false});
   return h;
@@ -2169,13 +2197,13 @@ function needsForMood(){
 function renderNeeds(){
   const m = moodById(state.mood);
   const by = needsForMood();
-  let h = topbar("需要什么样的环境", "第二步 · 出发前", "#/mood");
+  let h = topbar(uiCopy("需要什么样的环境", "What kind of place?"), uiCopy("你的偏好", "Your preferences"), "#/mood");
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">你说：' + m.name + '</p>';
-  h += '<h1 class="title sm">那你现在<br>需要什么样的地方？</h1>';
-  h += '<p class="lead">可以多选，也可以都不选。</p>';
+  h += '<p class="eyebrow">' + uiCopy('你说：', 'Right now: ') + m.name + '</p>';
+  h += '<h1 class="title sm">' + uiCopy('那你现在<br>需要什么样的地方？', 'What would feel<br>right right now?') + '</h1>';
+  h += '<p class="lead">' + uiCopy('可以多选，也可以都不选。', 'Choose any that fit, or skip this.') + '</p>';
   ["空间", "刺激", "恢复"].forEach(dir => {
-    h += '<p class="need-dir">' + dir + '</p><div class="need-grid">';
+    h += '<p class="need-dir">' + uiCopy(dir, {"空间":"Space","刺激":"Energy","恢复":"Reset"}[dir]) + '</p><div class="need-grid">';
     (by[dir] || []).forEach(k => {
       h += '<button class="need' + (state.needs.indexOf(k) >= 0 ? " on" : "") + '" data-need="' + k + '">' +
            NEEDS[k].label + '</button>';
@@ -2184,7 +2212,7 @@ function renderNeeds(){
   });
   const n = state.needs.length;
   h += '<div class="actions"><button class="btn" data-go="#/mode">' +
-       (n ? '按这 ' + n + ' 条找 ' : '跳过，只按情绪找 ') + '<span>→</span></button></div>';
+       uiCopy(n ? '按这 ' + n + ' 条找' : '跳过，只按情绪找', n ? 'Find with these ' + n : 'Skip') + ' <span>→</span></button></div>';
   h += '</div></div>';
   h += dock(n ? '记着了：<b>' + state.needs.map(k => NEEDS[k].label).join('、') + '</b>。'
              : '一条都不选也可以，我就只按「<b>' + m.name + '</b>」来找。', {records:false});
@@ -2194,16 +2222,16 @@ function renderNeeds(){
 /* --- 3. 两种推荐入口 --- */
 function renderMode(){
   const m = moodById(state.mood);
-  let h = topbar("怎么找", "第二步 · 挑一种方式", "#/mood");
+  let h = topbar(uiCopy("怎么找", "How do you want to browse?"), uiCopy("选择方式", "Choose how"), "#/mood");
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">现在需要</p><h1 class="title sm">' + m.name + '</h1>';
+  h += '<p class="eyebrow">' + uiCopy('现在需要', 'Right now') + '</p><h1 class="title sm">' + m.name + '</h1>';
   h += '<div style="display:flex;flex-direction:column;gap:12px">';
   h += '<button class="mode-card" data-go="#/pick"><div class="visual"><div class="mock-one"></div></div>' +
-       '<div class="txt"><h3>替我选</h3><p>一次只给你一个空间。没力气比较的时候，用这个。</p>' +
-       '<div class="go">卡片模式 →</div></div></button>';
+       '<div class="txt"><h3>' + uiCopy('替我选', 'Pick for me') + '</h3><p>' + uiCopy('一次看一个地方。', 'One place at a time.') + '</p>' +
+       '<div class="go">' + uiCopy('卡片模式 →', 'One by one →') + '</div></div></button>';
   h += '<button class="mode-card" data-go="#/browse"><div class="visual"><div class="mock-grid"><i></i><i></i><i></i><i></i></div></div>' +
-       '<div class="txt"><h3>自己逛逛</h3><p>八个空间一起铺开，自己比。还有力气挑的时候，用这个。</p>' +
-       '<div class="go">瀑布流模式 →</div></div></button>';
+       '<div class="txt"><h3>' + uiCopy('自己逛逛', 'Browse') + '</h3><p>' + uiCopy('同时看看更多地方。', 'Browse more places at once.') + '</p>' +
+       '<div class="go">' + uiCopy('瀑布流模式 →', 'See the grid →') + '</div></div></button>';
   h += '</div>';
   h += '<div class="actions"><button class="btn-text" data-go="#/records">先看看我的情绪空间轨迹</button></div>';
   h += '</div></div>';
@@ -2225,11 +2253,11 @@ function renderPick(){
   h += '<p class="place-sub" style="font-size:14px;color:var(--ink)">' + p.action + '</p>';
   h += '<div class="meta-row"><span><i>距离</i>' + p.distance +
        '</span><span><i>建议停留</i>' + p.suggestedDuration + '</span></div>';
-  h += '<div class="detail-rows"><div><i>会看到什么</i><span>' + p.see + '</span></div>' +
-       '<div><i>消费压力</i><span>' + p.cost + '</span></div></div>';
+  h += '<div class="detail-rows"><div><i>' + uiCopy('会看到什么', 'What it is like') + '</i><span>' + p.see + '</span></div>' +
+       '<div><i>' + uiCopy('消费压力', 'Cost') + '</i><span>' + p.cost + '</span></div></div>';
   h += '<div class="why"><span class="k">为什么此刻推荐给你</span><p>' + reasonFor(p, state.mood) + '</p></div>';
   h += '<div class="insights"><div class="head"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
-       '</span><b>小在眼中的这里</b></div>';
+       '</span><b>' + uiCopy('这里有什么', 'What to expect') + '</b></div>';
   /* 卡片只显示最强的一条；第二条留给详情页 —— 替我选是给低能量用户的，选择负担要低 */
   const x = p.placeInsights[0];
   h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong></div></div>';
@@ -2312,7 +2340,9 @@ function renderPlace(id){
   const p = placeById(id);
   const recommendation = state.aiRecommendations[id];
   const distance = recommendation && recommendation.distance_source === "amap" ? recommendation.distance_km + " km" : p.distance;
-  const arrival = recommendation && recommendation.walking_minutes ? "步行约 " + recommendation.walking_minutes + " 分钟" : p.transport;
+  const arrival = recommendation && recommendation.walking_minutes
+    ? uiCopy("步行约 " + recommendation.walking_minutes + " 分钟", recommendation.walking_minutes + " min walk")
+    : p.transport;
   const fromOffer = (state.offer || []).some(x => x.place_id === p.placeId);
   const back = fromOffer ? "#/offer"
              : state.route.indexOf("browse") > -1 ? "#/browse"
@@ -2323,7 +2353,7 @@ function renderPlace(id){
   h += '<div class="pad" style="padding-top:16px">';
   h += '<div class="meta-row"><span><i>距离</i>' + distance + '</span><span><i>到达</i>' + arrival +
        '</span><span><i>建议停留</i>' + p.suggestedDuration + '</span></div>';
-  h += '<p class="sec-k">小在眼中的这里</p>';
+  h += '<p class="sec-k">这里有什么</p>';
   h += '<div class="insights" style="margin-top:0">';
   p.placeInsights.forEach(x => {
     h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong></div></div>';
@@ -2348,9 +2378,9 @@ function renderPlace(id){
   // 真人原话不是「到访反馈」，是空间档案的来源（FR-16 的评论那一路）。
   // 身份不同就不该长得像反馈：不带变化分，不算进任何汇总。
   if (p.quote){
-    h += '<p class="sec-k">一手描述</p>';
+    h += '<p class="sec-k">空间印象</p>';
     h += '<div class="here" style="margin-top:0"><div class="h"><span style="width:14px;height:14px;display:inline-block">' +
-         catSVG() + '</span><b>档案来源，不是到访反馈</b></div>';
+         catSVG() + '</span><b>来自实地体验</b></div>';
     h += '<div class="e">「' + escapeHTML(p.quote) + '」</div>';
     h += '</div>';
   }
@@ -2383,7 +2413,7 @@ function renderReflect(id){
   const d = state.draft;
   const short = p.placeName.replace(/ · .*/, "").slice(0, 6);
   const r = state.reflect;
-  let h = topbar("说说刚才", "第三步 · 你刚离开", "#/visit/" + id);
+  let h = topbar("说说刚才", "离开后", "#/visit/" + id);
   h += '<div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>';
   h += '<div class="screen mid"><div class="pad">';
 
@@ -2447,7 +2477,7 @@ function renderVisit(id){
   const p = placeById(id);
   const d = state.draft;
   const short = p.placeName.replace(/ · .*/, "").slice(0, 5);
-  let h = topbar("到访反馈", "第三步 · 你刚离开", "#/place/" + p.placeId);
+  let h = topbar("到访反馈", "离开后", "#/place/" + p.placeId);
   h += '<div class="steps"><i class="on"></i><i></i><i></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
   h += '<h1 class="title">刚从' + short + '回来吗？</h1>';
@@ -2467,7 +2497,7 @@ function renderVisit(id){
 function renderScore(id){
   const p = placeById(id);
   const d = state.draft;
-  let h = topbar("到访反馈", "01 · 心情变化", "#/visit/" + p.placeId);
+  let h = topbar("到访反馈", "心情变化", "#/visit/" + p.placeId);
   h += '<div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
   h += '<h1 class="title sm">现在，心里松了一点吗？</h1>';
@@ -2483,7 +2513,7 @@ function renderScore(id){
   });
   h += '</div><div class="scale-lab"><span>明显更难受</span><span>差不多</span><span>明显变好</span></div>';
   h += '<p class="hint' + (d.score !== null ? " on" : "") + '">' +
-       (d.score === null ? "选一个之后才能继续。初始不预选，是为了不给你暗示。" : "记下了：" + scoreLabel(d.score) + "。随时可以改。") + '</p>';
+       (d.score === null ? "" : uiCopy("已记录：" + scoreLabel(d.score) + "。", "Saved: " + scoreLabel(d.score) + ".")) + '</p>';
   h += '<div class="actions"><button class="btn" data-step="2"' + (d.score === null ? " disabled" : "") + '>继续 <span>→</span></button></div>';
   h += '</div></div>';
   h += dock('这是同一个人前后的差，不是这个地方的星级。');
@@ -2520,7 +2550,7 @@ function renderFactors(id){
   // 对话已经把分数、因素、哪一环都拿到了，这里只剩「这条放哪里」——
   // 那是授权，不能替他决定，所以它是唯一保留的一步。
   if (state.reflect){
-    let lean = topbar("放在哪里", "第四步 · 最后一下", "#/reflect/" + p.placeId);
+    let lean = topbar("放在哪里", "保存方式", "#/reflect/" + p.placeId);
     lean += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>';
     lean += '<div class="screen mid"><div class="pad">';
     lean += '<div class="say"><span class="zai">' + cloudSVG() + '</span>' +
@@ -2535,7 +2565,7 @@ function renderFactors(id){
     return lean;
   }
 
-  let h = topbar("到访反馈", "02 · 发生了什么", "#/feedback/" + p.placeId + "?s=1");
+  let h = topbar("到访反馈", "影响因素", "#/feedback/" + p.placeId + "?s=1");
   h += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
   h += '<h1 class="title sm">是什么参与了这次变化？</h1>';
@@ -2552,7 +2582,7 @@ function renderFactors(id){
   const missed = d.score !== null && d.score <= 0;
   h += '<div class="stage-pick">';
   h += '<p class="lead-q">' + (missed ? '哪一环没对上？' : '哪一环最对？') + '</p>';
-  h += '<p class="note">这一条比分数更有用：它告诉我该改哪一步，而不是把哪个地方拉黑。</p>';
+  h += '<p class="note">这会帮助下次推荐更贴近你。</p>';
   h += '<div class="row">';
   STAGE_OPTIONS.forEach(o => {
     const on = d.mismatchStage === o.key;
@@ -2609,15 +2639,15 @@ function placeAggregate(placeId){
 function presenceLine(rec){
   const dwell = rec.dwellMinutes || stayMinutes(rec);
   if (rec.demo){
-    return "演示记录：抵达和离开由演示按钮模拟，只用于展示流程，不会保存，也不会进入任何地点汇总。";
+    return uiCopy("演示到访 · 由演示按钮模拟，不会保存", "Demo visit · simulated with the demo controls, not saved");
   }
   if (rec.presenceLevel === "geofence_dwell"){
-    return "到访已核验：进入这个地点的围栏并停留 " + dwell + " 分钟。位置判定在你手机上完成，坐标没有上传。";
+    return uiCopy("已确认到访 · 停留 " + dwell + " 分钟", "Visit confirmed · " + dwell + " min");
   }
   if (rec.presenceLevel === "dwell_only"){
-    return "按停留时长算数：停留 " + dwell + " 分钟。这个地点还没有人工核对过的坐标，所以没法用围栏核验。";
+    return uiCopy("已记录停留 · " + dwell + " 分钟", "Stay recorded · " + dwell + " min");
   }
-  return "这条算你自己说的：没有围栏核验，停留也不到 5 分钟。它会进你的轨迹，但不进任何地点的匿名汇总。";
+  return uiCopy("自行确认到访", "Visit confirmed by you");
 }
 
 /* 记完之后，立刻告诉他这条记录改变了什么。
@@ -2633,14 +2663,12 @@ function payoffBanner(rec){
   const factor = (rec.factors || [])[0];
   if (factor){
     lines.push(rec.changeScore > 0
-      ? '下次我会多给你带「' + escapeHTML(factor) + '」的地方'
-      : '下次我会避开「' + escapeHTML(factor) + '」这一类');
+      ? uiCopy('下次我会多给你带「' + escapeHTML(factor) + '」的地方', 'I’ll favor places with “' + escapeHTML(factor) + '” next time')
+      : uiCopy('下次我会避开「' + escapeHTML(factor) + '」这一类', 'I’ll show fewer places with “' + escapeHTML(factor) + '” next time'));
+  } else {
+    lines.push(uiCopy('这次变化会用于调整下次推荐', 'I’ll use this to tune your next recommendation'));
   }
-  const mine = state.records.length;
-  lines.push(mine < AGGREGATE_MIN
-    ? '这是第 ' + mine + ' 条 · 攒够 ' + AGGREGATE_MIN + ' 条，我就用你的记录替掉原来的估计'
-    : '你的 ' + mine + ' 条记录已经在替你改排序了');
-  return '<div class="payoff"><b>记下了，下次会不一样</b>' +
+  return '<div class="payoff"><b>' + uiCopy('已记下', 'Saved') + '</b>' +
          lines.map(l => '<span>' + l + '</span>').join("") + '</div>';
 }
 
@@ -2652,7 +2680,7 @@ function renderCard(recId, backTo){
   const isNew = rec.id === state.lastRecordId;
   // 反馈后符号"重新长一次"：光点按分数向环内 / 环外移动
   const moved = Math.max(12, p.sig.nodeDist - rec.changeScore * 11);
-  let h = topbar("到访卡", isNew ? (rec.demo ? "第四步 · 演示完成" : "第四步 · 已保存") : "历史记录", backTo || "#/records");
+  let h = topbar("到访卡", isNew ? (rec.demo ? "演示完成" : "已保存") : "历史记录", backTo || "#/records");
   if (isNew) h += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>';
   h += '<div class="screen"><div class="pad">';
   if (isNew){
@@ -2668,7 +2696,7 @@ function renderCard(recId, backTo){
   // 正面：你去过的地方
   h += '<div class="face face-front">';
   h += coverHTML(p, {badge:true, nodeDist:moved, tag:"f"});
-  h += '<div class="b"><h3>' + rec.placeName + '</h3>' +
+  h += '<div class="b"><h3>' + p.placeName + '</h3>' +
        '<div class="meta-row"><span><i>到访</i>' + fmtDate(rec.visitStartedAt) + '</span>' +
        '<span><i>停留</i>约 ' + stayMinutes(rec) + ' 分钟</span></div>' +
        '<div style="margin-top:11px">' + '<span class="stamp' + (rec.visibility === "anonymous" && !rec.demo ? " anon" : "") + '">' +
@@ -2704,10 +2732,10 @@ function renderCard(recId, backTo){
   }
   h += '</div>';
   h += '<button class="btn ghost flip-btn" data-flip="1">' + (state.flipped ? "← 翻回正面" : "翻到背面 · 看这次的变化 →") + '</button>';
-  h += '<section class="card-share" aria-label="导出心情轨迹卡"><p class="share-title">把今天这段轨迹带走</p>' +
-       '<p class="share-copy">生成 4:5 PNG，不包含你写下的私密原话。手机上会打开系统分享菜单；不支持时自动下载。</p>' +
-       '<div class="share-row"><button class="btn sm" data-share-card="' + escapeHTML(rec.id) + '">分享心情轨迹卡</button>' +
-       '<button class="btn ghost sm" data-save-card="' + escapeHTML(rec.id) + '">下载 PNG</button></div>' +
+  h += '<section class="card-share" aria-label="保存或分享心情轨迹卡"><p class="share-title">保存这段心情轨迹</p>' +
+       '<p class="share-copy">图片不会包含你的私密原话。</p>' +
+       '<div class="share-row"><button class="btn sm" data-share-card="' + escapeHTML(rec.id) + '">分享卡片</button>' +
+       '<button class="btn ghost sm" data-save-card="' + escapeHTML(rec.id) + '">保存图片</button></div>' +
        '<p class="share-status" role="status" aria-live="polite"></p></section>';
   if (rec.demo){
     h += '<div class="sample-note" style="margin-top:14px">演示反馈不会上传，也不会进入任何地点的统计。</div>';
@@ -2776,7 +2804,7 @@ function renderRecords(){
        '<div class="who"><h1>你的轨迹</h1><p>' + read.line + '</p></div>' +
        '<div class="av"><span>' + catSVG() + '</span></div></div>';
   h += '<div class="eye"><div class="head"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
-       '</span><b>我们的此在</b></div>';
+       '</span><b>从记录里看到的</b></div>';
   read.rows.forEach(r => {
     h += '<div class="row"><span class="dot">' + catDot(placeById(all.length ? all[0].placeId : "liangmahe")) +
          '</span><div><strong>' + r.t + '</strong><em>依据 · ' + r.e + '</em></div></div>';
@@ -2804,7 +2832,8 @@ function renderRecords(){
     h += '</div></div>';
   }
   h += '<div class="rec-head" style="padding-top:18px"><p class="eyebrow">你去过的地方</p>' +
-       '<h1 class="title sm">' + all.length + ' 次到访，<br>攒成了一片。</h1></div>';
+       '<h1 class="title sm">' + uiCopy(all.length + ' 次到访，<br>攒成了一片。',
+                                        all.length + (all.length === 1 ? ' visit' : ' visits') + '<br>in your trail.') + '</h1></div>';
   h += '<div class="rec-stat"><div><b class="num">' + (avg >= 0 ? "+" : "") + avg.toFixed(1) + '</b><small>平均变化</small></div>' +
        '<div><b class="num">' + anon + '</b><small>匿名贡献</small></div>' +
        '<div><b class="num">' + (all.length - anon) + '</b><small>只有你能看到</small></div></div>';
@@ -2826,7 +2855,7 @@ function renderRecords(){
       h += '<div class="b">';
       if (fresh) h += '<span class="fresh-tag">刚刚保存</span>';
       h += '<span class="date num">' + fmtDate(r.createdAt) + '</span>';
-      h += '<h4>' + r.placeName + '</h4>';
+      h += '<h4>' + p.placeName + '</h4>';
       h += '<div class="shift">' + r.preMood + ' <span style="color:var(--ink-faint)">→</span> ' + scoreLabel(r.changeScore) +
            ' <b class="' + scoreCls(r.changeScore) + ' num">' + signed(r.changeScore) + '</b></div>';
       if (r.factors.length) h += '<div class="mini-tags">' + r.factors.slice(0,3).map(f => '<span>' + f + '</span>').join("") + '</div>';
@@ -2837,8 +2866,9 @@ function renderRecords(){
     });
     h += '</div>';
   }
-  h += '<p style="padding:0 18px 22px;margin:0;font:11px/1.8 var(--mono);color:var(--ink-faint)">' +
-       '前三条是示例记录。你的记录存在这台设备上，没有账号。</p>';
+  if (DEMO_MODE){
+    h += '<p style="padding:0 18px 22px;margin:0;font:11px/1.8 var(--mono);color:var(--ink-faint)">当前为演示模式。</p>';
+  }
   h += '</div>';
   h += dock('给不给别人看，每条你自己定。');
   return h;
@@ -2860,25 +2890,21 @@ function renderNearby(placeFilter){
 
   let h = topbar(p ? p.placeName : "匿名汇总", p ? "这个空间的样本" : "样本怎么算", p ? "#/place/" + p.placeId : "#/records");
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">只聚合 · 不展示单条</p>';
-  h += '<h1 class="title sm">别人去了怎么样，<br>只以汇总的形式出现。</h1>';
-  h += '<p class="lead">单条评分可以刷，聚合不行。</p>';
+  h += '<p class="eyebrow">' + uiCopy('匿名汇总', 'Anonymous summary') + '</p>';
+  h += '<h1 class="title sm">' + uiCopy('这里对去过的人<br>有没有帮助？', 'Did this place help<br>the people who went?') + '</h1>';
+  h += '<p class="lead">' + uiCopy('只显示汇总，不展示任何人的单条记录。', 'Only the combined result is shown. Individual entries stay private.') + '</p>';
 
   h += '<div class="learned" style="margin-bottom:20px">';
-  h += '<div class="lh"><span>' + catSVG() + '</span>一条反馈要满足什么才算数</div>';
-  h += '<div class="lr"><strong>你得真的去过，而且待够 5 分钟</strong></div>';
-  h += '<div class="lr"><strong>你得自己选「匿名贡献」，默认不进</strong></div>';
-  h += '<div class="lr"><strong>一个地点攒够 ' + AGGREGATE_MIN + ' 条才出汇总</strong></div>';
-  h += '<div class="lr"><strong>反馈了就算数，不看你变好没有</strong></div>';
+  h += '<div class="lh"><span>' + catSVG() + '</span>' + uiCopy('统计方式', 'How it works') + '</div>';
+  h += '<div class="lr"><strong>' + uiCopy('仅计入已确认且主动匿名贡献的到访', 'Only confirmed visits you choose to contribute are counted') + '</strong></div>';
+  h += '<div class="lr"><strong>' + uiCopy('满 ' + AGGREGATE_MIN + ' 条后显示汇总', 'A summary appears after ' + AGGREGATE_MIN + ' visits') + '</strong></div>';
   h += '</div>';
 
   h += '<p class="eyebrow">现在攒到哪一步</p>';
   if (!rows.length){
     h += '<div class="empty" style="margin:0">' +
-         (p ? "这个空间还没有任何核验过的匿名反馈。" : "还没有任何一个空间攒到反馈。") +
-         '<br>第一条可以是你的。<br><br>' +
-         '<span style="font:11px var(--mono);color:var(--ink-faint)">这里空着是真的空着——' +
-         '我们不拿原型示例数据冒充统计。</span></div>';
+         uiCopy(p ? "这个空间还没有足够的匿名到访记录。" : "还没有足够的匿名到访记录。",
+                p ? "Not enough anonymous visits here yet." : "Not enough anonymous visits yet.") + '</div>';
   } else {
     h += '<div class="here" style="margin-top:0">';
     h += '<div class="h"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
@@ -3070,36 +3096,30 @@ function tierCard(o){
 function renderSettings(){
   const r = state.reach;
   const allowed = reachAllowed();
-  let h = topbar("你说了算", "授权与打扰", "#/talk");
+  let h = topbar("设置", "权限与提醒", "#/talk");
   h += '<div class="screen"><div class="pad">';
 
-  h += '<p class="eyebrow">信号分层 · 逐项可关</p>';
-  h += '<h1 class="title sm">我拿什么来猜<br>你此刻需要什么</h1>';
-  h += '<p class="lead">默认只开最外面那层。</p>';
+  h += '<p class="eyebrow">权限</p>';
+  h += '<h1 class="title sm">只打开你愿意给的</h1>';
+  h += '<p class="lead">定位和主动提醒都可以随时关闭。</p>';
 
   // 这一页的全部意义就是「存什么、不存什么」，所以只留这两行。
   // 原来每层还有一段解释，那段是把标题再说一遍。
   h += tierCard({
-    level:"默认层", key:"base", locked:true, on:true,
-    title:"时间，和你自己说的话",
+    level:"输入", key:"base", locked:true, on:true,
+    title:"你主动输入的内容",
     keep:"存：结构化之后的需求",
     drop:"不存：原话、语音"
   });
   h += tierCard({
-    level:"手机层", key:"location", on:r.grants.location,
+    level:"位置", key:"location", on:r.grants.location,
     title:"当前位置",
     keep:"存：到访结论",
     drop:"不存：你的坐标"
   });
-  h += tierCard({
-    level:"身体层", key:"body", pending:true, on:false,
-    title:"心率变化（HRV）",
-    keep:"接入后存：到访前后的差值",
-    drop:"永远不存：原始生理流、人脸"
-  });
 
-  h += '<p class="eyebrow" style="margin-top:26px">打扰</p>';
-  h += '<div class="setrow"><div class="txt"><b>让小在主动来找我</b>' +
+  h += '<p class="eyebrow" style="margin-top:26px">提醒</p>';
+  h += '<div class="setrow"><div class="txt"><b>主动提醒我</b>' +
        (r.stopped ? '<small>已经停了：你连着拒绝过几次，我不再自己回来。</small>' :
         allowed.ok ? "" : '<small>' + reachBlockedText(allowed.reason) + '</small>') + '</div>' +
        '<button class="switch' + (r.enabled ? " on" : "") + '" data-reachtoggle="1" aria-pressed="' + r.enabled + '"><i></i></button></div>';
@@ -3107,7 +3127,8 @@ function renderSettings(){
        '<div class="pick">' + [1,2,3].map(n =>
          '<button class="' + (r.dailyCap === n ? "on" : "") + '" data-cap="' + n + '">' + n + '</button>').join("") + '</div></div>';
   h += '<div class="setrow"><div class="txt"><b>静默时段</b>' +
-       '<small>' + r.silentFrom + ':00 到次日 ' + r.silentTo + ':00 不说话</small></div>' +
+       '<small>' + uiCopy(r.silentFrom + ':00 到次日 ' + r.silentTo + ':00 不说话',
+                          r.silentFrom + ':00–' + r.silentTo + ':00 · no reminders') + '</small></div>' +
        '<div class="pick">' + [[22,8],[21,9],[20,10]].map(w =>
          '<button class="' + (r.silentFrom === w[0] ? "on" : "") + '" data-silent="' + w[0] + ':' + w[1] + '">' +
          w[0] + '–' + w[1] + '点</button>').join("") + '</div></div>';
@@ -3115,9 +3136,11 @@ function renderSettings(){
 
   h += '<details class="fold" style="margin-top:26px"><summary>这台设备上存了什么</summary>';
   h += '<div class="tier"><div class="tb" style="padding-top:13px">' +
-       '到访记录 ' + state.records.length + ' 条（含 3 条演示数据）<b>行程状态 ' + (state.trip ? "1 条进行中" : "无") + '</b>' +
-       '<b>打扰记录：今天 ' + (r.todayKey === ReachPolicy.startOfDay(Date.now()) ? r.todayCount : 0) + ' 次</b>' +
-       '<b>一个匿名 session ID，不含姓名、手机号、设备指纹</b></div></div></details>';
+       uiCopy('到访记录 ' + state.records.length + ' 条', state.records.length + (state.records.length === 1 ? ' visit' : ' visits')) +
+       '<b>' + uiCopy('行程状态 ' + (state.trip ? "1 条进行中" : "无"), state.trip ? 'One trip in progress' : 'No trip in progress') + '</b>' +
+       '<b>' + uiCopy('打扰记录：今天 ' + (r.todayKey === ReachPolicy.startOfDay(Date.now()) ? r.todayCount : 0) + ' 次',
+                       'Reminders today: ' + (r.todayKey === ReachPolicy.startOfDay(Date.now()) ? r.todayCount : 0)) + '</b>' +
+       '<b>匿名会话标识，不含姓名或手机号</b></div></div></details>';
   h += '<button class="danger" data-wipe="1">清空这台设备上的全部记录</button>';
   if (state.pendingWipe){
     h += '<div class="confirm"><p>清空之后，你的到访记录、行程和打扰设置都会消失。' +
@@ -3126,12 +3149,11 @@ function renderSettings(){
          '<button class="yes" data-wipeyes="1">清空</button></div></div>';
   }
 
-  h += '<details class="fold" style="margin-top:26px"><summary>不会变的三条</summary>';
+  h += '<details class="fold" style="margin-top:26px"><summary>我们的边界</summary>';
   h += '<div class="boundary"><ul style="margin:0;padding-left:18px">' +
-       '<li>不诊断：不给情绪贴临床标签，生理数据只做校准</li>' +
+       '<li>不诊断：不给情绪贴临床标签</li>' +
        '<li>不评判：情绪变差不叫失败，只叫这次没接住</li>' +
-       '<li>不侵入社交：没有昵称、人脸、主页、私信、关注</li>' +
-       '<li>不做人脸识别，不采集原始生理流</li></ul></div></details>';
+       '<li>不做社交画像：没有人脸、主页、私信或关注</li></ul></div></details>';
   h += '</div></div>';
   h += dock('这一页上的每一项，关了就是关了。', {records:false});
   return h;
@@ -3152,21 +3174,21 @@ function renderTalk(){
   const locationMode = CurrentAI.getLocationMode();
   let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div>' +
           '<div style="display:flex;gap:10px;align-items:center">' + langToggle() +
-          '<button class="k" data-go="#/settings" style="letter-spacing:.14em">设置</button>' +
-          '<button class="k" data-go="#/records" style="letter-spacing:.14em">记录</button></div></div>';
+          '<button class="k" data-go="#/settings" style="letter-spacing:.14em">' + uiCopy('设置', 'Settings') + '</button>' +
+          '<button class="k" data-go="#/records" style="letter-spacing:.14em">' + uiCopy('记录', 'Records') + '</button></div></div>';
   h += '<div class="talk">';
   h += '<div class="zai">' + cloudSVG("withyou") + '</div>';
-  h += '<h1>想安静，想吃烤串，<br>都可以直接说。</h1>';
+  h += '<h1>' + uiCopy('想安静，想吃烤串，<br>都可以直接说。', 'Say how you feel,<br>or what you want to do.') + '</h1>';
   // 打字时麦克风退成小圆钮：一屏一个主动作，语音的优先级靠体量表达
-  h += '<button class="mic' + (state.talkTyping ? ' small' : '') + '" id="mic-button" aria-label="用语音说">' + micSVG() + '</button>';
+  h += '<button class="mic' + (state.talkTyping ? ' small' : '') + '" id="mic-button" aria-label="' + uiCopy('用语音说', 'Speak') + '">' + micSVG() + '</button>';
   h += '<p class="mic-cap" id="mic-cap">' +
        (state.reachNote ? escapeHTML(state.reachNote) : '') + '</p>';
   if (!state.talkTyping){
-    h += '<button class="type-toggle" id="type-toggle" aria-label="打字输入">⌨ 打字输入</button>';
+    h += '<button class="type-toggle" id="type-toggle" aria-label="' + uiCopy('打字输入', 'Type instead') + '">⌨ ' + uiCopy('打字输入', 'Type instead') + '</button>';
   } else {
     h += '<div class="typing"><textarea id="natural-input" maxlength="2000" ' +
-         'placeholder="比如：好累，想找个人少、能吹风的地方">' + escapeHTML(state.talkText) + '</textarea>' +
-         '<button class="send" id="natural-submit">发送</button></div>';
+         'placeholder="' + uiCopy('比如：好累，想找个人少、能吹风的地方', 'For example: I’m exhausted and want somewhere quiet outside') + '">' + escapeHTML(state.talkText) + '</textarea>' +
+         '<button class="send" id="natural-submit">' + uiCopy('发送', 'Send') + '</button></div>';
   }
   if (guardianState() === "leaning"){
     // 守则 12 防依赖：不劝阻，只提一句「我不是唯一的出口」
@@ -3175,10 +3197,10 @@ function renderTalk(){
   }
   h += '<div class="foot">' +
        '<button id="location-input"' + (locationMode === "real" ? ' class="on"' : '') + '>' +
-       (locationMode === "real" ? '✓ 已使用当前位置' : '⌖ 使用当前位置') + '</button>' +
-       '<button id="demo-location"' + (locationMode === "demo" || locationMode === "trip-demo" ? ' class="on"' : '') + '>' +
-       (locationMode === "trip-demo" ? '✓ 演示定位' : locationMode === "demo" ? '✓ 体验北京路线' : '体验北京路线') + '</button>' +
-       '<button class="quiet" data-go="#/mood">我不想说，自己挑</button></div>';
+       uiCopy(locationMode === "real" ? '✓ 已使用当前位置' : '⌖ 使用当前位置', locationMode === "real" ? '✓ Location on' : '⌖ Use my location') + '</button>' +
+       (DEMO_MODE ? '<button id="demo-location"' + (locationMode === "demo" || locationMode === "trip-demo" ? ' class="on"' : '') + '>' +
+       uiCopy(locationMode === "trip-demo" ? '✓ 演示定位' : locationMode === "demo" ? '✓ 体验北京路线' : '体验北京路线', locationMode === "trip-demo" ? '✓ Demo location' : locationMode === "demo" ? '✓ Beijing demo' : 'Try Beijing demo') + '</button>' : '') +
+       '<button class="quiet" data-go="#/mood">' + uiCopy('我不想说，自己挑', 'Choose instead') + '</button></div>';
   h += '</div>';
   h += tripStrip();
   return h;
@@ -3188,7 +3210,7 @@ function renderTalk(){
 function renderEcho(){
   const r = state.read;
   if (!r) return renderTalk();
-  let h = topbar("我听到的", "第一步 · 只确认一次", "#/talk");
+  let h = topbar("我听到的", "确认理解", "#/talk");
   h += '<div class="screen mid"><div class="pad">';
   h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
        '<div class="bubble"><span class="tag">小在</span><p>' + keepQuotedTogether(escapeHTML(r.acknowledgement)) + '</p></div></div>';
@@ -3254,8 +3276,7 @@ function renderFix(){
     }
   }
 
-  h += '<p class="lead" style="margin-top:20px">选完直接出结果，不会再让你确认一遍。<br>' +
-       (link === "state" ? '这些都是身体上的感觉，不是病名。' : '改哪一环都算数，改完还可以再改。') + '</p>';
+  if (link === "state") h += '<p class="lead" style="margin-top:20px">选最接近的一项。</p>';
   h += '<p class="status" id="natural-status" style="min-height:18px;font:11.5px/1.55 var(--sans);color:var(--ink-faint)"></p>';
   h += '</div></div>';
   h += dock('说错、改口、再改一次，都算数。', {records:false});
@@ -3273,7 +3294,7 @@ function renderOffer(){
   const p = placeById(main.place_id);
   const alts = offer.slice(1, 3);
 
-  let h = topbar("此刻给你一个", "第二步 · 推荐", "#/echo");
+  let h = topbar("此刻给你一个", "空间推荐", "#/echo");
   h += '<div class="screen"><div class="pad" style="padding-top:16px">';
   // FR-14 守护层：给了好几次推荐都没出发，就别再推第四个地方了。
   if (guardianState() === "withdrawn" && !state.guardianDismissed){
@@ -3354,9 +3375,9 @@ function keepQuotedTogether(escaped){
 /* US-06：给用户选地图，不替他决定。
    高德收 GCJ-02，Apple / Google 收 WGS-84，后端已经按各家坐标系分别转好了。 */
 const MAP_APPS = [
-  {key:"amap",   name:"高德地图",   note:"优先打开 App"},
-  {key:"apple",  name:"Apple 地图", note:"iPhone 自带"},
-  {key:"google", name:"Google 地图", note:"Google Maps"}
+  {key:"amap",   name:"高德地图",   enName:"Amap",        note:"优先打开 App", enNote:"Open the app"},
+  {key:"apple",  name:"Apple 地图", enName:"Apple Maps",  note:"iPhone 自带", enNote:"Built into iPhone"},
+  {key:"google", name:"Google 地图", enName:"Google Maps", note:"Google Maps", enNote:"Google Maps"}
 ];
 
 function mapSheet(){
@@ -3364,19 +3385,19 @@ function mapSheet(){
   if (!t) return "";
   const links = t.links || {};
   let h = '<div class="sheet" id="map-sheet"><div class="sheet-in">';
-  h += '<h4>用哪个地图带你去？</h4>';
+  h += '<h4>' + uiCopy('用哪个地图带你去？', 'Which map do you want to use?') + '</h4>';
   h += '<p class="sub">' + escapeHTML(t.placeName) + '</p>';
   MAP_APPS.forEach(app => {
     if (!links[app.key]) return;
     if (app.key === "amap"){
-      h += '<button type="button" class="map-choice" data-mapapp="amap"><span>' + app.name +
-           '</span><i>' + app.note + '</i></button>';
+      h += '<button type="button" class="map-choice" data-mapapp="amap"><span>' + uiCopy(app.name, app.enName) +
+           '</span><i>' + uiCopy(app.note, app.enNote) + '</i></button>';
     } else {
       h += '<a class="map-choice" href="' + escapeHTML(links[app.key]) + '" target="_blank" rel="noopener" data-mapapp="' + app.key + '">' +
-           '<span>' + app.name + '</span><i>' + app.note + '</i></a>';
+           '<span>' + uiCopy(app.name, app.enName) + '</span><i>' + uiCopy(app.note, app.enNote) + '</i></a>';
     }
   });
-  h += '<button class="cancel" id="map-cancel">先不去</button>';
+  h += '<button class="cancel" id="map-cancel">' + uiCopy('先不去', 'Not now') + '</button>';
   h += '</div></div>';
   return h;
 }
@@ -3389,7 +3410,7 @@ function mapStrip(rec){
   const url = CurrentAI.staticMapUrl(rec.latitude, rec.longitude, 640, 240);
   if (!url) return "";
   return '<div class="mapstrip"><img src="' + escapeHTML(url) + '" alt="' +
-         escapeHTML(rec.place_name) + '在地图上的位置" loading="lazy" ' +
+         uiCopy(escapeHTML(rec.place_name) + '在地图上的位置', escapeHTML(rec.place_name) + ' on the map') + '" loading="lazy" ' +
          'onerror="this.closest(\'.mapstrip\').remove()"><span class="pin"></span></div>';
 }
 
@@ -3404,12 +3425,15 @@ function reachLine(rec, p){
   if (rec.distance_source === "amap" && rec.walking_minutes){
     // 8 公里说「步行 108 分钟」不是贴心，是吓人。远的地方按骑行/公交算。
     const how = {walk:"步行", ride:"骑行", transit:"公交"}[rec.travel_mode] || "步行";
-    return how + "约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km";
+    const howEn = {walk:"walk", ride:"bike", transit:"transit"}[rec.travel_mode] || "walk";
+    return uiCopy(how + "约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km",
+                  rec.walking_minutes + " min by " + howEn + " · " + rec.distance_km + " km");
   }
   if (rec.distance_source === "amap_straight_line" && rec.distance_km != null){
-    return "直线约 " + rec.distance_km + " km";
+    return uiCopy("直线约 " + rec.distance_km + " km", rec.distance_km + " km away");
   }
-  return "约 " + rec.reach_minutes + " 分钟 · " + p.transport;
+  return uiCopy("约 " + rec.reach_minutes + " 分钟 · " + p.transport,
+                "About " + rec.reach_minutes + " min · " + p.transport);
 }
 /* 样本诚实（FR-10b / FR-19b）：没有真实到访数据时，不给任何平均分 */
 function sampleLine(rec){
@@ -3445,7 +3469,7 @@ function setLang(lang){
 const EN = {
   "此在 · Current": "Current",
   "首页": "Home", "轨迹": "Trail", "设置": "Settings", "记录": "Records", "推荐": "Picks",
-  "小在": "Xiaozai", "代价": "What it asks", "到达": "Getting there",
+  "小在": "Xiaozai", "代价": "Trade-offs", "到达": "Getting there",
   "营业": "Hours", "距离": "Distance", "待多久": "How long", "建议停留": "Suggested stay",
   "匿名": "anonymous", "私密": "private", "取消": "Cancel", "约": "about",
   "分钟": "min", "步行约": "about a", "条记录": " records", "瀑布流": "the grid",
@@ -3644,7 +3668,7 @@ const EN = {
   "绕到银锭桥就不想走了，坐了会儿。": "Got as far as Yinding Bridge and didn't want to walk further. Sat a while.",
   "人太多了，没看进去。": "Too many people. Couldn't take anything in.",
   "明显轻了": "noticeably lighter", "松了一点": "loosened a little", "还是有点沉": "still heavy",
-  "能一直走": "room to walk", "有水": "water", "坐得住": "somewhere to sit", "不必消费": "no need to buy",
+  "能一直走": "keep walking", "有水": "water nearby", "坐得住": "easy to linger", "不必消费": "no need to spend",
   "太挤": "too crowded",
   "刚从": "Just back from ", "回来吗？": "?",
   "我不评价这个地方。我只想知道它对": "I'm not rating this place. I only want to know what it did for ",
@@ -3689,7 +3713,53 @@ const EN = {
   "第一条可以是你的。": "The first one could be yours.",
   "全部": "All", "让我安静下来": "Calmed me", "给我能量": "Gave me energy", "没有帮助": "Didn't help",
   "还没有反复出现的因素": "No factor has shown up more than once yet",
-  "去过 3 个空间，室内偏多；平均变化": "3 places so far, mostly indoors; average change"
+  "去过 3 个空间，室内偏多；平均变化": "3 places so far, mostly indoors; average change",
+
+  /* 主要用户链路使用为 App 单独撰写的英文，不做逐字翻译。 */
+  "心情与需求": "Mood and needs", "直接说一句 →": "Say it instead →",
+  "你的偏好": "Your preferences", "选择方式": "Choose how",
+  "一次看一个地方。": "One place at a time.", "同时看看更多地方。": "Browse more places at once.",
+  "这里有什么": "What to expect", "空间印象": "What it feels like",
+  "来自实地体验": "First-hand note", "离开后": "After your visit",
+  "心情变化": "Mood shift", "保存方式": "Save it", "影响因素": "What changed",
+  "这会帮助下次推荐更贴近你。": "This helps tune your next recommendation.",
+  "确认理解": "Quick check", "空间推荐": "Your recommendation",
+  "选最接近的一项。": "Choose the closest fit.",
+  "保存这段心情轨迹": "Save this mood trail",
+  "图片不会包含你的私密原话。": "Your private note won't appear in the image.",
+  "分享卡片": "Share card", "保存图片": "Save image",
+  "保存或分享心情轨迹卡": "Save or share your mood trail card",
+  "从记录里看到的": "Patterns in your visits", "当前为演示模式。": "Demo mode is on.",
+  "权限与提醒": "Permissions and reminders", "权限": "Permissions", "提醒": "Reminders",
+  "只打开你愿意给的": "Share only what you choose",
+  "定位和主动提醒都可以随时关闭。": "You can turn off location and reminders at any time.",
+  "输入": "Input", "位置": "Location", "你主动输入的内容": "What you choose to share",
+  "主动提醒我": "Send me gentle reminders",
+  "匿名会话标识，不含姓名或手机号": "An anonymous session ID, with no name or phone number",
+  "我们的边界": "Our boundaries", "不诊断：不给情绪贴临床标签": "No diagnosis or clinical labels",
+  "不做社交画像：没有人脸、主页、私信或关注": "No social profiles, faces, DMs, or follows",
+  "统计方式": "How it works",
+  "只显示汇总，不展示任何人的单条记录。": "Only the combined result is shown. Individual entries stay private.",
+  "已记下": "Saved", "这次变化会用于调整下次推荐": "I'll use this to tune your next recommendation",
+  "演示到访 · 不保存": "Demo visit · not saved", "自行确认到访": "Visit confirmed by you",
+
+  "没什么力气，也不想解释": "Low on energy. Don't want to explain.",
+  "不想再被声音和人挤着": "Need less noise and fewer people.",
+  "念头一直转，坐不住": "Thoughts keep looping. Can't settle.",
+  "有力气，只是没方向": "Have some energy, but no direction.",
+  "身体想躺，脑子不肯": "Body is tired. Mind is still racing.",
+  "不难过，就是没着落": "Not exactly sad. Just unanchored.",
+  "说不上为什么，就是绷着": "Can't name it. Just tense.",
+  "不用说话，有人就行": "Want company without having to talk.",
+  "待腻了，想看点没见过的": "Ready for a change of scene.",
+  "兴致不错，想把它接下去": "Feeling good and want to keep it going.",
+  "不用被接住，想出去走走": "Doing okay. Just want to go out.",
+  "不被人看见": "Somewhere private", "能坐很久": "Sit for a while",
+  "不用花钱": "Spend nothing", "想看见绿色": "See some green",
+  "想看没见过的": "See something new", "想听点声音": "Hear something",
+  "周围有人就行": "Have people nearby", "想要吵一点": "Somewhere lively",
+  "想慢下来": "Slow down", "想手上有事做": "Keep my hands busy",
+  "想喘口气": "Catch my breath", "什么都不想决定": "Make no decisions"
 };
 
 /* 长串优先替换，避免短词先把长句里的字吃掉。 */
@@ -3764,7 +3834,8 @@ function render(){
   const r = state.route;
   let inner = "", isCompare = false;
 
-  if (r === "#/compare"){ isCompare = true; inner = renderCompare(); }
+  if (r === "#/compare" && DEMO_MODE){ isCompare = true; inner = renderCompare(); }
+  else if (r === "#/compare"){ state.route = "#/talk"; inner = renderTalk(); }
   else if (r === "#/talk")   inner = renderTalk();
   else if (r === "#/recheck")  inner = renderRecheck();
   else if (r === "#/settings") inner = renderSettings();
@@ -4500,12 +4571,12 @@ function bind(){
     Promise.resolve(result).then(outcome => {
       const en = currentLang() === "en";
       let message;
-      if (outcome.method === "share") message = en ? "Shared through the system share sheet." : "已通过系统分享菜单完成分享。";
+      if (outcome.method === "share") message = en ? "Shared." : "已分享。";
       else if (outcome.method === "cancelled") message = en ? "Share cancelled. Nothing was sent." : "已取消分享，卡片没有发出去。";
       else if (action === "share") message = en
-        ? "Image sharing is unavailable here, so the PNG was downloaded instead."
-        : "当前浏览器不能直接分享图片，已改为下载 PNG。";
-      else message = en ? "PNG downloaded." : "PNG 已下载。";
+        ? "Sharing is unavailable here, so the image was saved instead."
+        : "当前浏览器不能直接分享，图片已保存。";
+      else message = en ? "Image saved." : "图片已保存。";
       setCardExportUi(scope, false, message, false);
       if (outcome.method !== "cancelled") {
         CurrentAI.track("mood_card_exported", {place_id:place.placeId, method:outcome.method});

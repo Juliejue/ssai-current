@@ -125,9 +125,14 @@ function makeVoiceRuntime(options = {}) {
         ok: true,
         json: async () => {
           if (url.endsWith('/asr/capabilities')) {
-            return typeof options.tencentConfigured === 'boolean'
-              ? { tencent_realtime: options.tencentConfigured }
-              : {};
+            const capabilities = {};
+            if (typeof options.tencentConfigured === 'boolean') {
+              capabilities.tencent_realtime = options.tencentConfigured;
+            }
+            if (options.preferredProvider) {
+              capabilities.preferred_provider = options.preferredProvider;
+            }
+            return capabilities;
           }
           return url.endsWith('/asr/signature')
             ? { url: 'wss://asr.test/session' }
@@ -354,4 +359,33 @@ test('Tencent remains primary when configured and a failed session offers browse
   await runtime.current.toggleVoice(runtime.callbacks);
   assert.equal(runtime.recognitions.length, 1);
   assert.equal(runtime.recognitions[0].started, true);
+});
+
+test('the regional capability can start browser dictation on the first tap', async () => {
+  const runtime = makeVoiceRuntime({
+    browserSpeech: true,
+    tencentConfigured: true,
+    preferredProvider: 'browser',
+  });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+
+  assert.equal(runtime.recognitions.length, 1);
+  assert.equal(runtime.recognitions[0].started, true);
+  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), false);
+  assert.equal(runtime.sockets.length, 0);
+});
+
+test('Tencent remains the fallback when browser dictation is unavailable overseas', async () => {
+  const runtime = makeVoiceRuntime({
+    tencentConfigured: true,
+    preferredProvider: 'browser',
+  });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+
+  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), true);
+  assert.equal(runtime.sockets.length, 1);
 });
