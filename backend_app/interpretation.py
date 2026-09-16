@@ -29,17 +29,17 @@ RATE_LIMIT_BACKOFF_SECONDS = 1.5
 
 
 MOOD_RULES: dict[str, tuple[str, ...]] = {
-    "quiet": ("安静", "太吵", "不想听", "别说话"),
-    "noisy": ("脑子停不下来", "想太多", "一直想", "坐不住", "很乱"),
-    "spark": ("灵感", "没方向", "想创作", "想看看"),
-    "tired": ("很累", "好累", "累坏了", "累死了", "没睡", "困", "疲惫", "躺不住"),
-    "empty": ("空落落", "没着落", "空空", "没意思"),
-    "tight": ("发紧", "绷着", "喘不过", "心慌"),
-    "near": ("想有人", "陪我", "一个人难受", "有人在"),
-    "fresh": ("换个地方", "待腻", "没见过", "出去看看"),
-    "bright": ("很开心", "挺开心", "开心", "高兴", "快乐", "心情很好", "状态不错", "兴致很好"),
-    "okay": ("还行", "挺好", "没事", "随便走走", "跳舞", "蹦迪", "想动", "出去嗨", "想玩"),
-    "low": ("低落", "难过", "伤心", "难受", "委屈", "想哭", "没力气", "不开心", "心情不好", "糟糕"),
+    "quiet": ("安静", "太吵", "不想听", "别说话", "need it quiet", "need quiet", "too loud"),
+    "noisy": ("脑子停不下来", "想太多", "一直想", "坐不住", "很乱", "can't stop thinking", "mind won't stop", "racing thoughts", "restless"),
+    "spark": ("灵感", "没方向", "想创作", "想看看", "need inspiration", "feel creative", "want inspiration"),
+    "tired": ("很累", "好累", "累坏了", "累死了", "没睡", "困", "疲惫", "躺不住", "tired", "exhausted", "wiped out", "drained", "sleepy", "no energy"),
+    "empty": ("空落落", "没着落", "空空", "没意思", "feel empty", "feeling empty", "feel hollow", "unanchored"),
+    "tight": ("发紧", "绷着", "喘不过", "心慌", "tense", "stressed", "wound up", "on edge", "can't breathe"),
+    "near": ("想有人", "陪我", "一个人难受", "有人在", "want company", "someone nearby", "not be alone"),
+    "fresh": ("换个地方", "待腻", "没见过", "出去看看", "change of scene", "somewhere new", "get out of here"),
+    "bright": ("很开心", "挺开心", "开心", "高兴", "快乐", "心情很好", "状态不错", "兴致很好", "happy", "great mood", "excited"),
+    "okay": ("还行", "挺好", "没事", "随便走走", "跳舞", "蹦迪", "想动", "出去嗨", "想玩", "doing okay", "feel okay", "walk around", "go out"),
+    "low": ("低落", "难过", "伤心", "难受", "委屈", "想哭", "没力气", "不开心", "心情不好", "糟糕", "feel low", "feeling low", "sad", "upset", "bad mood", "feel awful"),
 }
 
 
@@ -86,19 +86,19 @@ PLACE_TYPE_LABELS: dict[str, str] = {
 }
 
 NEED_RULES: dict[str, tuple[str, ...]] = {
-    "hide": ("不想见人", "不被看见", "躲", "一个人"),
-    "sit": ("坐一会", "坐很久", "不想动"),
-    "walk": ("走走", "散步", "一直走", "走一会"),
-    "free": ("不花钱", "不想花钱", "不想花很多钱", "没钱", "便宜", "预算低", "少花点"),
-    "green": ("树", "绿色", "公园", "自然"),
-    "new": ("没见过", "新鲜", "换个地方"),
-    "sound": ("听音乐", "听点声音", "唱片"),
-    "people": ("有人在", "有人就行", "生活气", "想聊天", "和人说话", "找人聊", "认识人", "想社交"),
-    "loud": ("吵一点", "热闹", "蹦迪", "跳舞", "嗨一点"),
-    "slow": ("慢下来", "安静", "缓一缓"),
-    "hands": ("手上有事", "做点什么", "翻书"),
-    "breathe": ("喘口气", "透气", "发紧", "吹吹风", "吹风", "微风", "有风"),
-    "nothing": ("不想决定", "你替我选", "随便", "都可以"),
+    "hide": ("不想见人", "不被看见", "躲", "一个人", "don't want to see anyone", "want to be alone", "somewhere private"),
+    "sit": ("坐一会", "坐很久", "不想动", "sit down", "sit for a while", "don't want to move"),
+    "walk": ("走走", "散步", "一直走", "走一会", "take a walk", "keep walking", "go for a walk"),
+    "free": ("不花钱", "不想花钱", "不想花很多钱", "没钱", "便宜", "预算低", "少花点", "don't want to spend", "spend nothing", "free", "cheap", "low budget"),
+    "green": ("树", "绿色", "公园", "自然", "trees", "greenery", "nature"),
+    "new": ("没见过", "新鲜", "换个地方", "something new", "somewhere new", "change of scene"),
+    "sound": ("听音乐", "听点声音", "唱片", "listen to music", "hear music", "some sound", "records"),
+    "people": ("有人在", "有人就行", "生活气", "想聊天", "和人说话", "找人聊", "认识人", "想社交", "people around", "someone nearby", "talk to someone", "want company", "socialize"),
+    "loud": ("吵一点", "热闹", "蹦迪", "跳舞", "嗨一点", "somewhere loud", "somewhere lively", "party", "go dancing"),
+    "slow": ("慢下来", "安静", "缓一缓", "slow down", "take it slow", "somewhere quiet"),
+    "hands": ("手上有事", "做点什么", "翻书", "something to do", "keep my hands busy", "browse books"),
+    "breathe": ("喘口气", "透气", "发紧", "吹吹风", "吹风", "微风", "有风", "fresh air", "a breeze", "somewhere outside", "catch my breath"),
+    "nothing": ("不想决定", "你替我选", "随便", "都可以", "don't want to decide", "you choose", "anything works", "no decisions"),
 }
 
 # Safety routing is deliberately rule-first: explicit risk language must never be
@@ -210,18 +210,30 @@ CLARIFY_QUESTIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
 # （没配 Key、契约失败）不能连这个都丢。词表和 need_keys 是同一套。
 AVOID_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("people", ("不想见人", "不想见到人", "别跟人说话", "不想说话", "不想社交",
-                "人少点", "人少的", "少点人", "没什么人", "不要太多人", "别太多人", "不想应付")),
-    ("loud", ("不想吵", "别太吵", "太吵了", "怕吵", "安静点", "不要吵")),
-    ("hands", ("什么都不做", "啥都不想做", "不想动手", "不想干活", "不用动脑")),
+                "人少点", "人少的", "少点人", "没什么人", "不要太多人", "别太多人", "不想应付",
+                "don't want to see anyone", "avoid people", "fewer people", "not crowded", "don't want to socialize")),
+    ("loud", ("不想吵", "别太吵", "太吵了", "怕吵", "安静点", "不要吵", "not loud", "too loud", "avoid noise", "somewhere quiet")),
+    ("hands", ("什么都不做", "啥都不想做", "不想动手", "不想干活", "不用动脑", "do nothing", "nothing to do")),
 )
 
 
+def _token_match(text: str, token: str) -> re.Match[str] | None:
+    """Match Latin tokens as words while keeping Chinese substring behaviour."""
+    escaped = re.escape(token)
+    if token.isascii() and re.search(r"[A-Za-z0-9]", token):
+        escaped = rf"(?<![A-Za-z0-9_]){escaped}(?![A-Za-z0-9_])"
+    return re.search(escaped, text, flags=re.IGNORECASE)
+
+
 def _contains_any(text: str, patterns: tuple[str, ...]) -> bool:
-    return any(item in text for item in patterns)
+    return any(_token_match(text, item) for item in patterns)
 
 
 def interpret_with_rules(text: str) -> InterpretResponse:
-    mood_scores = {mood: sum(text.count(token) for token in tokens) for mood, tokens in MOOD_RULES.items()}
+    mood_scores = {
+        mood: sum(1 for token in tokens if _token_match(text, token))
+        for mood, tokens in MOOD_RULES.items()
+    }
     # 「难过 + 想找个安静的地方」里，难过是状态，安静是要求；不能因为词表
     # 顺序把要求反过来当成情绪。明确的身体/情绪词先决定 mood，环境仍进 need_keys。
     felt_moods = ("low", "bright", "tired", "empty", "tight")
@@ -232,7 +244,7 @@ def interpret_with_rules(text: str) -> InterpretResponse:
         mood_id = "okay"
 
     needs = [key for key, tokens in NEED_RULES.items() if _contains_any(text, tokens)]
-    place_types = [key for key, tokens in PLACE_TYPE_RULES.items() if _contains_any(text.casefold(), tuple(t.casefold() for t in tokens))]
+    place_types = [key for key, tokens in PLACE_TYPE_RULES.items() if _contains_any(text, tokens)]
     risk_text = text.casefold()
     self_harm = _contains_any(risk_text, URGENT_SELF_HARM_PATTERNS)
     harm_to_others = _contains_any(risk_text, URGENT_HARM_TO_OTHERS_PATTERNS)
@@ -249,22 +261,33 @@ def interpret_with_rules(text: str) -> InterpretResponse:
         risk_signals.append("severe_distress_language")
 
     energy = 2
-    if _contains_any(text, ("没力气", "很累", "好累", "累坏了", "累死了", "动不了", "不想动")):
+    if _contains_any(text, ("没力气", "很累", "好累", "累坏了", "累死了", "动不了", "不想动",
+                            "no energy", "tired", "exhausted", "wiped out", "drained", "don't want to move")):
         energy = 1
-    elif _contains_any(text, ("有力气", "想运动", "想跳", "想跑", "跳舞", "蹦迪", "想动", "出去嗨")):
+    elif _contains_any(text, ("有力气", "想运动", "想跳", "想跑", "跳舞", "蹦迪", "想动", "出去嗨",
+                              "work out", "workout", "go running", "go dancing", "want to move")):
         energy = 4
 
-    budget = "free" if _contains_any(text, ("不花钱", "不想花钱", "没钱", "免费")) else "low" if _contains_any(text, ("便宜", "不想花很多钱", "预算低", "少花点")) else "unknown"
+    budget = "free" if _contains_any(text, ("不花钱", "不想花钱", "没钱", "免费", "spend nothing", "don't want to spend", "free")) else "low" if _contains_any(text, ("便宜", "不想花很多钱", "预算低", "少花点", "cheap", "low budget", "not spend much")) else "unknown"
     social = (
-        "alone" if _contains_any(text, ("不想见人", "想一个人", "自己待着", "别跟人说话"))
-        else "low_contact" if _contains_any(text, ("有人但不说话", "不用说话", "有人就行", "有人在旁边"))
-        else "with_people" if _contains_any(text, ("想有人", "热闹", "很闹", "陪我", "想聊天", "和人说话", "认识人", "想社交"))
+        "alone" if _contains_any(text, ("不想见人", "想一个人", "自己待着", "别跟人说话", "don't want to see anyone", "want to be alone", "avoid people"))
+        else "low_contact" if _contains_any(text, ("有人但不说话", "不用说话", "有人就行", "有人在旁边", "people nearby but no talking", "company without talking"))
+        else "with_people" if _contains_any(text, ("想有人", "热闹", "很闹", "陪我", "想聊天", "和人说话", "认识人", "想社交", "want company", "talk to someone", "meet people", "socialize", "somewhere lively"))
         else "either"
     )
+    explicitly_outdoor = _contains_any(text, ("don't want to stay inside", "not indoors"))
+    explicitly_indoor = _contains_any(text, ("not outside", "don't want to be outside"))
+    wants_outdoor = _contains_any(text, (
+        "想去户外", "想在户外", "想去外面", "露天", "晒太阳", "能吹风", "吹吹风",
+        "微风", "有风", "河边", "江边", "水边", "湖边", "outside", "outdoors", "fresh air", "a breeze",
+        "by the river", "by the water", "in the sun",
+    ))
+    wants_indoor = _contains_any(text, (
+        "想待在室内", "想去室内", "不要户外", "不想在外面", "indoors", "stay inside",
+    ))
     environment = (
-        "outdoor" if _contains_any(text, ("想去户外", "想在户外", "想去外面", "露天", "晒太阳",
-                                                  "能吹风", "吹吹风", "微风", "有风", "河边", "江边", "水边", "湖边"))
-        else "indoor" if _contains_any(text, ("想待在室内", "想去室内", "不要户外", "不想在外面"))
+        "outdoor" if explicitly_outdoor or (wants_outdoor and not explicitly_indoor)
+        else "indoor" if explicitly_indoor or wants_indoor
         else "either"
     )
 
@@ -292,10 +315,16 @@ def interpret_with_rules(text: str) -> InterpretResponse:
 
 
 def _matched_tokens(text: str, patterns: tuple[str, ...]) -> list[str]:
-    return [token for token in patterns if token in text]
+    """Return the exact text the user typed, even for case-insensitive English matches."""
+    found: list[str] = []
+    for token in patterns:
+        match = _token_match(text, token)
+        if match:
+            found.append(match.group(0))
+    return found
 
 
-def _evidence_for(text: str, state: NeedState) -> list[str]:
+def _evidence_for(text: str, state: NeedState, lang: str = "zh") -> list[str]:
     """Quote the user's own words back. Never inferred, never stored, never logged.
 
     同一句话只引用一次。之前「不想见人」会先作为诉求出现、再作为社交约束出现，
@@ -303,51 +332,54 @@ def _evidence_for(text: str, state: NeedState) -> list[str]:
     """
     evidence: list[str] = []
     cited: set[str] = set()
+    english = lang == "en"
 
     for token in _matched_tokens(text, MOOD_RULES.get(state.mood_id, ())):
-        evidence.append(f"你说了「{token}」")
-        cited.add(token)
+        evidence.append(f"You said 「{token}」" if english else f"你说了「{token}」")
+        cited.add(token.casefold())
         break
 
     # 具体行动比抽象情绪更接近用户真正要求的东西，必须原样指出它是排序依据。
     for key in state.place_types:
-        tokens = [t for t in _matched_tokens(text.casefold(), tuple(v.casefold() for v in PLACE_TYPE_RULES.get(key, ()))) if t not in cited]
+        tokens = [t for t in _matched_tokens(text, PLACE_TYPE_RULES.get(key, ())) if t.casefold() not in cited]
         if not tokens:
             continue
-        evidence.append(f"「{tokens[0]}」——我先按这个找")
-        cited.add(tokens[0])
+        evidence.append(f"「{tokens[0]}」 — I’ll start there" if english else f"「{tokens[0]}」——我先按这个找")
+        cited.add(tokens[0].casefold())
         if len(evidence) >= 3:
             break
 
     for key in state.need_keys:
-        tokens = [t for t in _matched_tokens(text, NEED_RULES.get(key, ())) if t not in cited]
+        tokens = [t for t in _matched_tokens(text, NEED_RULES.get(key, ())) if t.casefold() not in cited]
         if not tokens:
             continue
-        evidence.append(f"「{tokens[0]}」——我理解成{NEED_LABELS.get(key, key)}")
-        cited.add(tokens[0])
+        label = NEED_LABELS_EN.get(key, key) if english else NEED_LABELS.get(key, key)
+        evidence.append(f"「{tokens[0]}」 — I kept that in the search" if english else f"「{tokens[0]}」——我理解成{label}")
+        cited.add(tokens[0].casefold())
         if len(evidence) >= 2:
             break
 
     if len(evidence) < 3:
         # 兜底那条也必须引用用户真说过的词，不能写死一句「你说了不想见人」。
-        constraints: list[tuple[bool, tuple[str, ...], str]] = [
-            (state.budget_level in {"free", "low"}, ("不花钱", "不想花钱", "不想花很多钱", "没钱", "免费", "便宜", "预算低", "少花点"), "所以我只找花不了什么钱的地方"),
-            (state.social_mode == "alone", ("不想见人", "一个人", "别跟人说话", "躲"), "所以我把人多的地方去掉了"),
-            ("people" in state.avoid_tags, ("不想见人", "不想见到人", "人少点", "人少的", "少点人", "没什么人", "不要太多人", "别太多人"), "所以我把人多的地方往后放了"),
-            (state.energy <= 1, ("没力气", "很累", "好累", "累坏了", "累死了", "动不了", "不想动", "困", "疲惫"), "所以我把远的地方往后放了"),
+        constraints: list[tuple[bool, tuple[str, ...], str, str]] = [
+            (state.budget_level in {"free", "low"}, ("不花钱", "不想花钱", "不想花很多钱", "没钱", "免费", "便宜", "预算低", "少花点", "spend nothing", "don't want to spend", "free", "cheap", "low budget"), "所以我只找花不了什么钱的地方", "so I’ll keep the cost low"),
+            (state.social_mode == "alone", ("不想见人", "一个人", "别跟人说话", "躲", "don't want to see anyone", "want to be alone", "avoid people"), "所以我把人多的地方去掉了", "so I’ll leave crowded places out"),
+            ("people" in state.avoid_tags, ("不想见人", "不想见到人", "人少点", "人少的", "少点人", "没什么人", "不要太多人", "别太多人", "fewer people", "not crowded", "avoid people"), "所以我把人多的地方往后放了", "so crowded places will move down"),
+            (state.energy <= 1, ("没力气", "很累", "好累", "累坏了", "累死了", "动不了", "不想动", "困", "疲惫", "no energy", "tired", "exhausted", "wiped out", "drained"), "所以我把远的地方往后放了", "so I’ll keep the trip short"),
         ]
-        for applies, tokens, consequence in constraints:
+        for applies, tokens, consequence, consequence_en in constraints:
             if not applies:
                 continue
-            fresh = [t for t in _matched_tokens(text, tokens) if t not in cited]
+            fresh = [t for t in _matched_tokens(text, tokens) if t.casefold() not in cited]
             if not fresh:
                 continue
-            evidence.append(f"「{fresh[0]}」——{consequence}")
-            cited.add(fresh[0])
+            evidence.append(f"「{fresh[0]}」 — {consequence_en}" if english else f"「{fresh[0]}」——{consequence}")
+            cited.add(fresh[0].casefold())
             break
 
     if not evidence:
-        evidence.append("你说的话里我没抓到很明确的线索，所以这一条我不太确定")
+        evidence.append("I couldn’t find a clear signal in that, so I’m not fully sure." if english
+                        else "你说的话里我没抓到很明确的线索，所以这一条我不太确定")
     return evidence[:3]
 
 
@@ -384,7 +416,7 @@ def _restatement(state: NeedState, lang: str = "zh") -> str:
         labels = (PLACE_TYPE_LABELS_EN if lang == "en" else PLACE_TYPE_LABELS)
         named = [labels[key] for key in state.place_types if key in labels][:2]
         if lang == "en":
-            return "I hear the feeling, and your request is specific: " + " and ".join(named) + ". I'll start there, not replace it with a guess."
+            return "I hear you. You were clear about what you want: " + " and ".join(named) + ". I’ll start there."
         empathy = {
             "low": "听起来今天有点不好受。", "tight": "听起来你现在还绷着。",
             "tired": "听起来你真的累了。", "empty": "听起来心里有点空。",
@@ -421,10 +453,14 @@ def _quotes_the_user(line: str, text: str) -> bool:
     模型编一句听起来很懂的话是很容易的，所以逐条核对「」里的片段确实出现在
     原文里；再挡掉泄漏出来的字段名和过长的书面语（FR-28 代码侧护栏）。
     """
-    if len(line) > 40 or any(leak in line.lower() for leak in EVIDENCE_LEAKS):
+    # Chinese evidence is compact; natural English needs a word limit instead
+    # of the Chinese character limit or nearly every honest line is discarded.
+    has_cjk = bool(re.search(r"[\u3400-\u9fff]", line.replace("「", "").replace("」", "")))
+    too_long = len(line) > 40 if has_cjk else len(line.split()) > 25
+    if too_long or any(leak in line.lower() for leak in EVIDENCE_LEAKS):
         return False
-    quoted = re.findall(r"「([^」]{1,20})」", line)
-    return bool(quoted) and all(q in text for q in quoted)
+    quoted = re.findall(r"「([^」]{1,60})」", line)
+    return bool(quoted) and all(q.casefold() in text.casefold() for q in quoted)
 
 
 def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[str] | None = None, lang: str = "zh") -> InterpretResponse:
@@ -446,7 +482,7 @@ def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[st
             line.strip() for line in model_evidence
             if isinstance(line, str) and line.strip() and _quotes_the_user(line, text)
         ][:3]
-    response.evidence = verified or _evidence_for(text, state)
+    response.evidence = verified or _evidence_for(text, state, lang)
     # FR-03：四环都要能一步纠正，不能只让用户改「状态」这一环。
     # 地点那一环不给选项——「这几个都不想去」本身就是动作。
     english = lang == "en"

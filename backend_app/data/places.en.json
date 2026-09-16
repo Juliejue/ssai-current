@@ -64,7 +64,7 @@
     },
     "fusheng": {
       "placeName": "Fusheng Records",
-      "action": "Browse a round after the movie",
+      "action": "Browse the records after the movie",
       "category": "record shop · indoors",
       "see": "Shelves packed tight. If the owner is there, you might chat.",
       "cost": "Low. It's fine to browse without buying.",
@@ -93,7 +93,7 @@
     },
     "kule": {
       "placeName": "Kule Records",
-      "action": "Squeeze into the rock section to grab a spot",
+      "action": "Browse the packed rock section",
       "category": "record shop · indoors",
       "see": "Narrow aisles, the rock section is always standing room only",
       "cost": "Low. But it's tight, staying long feels cramped",
@@ -211,7 +211,7 @@
     },
     "zuoshu": {
       "placeName": "Zuoshu · Longfu Temple",
-      "action": "Stand for a long time in front of the feminism shelf",
+      "action": "Take your time at the feminism shelf",
       "category": "bookstore · coffee · market",
       "see": "Shelves for feminism, non-fiction, and niche philosophy; doubles as a cafe",
       "cost": "Medium. Browsing is free, but sitting down requires ordering a drink",
@@ -453,7 +453,7 @@
     "langyuan": {
       "placeName": "Langyuan",
       "action": "Wander the grounds without a destination",
-      "category": "campus · semi-outdoor",
+      "category": "creative park · semi-outdoor",
       "see": "Converted old factories, bookstores, occasional exhibitions and markets",
       "cost": "Low. Browsing is free",
       "suggestedDuration": "40–90 minutes",
@@ -483,7 +483,7 @@
     },
     "yangmeizhu": {
       "placeName": "Yangmeizhu Xiejie",
-      "action": "Walk a hutong that hasn't been polished up yet",
+      "action": "Walk through a hutong that still feels lived-in",
       "category": "hutong · outdoors",
       "see": "Courtyards where people live, a few small shops, grey bricks and wires",
       "cost": "Free. Walking costs nothing",
@@ -572,8 +572,8 @@
     },
     "yunnanxiaochu": {
       "placeName": "Yunnan Xiaochu",
-      "action": "Get a bowl of stinky tofu rice noodles, done in twenty minutes",
-      "category": "eat · indoors",
+      "action": "Grab a bowl of stinky tofu rice noodles",
+      "category": "noodle shop · indoors",
       "see": "Tiny spot, packed at lunch",
       "cost": "Low. Price of one noodle bowl",
       "suggestedDuration": "20–40 mins",
@@ -602,7 +602,7 @@
     "huogui": {
       "placeName": "Huogui paro",
       "action": "Go on a Tuesday for the buy-one-get-one pizza deal",
-      "category": "eat · indoors",
+      "category": "pizzeria · indoors",
       "see": "Pizza oven, busier on Tuesdays",
       "cost": "Mid. Buy-one-get-one on Tuesdays, regular price otherwise",
       "suggestedDuration": "40–80 mins",
@@ -631,7 +631,7 @@
     "niaozhouli": {
       "placeName": "Niaozhouli",
       "action": "Eat yakitori at Liangmaqiao after dusk",
-      "category": "food · indoors",
+      "category": "yakitori · indoors",
       "see": "Counter seats face the grill; sitting alone is normal",
       "cost": "Mid-high. Japanese cuisine prices",
       "suggestedDuration": "60–90 minutes",
@@ -720,7 +720,7 @@
     "school": {
       "placeName": "School",
       "action": "Stand at the back and listen to the whole set",
-      "category": "livehouse · indoors",
+      "category": "live music · indoors",
       "see": "Small venue, packed, loud sound",
       "cost": "Medium. Ticket plus drinks",
       "suggestedDuration": "90–180 minutes",
@@ -749,7 +749,7 @@
     },
     "zhaodai": {
       "placeName": "zhaodai",
-      "action": "Dance until your brain shuts off",
+      "action": "Dance until your thoughts quiet down",
       "category": "club · indoors",
       "see": "Gets busy late, great sound system",
       "cost": "High. Ticket plus drinks",

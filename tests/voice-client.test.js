@@ -125,9 +125,14 @@ function makeVoiceRuntime(options = {}) {
         ok: true,
         json: async () => {
           if (url.endsWith('/asr/capabilities')) {
-            return typeof options.tencentConfigured === 'boolean'
-              ? { tencent_realtime: options.tencentConfigured }
-              : {};
+            const capabilities = {};
+            if (typeof options.tencentConfigured === 'boolean') {
+              capabilities.tencent_realtime = options.tencentConfigured;
+            }
+            if (options.preferredProvider) {
+              capabilities.preferred_provider = options.preferredProvider;
+            }
+            return capabilities;
           }
           return url.endsWith('/asr/signature')
             ? { url: 'wss://asr.test/session' }
@@ -256,7 +261,7 @@ test('browser dictation is a real first-tap fallback when Tencent is not configu
   assert.equal(recognition.continuous, true);
   assert.equal(recognition.interimResults, true);
   assert.equal(recognition.maxAlternatives, 1);
-  assert.ok(runtime.statuses.includes('我在听（浏览器听写），再按一次结束'));
+  assert.ok(runtime.statuses.includes('我在听，再按一次结束'));
   assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), false);
   assert.equal(runtime.sockets.length, 0);
 
@@ -349,9 +354,38 @@ test('Tencent remains primary when configured and a failed session offers browse
   const socket = runtime.sockets[0];
   socket.open();
   socket.receive({ code: 6001 });
-  assert.match(runtime.errors[0], /再点一次麦克风可改用浏览器听写/);
+  assert.match(runtime.errors[0], /再点一次麦克风可以重试/);
 
   await runtime.current.toggleVoice(runtime.callbacks);
   assert.equal(runtime.recognitions.length, 1);
   assert.equal(runtime.recognitions[0].started, true);
+});
+
+test('the regional capability can start browser dictation on the first tap', async () => {
+  const runtime = makeVoiceRuntime({
+    browserSpeech: true,
+    tencentConfigured: true,
+    preferredProvider: 'browser',
+  });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+
+  assert.equal(runtime.recognitions.length, 1);
+  assert.equal(runtime.recognitions[0].started, true);
+  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), false);
+  assert.equal(runtime.sockets.length, 0);
+});
+
+test('Tencent remains the fallback when browser dictation is unavailable overseas', async () => {
+  const runtime = makeVoiceRuntime({
+    tencentConfigured: true,
+    preferredProvider: 'browser',
+  });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+
+  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), true);
+  assert.equal(runtime.sockets.length, 1);
 });

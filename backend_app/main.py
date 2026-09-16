@@ -72,11 +72,36 @@ async def asr_signature() -> dict[str, str | int]:
         raise HTTPException(status_code=503, detail=str(error)) from error
 
 
+def _env_flag(name: str) -> bool:
+    return os.getenv(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _preferred_asr_provider(request: Request, tencent_configured: bool) -> str:
+    """Choose a voice path without asking the user about network geography.
+
+    Tencent classifies Hong Kong, Macao, Taiwan and other non-mainland traffic
+    as cross-border realtime ASR. Until that entitlement is enabled, browsers
+    outside mainland China should start their own dictation path first. We only
+    use Vercel's country header for this routing decision and never return or
+    store the region itself.
+    """
+    if not tencent_configured:
+        return "browser"
+    country = request.headers.get("x-vercel-ip-country", "").strip().upper()
+    if country and country != "CN" and not _env_flag("ASR_CROSS_BORDER_ENABLED"):
+        return "browser"
+    return "tencent"
+
+
 @app.get("/api/v1/asr/capabilities")
-async def asr_capabilities(response: Response) -> dict[str, bool]:
+async def asr_capabilities(request: Request, response: Response) -> dict[str, bool | str]:
     """Tell the client which voice path to start; never expose credentials."""
     response.headers["Cache-Control"] = "no-store"
-    return {"tencent_realtime": realtime_asr_is_configured()}
+    configured = realtime_asr_is_configured()
+    return {
+        "tencent_realtime": configured,
+        "preferred_provider": _preferred_asr_provider(request, configured),
+    }
 
 
 @app.get("/api/v1/map/static")

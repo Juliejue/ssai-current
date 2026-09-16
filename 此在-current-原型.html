@@ -1459,7 +1459,51 @@ function placeFromRecommendation(rec){
 /* 26 个人工地点的英文版（scripts/translate_places.py 生成）。
    后端在 lang=en 时已经用它出推荐卡；但详情页、记录页是前端直接读本地 PLACES 渲染的，
    所以这份也得带到前端来，否则切了英文还有一半是中文。 */
-const PLACES_EN = {"fruityshop":{"placeName":"fRUITYSHOP","action":"Ask them to play one for you","category":"record shop · indoors","see":"A wall of vinyl, a good sound system","cost":"Low. You can just listen without buying; staff won't push.","suggestedDuration":"20–60 minutes","transport":"Metro Line 8, Shichahai","matchReason":{"spark":"When you need inspiration, letting someone else pick is easier than searching—ask for one and they'll play it.","fresh":"The stock here isn't the same batch you see on streaming apps. Ten minutes of browsing turns up things you haven't heard.","low":"No talking required, no purchase needed. Standing there listening to one side counts as a win.","_":"Few places let your hands be busy and your ears engaged at the same time."},"placeInsights":[{"t":"Listen without buying","d":"Ask for a track and they play it; the staff know their inventory well. This alone lowers the pressure."},{"t":"Fair prices","d":"A new Aphex Twin record costs 320 here, versus 588 at the shop on Chaoyue's fifth floor."}],"environmentTags":["audition available","no purchase necessary","good sound","jazz/electronic/rock"]},"postpost":{"placeName":"postpost","action":"Grab a book off the shelf and sit down","category":"bookstore · concept store · coffee","see":"Walls of browsable books, full Genelec audio setup, own-brand and curated clothing","cost":"Medium. You can just sit and read, but the curry rice and pour-over are worth ordering","suggestedDuration":"60–120 minutes","transport":"Line 10, Tuanjiehu Station","matchReason":{"spark":"The selection and new arrivals move fast enough that you’ll likely find something in an hour.","tired":"Every corner on the first floor sounds good. Sit down without deciding where to go next; stay until you don’t want to anymore.","fresh":"Books, clothes, curry, and drinks under one roof. A quick walk around fills your senses.","_":"All shelf books are available for borrowing—you can finish them without buying, which is rare for a bookstore."},"placeInsights":[{"t":"Shelf books borrowable","d":"As a bookstore, this matters most. You don’t have to pay upfront to read."},{"t":"Club-grade sound system","d":"Full Genelec setup. Every corner on the first floor offers a good listening experience."}],"environmentTags":["borrowable shelves","great sound","curated selection","easy to linger"]},"fusheng":{"placeName":"Fusheng Records","action":"Browse a round after the movie","category":"record shop · indoors","see":"Shelves packed tight. If the owner is there, you might chat.","cost":"Low. It's fine to browse without buying.","suggestedDuration":"20–40 mins","transport":"Line 4, Xinjiekou Station","matchReason":{"spark":"It's on the same line as the Film Archive and Douzai Coffee. You can string them together in one afternoon without making new decisions.","noisy":"Flipping through records is repetitive. Your hands keep moving, and your thoughts slow down with them.","_":"Places you pass by are easier to start than places you go out of your way for."},"placeInsights":[{"t":"Easy chain","d":"Watch a film at the Archive, get coffee at Douzai, flip through records here—all on one street."},{"t":"The search is the thing","d":"No goal needed. Whatever you find, you find."}],"environmentTags":["next to archive","easy chain","no purchase required"]},"kule":{"placeName":"Kule Records","action":"Squeeze into the rock section to grab a spot","category":"record shop · indoors","see":"Narrow aisles, the rock section is always standing room only","cost":"Low. But it's tight, staying long feels cramped","suggestedDuration":"20–40 minutes","transport":"Metro Line 5, Zhangzizhonglu","matchReason":{"fresh":"Stock is complete, but it's crowded. If you want something new and don't mind being close to people, this is it.","okay":"When you're feeling okay, squeezing in can actually be fun.","_":"Bookstores and record shops are clustered around Dongsi, easy to visit together."},"placeInsights":[{"t":"Really crowded","d":"The rock section often gets blocked by people, so you can't see everything. Good to know beforehand."},{"t":"On the Dongsi line","d":"Sanlian, Paper Sound, and Maybe Books are nearby, making for a good combined trip."}],"environmentTags":["very crowded","full stock","dongsi book street"]},"wansheng":{"placeName":"All Sages Bookstore","action":"Browse the social sciences section until closing","category":"bookshop · indoors","see":"Floor-to-ceiling shelves of social science books, with a coffee area nearby","cost":"Low. You can just look; if you sit in the coffee area, you need to order.","suggestedDuration":"60–150 minutes","transport":"Metro Line 4, Peking University East Gate","matchReason":{"quiet":"The quiet here isn't luck; it's how the space is built.","tired":"You can sit without being watched or asked how long you're staying.","tight":"High shelves and narrow aisles hold your gaze, which often helps you loosen up.","_":"Being alone here requires no explanation to anyone."},"placeInsights":[{"t":"Staying long is normal","d":"Sitting from afternoon until close isn't strange; it's the default here."},{"t":"Pizza next door","d":"Fire Ghost Paro is a short walk away, with buy-one-get-one pizza on Tuesdays."}],"environmentTags":["quiet","easy to sit","academic","no purchase needed"]},"sanlian":{"placeName":"Sanlian Taofen Bookstore","action":"Sit on the steps and finish a book","category":"bookstore · indoors","see":"Steps you can sit on, sunken reading area","cost":"Low. Sitting on the steps to read requires no purchase","suggestedDuration":"40–90 minutes","transport":"Line 5, Zhangzizhonglu Station","matchReason":{"low":"No need to sit up straight. Any posture works on the steps. Two pages is enough.","tired":"The seat here isn't bought with consumption; it's just allowed.","_":"Holding a book gives you a valid reason to be alone."},"placeInsights":[{"t":"Sitting without buying","d":"The steps and sunken area are for sitting, not decoration."},{"t":"On Dongsi book line","d":"Next to Paper Sound, Maybe Books, and Zuoshu; easy to chain into half a day."}],"environmentTags":["sit on floor","no purchase needed","Dongsi line"]},"zhishang":{"placeName":"Zhishang Shengyin","action":"Flip through indie publications you haven't seen before","category":"bookstore · indoors","see":"Indie publications, zines, uncommon prints","cost":"Low. Browsing is free","suggestedDuration":"20–50 mins","transport":"Line 5, Zhangzizhonglu","matchReason":{"spark":"Most items here aren't in algorithmic feeds; you might stumble on something.","fresh":"The upside of indie publishing is a high ratio of unknowns.","_":"Small shops have a different kind of quiet—not empty, just unmonitored."},"placeInsights":[{"t":"High ratio of unknowns","d":"These items rarely show up in your feed."},{"t":"Very small space","d":"It gets cramped when busy; weekday afternoons are better."}],"environmentTags":["indie publishing","small and quiet","dongsi area"]},"zuoshu":{"placeName":"Zuoshu · Longfu Temple","action":"Stand for a long time in front of the feminism shelf","category":"bookstore · coffee · market","see":"Shelves for feminism, non-fiction, and niche philosophy; doubles as a cafe","cost":"Medium. Browsing is free, but sitting down requires ordering a drink","suggestedDuration":"40–90 minutes","transport":"Metro Line 6, Dongsi","matchReason":{"spark":"The selection has a stance—feminism, non-fiction, and lesser-known philosophy are all here.","near":"People around you are reading similar things, but no one will interrupt.","_":"You can read, sit, and have a drink; three things for an afternoon, all in one place."},"placeInsights":[{"t":"Curated with intent","d":"Not arranged by bestseller lists, but carefully chosen by someone."},{"t":"Also a cafe","d":"No need to move when you're tired; this removes one decision."}],"environmentTags":["good curation","coffee available","occasional markets"]},"soloist":{"placeName":"soloist coffee","action":"Watch the sunset hit the grey tiles","category":"coffee · hutong","see":"Grey roof tiles and a hutong outside the window; light in the evening","cost":"Medium. The price of a coffee","suggestedDuration":"40–80 minutes","transport":"Metro Line 2, Qianmen","matchReason":{"low":"Sit and watch the sky change. You don't have to do anything.","tight":"Outside is slow: tiles, the alley, people walking by. Tension might loosen on its own.","empty":"Life happens around you. You don't need to join in, just watch.","_":"Go in the evening. Half the appeal here is the light."},"placeInsights":[{"t":"Light is the main event","d":"Sunset on grey tiles doesn't require your participation."},{"t":"Street isn't polished","d":"It feels lived-in. Walking in and out shifts your pace."}],"environmentTags":["sunset view","lived-in feel","best at dusk"]},"douzai":{"placeName":"Douzai Coffee","action":"Wait for a movie to start","category":"coffee · indoors","see":"Most people are waiting for a film; many sit alone","cost":"Medium. Price of a cup","suggestedDuration":"30–60 mins","transport":"Metro Line 4, Xinjiekou","matchReason":{"quiet":"Most others are here alone too, so sitting by yourself feels normal.","tired":"You have a clear reason to wait, so resting doesn't need an excuse.","_":"It's on the same line as the Film Archive and Fusheng Records, good for a chain."},"placeInsights":[{"t":"Alone is default","d":"Sitting here solo requires no explanation."},{"t":"Valid reason to wait","d":"Waiting for the start time makes staying put feel justified."}],"environmentTags":["next to archive","mostly solo visitors","quiet"]},"beipingjiqi":{"placeName":"Beiping Machine","action":"Sit at the bar alone with a drink","category":"craft beer · indoors","see":"Long bar counter, many solo visitors, frequent menu changes","cost":"Mid-high. Price of one craft beer","suggestedDuration":"40–90 minutes","transport":"Metro Line 8, Gulou Dajie","matchReason":{"empty":"The bar means people are nearby, but no one expects you to talk.","near":"If you want company without the effort of socializing, the bar is the easiest spot.","okay":"When you're doing fine, one drink is enough; no need to stay late.","_":"Sitting at the bar alone here is normal, not something that needs explaining."},"placeInsights":[{"t":"Solo is normal","d":"Half the seats at the bar are taken by people drinking alone."},{"t":"Leave anytime","d":"Finish your drink and pay; there's no pressure to stay until closing."}],"environmentTags":["solo bar seating","no socializing required","Gulou area"]},"liangmahe":{"placeName":"Liangma River","action":"Walk along the river, thinking as you go","category":"riverbank · outdoors","see":"Riverside paths, lights across the water, people walking at dusk","cost":"Free. No spending required","suggestedDuration":"30–90 minutes","transport":"Metro Line 10, Liangmaqiao Station","matchReason":{"noisy":"The water keeps moving; your looping thoughts might struggle to keep up.","low":"This place doesn't ask you to cheer up, just pulls your gaze further than your thoughts.","tight":"As you walk, your breathing lengthens on its own, without you having to adjust it.","empty":"A long line with no choices to make; however far you go counts.","_":"No consumption needed, and no one asks how long you're staying."},"placeInsights":[{"t":"Keep walking","d":"When your body is moving, you don't have to force clarity."},{"t":"Dusk is best","d":"The half-hour when daylight swaps with the lights is worth rushing for."}],"environmentTags":["walkable","waterfront","best at dusk","free"]},"shichahai":{"placeName":"Shichahai","action":"Walk along the water. You don't have to finish the loop.","category":"waterfront · outdoors","see":"Willows on the bank, people rowing boats, the quieter stretch further along","cost":"Free. Unless you want a drink to sit with.","suggestedDuration":"40–120 mins","transport":"Line 8, Shichahai Station","matchReason":{"noisy":"Walking by the water is a mindless motion. Go as far as you feel like.","empty":"Life keeps happening on the banks. You don't need to join in, just pass through.","low":"If you get tired or hot, there are shops right at the subway exit. Sit down, rest, then keep going.","_":"Following the water from Xihai is the most comfortable part of this route."},"placeInsights":[{"t":"Stop anytime","d":"No need to complete the full circle; turn back when you're done."},{"t":"Quieter to the north","d":"It gets calmer closer to the Xihai side."}],"environmentTags":["walkable","waterfront","free","long walk"]},"beihai":{"placeName":"Beihai Park","action":"Sit by the shore and look at the White Pagoda","category":"park · outdoors","see":"Water, the White Pagoda, benches; people skating on the ice in winter","cost":"Low. Ticket is a few yuan","suggestedDuration":"60–120 minutes","transport":"Metro Line 6, Beihai North Station","matchReason":{"tight":"The water and trees don't ask anything of you.","tired":"There are benches. Just sit down; no need to keep walking.","low":"Your gaze can travel far, making thoughts feel smaller.","_":"It's next to Shichahai, so you can keep walking."},"placeInsights":[{"t":"Places to sit","d":"Unlike some parks where you have to keep moving, here you can stop."},{"t":"Long sightlines","d":"The distance takes over some of your attention for you."}],"environmentTags":["has water","has benches","good for sitting long"]},"tiantan":{"placeName":"Temple of Heaven","action":"Walk to the far end of the cypress grove","category":"park · outdoors","see":"Rows of old cypresses; few people if you go deeper","cost":"Low. Ticket is a few yuan","suggestedDuration":"60–150 minutes","transport":"Line 5, Temple of Heaven East Gate","matchReason":{"quiet":"Head northwest and the crowd thins out; quiet comes from distance.","tight":"The air in the cypress grove is cool; your breathing slows down on its own.","noisy":"It’s big enough to walk until tired, without needing to make decisions halfway.","_":"Beautiful at dusk, when there are the fewest people."},"placeInsights":[{"t":"Quiet takes walking","d":"The main path is always busy; ten minutes inward feels like another world."},{"t":"Trees are old","d":"Rows of cypresses make looking up feel natural here."}],"environmentTags":["large grove","long walks","crowds thin out"]},"langyuan":{"placeName":"Langyuan","action":"Wander the grounds without a destination","category":"campus · semi-outdoor","see":"Converted old factories, bookstores, occasional exhibitions and markets","cost":"Low. Browsing is free","suggestedDuration":"40–90 minutes","transport":"Line 1, Dawanglu Station","matchReason":{"spark":"Exhibitions and markets pop up in these factory spaces; see what you find.","fresh":"The content changes each time, so it never feels stale.","okay":"Walk around here, then head to Liangma River for a complete evening.","_":"No tickets, no reservations. Just walk in."},"placeInsights":[{"t":"Content rotates","d":"Exhibitions and markets take turns, keeping the place fresh."},{"t":"Easy to continue","d":"From here, walking toward Liangma River is a smooth route."}],"environmentTags":["free entry","exhibitions","not crowded","near Liangma River"]},"yangmeizhu":{"placeName":"Yangmeizhu Xiejie","action":"Walk a hutong that hasn't been polished up yet","category":"hutong · outdoors","see":"Courtyards where people live, a few small shops, grey bricks and wires","cost":"Free. Walking costs nothing","suggestedDuration":"30–60 mins","transport":"Line 2, Qianmen Station","matchReason":{"empty":"People actually live here; life happens alongside you, just pass through.","fresh":"Unlike the renovated commercial streets, this feels denser and real.","_":"A street you can walk slowly to the end, where there's a cafe to sit."},"placeInsights":[{"t":"Not yet fixed up","d":"It has a raw, everyday feel—something rare in Beijing now."},{"t":"Somewhere to sit","d":"soloist is on this line, good for when your feet get tired."}],"environmentTags":["everyday feel","not crowded","free","has cafes"]},"wudaoying":{"placeName":"Guozijian · Wudaoying","action":"Walk from the ginkgo street to Wudaoying","category":"hutong · outdoors","see":"Old trees at Guozijian, small shops lining Wudaoying","cost":"Low. Walking is free, sitting down means ordering","suggestedDuration":"40–90 mins","transport":"Line 2, Yonghegong Station","matchReason":{"fresh":"The density shifts between the two streets—one quiet, one busy—so a walk switches your state twice.","okay":"The street isn't long; you finish it just right without getting tired.","_":"It's next to the Gulou area, so you can link them into one route."},"placeInsights":[{"t":"Two rhythms","d":"The Guozijian side has trees and quiet; the Wudaoying side has shops and people."},{"t":"Continue to Gulou","d":"It's not far from here, so you can connect both areas in one go."}],"environmentTags":["old trees","many small shops","good for walking"]},"ziliaoguan":{"placeName":"China Film Archive","action":"Buy a matinee ticket, turn off your phone","category":"cinema · indoors","see":"Screenings don't follow mainstream chains; most people come alone","cost":"Low. Tickets are cheap","suggestedDuration":"120–180 minutes","transport":"Metro Line 4, Xinjiekou","matchReason":{"noisy":"For two hours you don't have to make any decisions—that's the real function of this place.","tired":"Once the lights go down, you don't have to keep up any expression.","low":"No need to talk to anyone, or pretend you're doing something important.","_":"After the film, keep walking: Yunnan Kitchen, Fusheng Records, and Douzai Coffee are nearby."},"placeInsights":[{"t":"Two hours no choices","d":"When the lights dim, you hand over the decision-making."},{"t":"Start of a route","d":"Walk east from here and you can fill the whole day."}],"environmentTags":["good curation","mostly solo visitors","no decisions for two hours"]},"yunnanxiaochu":{"placeName":"Yunnan Xiaochu","action":"Get a bowl of stinky tofu rice noodles, done in twenty minutes","category":"eat · indoors","see":"Tiny spot, packed at lunch","cost":"Low. Price of one noodle bowl","suggestedDuration":"20–40 mins","transport":"Opposite the Film Archive","matchReason":{"tired":"Hot food helps more than thinking it through; you’re done in twenty.","empty":"Small room, lots of people and steam. You don’t have to participate.","_":"Right across from the Film Archive. No need to make another 'where to eat' decision after the movie."},"placeInsights":[{"t":"Low decision cost","d":"It’s right there, no need to choose again."},{"t":"Crowded is normal","d":"Full at lunch; go off-peak if you’re in a rush."}],"environmentTags":["cheap","fast","opposite archive"]},"huogui":{"placeName":"Huogui paro","action":"Go on a Tuesday for the buy-one-get-one pizza deal","category":"eat · indoors","see":"Pizza oven, busier on Tuesdays","cost":"Mid. Buy-one-get-one on Tuesdays, regular price otherwise","suggestedDuration":"40–80 mins","transport":"Metro Line 4, Peking Univ East Gate","matchReason":{"near":"Better value for two people with the Tuesday deal.","okay":"A short walk from Wansheng Bookstore, no extra planning needed.","_":"Having a specific reason to go out sometimes matters more than the reason itself."},"placeInsights":[{"t":"Tuesday has a hook","d":"Buy-one-get-one is a reason to leave the house."},{"t":"Next to Wansheng","d":"Eat after browsing books to complete the afternoon."}],"environmentTags":["Tuesday BOGO","Near Wansheng","Good for pairs"]},"niaozhouli":{"placeName":"Niaozhouli","action":"Eat yakitori at Liangmaqiao after dusk","category":"food · indoors","see":"Counter seats face the grill; sitting alone is normal","cost":"Mid-high. Japanese cuisine prices","suggestedDuration":"60–90 minutes","transport":"Line 10, Liangmaqiao Station","matchReason":{"near":"The counter faces the grill, so you have something to watch without needing to talk.","okay":"Finish a walk along the Liangma River and eat here; it makes for a complete evening.","_":"Sitting alone at the counter is common here, no explanation needed."},"placeInsights":[{"t":"Something to watch","d":"The grill is right in front of you, so eating alone feels natural."},{"t":"After the river walk","d":"Walking first then eating feels better than the other way around."}],"environmentTags":["counter seating","after river walk","solo friendly"]},"qmex":{"placeName":"qmex","action":"Stand in the courtyard and drink, leave whenever","category":"bar · semi-outdoor","see":"People standing in the yard, music not too loud","cost":"Mid-high. Drink prices.","suggestedDuration":"60–120 minutes","transport":"Subway Line 10 Tuanjiehu","matchReason":{"fresh":"The courtyard is busy; staying a while shifts your state.","okay":"Standing to drink means you can leave anytime, no getting stuck.","near":"Surrounded by people, but you can just stand there without talking.","_":"It only works at night. Daytime is a different story."},"placeInsights":[{"t":"Easy exit","d":"Standing to drink doesn't require ending a session; you just walk away."},{"t":"Really crowded","d":"Not suitable if you want quiet; know this beforehand."}],"environmentTags":["semi-outdoor","easy exit","night only","social"]},"lasocial":{"placeName":"la social","action":"Grab a bite at the Japanese place next door first","category":"bar · indoors","see":"Packed, with a Japanese restaurant right next door for a pre-drink meal","cost":"High. Drinks plus dinner","suggestedDuration":"90–150 mins","transport":"Line 10, Tuanjiehu","matchReason":{"fresh":"Fastest shift if you want a change and have the energy to handle people.","okay":"Only come when you're feeling okay. It drains more when you're not.","_":"There's a Japanese spot next door—eat first before going in. That's how locals do it."},"placeInsights":[{"t":"Takes effort","d":"The barrier here isn't money, it's the energy to deal with people."},{"t":"Eat then drink","d":"Pre-drinking at the Japanese place next door beats entering on an empty stomach."}],"environmentTags":["very lively","social effort","next-door predrink"]},"school":{"placeName":"School","action":"Stand at the back and listen to the whole set","category":"livehouse · indoors","see":"Small venue, packed, loud sound","cost":"Medium. Ticket plus drinks","suggestedDuration":"90–180 minutes","transport":"Subway Line 8, Gulou Dajie","matchReason":{"fresh":"The live sound drowns out everything else; that is its most practical function.","spark":"The lineup isn't sorted by popularity, so stumbling upon unknown bands is common.","_":"You can stand at the very back and still hear the entire show without pushing forward."},"placeInsights":[{"t":"Sound drowns thoughts","d":"When the volume is high enough, your mind stops queuing up worries."},{"t":"Back row works","d":"No need to crowd the front; the last row hears it all just fine."}],"environmentTags":["live music","loud","standing room","Gulou area"]},"zhaodai":{"placeName":"zhaodai","action":"Dance until your brain shuts off","category":"club · indoors","see":"Gets busy late, great sound system","cost":"High. Ticket plus drinks","suggestedDuration":"120–240 minutes","transport":"Line 10, Tuanjiehu Station","matchReason":{"fresh":"If you want a total change of scene, this is the furthest end of the spectrum.","okay":"You need energy to spare. If you're tired, this will drain you twice as fast.","_":"Move your body first, let your mind stop later—it works better in that order."},"placeInsights":[{"t":"Body moves first","d":"You don't need to figure it out; just start moving."},{"t":"Very draining","d":"Count how you feel the next day as part of the cost."}],"environmentTags":["late night","electronic music","physical"]}};
+const PLACES_EN = {"fruityshop":{"placeName":"fRUITYSHOP","action":"Ask them to play one for you","category":"record shop · indoors","see":"A wall of vinyl, a good sound system","cost":"Low. You can just listen without buying; staff won't push.","suggestedDuration":"20–60 minutes","transport":"Metro Line 8, Shichahai","matchReason":{"spark":"When you need inspiration, letting someone else pick is easier than searching—ask for one and they'll play it.","fresh":"The stock here isn't the same batch you see on streaming apps. Ten minutes of browsing turns up things you haven't heard.","low":"No talking required, no purchase needed. Standing there listening to one side counts as a win.","_":"Few places let your hands be busy and your ears engaged at the same time."},"placeInsights":[{"t":"Listen without buying","d":"Ask for a track and they play it; the staff know their inventory well. This alone lowers the pressure."},{"t":"Fair prices","d":"A new Aphex Twin record costs 320 here, versus 588 at the shop on Chaoyue's fifth floor."}],"environmentTags":["audition available","no purchase necessary","good sound","jazz/electronic/rock"]},"postpost":{"placeName":"postpost","action":"Grab a book off the shelf and sit down","category":"bookstore · concept store · coffee","see":"Walls of browsable books, full Genelec audio setup, own-brand and curated clothing","cost":"Medium. You can just sit and read, but the curry rice and pour-over are worth ordering","suggestedDuration":"60–120 minutes","transport":"Line 10, Tuanjiehu Station","matchReason":{"spark":"The selection and new arrivals move fast enough that you’ll likely find something in an hour.","tired":"Every corner on the first floor sounds good. Sit down without deciding where to go next; stay until you don’t want to anymore.","fresh":"Books, clothes, curry, and drinks under one roof. A quick walk around fills your senses.","_":"All shelf books are available for borrowing—you can finish them without buying, which is rare for a bookstore."},"placeInsights":[{"t":"Shelf books borrowable","d":"As a bookstore, this matters most. You don’t have to pay upfront to read."},{"t":"Club-grade sound system","d":"Full Genelec setup. Every corner on the first floor offers a good listening experience."}],"environmentTags":["borrowable shelves","great sound","curated selection","easy to linger"]},"fusheng":{"placeName":"Fusheng Records","action":"Browse the records after the movie","category":"record shop · indoors","see":"Shelves packed tight. If the owner is there, you might chat.","cost":"Low. It's fine to browse without buying.","suggestedDuration":"20–40 mins","transport":"Line 4, Xinjiekou Station","matchReason":{"spark":"It's on the same line as the Film Archive and Douzai Coffee. You can string them together in one afternoon without making new decisions.","noisy":"Flipping through records is repetitive. Your hands keep moving, and your thoughts slow down with them.","_":"Places you pass by are easier to start than places you go out of your way for."},"placeInsights":[{"t":"Easy chain","d":"Watch a film at the Archive, get coffee at Douzai, flip through records here—all on one street."},{"t":"The search is the thing","d":"No goal needed. Whatever you find, you find."}],"environmentTags":["next to archive","easy chain","no purchase required"]},"kule":{"placeName":"Kule Records","action":"Browse the packed rock section","category":"record shop · indoors","see":"Narrow aisles, the rock section is always standing room only","cost":"Low. But it's tight, staying long feels cramped","suggestedDuration":"20–40 minutes","transport":"Metro Line 5, Zhangzizhonglu","matchReason":{"fresh":"Stock is complete, but it's crowded. If you want something new and don't mind being close to people, this is it.","okay":"When you're feeling okay, squeezing in can actually be fun.","_":"Bookstores and record shops are clustered around Dongsi, easy to visit together."},"placeInsights":[{"t":"Really crowded","d":"The rock section often gets blocked by people, so you can't see everything. Good to know beforehand."},{"t":"On the Dongsi line","d":"Sanlian, Paper Sound, and Maybe Books are nearby, making for a good combined trip."}],"environmentTags":["very crowded","full stock","dongsi book street"]},"wansheng":{"placeName":"All Sages Bookstore","action":"Browse the social sciences section until closing","category":"bookshop · indoors","see":"Floor-to-ceiling shelves of social science books, with a coffee area nearby","cost":"Low. You can just look; if you sit in the coffee area, you need to order.","suggestedDuration":"60–150 minutes","transport":"Metro Line 4, Peking University East Gate","matchReason":{"quiet":"The quiet here isn't luck; it's how the space is built.","tired":"You can sit without being watched or asked how long you're staying.","tight":"High shelves and narrow aisles hold your gaze, which often helps you loosen up.","_":"Being alone here requires no explanation to anyone."},"placeInsights":[{"t":"Staying long is normal","d":"Sitting from afternoon until close isn't strange; it's the default here."},{"t":"Pizza next door","d":"Fire Ghost Paro is a short walk away, with buy-one-get-one pizza on Tuesdays."}],"environmentTags":["quiet","easy to sit","academic","no purchase needed"]},"sanlian":{"placeName":"Sanlian Taofen Bookstore","action":"Sit on the steps and finish a book","category":"bookstore · indoors","see":"Steps you can sit on, sunken reading area","cost":"Low. Sitting on the steps to read requires no purchase","suggestedDuration":"40–90 minutes","transport":"Line 5, Zhangzizhonglu Station","matchReason":{"low":"No need to sit up straight. Any posture works on the steps. Two pages is enough.","tired":"The seat here isn't bought with consumption; it's just allowed.","_":"Holding a book gives you a valid reason to be alone."},"placeInsights":[{"t":"Sitting without buying","d":"The steps and sunken area are for sitting, not decoration."},{"t":"On Dongsi book line","d":"Next to Paper Sound, Maybe Books, and Zuoshu; easy to chain into half a day."}],"environmentTags":["sit on floor","no purchase needed","Dongsi line"]},"zhishang":{"placeName":"Zhishang Shengyin","action":"Flip through indie publications you haven't seen before","category":"bookstore · indoors","see":"Indie publications, zines, uncommon prints","cost":"Low. Browsing is free","suggestedDuration":"20–50 mins","transport":"Line 5, Zhangzizhonglu","matchReason":{"spark":"Most items here aren't in algorithmic feeds; you might stumble on something.","fresh":"The upside of indie publishing is a high ratio of unknowns.","_":"Small shops have a different kind of quiet—not empty, just unmonitored."},"placeInsights":[{"t":"High ratio of unknowns","d":"These items rarely show up in your feed."},{"t":"Very small space","d":"It gets cramped when busy; weekday afternoons are better."}],"environmentTags":["indie publishing","small and quiet","dongsi area"]},"zuoshu":{"placeName":"Zuoshu · Longfu Temple","action":"Take your time at the feminism shelf","category":"bookstore · coffee · market","see":"Shelves for feminism, non-fiction, and niche philosophy; doubles as a cafe","cost":"Medium. Browsing is free, but sitting down requires ordering a drink","suggestedDuration":"40–90 minutes","transport":"Metro Line 6, Dongsi","matchReason":{"spark":"The selection has a stance—feminism, non-fiction, and lesser-known philosophy are all here.","near":"People around you are reading similar things, but no one will interrupt.","_":"You can read, sit, and have a drink; three things for an afternoon, all in one place."},"placeInsights":[{"t":"Curated with intent","d":"Not arranged by bestseller lists, but carefully chosen by someone."},{"t":"Also a cafe","d":"No need to move when you're tired; this removes one decision."}],"environmentTags":["good curation","coffee available","occasional markets"]},"soloist":{"placeName":"soloist coffee","action":"Watch the sunset hit the grey tiles","category":"coffee · hutong","see":"Grey roof tiles and a hutong outside the window; light in the evening","cost":"Medium. The price of a coffee","suggestedDuration":"40–80 minutes","transport":"Metro Line 2, Qianmen","matchReason":{"low":"Sit and watch the sky change. You don't have to do anything.","tight":"Outside is slow: tiles, the alley, people walking by. Tension might loosen on its own.","empty":"Life happens around you. You don't need to join in, just watch.","_":"Go in the evening. Half the appeal here is the light."},"placeInsights":[{"t":"Light is the main event","d":"Sunset on grey tiles doesn't require your participation."},{"t":"Street isn't polished","d":"It feels lived-in. Walking in and out shifts your pace."}],"environmentTags":["sunset view","lived-in feel","best at dusk"]},"douzai":{"placeName":"Douzai Coffee","action":"Wait for a movie to start","category":"coffee · indoors","see":"Most people are waiting for a film; many sit alone","cost":"Medium. Price of a cup","suggestedDuration":"30–60 mins","transport":"Metro Line 4, Xinjiekou","matchReason":{"quiet":"Most others are here alone too, so sitting by yourself feels normal.","tired":"You have a clear reason to wait, so resting doesn't need an excuse.","_":"It's on the same line as the Film Archive and Fusheng Records, good for a chain."},"placeInsights":[{"t":"Alone is default","d":"Sitting here solo requires no explanation."},{"t":"Valid reason to wait","d":"Waiting for the start time makes staying put feel justified."}],"environmentTags":["next to archive","mostly solo visitors","quiet"]},"beipingjiqi":{"placeName":"Beiping Machine","action":"Sit at the bar alone with a drink","category":"craft beer · indoors","see":"Long bar counter, many solo visitors, frequent menu changes","cost":"Mid-high. Price of one craft beer","suggestedDuration":"40–90 minutes","transport":"Metro Line 8, Gulou Dajie","matchReason":{"empty":"The bar means people are nearby, but no one expects you to talk.","near":"If you want company without the effort of socializing, the bar is the easiest spot.","okay":"When you're doing fine, one drink is enough; no need to stay late.","_":"Sitting at the bar alone here is normal, not something that needs explaining."},"placeInsights":[{"t":"Solo is normal","d":"Half the seats at the bar are taken by people drinking alone."},{"t":"Leave anytime","d":"Finish your drink and pay; there's no pressure to stay until closing."}],"environmentTags":["solo bar seating","no socializing required","Gulou area"]},"liangmahe":{"placeName":"Liangma River","action":"Walk along the river, thinking as you go","category":"riverbank · outdoors","see":"Riverside paths, lights across the water, people walking at dusk","cost":"Free. No spending required","suggestedDuration":"30–90 minutes","transport":"Metro Line 10, Liangmaqiao Station","matchReason":{"noisy":"The water keeps moving; your looping thoughts might struggle to keep up.","low":"This place doesn't ask you to cheer up, just pulls your gaze further than your thoughts.","tight":"As you walk, your breathing lengthens on its own, without you having to adjust it.","empty":"A long line with no choices to make; however far you go counts.","_":"No consumption needed, and no one asks how long you're staying."},"placeInsights":[{"t":"Keep walking","d":"When your body is moving, you don't have to force clarity."},{"t":"Dusk is best","d":"The half-hour when daylight swaps with the lights is worth rushing for."}],"environmentTags":["walkable","waterfront","best at dusk","free"]},"shichahai":{"placeName":"Shichahai","action":"Walk along the water. You don't have to finish the loop.","category":"waterfront · outdoors","see":"Willows on the bank, people rowing boats, the quieter stretch further along","cost":"Free. Unless you want a drink to sit with.","suggestedDuration":"40–120 mins","transport":"Line 8, Shichahai Station","matchReason":{"noisy":"Walking by the water is a mindless motion. Go as far as you feel like.","empty":"Life keeps happening on the banks. You don't need to join in, just pass through.","low":"If you get tired or hot, there are shops right at the subway exit. Sit down, rest, then keep going.","_":"Following the water from Xihai is the most comfortable part of this route."},"placeInsights":[{"t":"Stop anytime","d":"No need to complete the full circle; turn back when you're done."},{"t":"Quieter to the north","d":"It gets calmer closer to the Xihai side."}],"environmentTags":["walkable","waterfront","free","long walk"]},"beihai":{"placeName":"Beihai Park","action":"Sit by the shore and look at the White Pagoda","category":"park · outdoors","see":"Water, the White Pagoda, benches; people skating on the ice in winter","cost":"Low. Ticket is a few yuan","suggestedDuration":"60–120 minutes","transport":"Metro Line 6, Beihai North Station","matchReason":{"tight":"The water and trees don't ask anything of you.","tired":"There are benches. Just sit down; no need to keep walking.","low":"Your gaze can travel far, making thoughts feel smaller.","_":"It's next to Shichahai, so you can keep walking."},"placeInsights":[{"t":"Places to sit","d":"Unlike some parks where you have to keep moving, here you can stop."},{"t":"Long sightlines","d":"The distance takes over some of your attention for you."}],"environmentTags":["has water","has benches","good for sitting long"]},"tiantan":{"placeName":"Temple of Heaven","action":"Walk to the far end of the cypress grove","category":"park · outdoors","see":"Rows of old cypresses; few people if you go deeper","cost":"Low. Ticket is a few yuan","suggestedDuration":"60–150 minutes","transport":"Line 5, Temple of Heaven East Gate","matchReason":{"quiet":"Head northwest and the crowd thins out; quiet comes from distance.","tight":"The air in the cypress grove is cool; your breathing slows down on its own.","noisy":"It’s big enough to walk until tired, without needing to make decisions halfway.","_":"Beautiful at dusk, when there are the fewest people."},"placeInsights":[{"t":"Quiet takes walking","d":"The main path is always busy; ten minutes inward feels like another world."},{"t":"Trees are old","d":"Rows of cypresses make looking up feel natural here."}],"environmentTags":["large grove","long walks","crowds thin out"]},"langyuan":{"placeName":"Langyuan","action":"Wander the grounds without a destination","category":"creative park · semi-outdoor","see":"Converted old factories, bookstores, occasional exhibitions and markets","cost":"Low. Browsing is free","suggestedDuration":"40–90 minutes","transport":"Line 1, Dawanglu Station","matchReason":{"spark":"Exhibitions and markets pop up in these factory spaces; see what you find.","fresh":"The content changes each time, so it never feels stale.","okay":"Walk around here, then head to Liangma River for a complete evening.","_":"No tickets, no reservations. Just walk in."},"placeInsights":[{"t":"Content rotates","d":"Exhibitions and markets take turns, keeping the place fresh."},{"t":"Easy to continue","d":"From here, walking toward Liangma River is a smooth route."}],"environmentTags":["free entry","exhibitions","not crowded","near Liangma River"]},"yangmeizhu":{"placeName":"Yangmeizhu Xiejie","action":"Walk through a hutong that still feels lived-in","category":"hutong · outdoors","see":"Courtyards where people live, a few small shops, grey bricks and wires","cost":"Free. Walking costs nothing","suggestedDuration":"30–60 mins","transport":"Line 2, Qianmen Station","matchReason":{"empty":"People actually live here; life happens alongside you, just pass through.","fresh":"Unlike the renovated commercial streets, this feels denser and real.","_":"A street you can walk slowly to the end, where there's a cafe to sit."},"placeInsights":[{"t":"Not yet fixed up","d":"It has a raw, everyday feel—something rare in Beijing now."},{"t":"Somewhere to sit","d":"soloist is on this line, good for when your feet get tired."}],"environmentTags":["everyday feel","not crowded","free","has cafes"]},"wudaoying":{"placeName":"Guozijian · Wudaoying","action":"Walk from the ginkgo street to Wudaoying","category":"hutong · outdoors","see":"Old trees at Guozijian, small shops lining Wudaoying","cost":"Low. Walking is free, sitting down means ordering","suggestedDuration":"40–90 mins","transport":"Line 2, Yonghegong Station","matchReason":{"fresh":"The density shifts between the two streets—one quiet, one busy—so a walk switches your state twice.","okay":"The street isn't long; you finish it just right without getting tired.","_":"It's next to the Gulou area, so you can link them into one route."},"placeInsights":[{"t":"Two rhythms","d":"The Guozijian side has trees and quiet; the Wudaoying side has shops and people."},{"t":"Continue to Gulou","d":"It's not far from here, so you can connect both areas in one go."}],"environmentTags":["old trees","many small shops","good for walking"]},"ziliaoguan":{"placeName":"China Film Archive","action":"Buy a matinee ticket, turn off your phone","category":"cinema · indoors","see":"Screenings don't follow mainstream chains; most people come alone","cost":"Low. Tickets are cheap","suggestedDuration":"120–180 minutes","transport":"Metro Line 4, Xinjiekou","matchReason":{"noisy":"For two hours you don't have to make any decisions—that's the real function of this place.","tired":"Once the lights go down, you don't have to keep up any expression.","low":"No need to talk to anyone, or pretend you're doing something important.","_":"After the film, keep walking: Yunnan Kitchen, Fusheng Records, and Douzai Coffee are nearby."},"placeInsights":[{"t":"Two hours no choices","d":"When the lights dim, you hand over the decision-making."},{"t":"Start of a route","d":"Walk east from here and you can fill the whole day."}],"environmentTags":["good curation","mostly solo visitors","no decisions for two hours"]},"yunnanxiaochu":{"placeName":"Yunnan Xiaochu","action":"Grab a bowl of stinky tofu rice noodles","category":"noodle shop · indoors","see":"Tiny spot, packed at lunch","cost":"Low. Price of one noodle bowl","suggestedDuration":"20–40 mins","transport":"Opposite the Film Archive","matchReason":{"tired":"Hot food helps more than thinking it through; you’re done in twenty.","empty":"Small room, lots of people and steam. You don’t have to participate.","_":"Right across from the Film Archive. No need to make another 'where to eat' decision after the movie."},"placeInsights":[{"t":"Low decision cost","d":"It’s right there, no need to choose again."},{"t":"Crowded is normal","d":"Full at lunch; go off-peak if you’re in a rush."}],"environmentTags":["cheap","fast","opposite archive"]},"huogui":{"placeName":"Huogui paro","action":"Go on a Tuesday for the buy-one-get-one pizza deal","category":"pizzeria · indoors","see":"Pizza oven, busier on Tuesdays","cost":"Mid. Buy-one-get-one on Tuesdays, regular price otherwise","suggestedDuration":"40–80 mins","transport":"Metro Line 4, Peking Univ East Gate","matchReason":{"near":"Better value for two people with the Tuesday deal.","okay":"A short walk from Wansheng Bookstore, no extra planning needed.","_":"Having a specific reason to go out sometimes matters more than the reason itself."},"placeInsights":[{"t":"Tuesday has a hook","d":"Buy-one-get-one is a reason to leave the house."},{"t":"Next to Wansheng","d":"Eat after browsing books to complete the afternoon."}],"environmentTags":["Tuesday BOGO","Near Wansheng","Good for pairs"]},"niaozhouli":{"placeName":"Niaozhouli","action":"Eat yakitori at Liangmaqiao after dusk","category":"yakitori · indoors","see":"Counter seats face the grill; sitting alone is normal","cost":"Mid-high. Japanese cuisine prices","suggestedDuration":"60–90 minutes","transport":"Line 10, Liangmaqiao Station","matchReason":{"near":"The counter faces the grill, so you have something to watch without needing to talk.","okay":"Finish a walk along the Liangma River and eat here; it makes for a complete evening.","_":"Sitting alone at the counter is common here, no explanation needed."},"placeInsights":[{"t":"Something to watch","d":"The grill is right in front of you, so eating alone feels natural."},{"t":"After the river walk","d":"Walking first then eating feels better than the other way around."}],"environmentTags":["counter seating","after river walk","solo friendly"]},"qmex":{"placeName":"qmex","action":"Stand in the courtyard and drink, leave whenever","category":"bar · semi-outdoor","see":"People standing in the yard, music not too loud","cost":"Mid-high. Drink prices.","suggestedDuration":"60–120 minutes","transport":"Subway Line 10 Tuanjiehu","matchReason":{"fresh":"The courtyard is busy; staying a while shifts your state.","okay":"Standing to drink means you can leave anytime, no getting stuck.","near":"Surrounded by people, but you can just stand there without talking.","_":"It only works at night. Daytime is a different story."},"placeInsights":[{"t":"Easy exit","d":"Standing to drink doesn't require ending a session; you just walk away."},{"t":"Really crowded","d":"Not suitable if you want quiet; know this beforehand."}],"environmentTags":["semi-outdoor","easy exit","night only","social"]},"lasocial":{"placeName":"la social","action":"Grab a bite at the Japanese place next door first","category":"bar · indoors","see":"Packed, with a Japanese restaurant right next door for a pre-drink meal","cost":"High. Drinks plus dinner","suggestedDuration":"90–150 mins","transport":"Line 10, Tuanjiehu","matchReason":{"fresh":"Fastest shift if you want a change and have the energy to handle people.","okay":"Only come when you're feeling okay. It drains more when you're not.","_":"There's a Japanese spot next door—eat first before going in. That's how locals do it."},"placeInsights":[{"t":"Takes effort","d":"The barrier here isn't money, it's the energy to deal with people."},{"t":"Eat then drink","d":"Pre-drinking at the Japanese place next door beats entering on an empty stomach."}],"environmentTags":["very lively","social effort","next-door predrink"]},"school":{"placeName":"School","action":"Stand at the back and listen to the whole set","category":"live music · indoors","see":"Small venue, packed, loud sound","cost":"Medium. Ticket plus drinks","suggestedDuration":"90–180 minutes","transport":"Subway Line 8, Gulou Dajie","matchReason":{"fresh":"The live sound drowns out everything else; that is its most practical function.","spark":"The lineup isn't sorted by popularity, so stumbling upon unknown bands is common.","_":"You can stand at the very back and still hear the entire show without pushing forward."},"placeInsights":[{"t":"Sound drowns thoughts","d":"When the volume is high enough, your mind stops queuing up worries."},{"t":"Back row works","d":"No need to crowd the front; the last row hears it all just fine."}],"environmentTags":["live music","loud","standing room","Gulou area"]},"zhaodai":{"placeName":"zhaodai","action":"Dance until your thoughts quiet down","category":"club · indoors","see":"Gets busy late, great sound system","cost":"High. Ticket plus drinks","suggestedDuration":"120–240 minutes","transport":"Line 10, Tuanjiehu Station","matchReason":{"fresh":"If you want a total change of scene, this is the furthest end of the spectrum.","okay":"You need energy to spare. If you're tired, this will drain you twice as fast.","_":"Move your body first, let your mind stop later—it works better in that order."},"placeInsights":[{"t":"Body moves first","d":"You don't need to figure it out; just start moving."},{"t":"Very draining","d":"Count how you feel the next day as part of the cost."}],"environmentTags":["late night","electronic music","physical"]}};
+const AREA_EN = {
+  "鼓楼":"Gulou", "三里屯幸福村":"Xingfucun, Sanlitun", "小西天":"Xiaoxitian",
+  "东四":"Dongsi", "成府路":"Chengfu Road", "隆福寺":"Longfu Temple",
+  "杨梅竹斜街":"Yangmeizhu Xiejie", "朝阳":"Chaoyang", "西城":"Xicheng",
+  "东城":"Dongcheng", "大栅栏":"Dashilar", "安定门":"Andingmen",
+  "亮马桥":"Liangmaqiao", "三里屯":"Sanlitun", "工体一带":"Workers' Stadium area"
+};
+
+/* Feedback is stored with the stable Chinese label for backwards compatibility.
+   English is a display layer, so switching languages never changes saved data. */
+const FACTOR_EN = {
+  "声音舒服":{label:"Comfortable sound", insight:"The sound felt easy to be around."},
+  "人不多":{label:"Not crowded", insight:"Fewer people meant less pressure to look or act a certain way."},
+  "坐得住":{label:"Easy to stay", insight:"You could stop without feeling rushed."},
+  "光线":{label:"Good light", insight:"The light made the space easier on your eyes."},
+  "独处感":{label:"Comfortable alone", insight:"Being there alone felt natural."},
+  "不必消费":{label:"No need to spend", insight:"You could stay without having to buy anything."},
+  "手上有事做":{label:"Something to do", insight:"Keeping your hands occupied gave your thoughts less room to loop."},
+  "能一直走":{label:"Keep walking", insight:"Moving let you stop forcing an answer."},
+  "视野开阔":{label:"Open view", insight:"Looking further away took some pressure off your attention."},
+  "有水":{label:"Water nearby", insight:"The moving water held some of your attention."},
+  "有树":{label:"Trees", insight:"The greenery asked nothing of you."},
+  "天色刚好":{label:"Right time of day", insight:"The changing light gave the visit its rhythm."},
+  "店员舒服":{label:"Easygoing staff", insight:"The staff made the visit feel low-pressure."},
+  "看到没见过的":{label:"Something new", insight:"Something unfamiliar drew your attention outward."},
+  "有人但不打扰":{label:"People, no pressure", insight:"People were nearby without asking anything from you."},
+  "声音好":{label:"Good sound", insight:"The sound filled enough space for your thoughts to slow down."},
+  "跟着动起来":{label:"Get moving", insight:"Your body could move before your thoughts had to settle."},
+  "太挤":{label:"Too crowded", insight:"The crowd got in the way this time."},
+  "太吵":{label:"Too loud", insight:"The sound level made this a poor fit."},
+  "太贵":{label:"Too expensive", insight:"The cost was part of what made the visit harder."},
+  "得跟人周旋":{label:"Too social", insight:"Interacting with people took more energy than you wanted to spend."},
+  "路上太远":{label:"Too far", insight:"Getting there used too much of your energy."},
+  "太晒 / 太亮":{label:"Too bright", insight:"The light made this time of day a poor fit."},
+  "不安全":{label:"Felt unsafe", insight:"Without a sense of safety, the other qualities did not matter."},
+  "没什么用":{label:"Didn't help", insight:"It did not help this time, and that still improves the next recommendation."}
+};
+function factorCopy(label){
+  return currentLang() === "en" && FACTOR_EN[label] ? FACTOR_EN[label].label : label;
+}
+function factorInsight(label, fallback){
+  return currentLang() === "en" && FACTOR_EN[label] ? FACTOR_EN[label].insight : fallback;
+}
+
 function localized(p){
   if (!p || currentLang() !== "en") return p;
   const en = PLACES_EN[p.placeId];
@@ -1471,6 +1515,7 @@ function localized(p){
     category: en.category || p.category,
     see: en.see || p.see,
     cost: en.cost || p.cost,
+    area: AREA_EN[p.area] || p.area,
     transport: en.transport || p.transport,
     suggestedDuration: en.suggestedDuration || p.suggestedDuration,
     matchReason: en.matchReason || p.matchReason,
@@ -1496,7 +1541,7 @@ function rankedPlaces(list){
       return aiA - aiB;
     }
     return matchScore(b, state.mood, state.needs) - matchScore(a, state.mood, state.needs);
-  });
+  }).map(localized);
 }
 
 
@@ -1534,17 +1579,23 @@ function selfSigil(recs){
 --------------------------------- */
 function selfRead(recs){
   if (recs.length < 2){
-    return {line:"还需要一两次记录，我才敢说。", rows:[
-      {t:"证据不够", d:"我只用你自己打过的分和勾过的因素说话。现在这些还太少，凑不出一条站得住的观察。",
-       e:"当前 " + recs.length + " 条记录"}
+    return {line:uiCopy("还需要一两次记录，我才敢说。", "A couple more visits will make patterns easier to see."), rows:[
+      {t:uiCopy("记录还不够", "Not enough visits yet"),
+       d:uiCopy("我只用你自己打过的分和勾过的因素说话。现在这些还太少，凑不出一条站得住的观察。",
+                "This view only uses the changes and factors you recorded."),
+       e:uiCopy("当前 " + recs.length + " 条记录", recs.length + (recs.length === 1 ? " visit" : " visits"))}
     ]};
   }
   // 身份行：偏好的空间类型 + 平均变化
   const outdoor = recs.filter(r => !placeById(r.placeId).indoor).length;
-  const kind = outdoor * 2 > recs.length ? "户外偏多" : (outdoor * 2 === recs.length ? "室内户外各半" : "室内偏多");
+  const kind = outdoor * 2 > recs.length ? uiCopy("户外偏多", "mostly outdoors")
+    : (outdoor * 2 === recs.length ? uiCopy("室内户外各半", "a mix of indoors and outdoors") : uiCopy("室内偏多", "mostly indoors"));
   const avg = recs.reduce((s, r) => s + r.changeScore, 0) / recs.length;
-  const line = "去过 " + new Set(recs.map(r => r.placeId)).size + " 个空间，" + kind + "；平均变化 <b>" +
-               (avg >= 0 ? "+" : "") + avg.toFixed(1) + "</b>";
+  const placeCount = new Set(recs.map(r => r.placeId)).size;
+  const line = uiCopy("去过 " + placeCount + " 个空间，" + kind + "；平均变化 <b>" +
+               (avg >= 0 ? "+" : "") + avg.toFixed(1) + "</b>",
+               placeCount + (placeCount === 1 ? " place" : " places") + ", " + kind +
+               " · average shift <b>" + (avg >= 0 ? "+" : "") + avg.toFixed(1) + "</b>");
   // 观察一：最常勾选的因素
   const tally = {};
   recs.forEach(r => r.factors.forEach(f => { tally[f] = (tally[f] || 0) + 1; }));
@@ -1553,28 +1604,40 @@ function selfRead(recs){
   if (top && tally[top] >= 2){
     const p = recs.map(r => placeById(r.placeId)).find(pp => pp.factorOptions.some(o => o.label === top));
     const o = p && p.factorOptions.find(x => x.label === top);
-    rows.push({t:"你反复在选「" + top + "」", d:(o ? o.insight : "这一条你选了不止一次。"),
-               e:tally[top] + " / " + recs.length + " 次记录里出现"});
+    const fallbackInsight = o ? o.insight : uiCopy("这一条你选了不止一次。", "You chose this more than once.");
+    rows.push({t:uiCopy("你反复在选「" + top + "」", "You keep choosing “" + factorCopy(top) + "”"),
+               d:factorInsight(top, fallbackInsight),
+               e:uiCopy(tally[top] + " / " + recs.length + " 次记录里出现", tally[top] + " of " + recs.length + " visits")});
   }
   // 观察二：变化最大的一次 或 最没用的一次
   const best = recs.slice().sort((a, b) => b.changeScore - a.changeScore)[0];
   const worst = recs.slice().sort((a, b) => a.changeScore - b.changeScore)[0];
+  const bestName = placeById(best.placeId).placeName || best.placeName;
+  const worstName = placeById(worst.placeId).placeName || worst.placeName;
   if (worst.changeScore <= 0 && recs.length > 2){
-    rows.push({t:"「" + worst.placeName.replace(/ · .*/, "") + "」那次没接住", d:"出发前是「" + worst.preMood +
-      "」，离开时 " + signed(worst.changeScore) + "。这条会让同类空间在你的推荐里往后退。",
-      e:fmtDate(worst.createdAt) + " · " + worst.placeName});
+    rows.push({t:uiCopy("「" + worst.placeName.replace(/ · .*/, "") + "」那次没接住",
+                        worstName.replace(/ · .*/, "") + " did not help that time"),
+      d:uiCopy("出发前是「" + worst.preMood + "」，离开时 " + signed(worst.changeScore) + "。这条会让同类空间在你的推荐里往后退。",
+               "You recorded " + signed(worst.changeScore) + " after this visit. Similar places will move down."),
+      e:fmtDate(worst.createdAt) + " · " + worstName});
   } else {
-    rows.push({t:"变化最大的一次在「" + best.placeName.replace(/ · .*/, "") + "」", d:"出发前是「" + best.preMood +
-      "」，离开时 " + signed(best.changeScore) + "。同类空间会被排得靠前一点。",
-      e:fmtDate(best.createdAt) + " · " + best.placeName});
+    rows.push({t:uiCopy("变化最大的一次在「" + best.placeName.replace(/ · .*/, "") + "」",
+                        "Your biggest shift was at " + bestName.replace(/ · .*/, "")),
+      d:uiCopy("出发前是「" + best.preMood + "」，离开时 " + signed(best.changeScore) + "。同类空间会被排得靠前一点。",
+               "You recorded " + signed(best.changeScore) + " after this visit. Similar places will move up."),
+      e:fmtDate(best.createdAt) + " · " + bestName});
   }
   if (rows.length < 2){
     const kinds = Object.keys(tally).length;
     rows.push(kinds
-      ? {t:"还没有反复出现的因素", d:"你勾过的每一条都只出现过一次。再记几次，我才能说清是什么在稳定地起作用。",
-         e:kinds + " 种因素各出现 1 次"}
-      : {t:"目前只有分数，没有因素", d:"你还没勾过影响因素。只有分数也能用，但有因素之后我才能说清是什么在起作用。",
-         e:"已勾选因素 0 种"});
+      ? {t:uiCopy("还没有反复出现的因素", "No factor repeats yet"),
+         d:uiCopy("你勾过的每一条都只出现过一次。再记几次，我才能说清是什么在稳定地起作用。",
+                  "A few more visits will make the pattern clearer."),
+         e:uiCopy(kinds + " 种因素各出现 1 次", kinds + " factors · once each")}
+      : {t:uiCopy("目前只有分数，没有因素", "No factors recorded yet"),
+         d:uiCopy("你还没勾过影响因素。只有分数也能用，但有因素之后我才能说清是什么在起作用。",
+                  "A mood shift is still useful; factors make future recommendations more precise."),
+         e:uiCopy("已勾选因素 0 种", "0 factors")});
   }
   return {line, rows:rows.slice(0, 2)};
 }
@@ -1714,8 +1777,17 @@ const state = {
   shownRecommendationId: null
 };
 
+const DEMO_MODE = (() => {
+  try { return new URLSearchParams(location.search || "").get("demo") === "trip"; }
+  catch(e){ return false; }
+})();
+
 /* 演示用的既往记录（原型示例数据，非真实用户数据） */
 function seed(){
+  if (!DEMO_MODE){
+    state.records = [];
+    return;
+  }
   /* 地点信息从 placeById 派生，换库时不会再出现旧 id 静默错配 */
   const mk = (id, placeId, preMood, changeScore, factors, note, visibility, start, end) => {
     const p = placeById(placeId);
@@ -1753,13 +1825,13 @@ function newDraft(placeId){
 
 /* ---------- 文案 ---------- */
 function scoreLabel(s){
-  if (s === null || s === undefined) return "还没选";
-  if (s <= -2) return "更难受了";
-  if (s === -1) return "还是有点沉";
-  if (s === 0)  return "差不多";
-  if (s === 1)  return "松了一点";
-  if (s === 2)  return "明显轻了";
-  return "明亮了许多";
+  if (s === null || s === undefined) return uiCopy("还没选", "Not selected");
+  if (s <= -2) return uiCopy("更难受了", "Much worse");
+  if (s === -1) return uiCopy("还是有点沉", "A little worse");
+  if (s === 0)  return uiCopy("差不多", "About the same");
+  if (s === 1)  return uiCopy("松了一点", "A little lighter");
+  if (s === 2)  return uiCopy("明显轻了", "Noticeably lighter");
+  return uiCopy("明亮了许多", "Much lighter");
 }
 const signed = s => (s > 0 ? "+" + s : "" + s);
 const scoreCls = s => (s > 0 ? "up" : s < 0 ? "down" : "flat");
@@ -1773,6 +1845,11 @@ function deltaColor(sc){
 }
 function fmtDate(iso){
   const d = new Date(iso);
+  if (currentLang() === "en"){
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return months[d.getMonth()] + " " + d.getDate() + " · " +
+      String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+  }
   return (d.getMonth()+1) + "月" + d.getDate() + "日 " +
     String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
 }
@@ -1796,15 +1873,15 @@ function visitInsights(rec){
   const neg = picked.filter(o => o.tone === "neg");
   const s = rec.changeScore;
   let first;
-  if (s >= 2)      first = {t:"这里接住了你", d:"出发前是「" + rec.preMood + "」，离开时你给了 " + signed(s) + "。变化不小，值得记下来是哪一次。"};
-  else if (s === 1)first = {t:"松了一点", d:"不是解决，是松了一格。这一格也算数。"};
-  else if (s === 0)first = {t:"没有变化", d:"你给了 0。没变也是一条有用的记录——它会让下次的推荐避开同类。"};
-  else             first = {t:"这次没接住", d:"出发前是「" + rec.preMood + "」，离开时更沉了。这条会让这里在你的推荐里往后退。"};
+  if (s >= 2)      first = {t:uiCopy("这里接住了你", "This one worked"), d:uiCopy("出发前是「" + rec.preMood + "」，离开时你给了 " + signed(s) + "。变化不小，值得记下来是哪一次。", "You logged a clear shift: " + signed(s) + ". This will move similar places up next time.")};
+  else if (s === 1)first = {t:uiCopy("松了一点", "A little lighter"), d:uiCopy("不是解决，是松了一格。这一格也算数。", "Not fixed. Just a little lighter—and that still counts.")};
+  else if (s === 0)first = {t:uiCopy("没有变化", "No change"), d:uiCopy("你给了 0。没变也是一条有用的记录——它会让下次的推荐避开同类。", "No change is still useful. I’ll rank similar places lower next time.")};
+  else             first = {t:uiCopy("这次没接住", "Not the right fit"), d:uiCopy("出发前是「" + rec.preMood + "」，离开时更沉了。这条会让这里在你的推荐里往后退。", "You felt worse after this visit. I’ll rank similar places lower next time.")};
   let second;
-  if (pos.length)      second = {t:pos[0].label, d:pos[0].insight};
-  else if (neg.length) second = {t:neg[0].label, d:neg[0].insight};
-  else if (rec.note)   second = {t:"你留下的一句", d:"你没有勾选因素，但写了一句话。原话会被原样保存，不做改写。"};
-  else                 second = {t:"只留下了分数", d:"没有选因素也可以。下次想说的时候再说。"};
+  if (pos.length)      second = {t:factorCopy(pos[0].label), d:factorInsight(pos[0].label, pos[0].insight)};
+  else if (neg.length) second = {t:factorCopy(neg[0].label), d:factorInsight(neg[0].label, neg[0].insight)};
+  else if (rec.note)   second = {t:uiCopy("你留下的一句", "Your note"), d:uiCopy("你没有勾选因素，但写了一句话。原话会被原样保存，不做改写。", "You left a note without choosing a factor. I’ll keep it in your own words.")};
+  else                 second = {t:uiCopy("只留下了分数", "Score only"), d:uiCopy("没有选因素也可以。下次想说的时候再说。", "That is enough. Add context another time if you want to.")};
   return [first, second];
 }
 
@@ -1977,74 +2054,75 @@ const STALE_TRIP_MINUTES = 6 * 60;
 
 function arrivedToast(){
   if (!state.arrivedToast) return "";
-  return '<div class="arrived-toast"><div><b>你到' + escapeHTML(state.arrivedToast) + '了</b>' +
-         '</div><button id="toast-close">知道了</button></div>';
+  return '<div class="arrived-toast"><div><b>' + uiCopy('你到' + escapeHTML(state.arrivedToast) + '了',
+         'You\'ve arrived at ' + escapeHTML(state.arrivedToast)) + '</b>' +
+         '</div><button id="toast-close">' + uiCopy('知道了', 'Got it') + '</button></div>';
 }
 
 function tripStrip(){
   const t = state.trip;
   if (!t) return "";
   const p = placeById(t.placeId);
-  const short = p.placeName.replace(/ · .*/, "").slice(0, 8);
+  const short = shortPlaceName(p.placeName, 8);
   const fenced = Boolean(t.geofence);
   const demo = Boolean(t.experienceMode);
   const confirmedInside = demo || (fenced && t.presenceAvailable && t.inside);
 
   if (t.status === "arrival_pending"){
-    return '<div class="trip"><div class="txt"><b>看起来你已经到' + short + '了</b>' +
-      '<small>' + (demo ? '演示定位 · ' : '') + '请确认一下</small></div>' +
-      '<button data-trip="confirm-arrived">已抵达</button>' +
-      '<button class="ghost" data-trip="not-arrived">还没有</button></div>';
+    return '<div class="trip"><div class="txt"><b>' + uiCopy('看起来你已经到' + short + '了', 'Looks like you\'re at ' + short) + '</b>' +
+      '<small>' + (demo ? uiCopy('演示定位 · ', 'Demo location · ') : '') + uiCopy('请确认一下', 'Please confirm') + '</small></div>' +
+      '<button data-trip="confirm-arrived">' + uiCopy('已抵达', 'I\'m here') + '</button>' +
+      '<button class="ghost" data-trip="not-arrived">' + uiCopy('还没有', 'Not yet') + '</button></div>';
   }
 
   if (t.status === "leave_pending"){
-    return '<div class="trip"><div class="txt"><b>检测到你已经离开' + short + '</b>' +
-      '<small>' + (demo ? '演示定位 · ' : '') + '请确认一下</small></div>' +
-      '<button data-trip="left">已离开</button>' +
-      '<button class="ghost" data-trip="still-here">我还在这里</button></div>';
+    return '<div class="trip"><div class="txt"><b>' + uiCopy('检测到你已经离开' + short, 'Looks like you left ' + short) + '</b>' +
+      '<small>' + (demo ? uiCopy('演示定位 · ', 'Demo location · ') : '') + uiCopy('请确认一下', 'Please confirm') + '</small></div>' +
+      '<button data-trip="left">' + uiCopy('已离开', 'I left') + '</button>' +
+      '<button class="ghost" data-trip="still-here">' + uiCopy('我还在这里', 'Still here') + '</button></div>';
   }
 
   if (t.status === "departed"){
     const line = t.presenceNote ? t.presenceNote
-      : demo ? "可模拟抵达"
-      : (fenced && t.presenceAvailable) ? "正在检测抵达"
-      : fenced ? "等待定位"
-      : "到达后请确认";
-    return '<div class="trip"><div class="txt"><b>在去' + short + '的路上</b>' +
-      '<small>' + fmtDate(t.startedAt) + ' 出发 · ' + line + '</small></div>' +
-      '<button data-trip="' + (demo ? 'demo-arrive' : 'arrived') + '">' + (demo ? '模拟抵达' : '我到了') + '</button></div>';
+      : demo ? uiCopy("可模拟抵达", "Ready to simulate arrival")
+      : (fenced && t.presenceAvailable) ? uiCopy("正在检测抵达", "Watching for arrival")
+      : fenced ? uiCopy("等待定位", "Waiting for location")
+      : uiCopy("到达后请确认", "Confirm when you arrive");
+    return '<div class="trip"><div class="txt"><b>' + uiCopy('在去' + short + '的路上', 'On the way to ' + short) + '</b>' +
+      '<small>' + fmtDate(t.startedAt) + ' · ' + line + '</small></div>' +
+      '<button data-trip="' + (demo ? 'demo-arrive' : 'arrived') + '">' + uiCopy(demo ? '模拟抵达' : '我到了', demo ? 'Simulate arrival' : 'I\'m here') + '</button></div>';
   }
 
   // 自动判定已经走了：这是唯一该主动开口的时刻。
   if (t.status === "left"){
-    if (demo) return '<div class="trip"><div class="txt"><b>演示状态：已离开' + short + '</b>' +
-      '<small>这次模拟不会写入到访记录</small></div><button class="ghost" data-trip="clear">结束演示</button></div>';
-    return '<div class="trip"><div class="txt"><b>你离开了' + short + '</b>' +
-      '<small>待了 ' + (t.dwellMinutes || 0) + ' 分钟</small></div>' +
-      '<button data-trip="left">记录变化</button>' +
-      '<button class="ghost" data-trip="clear">以后再说</button></div>';
+    if (demo) return '<div class="trip"><div class="txt"><b>' + uiCopy('演示状态：已离开' + short, 'Demo: left ' + short) + '</b>' +
+      '<small>' + uiCopy('这次模拟不会写入到访记录', 'This demo visit will not be saved') + '</small></div><button class="ghost" data-trip="clear">' + uiCopy('结束演示', 'End demo') + '</button></div>';
+    return '<div class="trip"><div class="txt"><b>' + uiCopy('你离开了' + short, 'You left ' + short) + '</b>' +
+      '<small>' + uiCopy('待了 ' + (t.dwellMinutes || 0) + ' 分钟', 'Stayed ' + (t.dwellMinutes || 0) + ' min') + '</small></div>' +
+      '<button data-trip="left">' + uiCopy('记录变化', 'Check in') + '</button>' +
+      '<button class="ghost" data-trip="clear">' + uiCopy('以后再说', 'Later') + '</button></div>';
   }
 
   const elapsed = Math.max(0, Math.round((Date.now() - new Date(t.arrivedAt).getTime()) / 60000));
   // 一趟挂了大半天多半是忘了收，不是真待了 2243 分钟。
   // 显示那个数字比不显示更糟——它会让人觉得这个 App 根本没在算。
   if (elapsed > STALE_TRIP_MINUTES){
-    return '<div class="trip"><div class="txt"><b>' + short + '那一趟还开着</b>' +
-      '<small>过去挺久了，要不收了它</small></div>' +
-      '<button data-trip="left">记录变化</button>' +
-      '<button class="ghost" data-trip="clear">收起来</button></div>';
+    return '<div class="trip"><div class="txt"><b>' + uiCopy(short + '那一趟还开着', 'Your ' + short + ' visit is still open') + '</b>' +
+      '<small>' + uiCopy('过去挺久了，要不收了它', 'It has been a while') + '</small></div>' +
+      '<button data-trip="left">' + uiCopy('记录变化', 'Check in') + '</button>' +
+      '<button class="ghost" data-trip="clear">' + uiCopy('收起来', 'Close') + '</button></div>';
   }
 
   const dwell = t.dwellMinutes || elapsed;
   const level = t.presenceLevel || (dwell >= 5 ? "dwell_only" : "self_reported");
   // 只有定位真的回报过「围栏内」，才承诺能自动识别离开。
-  const note = demo ? "演示定位 · 可模拟离开"
-    : confirmedInside ? "走了我自己知道"
-    : PRESENCE_LABEL[level] + " · 离开时按一下";
-  return '<div class="trip"><div class="txt"><b>你在' + short + ' · 停留 ' + dwell + ' 分钟</b>' +
-    '<small>' + note + (confirmedInside && !demo ? " · 围栏内" : "") + '</small></div>' +
-    '<button data-trip="' + (demo ? 'demo-leave' : 'left') + '">' + (demo ? '模拟离开' : '我离开了') + '</button>' +
-    '<button class="ghost" data-trip="clear">取消</button></div>';
+  const note = demo ? uiCopy("演示定位 · 可模拟离开", "Demo location · ready to simulate leaving")
+    : confirmedInside ? uiCopy("离开后会自动提醒", "I\'ll notice when you leave")
+    : uiCopy(PRESENCE_LABEL[level] + " · 离开时按一下", "Tap when you leave");
+  return '<div class="trip"><div class="txt"><b>' + uiCopy('你在' + short + ' · 停留 ' + dwell + ' 分钟', 'At ' + short + ' · ' + dwell + ' min') + '</b>' +
+    '<small>' + note + '</small></div>' +
+    '<button data-trip="' + (demo ? 'demo-leave' : 'left') + '">' + uiCopy(demo ? '模拟离开' : '我离开了', demo ? 'Simulate leaving' : 'I left') + '</button>' +
+    '<button class="ghost" data-trip="clear">' + uiCopy('取消', 'Cancel') + '</button></div>';
 }
 
 /* ---------- 小在从你的记录里看到的（FR-12）----------
@@ -2065,20 +2143,29 @@ function learnedPatterns(){
   };
   const topGood = tally(good)[0];
   if (topGood){
-    rows.push({t:"接住你的时候，多半有「" + topGood + "」",
-               d:"在 " + good.length + " 次变好的记录里出现过。这会让带这个属性的空间往前排。"});
+    rows.push({t:uiCopy("接住你的时候，多半有「" + topGood + "」",
+                        "Visits that helped often had “" + factorCopy(topGood) + "”"),
+               d:uiCopy("在 " + good.length + " 次变好的记录里出现过。这会让带这个属性的空间往前排。",
+                        "It appeared in " + good.length + (good.length === 1 ? " visit" : " visits") + ". Similar places will move up.")});
   }
   const topBad = tally(bad)[0];
   if (topBad){
-    rows.push({t:"「" + topBad + "」出现时，你多半没被接住",
-               d:"我会在推荐里避开同类。样本还很少，说错了就点「不太对」。"});
+    rows.push({t:uiCopy("「" + topBad + "」出现时，你多半没被接住",
+                        "“" + factorCopy(topBad) + "” often came with a worse visit"),
+               d:uiCopy("我会在推荐里避开同类。样本还很少，说错了就点「不太对」。",
+                        "I’ll rank similar places lower. There are still only a few visits to learn from.")});
   }
   const cats = {};
   recs.forEach(r => { const c = (r.placeCategory || "").split(" · ")[0]; if (c) cats[c] = (cats[c] || 0) + 1; });
   const topCat = Object.keys(cats).sort((a, b) => cats[b] - cats[a])[0];
   if (topCat && cats[topCat] > 1){
-    rows.push({t:"你去得最多的是「" + topCat + "」",
-               d:cats[topCat] + " 次。这是已经发生的事实，不是对你的判断。"});
+    const topCatRecord = recs.find(r => (r.placeCategory || "").split(" · ")[0] === topCat);
+    const cat = currentLang() === "en" && topCatRecord
+      ? (placeById(topCatRecord.placeId).category || topCat).split(" · ")[0]
+      : topCat;
+    rows.push({t:uiCopy("你去得最多的是「" + topCat + "」", "You visit " + cat + " places most"),
+               d:uiCopy(cats[topCat] + " 次。这是已经发生的事实，不是对你的判断。",
+                        cats[topCat] + " visits so far. That is a pattern in your records, not a judgment about you.")});
   }
   if (!rows.length) return null;
   return {rows:rows.slice(0, 3), count:recs.length};
@@ -2086,15 +2173,16 @@ function learnedPatterns(){
 
 /* ---------- 安全响应（SP-6）：不分析、不诊断、不继续推荐空间 ---------- */
 function renderSafe(){
-  let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div></div>';
+  let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">' + uiCopy('此在 · Current', 'Current') + '</h2></div></div>';
   h += '<div class="screen"><div class="safe">';
   h += '<div style="width:56px;height:34px;opacity:.85">' + cloudSVG("closed") + '</div>';
-  h += '<h1>听起来你现在<br>非常难受。</h1>';
-  h += '<p>这一步我不给你找地方了。不是因为你说错了什么，是因为现在更要紧的是有人在你身边。</p>';
-  h += '<div class="lines"><b>可以先联系</b><span>身边一个你信得过的人</span>' +
-       '<span>北京心理援助热线 010-82951332</span><span>全国 24 小时 400-161-9995</span>' +
-       '<small>我不做诊断，也不替代任何专业帮助。你随时可以回来。</small></div>';
-  h += '<div class="actions"><button class="btn ghost" data-go="#/talk">回到开头</button></div>';
+  h += '<h1>' + uiCopy('听起来你现在<br>非常难受。', 'It sounds like you’re<br>having a really hard time.') + '</h1>';
+  h += '<p>' + uiCopy('这一步我不给你找地方了。不是因为你说错了什么，是因为现在更要紧的是有人在你身边。',
+                       'I’m not going to suggest a place right now. What matters more is having someone with you.') + '</p>';
+  h += '<div class="lines"><b>' + uiCopy('可以先联系', 'Reach out to') + '</b><span>' + uiCopy('身边一个你信得过的人', 'someone you trust nearby') + '</span>' +
+       '<span>' + uiCopy('中国大陆心理援助热线 12356', 'Mainland China mental-health support: 12356') + '</span><span>' + uiCopy('有立即危险：110 / 120', 'Immediate danger: call 110 / 120') + '</span>' +
+       '<small>' + uiCopy('我不做诊断，也不替代任何专业帮助。你随时可以回来。', 'I don’t diagnose or replace professional help. You can come back any time.') + '</small></div>';
+  h += '<div class="actions"><button class="btn ghost" data-go="#/talk">' + uiCopy('回到开头', 'Back to start') + '</button></div>';
   h += '</div></div>';
   return h;
 }
@@ -2117,6 +2205,19 @@ window.addEventListener("hashchange", () => {
    ============================================================ */
 
 /* 语言开关放在顶栏右上角，和「总览」并排——评委第一眼就要找得到。 */
+function uiCopy(zh, en){
+  return currentLang() === "en" ? en : zh;
+}
+function shortPlaceName(name, limit){
+  const base = String(name || "").replace(/ · .*/, "");
+  return currentLang() === "en" ? base : base.slice(0, limit);
+}
+function moodCopy(name){
+  if (currentLang() !== "en") return name;
+  const mood = MOODS.find(item => item.name === name);
+  return mood && MOODS_EN[mood.id] ? MOODS_EN[mood.id] : name;
+}
+
 function langToggle(){
   const en = currentLang() === "en";
   return '<button class="langsw" data-lang="' + (en ? "zh" : "en") + '" ' +
@@ -2126,26 +2227,25 @@ function langToggle(){
 
 function topbar(title, kicker, backTo){
   return '<div class="top"><div class="lead">' +
-    (backTo ? '<button class="back" data-go="' + backTo + '" aria-label="返回">←</button>' : '') +
+    (backTo ? '<button class="back" data-go="' + backTo + '" aria-label="' + uiCopy("返回", "Back") + '">←</button>' : '') +
     '<div><div class="k">' + kicker + '</div></div><h2>' + title + '</h2></div>' +
     '<div class="topright">' + langToggle() +
-    '<button class="topnav" data-go="#/talk">首页</button>' +
-    '<button class="topnav" data-go="#/records">轨迹</button></div></div>';
+    '<button class="topnav" data-go="#/talk">' + uiCopy("首页", "Home") + '</button>' +
+    '<button class="topnav" data-go="#/records">' + uiCopy("轨迹", "Trail") + '</button></div></div>';
 }
 
 /* --- 1. 情绪 --- */
 function renderMood(){
-  let h = topbar("自己挑一种", "备用入口", "#/talk");
+  let h = topbar(uiCopy("自己挑一种", "Choose how you feel"), uiCopy("心情与需求", "Mood and needs"), "#/talk");
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">自己挑 · 备用入口</p>';
-  h += '<h1 class="title">此刻，你更接近<br>哪一种？</h1>';
-  h += '<button class="btn ghost sm" data-go="#/talk" style="margin-bottom:20px">回去直接说一句 →</button>';
+  h += '<h1 class="title">' + uiCopy('此刻，你更接近<br>哪一种？', 'What feels closest<br>right now?') + '</h1>';
+  h += '<button class="btn ghost sm" data-go="#/talk" style="margin-bottom:20px">' + uiCopy('直接说一句 →', 'Say it instead →') + '</button>';
   h += '<div class="mood-grid">';
   MOODS.forEach(m => {
     h += '<button class="mood' + (state.mood === m.id ? " on" : "") + '" data-mood="' + m.id + '">' +
          '<strong>' + m.name + '</strong><small>' + m.desc + '</small></button>';
   });
-  h += '</div><div class="actions"><button class="btn" data-go="#/needs">接着走 <span>→</span></button></div>';
+  h += '</div><div class="actions"><button class="btn" data-go="#/needs">' + uiCopy('继续', 'Continue') + ' <span>→</span></button></div>';
   h += '</div></div>';
   h += dock('我先记着：<b>' + moodById(state.mood).name + '</b>。', {records:false});
   return h;
@@ -2169,13 +2269,13 @@ function needsForMood(){
 function renderNeeds(){
   const m = moodById(state.mood);
   const by = needsForMood();
-  let h = topbar("需要什么样的环境", "第二步 · 出发前", "#/mood");
+  let h = topbar(uiCopy("需要什么样的环境", "What kind of place?"), uiCopy("你的偏好", "Your preferences"), "#/mood");
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">你说：' + m.name + '</p>';
-  h += '<h1 class="title sm">那你现在<br>需要什么样的地方？</h1>';
-  h += '<p class="lead">可以多选，也可以都不选。</p>';
+  h += '<p class="eyebrow">' + uiCopy('你说：', 'Right now: ') + m.name + '</p>';
+  h += '<h1 class="title sm">' + uiCopy('那你现在<br>需要什么样的地方？', 'What would feel<br>right right now?') + '</h1>';
+  h += '<p class="lead">' + uiCopy('可以多选，也可以都不选。', 'Choose any that fit, or skip this.') + '</p>';
   ["空间", "刺激", "恢复"].forEach(dir => {
-    h += '<p class="need-dir">' + dir + '</p><div class="need-grid">';
+    h += '<p class="need-dir">' + uiCopy(dir, {"空间":"Space","刺激":"Energy","恢复":"Reset"}[dir]) + '</p><div class="need-grid">';
     (by[dir] || []).forEach(k => {
       h += '<button class="need' + (state.needs.indexOf(k) >= 0 ? " on" : "") + '" data-need="' + k + '">' +
            NEEDS[k].label + '</button>';
@@ -2184,7 +2284,7 @@ function renderNeeds(){
   });
   const n = state.needs.length;
   h += '<div class="actions"><button class="btn" data-go="#/mode">' +
-       (n ? '按这 ' + n + ' 条找 ' : '跳过，只按情绪找 ') + '<span>→</span></button></div>';
+       uiCopy(n ? '按这 ' + n + ' 条找' : '跳过，只按情绪找', n ? 'Find with these ' + n : 'Skip') + ' <span>→</span></button></div>';
   h += '</div></div>';
   h += dock(n ? '记着了：<b>' + state.needs.map(k => NEEDS[k].label).join('、') + '</b>。'
              : '一条都不选也可以，我就只按「<b>' + m.name + '</b>」来找。', {records:false});
@@ -2194,18 +2294,18 @@ function renderNeeds(){
 /* --- 3. 两种推荐入口 --- */
 function renderMode(){
   const m = moodById(state.mood);
-  let h = topbar("怎么找", "第二步 · 挑一种方式", "#/mood");
+  let h = topbar(uiCopy("怎么找", "How do you want to browse?"), uiCopy("选择方式", "Choose how"), "#/mood");
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">现在需要</p><h1 class="title sm">' + m.name + '</h1>';
+  h += '<p class="eyebrow">' + uiCopy('现在需要', 'Right now') + '</p><h1 class="title sm">' + m.name + '</h1>';
   h += '<div style="display:flex;flex-direction:column;gap:12px">';
   h += '<button class="mode-card" data-go="#/pick"><div class="visual"><div class="mock-one"></div></div>' +
-       '<div class="txt"><h3>替我选</h3><p>一次只给你一个空间。没力气比较的时候，用这个。</p>' +
-       '<div class="go">卡片模式 →</div></div></button>';
+       '<div class="txt"><h3>' + uiCopy('替我选', 'Pick for me') + '</h3><p>' + uiCopy('一次看一个地方。', 'One place at a time.') + '</p>' +
+       '<div class="go">' + uiCopy('卡片模式 →', 'One by one →') + '</div></div></button>';
   h += '<button class="mode-card" data-go="#/browse"><div class="visual"><div class="mock-grid"><i></i><i></i><i></i><i></i></div></div>' +
-       '<div class="txt"><h3>自己逛逛</h3><p>八个空间一起铺开，自己比。还有力气挑的时候，用这个。</p>' +
-       '<div class="go">瀑布流模式 →</div></div></button>';
+       '<div class="txt"><h3>' + uiCopy('自己逛逛', 'Browse') + '</h3><p>' + uiCopy('同时看看更多地方。', 'Browse more places at once.') + '</p>' +
+       '<div class="go">' + uiCopy('瀑布流模式 →', 'See the grid →') + '</div></div></button>';
   h += '</div>';
-  h += '<div class="actions"><button class="btn-text" data-go="#/records">先看看我的情绪空间轨迹</button></div>';
+  h += '<div class="actions"><button class="btn-text" data-go="#/records">' + uiCopy('先看看我的情绪空间轨迹', 'View my trail') + '</button></div>';
   h += '</div></div>';
   h += dock('两条路都会回到同一个地方。');
   return h;
@@ -2217,36 +2317,28 @@ function renderPick(){
   const i = ((state.cardIndex % list.length) + list.length) % list.length;
   const p = list[i];
   const m = moodById(state.mood);
-  let h = topbar("替我选", "卡片模式", "#/mode");
+  let h = topbar(uiCopy("替我选", "Pick for me"), uiCopy("卡片模式", "One by one"), "#/mode");
   h += '<div class="screen"><div class="pad" style="padding-top:14px">';
   h += '<div class="deck"><div class="slide" id="slide">';
   h += '<div class="pcard">' + coverHTML(p, {caption:true, badge:true});
   h += '<div class="body">';
   h += '<p class="place-sub" style="font-size:14px;color:var(--ink)">' + p.action + '</p>';
-  h += '<div class="meta-row"><span><i>距离</i>' + p.distance +
-       '</span><span><i>建议停留</i>' + p.suggestedDuration + '</span></div>';
-  h += '<div class="detail-rows"><div><i>会看到什么</i><span>' + p.see + '</span></div>' +
-       '<div><i>消费压力</i><span>' + p.cost + '</span></div></div>';
-  h += '<div class="why"><span class="k">为什么此刻推荐给你</span><p>' + reasonFor(p, state.mood) + '</p></div>';
-  h += '<div class="insights"><div class="head"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
-       '</span><b>小在眼中的这里</b></div>';
-  /* 卡片只显示最强的一条；第二条留给详情页 —— 替我选是给低能量用户的，选择负担要低 */
-  const x = p.placeInsights[0];
-  h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong></div></div>';
-  h += '</div>';
-  h += '<div class="sample-note">' + SAMPLE_EMPTY + '</div>';
+  h += '<div class="meta-row"><span><i>' + uiCopy('位置', 'Area') + '</i>' + p.area +
+       '</span><span><i>' + uiCopy('建议停留', 'Suggested stay') + '</i>' + p.suggestedDuration + '</span>' +
+       '<span><i>' + uiCopy('花费', 'Cost') + '</i>' + uiCopy(p.free ? '免费' : '需要消费', p.free ? 'Free' : 'Purchase') + '</span></div>';
+  h += '<div class="why"><span class="k">' + uiCopy('为什么此刻推荐给你', 'Why this fits right now') + '</span><p>' + reasonFor(p, state.mood) + '</p></div>';
   h += '</div></div>';
   h += '</div>';
-  h += '<div class="deck-nav"><button data-card="-1" aria-label="上一个">←</button>' +
+  h += '<div class="deck-nav"><button data-card="-1" aria-label="' + uiCopy('上一个', 'Previous') + '">←</button>' +
        '<div class="pos"><div class="track"><i style="left:' +
        (list.length > 1 ? (i / (list.length - 1) * 100).toFixed(1) : 50) + '%"></i></div>' +
        '<span>' + (i + 1) + ' / ' + list.length + '</span></div>' +
-       '<button data-card="1" aria-label="下一个">→</button></div>';
+       '<button data-card="1" aria-label="' + uiCopy('下一个', 'Next') + '">→</button></div>';
   h += '</div>';
-  h += '<div class="actions"><button class="btn" data-go="#/place/' + p.placeId + '">就去这里 <span>→</span></button>' +
+  h += '<div class="actions"><button class="btn" data-go="#/place/' + p.placeId + '">' + uiCopy('就去这里', 'Choose this place') + ' <span>→</span></button>' +
        '<div class="btn-row" style="margin-top:10px">' +
-       '<button class="btn ghost sm" data-fav="' + p.placeId + '">' + (state.favs.has(p.placeId) ? "已收藏" : "收藏") + '</button>' +
-       '<button class="btn ghost sm" data-card="1">换一个</button></div></div>';
+       '<button class="btn ghost sm" data-fav="' + p.placeId + '">' + uiCopy(state.favs.has(p.placeId) ? "已收藏" : "收藏", state.favs.has(p.placeId) ? "Saved" : "Save") + '</button>' +
+       '<button class="btn ghost sm" data-card="1">' + uiCopy('换一个', 'Another') + '</button></div></div>';
   h += '</div></div>';
   h += dock('你说「' + m.name + '」，这个放最上面。');
   return h;
@@ -2274,17 +2366,17 @@ function renderBrowse(){
   const m = moodById(state.mood);
   const list = rankedPlaces(filtered());
   const f = state.filters;
-  let h = topbar("自己逛逛", "瀑布流模式", "#/mode");
-  h += '<div class="mood-strip"><span class="k">现在需要</span><b>' + m.name + '</b>' +
-       '<button class="swap" data-go="#/mood">换一个状态</button></div>';
+  let h = topbar(uiCopy("自己逛逛", "Browse"), uiCopy("瀑布流模式", "All places"), "#/mode");
+  h += '<div class="mood-strip"><span class="k">' + uiCopy('现在需要', 'Right now') + '</span><b>' + m.name + '</b>' +
+       '<button class="swap" data-go="#/mood">' + uiCopy('换一个状态', 'Change') + '</button></div>';
   h += '<div class="filterbar">';
-  h += chip("dist","all","不限距离") + chip("dist","1km","1km 内") + chip("dist","3km","3km 内");
-  h += chip("place","in","室内") + chip("place","out","户外");
-  h += chip("crowd","low","人少") + chip("cost","free","免费");
+  h += chip("dist","all",uiCopy("不限距离", "Any distance")) + chip("dist","1km",uiCopy("1km 内", "Within 1 km")) + chip("dist","3km",uiCopy("3km 内", "Within 3 km"));
+  h += chip("place","in",uiCopy("室内", "Indoors")) + chip("place","out",uiCopy("户外", "Outdoors"));
+  h += chip("crowd","low",uiCopy("人少", "Quiet")) + chip("cost","free",uiCopy("免费", "Free"));
   h += '</div>';
   h += '<div class="screen">';
   if (!list.length){
-    h += '<div class="empty">这几个条件叠起来，暂时没有空间。<br>去掉一个再试试。</div>';
+    h += '<div class="empty">' + uiCopy('这几个条件叠起来，暂时没有空间。<br>去掉一个再试试。', 'Nothing matches all those filters yet.<br>Remove one and try again.') + '</div>';
   } else {
     h += '<div class="falls">';
     list.forEach(p => {
@@ -2292,8 +2384,8 @@ function renderBrowse(){
       h += coverHTML(p, {style:"aspect-ratio:" + p.ratio});
       h += '<div class="b"><h4>' + p.placeName + '</h4><p class="place-sub sm">' + p.category + '</p>' +
            '<p class="rsn">' + p.action + '</p>';
-      h += '<div class="foot"><b style="font:10px var(--mono);letter-spacing:.08em;color:var(--ink-faint)">样本还少</b><span>' + p.distance + '</span><span>' + p.category.split(" · ")[0] + '</span></div>';
-      h += '<div class="mini-tags">' + p.environmentTags.slice(0,3).map(t => '<span>' + t + '</span>').join("") + '</div>';
+      h += '<div class="foot"><span>' + p.area + '</span><span>' + uiCopy(p.free ? '免费' : '需要消费', p.free ? 'Free' : 'Purchase') + '</span></div>';
+      h += '<div class="mini-tags">' + p.environmentTags.slice(0,2).map(t => '<span>' + t + '</span>').join("") + '</div>';
       h += '</div></button>';
     });
     h += '</div>';
@@ -2312,45 +2404,45 @@ function renderPlace(id){
   const p = placeById(id);
   const recommendation = state.aiRecommendations[id];
   const distance = recommendation && recommendation.distance_source === "amap" ? recommendation.distance_km + " km" : p.distance;
-  const arrival = recommendation && recommendation.walking_minutes ? "步行约 " + recommendation.walking_minutes + " 分钟" : p.transport;
+  const arrival = recommendation && recommendation.walking_minutes
+    ? uiCopy("步行约 " + recommendation.walking_minutes + " 分钟", recommendation.walking_minutes + " min walk")
+    : p.transport;
   const fromOffer = (state.offer || []).some(x => x.place_id === p.placeId);
   const back = fromOffer ? "#/offer"
              : state.route.indexOf("browse") > -1 ? "#/browse"
              : (state.lastMode || "#/pick");
-  let h = topbar(p.placeName, "地点详情", back);
+  let h = topbar(p.placeName, uiCopy("地点详情", "Place"), back);
   h += '<div class="screen">';
   h += coverHTML(p, {cls:"detail-cover", caption:true, badge:true});
   h += '<div class="pad" style="padding-top:16px">';
-  h += '<div class="meta-row"><span><i>距离</i>' + distance + '</span><span><i>到达</i>' + arrival +
-       '</span><span><i>建议停留</i>' + p.suggestedDuration + '</span></div>';
-  h += '<p class="sec-k">小在眼中的这里</p>';
+  h += '<div class="meta-row"><span><i>' + uiCopy('距离', 'Distance') + '</i>' + distance + '</span><span><i>' + uiCopy('到达', 'Getting there') + '</i>' + arrival +
+       '</span><span><i>' + uiCopy('建议停留', 'Suggested stay') + '</i>' + p.suggestedDuration + '</span></div>';
+  h += '<p class="sec-k">' + uiCopy('这里有什么', 'What to expect') + '</p>';
   h += '<div class="insights" style="margin-top:0">';
   p.placeInsights.forEach(x => {
     h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong></div></div>';
   });
   h += '</div>';
-  h += '<div class="why" style="margin-top:16px"><span class="k">为什么此刻推荐给你</span><p>' + reasonFor(p, state.mood) + '</p></div>';
+  h += '<div class="why" style="margin-top:16px"><span class="k">' + uiCopy('为什么此刻推荐给你', 'Why this fits right now') + '</span><p>' + reasonFor(p, state.mood) + '</p></div>';
   h += '<div class="tags" style="margin-top:16px">' + p.environmentTags.map(t => '<span class="tag">' + t + '</span>').join("") + '</div>';
   // US-04：不展示单条到访反馈。别人去了怎么样，只以聚合的形式出现，并且附样本量。
   const agg = placeAggregate(p.placeId);
-  h += '<p class="sec-k">匿名汇总</p>';
-  h += '<div class="here" style="margin-top:0"><div class="h"><span style="width:14px;height:14px;display:inline-block">' +
-       catSVG() + '</span><b>只聚合，不展示单条</b><button data-go="#/nearby">怎么算的 →</button></div>';
   if (agg.enough){
-    h += '<div class="e">到访前后平均变化 <b class="num">' + signed(agg.average) + '</b>' +
-         '<u>' + agg.count + ' 条核验反馈 · 最常勾到「' + agg.factors.join("、") + '」</u></div>';
-  } else {
-    // 样本量和门槛是承诺（US-04 / FR-19b），不能删；但用不着写成一段话。
-    h += '<div class="e">样本 ' + agg.count + ' / ' + AGGREGATE_MIN + '，还不够出汇总</div>';
+    h += '<p class="sec-k">' + uiCopy('匿名汇总', 'Anonymous summary') + '</p>';
+    h += '<div class="here" style="margin-top:0"><div class="h"><span style="width:14px;height:14px;display:inline-block">' +
+         catSVG() + '</span><b>' + uiCopy('只聚合，不展示单条', 'Combined only') + '</b><button data-go="#/nearby">' + uiCopy('怎么算的 →', 'How it works →') + '</button></div>';
+    h += '<div class="e">' + uiCopy('到访前后平均变化', 'Average change') + ' <b class="num">' + signed(agg.average) + '</b>' +
+         '<u>' + uiCopy(agg.count + ' 条核验反馈 · 最常勾到「' + agg.factors.join("、") + '」',
+                         agg.count + ' confirmed visits · often linked to ' + agg.factors.map(factorCopy).join(', ')) + '</u></div>';
+    h += '</div>';
   }
-  h += '</div>';
 
   // 真人原话不是「到访反馈」，是空间档案的来源（FR-16 的评论那一路）。
   // 身份不同就不该长得像反馈：不带变化分，不算进任何汇总。
-  if (p.quote){
-    h += '<p class="sec-k">一手描述</p>';
+  if (p.quote && currentLang() !== "en"){
+    h += '<p class="sec-k">空间印象</p>';
     h += '<div class="here" style="margin-top:0"><div class="h"><span style="width:14px;height:14px;display:inline-block">' +
-         catSVG() + '</span><b>档案来源，不是到访反馈</b></div>';
+         catSVG() + '</span><b>来自实地体验</b></div>';
     h += '<div class="e">「' + escapeHTML(p.quote) + '」</div>';
     h += '</div>';
   }
@@ -2364,9 +2456,9 @@ function renderPlace(id){
                      Object.keys(recommendation.map_links).length > 0);
   h += '<div class="actions">' +
        '<button class="btn" data-depart="' + p.placeId + '">' +
-       (hasMaps ? '带我去 · 选地图' : '带我去') + ' <span>→</span></button>' +
-       (!hasMaps && recommendation ? '<p class="sub" style="margin:8px 2px 0">暂时无法导航，可在地图里搜索地点名。</p>' : '') +
-       '<button class="btn-text" data-go="' + back + '">回到' + (back === "#/browse" ? "瀑布流" : back === "#/offer" ? "推荐" : "卡片推荐") + '</button></div>';
+       uiCopy(hasMaps ? '带我去 · 选地图' : '带我去', hasMaps ? 'Take me there · choose a map' : 'Take me there') + ' <span>→</span></button>' +
+       (!hasMaps && recommendation ? '<p class="sub" style="margin:8px 2px 0">' + uiCopy('暂时无法导航，可在地图里搜索地点名。', 'Navigation is unavailable. Search the place name in Maps.') + '</p>' : '') +
+       '<button class="btn-text" data-go="' + back + '">' + uiCopy('回到' + (back === "#/browse" ? "瀑布流" : back === "#/offer" ? "推荐" : "卡片推荐"), 'Back') + '</button></div>';
   h += '</div></div>';
   h += tripStrip() || dock('到了不打扰，走了问你 30 秒。');
   return h;
@@ -2381,44 +2473,44 @@ function renderPlace(id){
 function renderReflect(id){
   const p = placeById(id);
   const d = state.draft;
-  const short = p.placeName.replace(/ · .*/, "").slice(0, 6);
+  const short = shortPlaceName(p.placeName, 6);
   const r = state.reflect;
-  let h = topbar("说说刚才", "第三步 · 你刚离开", "#/visit/" + id);
+  let h = topbar(uiCopy("说说刚才", "How was it?"), uiCopy("离开后", "After your visit"), "#/visit/" + id);
   h += '<div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>';
   h += '<div class="screen mid"><div class="pad">';
 
   if (!r){
     h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
-         '<div class="bubble"><span class="tag">小在</span><p>刚才在' + escapeHTML(short) +
-         '怎么样？说一句就行。</p></div></div>';
-    h += '<button class="mic' + (state.reflectTyping ? ' small' : '') + '" id="reflect-mic" aria-label="用语音说">' + micSVG() + '</button>';
+         '<div class="bubble"><span class="tag">' + uiCopy('小在', 'Xiaozai') + '</span><p>' +
+         uiCopy('刚才在' + escapeHTML(short) + '怎么样？说一句就行。', 'How was ' + escapeHTML(short) + '? One sentence is enough.') + '</p></div></div>';
+    h += '<button class="mic' + (state.reflectTyping ? ' small' : '') + '" id="reflect-mic" aria-label="' + uiCopy('用语音说', 'Speak') + '">' + micSVG() + '</button>';
     h += '<p class="mic-cap" id="reflect-cap">' +
          (state.reflectNote ? escapeHTML(state.reflectNote) : '') + '</p>';
     if (!state.reflectTyping){
-      h += '<button class="type-toggle" id="reflect-type">改用文字</button>';
+      h += '<button class="type-toggle" id="reflect-type">' + uiCopy('改用文字', 'Type instead') + '</button>';
     } else {
       h += '<div class="typing"><textarea id="reflect-input" maxlength="500" ' +
-           'placeholder="比如：坐了半小时，风挺舒服的，就是人有点多">' + escapeHTML(state.reflectText || "") + '</textarea>' +
-           '<button class="send" id="reflect-submit">发送</button></div>';
+           'placeholder="' + uiCopy('比如：坐了半小时，风挺舒服的，就是人有点多', 'For example: the breeze felt good, but it was crowded') + '">' + escapeHTML(state.reflectText || "") + '</textarea>' +
+           '<button class="send" id="reflect-submit">' + uiCopy('发送', 'Send') + '</button></div>';
     }
-    h += '<button class="btn-text" data-step="1" style="margin-top:18px">不想说，自己选</button>';
+    h += '<button class="btn-text" data-step="1" style="margin-top:18px">' + uiCopy('不想说，自己选', 'Choose instead') + '</button>';
   } else {
     h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
-         '<div class="bubble"><span class="tag">小在</span><p>' +
+         '<div class="bubble"><span class="tag">' + uiCopy('小在', 'Xiaozai') + '</span><p>' +
          keepQuotedTogether(escapeHTML(r.acknowledgement)) + '</p></div></div>';
-    h += '<div class="beforeafter" style="margin-top:4px"><div><small>出发前</small><strong>' +
+    h += '<div class="beforeafter" style="margin-top:4px"><div><small>' + uiCopy('出发前', 'Before') + '</small><strong>' +
          moodById(state.mood).name + '</strong></div><span class="arrow">→</span>' +
-         '<div><small>现在</small><strong class="hit">' + escapeHTML(scoreLabel(r.change_score)) + '</strong></div>' +
+         '<div><small>' + uiCopy('现在', 'Now') + '</small><strong class="hit">' + escapeHTML(scoreLabel(r.change_score)) + '</strong></div>' +
          '<div style="margin-left:auto"><b class="num">' + signed(r.change_score) + '</b></div></div>';
     if (r.factors && r.factors.length){
       h += '<div class="tags" style="margin-top:14px">' +
-           r.factors.map(f => '<span class="tag">' + escapeHTML(f) + '</span>').join("") + '</div>';
+           r.factors.map(f => '<span class="tag">' + escapeHTML(factorCopy(f)) + '</span>').join("") + '</div>';
     }
     // 「为什么要记」的答案，接在这句话后面，不另起一屏（不给他加一步）。
     h += '<div class="say" style="margin-top:16px"><span class="zai">' + cloudSVG() + '</span>' +
          '<div class="bubble"><p>' + escapeHTML(reflectPayoff(r)) + '</p></div></div>';
-    h += '<div class="actions"><button class="btn" id="reflect-save">生成心情轨迹卡 <span>→</span></button>' +
-         '<button class="btn-text" data-step="1">我说错了，自己改</button></div>';
+    h += '<div class="actions"><button class="btn" id="reflect-save">' + uiCopy('生成心情轨迹卡', 'Create mood trail card') + ' <span>→</span></button>' +
+         '<button class="btn-text" data-step="1">' + uiCopy('我说错了，自己改', 'Edit it myself') + '</button></div>';
   }
   h += '</div></div>';
   h += dock('这是同一个人前后的差，不是这个地方的星级。');
@@ -2434,31 +2526,32 @@ function reflectPayoff(r){
   const factor = (r.factors || [])[0];
   const mine = state.records.length + 1;
   if (factor){
-    return (r.change_score > 0 ? '记下了。下次我会多给你带「' + factor + '」的地方。'
-                               : '记下了。下次我会避开「' + factor + '」这一类。');
+    return r.change_score > 0
+      ? uiCopy('记下了。下次我会多给你带「' + factor + '」的地方。', 'Saved. I’ll favor places with “' + factorCopy(factor) + '” next time.')
+      : uiCopy('记下了。下次我会避开「' + factor + '」这一类。', 'Saved. I’ll show fewer places with “' + factorCopy(factor) + '” next time.');
   }
   return mine < AGGREGATE_MIN
-    ? '记下了。这是第 ' + mine + ' 条，攒够 ' + AGGREGATE_MIN + ' 条我就用你的记录替掉估计值。'
-    : '记下了。你的 ' + mine + ' 条记录已经在替你改排序了。';
+    ? uiCopy('记下了。这是第 ' + mine + ' 条，攒够 ' + AGGREGATE_MIN + ' 条我就用你的记录替掉估计值。', 'Saved. After ' + AGGREGATE_MIN + ' visits, your own pattern will guide the ranking.')
+    : uiCopy('记下了。你的 ' + mine + ' 条记录已经在替你改排序了。', 'Saved. Your ' + mine + ' visits are already reshaping the ranking.');
 }
 
 /* --- 5. 到访提醒（反馈 step 0）--- */
 function renderVisit(id){
   const p = placeById(id);
   const d = state.draft;
-  const short = p.placeName.replace(/ · .*/, "").slice(0, 5);
-  let h = topbar("到访反馈", "第三步 · 你刚离开", "#/place/" + p.placeId);
+  const short = shortPlaceName(p.placeName, 5);
+  let h = topbar(uiCopy("到访反馈", "Visit check-in"), uiCopy("离开后", "After your visit"), "#/place/" + p.placeId);
   h += '<div class="steps"><i class="on"></i><i></i><i></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
-  h += '<h1 class="title">刚从' + short + '回来吗？</h1>';
-  h += '<p class="lead">记下前后的变化，生成今天的心情轨迹卡。</p>';
+  h += '<h1 class="title">' + uiCopy('刚从' + short + '回来吗？', 'Just back from ' + short + '?') + '</h1>';
+  h += '<p class="lead">' + uiCopy('记下前后的变化，生成今天的心情轨迹卡。', 'Save how you feel now and create today’s mood trail card.') + '</p>';
   h += coverHTML(p, {caption:true, style:"aspect-ratio:16/10"});
-  h += '<div class="beforeafter" style="margin-top:16px"><div><small>本次停留</small><strong>约 ' + d.stayMin + ' 分钟</strong></div>' +
-       '<span class="arrow">·</span><div><small>出发前</small><strong>' + moodById(state.mood).name + '</strong></div></div>';
-  h += '<div class="actions"><button class="btn" data-reflect="' + p.placeId + '">记录这次变化 <span>→</span></button>' +
-       '<button class="btn-text" data-remind="1">稍后提醒</button>';
+  h += '<div class="beforeafter" style="margin-top:16px"><div><small>' + uiCopy('本次停留', 'Time here') + '</small><strong>' + uiCopy('约 ' + d.stayMin + ' 分钟', 'About ' + d.stayMin + ' min') + '</strong></div>' +
+       '<span class="arrow">·</span><div><small>' + uiCopy('出发前', 'Before') + '</small><strong>' + moodById(state.mood).name + '</strong></div></div>';
+  h += '<div class="actions"><button class="btn" data-reflect="' + p.placeId + '">' + uiCopy('记录这次变化', 'Check in') + ' <span>→</span></button>' +
+       '<button class="btn-text" data-remind="1">' + uiCopy('稍后提醒', 'Remind me later') + '</button>';
   if (d.reminder) h += '<p class="hint on" style="text-align:center">' +
-       escapeHTML(state.reflectNote || "好，先去过你的生活。这条会留在记录里等你。") + '</p>';
+       escapeHTML(state.reflectNote || uiCopy("好，先去过你的生活。这条会留在记录里等你。", "Okay. I’ll leave this here for later.")) + '</p>';
   h += '</div></div></div>';
   return h;
 }
@@ -2467,24 +2560,24 @@ function renderVisit(id){
 function renderScore(id){
   const p = placeById(id);
   const d = state.draft;
-  let h = topbar("到访反馈", "01 · 心情变化", "#/visit/" + p.placeId);
+  let h = topbar(uiCopy("到访反馈", "Visit check-in"), uiCopy("心情变化", "Mood shift"), "#/visit/" + p.placeId);
   h += '<div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
-  h += '<h1 class="title sm">现在，心里松了一点吗？</h1>';
-  h += '<p class="lead">这是你自己的记录，完成后会生成轨迹卡。</p>';
-  h += '<div class="beforeafter"><div><small>出发前</small><strong>' + moodById(state.mood).name + '</strong></div>' +
-       '<span class="arrow">→</span><div><small>现在</small><strong class="' + (d.score === null ? "dim" : "hit") + '">' +
+  h += '<h1 class="title sm">' + uiCopy('现在，心里松了一点吗？', 'How do you feel now?') + '</h1>';
+  h += '<p class="lead">' + uiCopy('这是你自己的记录，完成后会生成轨迹卡。', 'This stays in your own trail.') + '</p>';
+  h += '<div class="beforeafter"><div><small>' + uiCopy('出发前', 'Before') + '</small><strong>' + moodById(state.mood).name + '</strong></div>' +
+       '<span class="arrow">→</span><div><small>' + uiCopy('现在', 'Now') + '</small><strong class="' + (d.score === null ? "dim" : "hit") + '">' +
        scoreLabel(d.score) + '</strong></div>' +
        (d.score !== null ? '<span class="sc" style="color:' + deltaColor(d.score) + '">' + signed(d.score) + '</span>' : '') + '</div>';
   h += '<div class="scale">';
   [-3,-2,-1,0,1,2,3].forEach(s => {
     h += '<button class="' + (d.score === s ? "on" : "") + '" data-score="' + s + '" style="--dc:' + deltaColor(s) + '" aria-pressed="' + (d.score === s) +
-         '" aria-label="' + signed(s) + '，' + scoreLabel(s) + '">' + signed(s) + '</button>';
+         '" aria-label="' + signed(s) + ', ' + scoreLabel(s) + '">' + signed(s) + '</button>';
   });
-  h += '</div><div class="scale-lab"><span>明显更难受</span><span>差不多</span><span>明显变好</span></div>';
+  h += '</div><div class="scale-lab"><span>' + uiCopy('明显更难受', 'Much worse') + '</span><span>' + uiCopy('差不多', 'Same') + '</span><span>' + uiCopy('明显变好', 'Much better') + '</span></div>';
   h += '<p class="hint' + (d.score !== null ? " on" : "") + '">' +
-       (d.score === null ? "选一个之后才能继续。初始不预选，是为了不给你暗示。" : "记下了：" + scoreLabel(d.score) + "。随时可以改。") + '</p>';
-  h += '<div class="actions"><button class="btn" data-step="2"' + (d.score === null ? " disabled" : "") + '>继续 <span>→</span></button></div>';
+       (d.score === null ? "" : uiCopy("已记录：" + scoreLabel(d.score) + "。", "Saved: " + scoreLabel(d.score) + ".")) + '</p>';
+  h += '<div class="actions"><button class="btn" data-step="2"' + (d.score === null ? " disabled" : "") + '>' + uiCopy('继续', 'Continue') + ' <span>→</span></button></div>';
   h += '</div></div>';
   h += dock('这是同一个人前后的差，不是这个地方的星级。');
   return h;
@@ -2495,16 +2588,16 @@ function renderScore(id){
    这一步不能替用户跳过——要不要匿名贡献，永远由他自己点。 */
 function privacyChoice(d){
   if (d.demo){
-    return '<p class="sec-k">这条记录放在哪里</p><div class="priv" style="margin-top:0">' +
-      '<button class="opt on" disabled><span class="mark"></span><div><strong>仅用于本次演示</strong>' +
-      '<small>反馈内容不会上传，不进入地点汇总，刷新页面后消失</small></div></button></div>';
+    return '<p class="sec-k">' + uiCopy('这条记录放在哪里', 'Save this visit') + '</p><div class="priv" style="margin-top:0">' +
+      '<button class="opt on" disabled><span class="mark"></span><div><strong>' + uiCopy('仅用于本次演示', 'Demo only') + '</strong>' +
+      '<small>' + uiCopy('反馈内容不会上传，不进入地点汇总，刷新页面后消失', 'Not uploaded or counted. It disappears when the page refreshes.') + '</small></div></button></div>';
   }
-  let h = '<p class="sec-k">这条记录放在哪里</p>';
+  let h = '<p class="sec-k">' + uiCopy('这条记录放在哪里', 'Save this visit') + '</p>';
   h += '<div class="priv" style="margin-top:0">';
   h += '<button class="opt' + (d.visibility === "private" ? " on" : "") + '" data-vis="private"><span class="mark"></span>' +
-       '<div><strong>只存进我的记录</strong><small>默认，没有人看得到</small></div></button>';
+       '<div><strong>' + uiCopy('只存进我的记录', 'Keep private') + '</strong><small>' + uiCopy('默认，没有人看得到', 'Only you can see it') + '</small></div></button>';
   h += '<button class="opt' + (d.visibility === "anonymous" ? " on" : "") + '" data-vis="anonymous"><span class="mark"></span>' +
-       '<div><strong>匿名进入这个地点的汇总</strong><small>只算进一个数，单条不展示</small></div></button>';
+       '<div><strong>' + uiCopy('匿名进入这个地点的汇总', 'Contribute anonymously') + '</strong><small>' + uiCopy('只算进一个数，单条不展示', 'Counted only in the combined result') + '</small></div></button>';
   h += '</div>';
   return h;
 }
@@ -2513,58 +2606,62 @@ function renderFactors(id){
   const p = placeById(id);
   const d = state.draft;
   const privacyDock = d.demo
-    ? '演示反馈不会上传，刷新页面后消失。'
-    : '不选匿名，它就只是你的。';
+    ? uiCopy('演示反馈不会上传，刷新页面后消失。', 'Demo feedback is not uploaded and disappears on refresh.')
+    : uiCopy('不选匿名，它就只是你的。', 'Keep it private unless you choose otherwise.');
 
   // 刚刚已经说过一遍了，就别把同一批问题再摆一屏。
   // 对话已经把分数、因素、哪一环都拿到了，这里只剩「这条放哪里」——
   // 那是授权，不能替他决定，所以它是唯一保留的一步。
   if (state.reflect){
-    let lean = topbar("放在哪里", "第四步 · 最后一下", "#/reflect/" + p.placeId);
+    let lean = topbar(uiCopy("放在哪里", "Save this visit"), uiCopy("保存方式", "Privacy"), "#/reflect/" + p.placeId);
     lean += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>';
     lean += '<div class="screen mid"><div class="pad">';
     lean += '<div class="say"><span class="zai">' + cloudSVG() + '</span>' +
-            '<div class="bubble"><span class="tag">小在</span><p>我记的是：' +
-            escapeHTML(scoreLabel(d.score)) + (d.factors.length ? '，' + d.factors.map(escapeHTML).join("、") : "") +
-            '。最后一件事——这条放哪里？</p></div></div>';
+            '<div class="bubble"><span class="tag">' + uiCopy('小在', 'Xiaozai') + '</span><p>' +
+            uiCopy('我记的是：' + escapeHTML(scoreLabel(d.score)) + (d.factors.length ? '，' + d.factors.map(escapeHTML).join("、") : "") + '。最后一件事——这条放哪里？',
+                   'I have ' + escapeHTML(scoreLabel(d.score)) + (d.factors.length ? ', ' + d.factors.map(f => escapeHTML(factorCopy(f))).join(', ') : '') + '. Where should I save it?') + '</p></div></div>';
     lean += privacyChoice(d);
-    lean += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">生成心情轨迹卡 <span>→</span></button>' +
-            '<button class="btn-text" data-step="1">我想自己改一下</button></div>';
+    lean += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">' + uiCopy('生成心情轨迹卡', 'Create mood trail card') + ' <span>→</span></button>' +
+            '<button class="btn-text" data-step="1">' + uiCopy('我想自己改一下', 'Edit my response') + '</button></div>';
     lean += '</div></div>';
     lean += dock(privacyDock);
     return lean;
   }
 
-  let h = topbar("到访反馈", "02 · 发生了什么", "#/feedback/" + p.placeId + "?s=1");
+  let h = topbar(uiCopy("到访反馈", "Visit check-in"), uiCopy("影响因素", "What changed"), "#/feedback/" + p.placeId + "?s=1");
   h += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>';
   h += '<div class="screen"><div class="pad">';
-  h += '<h1 class="title sm">是什么参与了这次变化？</h1>';
-  h += '<p class="lead">可以多选，也可以都不选。</p>';
+  h += '<h1 class="title sm">' + uiCopy('是什么参与了这次变化？', 'What shaped this visit?') + '</h1>';
+  h += '<p class="lead">' + uiCopy('可以多选，也可以都不选。', 'Choose any that fit, or skip this.') + '</p>';
   h += '<div class="fac-grid">';
   p.factorOptions.forEach(o => {
     const on = d.factors.indexOf(o.label) > -1;
     h += '<button class="fac' + (on ? " on" : "") + (o.tone === "neg" ? " neg" : "") + '" data-fac="' + o.label +
-         '" aria-pressed="' + on + '">' + (on ? "✓ " : "") + o.label + '</button>';
+         '" aria-pressed="' + on + '">' + (on ? "✓ " : "") + factorCopy(o.label) + '</button>';
   });
   h += '</div>';
   // 哪一环对/错（FR-09 / SP-4）：问的是「推荐依据对不对」，不是「这地方好不好」。
   // 措辞跟着分数走——接住了就问哪一环最对，没接住才问哪一环没对上。
   const missed = d.score !== null && d.score <= 0;
   h += '<div class="stage-pick">';
-  h += '<p class="lead-q">' + (missed ? '哪一环没对上？' : '哪一环最对？') + '</p>';
-  h += '<p class="note">这一条比分数更有用：它告诉我该改哪一步，而不是把哪个地方拉黑。</p>';
+  h += '<p class="lead-q">' + uiCopy(missed ? '哪一环没对上？' : '哪一环最对？', missed ? 'What missed?' : 'What felt right?') + '</p>';
+  h += '<p class="note">' + uiCopy('这会帮助下次推荐更贴近你。', 'This tunes the next recommendation.') + '</p>';
   h += '<div class="row">';
   STAGE_OPTIONS.forEach(o => {
     const on = d.mismatchStage === o.key;
     h += '<button class="' + (on ? "on" : "") + '" data-stage="' + o.key + '">' +
-         (missed ? o.wrong : o.right) + '</button>';
+         uiCopy(missed ? o.wrong : o.right, {
+           none:missed ? 'Not sure' : 'All of it', state:missed ? 'Mood' : 'Mood fit',
+           need:missed ? 'Need' : 'Need fit', constraint:missed ? 'Distance or cost' : 'Distance and cost',
+           place:missed ? 'The place' : 'Place fit'
+         }[o.key]) + '</button>';
   });
   h += '</div></div>';
-  h += '<div class="note-wrap"><label><span>如果愿意，留下一句话（可跳过）</span><em class="num">' + d.note.length + ' / 80</em></label>' +
-       '<textarea id="note" maxlength="80" placeholder="比如：风吹过来的时候，脑子终于安静了一点。">' + escapeHTML(d.note) + '</textarea></div>';
+  h += '<div class="note-wrap"><label><span>' + uiCopy('如果愿意，留下一句话（可跳过）', 'Add a note (optional)') + '</span><em class="num">' + d.note.length + ' / 80</em></label>' +
+       '<textarea id="note" maxlength="80" placeholder="' + uiCopy('比如：风吹过来的时候，脑子终于安静了一点。', 'For example: the breeze helped my mind quiet down') + '">' + escapeHTML(d.note) + '</textarea></div>';
   h += privacyChoice(d);
-  h += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">生成心情轨迹卡 <span>→</span></button>' +
-       '<button class="btn-text" data-step="1">回上一步改分数</button></div>';
+  h += '<div class="actions"><button class="btn" data-save="' + p.placeId + '">' + uiCopy('生成心情轨迹卡', 'Create mood trail card') + ' <span>→</span></button>' +
+       '<button class="btn-text" data-step="1">' + uiCopy('回上一步改分数', 'Change score') + '</button></div>';
   h += '</div></div>';
   h += dock(privacyDock);
   return h;
@@ -2609,15 +2706,15 @@ function placeAggregate(placeId){
 function presenceLine(rec){
   const dwell = rec.dwellMinutes || stayMinutes(rec);
   if (rec.demo){
-    return "演示记录：抵达和离开由演示按钮模拟，只用于展示流程，不会保存，也不会进入任何地点汇总。";
+    return uiCopy("演示到访 · 由演示按钮模拟，不会保存", "Demo visit · simulated with the demo controls, not saved");
   }
   if (rec.presenceLevel === "geofence_dwell"){
-    return "到访已核验：进入这个地点的围栏并停留 " + dwell + " 分钟。位置判定在你手机上完成，坐标没有上传。";
+    return uiCopy("已确认到访 · 停留 " + dwell + " 分钟", "Visit confirmed · " + dwell + " min");
   }
   if (rec.presenceLevel === "dwell_only"){
-    return "按停留时长算数：停留 " + dwell + " 分钟。这个地点还没有人工核对过的坐标，所以没法用围栏核验。";
+    return uiCopy("已记录停留 · " + dwell + " 分钟", "Stay recorded · " + dwell + " min");
   }
-  return "这条算你自己说的：没有围栏核验，停留也不到 5 分钟。它会进你的轨迹，但不进任何地点的匿名汇总。";
+  return uiCopy("自行确认到访", "Visit confirmed by you");
 }
 
 /* 记完之后，立刻告诉他这条记录改变了什么。
@@ -2633,14 +2730,12 @@ function payoffBanner(rec){
   const factor = (rec.factors || [])[0];
   if (factor){
     lines.push(rec.changeScore > 0
-      ? '下次我会多给你带「' + escapeHTML(factor) + '」的地方'
-      : '下次我会避开「' + escapeHTML(factor) + '」这一类');
+      ? uiCopy('下次我会多给你带「' + escapeHTML(factor) + '」的地方', 'I’ll favor places with “' + escapeHTML(factorCopy(factor)) + '” next time')
+      : uiCopy('下次我会避开「' + escapeHTML(factor) + '」这一类', 'I’ll show fewer places with “' + escapeHTML(factorCopy(factor)) + '” next time'));
+  } else {
+    lines.push(uiCopy('这次变化会用于调整下次推荐', 'I’ll use this to tune your next recommendation'));
   }
-  const mine = state.records.length;
-  lines.push(mine < AGGREGATE_MIN
-    ? '这是第 ' + mine + ' 条 · 攒够 ' + AGGREGATE_MIN + ' 条，我就用你的记录替掉原来的估计'
-    : '你的 ' + mine + ' 条记录已经在替你改排序了');
-  return '<div class="payoff"><b>记下了，下次会不一样</b>' +
+  return '<div class="payoff"><b>' + uiCopy('已记下', 'Saved') + '</b>' +
          lines.map(l => '<span>' + l + '</span>').join("") + '</div>';
 }
 
@@ -2652,15 +2747,15 @@ function renderCard(recId, backTo){
   const isNew = rec.id === state.lastRecordId;
   // 反馈后符号"重新长一次"：光点按分数向环内 / 环外移动
   const moved = Math.max(12, p.sig.nodeDist - rec.changeScore * 11);
-  let h = topbar("到访卡", isNew ? (rec.demo ? "第四步 · 演示完成" : "第四步 · 已保存") : "历史记录", backTo || "#/records");
+  let h = topbar(uiCopy("到访卡", "Visit card"), isNew ? uiCopy(rec.demo ? "演示完成" : "已保存", rec.demo ? "Demo complete" : "Saved") : uiCopy("历史记录", "Past visit"), backTo || "#/records");
   if (isNew) h += '<div class="steps"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>';
   h += '<div class="screen"><div class="pad">';
   if (isNew){
-    h += '<p class="eyebrow">' + (rec.demo ? '演示完成' : '记录完成') + '</p><h1 class="title sm">' +
-         (rec.demo ? '完整闭环，已经<br>跑通一次。' : '这次到访，已经<br>收进你的轨迹。') + '</h1>' +
-         '<p class="lead">卡片有两面，点一下翻过去。</p>';
+    h += '<p class="eyebrow">' + uiCopy(rec.demo ? '演示完成' : '记录完成', rec.demo ? 'Demo complete' : 'Saved') + '</p><h1 class="title sm">' +
+         uiCopy(rec.demo ? '完整闭环，已经<br>跑通一次。' : '这次到访，已经<br>收进你的轨迹。', rec.demo ? 'The full journey<br>is working.' : 'This visit is now<br>in your trail.') + '</h1>' +
+         '<p class="lead">' + uiCopy('卡片有两面，点一下翻过去。', 'Tap the card to see the change.') + '</p>';
     if (rec.demo){
-      h += '<div class="payoff"><b>这是一条演示记录</b><span>反馈内容不会上传，不进入匿名汇总，刷新页面后消失</span></div>';
+      h += '<div class="payoff"><b>' + uiCopy('这是一条演示记录', 'Demo visit') + '</b><span>' + uiCopy('反馈内容不会上传，不进入匿名汇总，刷新页面后消失', 'Not uploaded or counted. It disappears on refresh.') + '</span></div>';
     } else if (!state.reflect) h += payoffBanner(rec);
   }
   h += '<div class="flip-stage">';
@@ -2668,72 +2763,70 @@ function renderCard(recId, backTo){
   // 正面：你去过的地方
   h += '<div class="face face-front">';
   h += coverHTML(p, {badge:true, nodeDist:moved, tag:"f"});
-  h += '<div class="b"><h3>' + rec.placeName + '</h3>' +
-       '<div class="meta-row"><span><i>到访</i>' + fmtDate(rec.visitStartedAt) + '</span>' +
-       '<span><i>停留</i>约 ' + stayMinutes(rec) + ' 分钟</span></div>' +
+  h += '<div class="b"><h3>' + p.placeName + '</h3>' +
+       '<div class="meta-row"><span><i>' + uiCopy('到访', 'Visited') + '</i>' + fmtDate(rec.visitStartedAt) + '</span>' +
+       '<span><i>' + uiCopy('停留', 'Stayed') + '</i>' + uiCopy('约 ' + stayMinutes(rec) + ' 分钟', 'About ' + stayMinutes(rec) + ' min') + '</span></div>' +
        '<div style="margin-top:11px">' + '<span class="stamp' + (rec.visibility === "anonymous" && !rec.demo ? " anon" : "") + '">' +
-       (rec.demo ? "演示记录 · 不保存" : rec.visibility === "anonymous" ? "已匿名贡献" : "仅自己可见") + '</span></div>' +
+       uiCopy(rec.demo ? "演示记录 · 不保存" : rec.visibility === "anonymous" ? "已匿名贡献" : "仅自己可见", rec.demo ? "Demo · not saved" : rec.visibility === "anonymous" ? "Contributed anonymously" : "Private") + '</span></div>' +
        // 这条记录凭什么算数（FR-08）。写清楚才敢拿去做匿名汇总。
        '<div class="sample-note" style="margin-top:12px">' + escapeHTML(presenceLine(rec)) + '</div>' +
        '</div></div>';
   } else {
   // 背面：这个地方对你做了什么
   h += '<div class="face rear"><div class="rear-b">';
-  h += '<p class="eyebrow" style="margin-bottom:14px">这次到访 · 背面</p>';
-  h += '<div class="rear-line"><span class="k">出发前</span><span class="v serif">' + rec.preMood + '</span></div>';
-  h += '<div class="rear-line"><span class="k">现在</span><span class="v serif">' + scoreLabel(rec.changeScore) +
+  h += '<p class="eyebrow" style="margin-bottom:14px">' + uiCopy('这次到访 · 背面', 'This visit · back') + '</p>';
+  h += '<div class="rear-line"><span class="k">' + uiCopy('出发前', 'Before') + '</span><span class="v serif">' + moodCopy(rec.preMood) + '</span></div>';
+  h += '<div class="rear-line"><span class="k">' + uiCopy('现在', 'Now') + '</span><span class="v serif">' + scoreLabel(rec.changeScore) +
        ' <b class="num" style="color:' + deltaColor(rec.changeScore) + '">' + signed(rec.changeScore) + '</b></span></div>';
-  h += '<div class="rear-line"><span class="k">因素</span><span class="v">' +
+  h += '<div class="rear-line"><span class="k">' + uiCopy('因素', 'Factors') + '</span><span class="v">' +
        (rec.factors.length ? rec.factors.map(f => {
           const o = p.factorOptions.find(x => x.label === f);
-          return '<span class="tag ' + (o && o.tone === "neg" ? "neg" : "pos") + '" style="margin:0 4px 4px 0;display:inline-block">' + f + '</span>';
-       }).join("") : '<span style="color:var(--ink-faint)">没有勾选</span>') + '</span></div>';
-  h += '<div class="rear-line" style="border:none"><span class="k">可见性</span><span class="v">' +
+          return '<span class="tag ' + (o && o.tone === "neg" ? "neg" : "pos") + '" style="margin:0 4px 4px 0;display:inline-block">' + factorCopy(f) + '</span>';
+       }).join("") : '<span style="color:var(--ink-faint)">' + uiCopy('没有勾选', 'None selected') + '</span>') + '</span></div>';
+  h += '<div class="rear-line" style="border:none"><span class="k">' + uiCopy('可见性', 'Privacy') + '</span><span class="v">' +
        (rec.demo
-         ? "仅用于本次演示 · 不上传，刷新后消失"
+         ? uiCopy("仅用于本次演示 · 不上传，刷新后消失", "Demo only · not uploaded")
          : rec.visibility === "anonymous"
-         ? "匿名贡献 · 变化分和因素进入地点汇总，单条不展示" + (rec.note ? "；那句话只给我们看" : "")
-         : "仅自己可见 · 不进入任何汇总") + '</span></div>';
+         ? uiCopy("匿名贡献 · 变化分和因素进入地点汇总，单条不展示" + (rec.note ? "；那句话只给我们看" : ""), "Anonymous · counted only in the combined result")
+         : uiCopy("仅自己可见 · 不进入任何汇总", "Private · not counted")) + '</span></div>';
   if (rec.note) h += '<blockquote>' + escapeHTML(rec.note) + '</blockquote>';
   h += '<div class="insights" style="margin-top:16px"><div class="head"><span style="width:14px;height:14px;display:inline-block">' +
-       catSVG() + '</span><b>小在眼中的这次到访</b></div>';
+       catSVG() + '</span><b>' + uiCopy('小在眼中的这次到访', 'What changed this time') + '</b></div>';
   ins.forEach(x => {
     h += '<div class="row"><span class="dot">' + catDot(p) + '</span><div><strong>' + x.t + '</strong></div></div>';
   });
   h += '</div></div></div>';
   }
   h += '</div>';
-  h += '<button class="btn ghost flip-btn" data-flip="1">' + (state.flipped ? "← 翻回正面" : "翻到背面 · 看这次的变化 →") + '</button>';
-  h += '<section class="card-share" aria-label="导出心情轨迹卡"><p class="share-title">把今天这段轨迹带走</p>' +
-       '<p class="share-copy">生成 4:5 PNG，不包含你写下的私密原话。手机上会打开系统分享菜单；不支持时自动下载。</p>' +
-       '<div class="share-row"><button class="btn sm" data-share-card="' + escapeHTML(rec.id) + '">分享心情轨迹卡</button>' +
-       '<button class="btn ghost sm" data-save-card="' + escapeHTML(rec.id) + '">下载 PNG</button></div>' +
+  h += '<button class="btn ghost flip-btn" data-flip="1">' + uiCopy(state.flipped ? "← 翻回正面" : "翻到背面 · 看这次的变化 →", state.flipped ? "← Front" : "See the change →") + '</button>';
+  h += '<section class="card-share" aria-label="' + uiCopy('保存或分享心情轨迹卡', 'Save or share your mood trail card') + '"><p class="share-title">' + uiCopy('保存这段心情轨迹', 'Save this mood trail') + '</p>' +
+       '<p class="share-copy">' + uiCopy('图片不会包含你的私密原话。', 'Your private note won’t appear in the image.') + '</p>' +
+       '<div class="share-row"><button class="btn sm" data-share-card="' + escapeHTML(rec.id) + '">' + uiCopy('分享卡片', 'Share card') + '</button>' +
+       '<button class="btn ghost sm" data-save-card="' + escapeHTML(rec.id) + '">' + uiCopy('保存图片', 'Save image') + '</button></div>' +
        '<p class="share-status" role="status" aria-live="polite"></p></section>';
   if (rec.demo){
-    h += '<div class="sample-note" style="margin-top:14px">演示反馈不会上传，也不会进入任何地点的统计。</div>';
+    h += '<div class="sample-note" style="margin-top:14px">' + uiCopy('演示反馈不会上传，也不会进入任何地点的统计。', 'Demo feedback is not uploaded or counted.') + '</div>';
   } else if (rec.visibility === "anonymous"){
     const agg = placeAggregate(p.placeId);
     h += '<div class="sample-note" style="margin-top:14px">' +
          (countsTowardAggregate(rec)
-           ? '你这一条进了 ' + p.placeName + ' 的匿名汇总，但不会被单独展示给任何人。' + escapeHTML(agg.line)
-           : '你选了匿名贡献，但这次到访没有核验过（' + PRESENCE_LABEL[rec.presenceLevel || "self_reported"] +
-             '），所以它不会进 ' + p.placeName + ' 的汇总。记录还是你的，只是不参与统计。') +
+           ? uiCopy('你这一条进了 ' + p.placeName + ' 的匿名汇总，但不会被单独展示给任何人。' + escapeHTML(agg.line), 'Added anonymously to the combined result. It will never appear on its own.')
+           : uiCopy('你选了匿名贡献，但这次到访没有核验过（' + PRESENCE_LABEL[rec.presenceLevel || "self_reported"] + '），所以它不会进 ' + p.placeName + ' 的汇总。记录还是你的，只是不参与统计。', 'Saved to your trail, but not counted because this visit was not verified.')) +
          '</div>';
   } else {
     h += '<div class="avg" style="margin-top:14px;background:var(--card)"><b style="color:var(--ink-dim)">—</b>' +
-         '<p>这条没有进入 ' + p.placeName + ' 的汇总<em>你选了只存进自己的记录。地点的平均分里没有你。</em></p></div>';
+         '<p>' + uiCopy('这条没有进入 ' + p.placeName + ' 的汇总', 'This visit is private') + '<em>' + uiCopy('你选了只存进自己的记录。地点的平均分里没有你。', 'It stays in your trail and is not counted in the place summary.') + '</em></p></div>';
   }
   h += '<div class="actions"><button class="btn" data-go="#/records">' +
-       (rec.demo ? '查看本次演示轨迹' : '进入情绪空间轨迹') + ' <span>→</span></button>' +
-       '<button class="btn-text" data-reset="1">重新体验</button>';
+       uiCopy(rec.demo ? '查看本次演示轨迹' : '进入情绪空间轨迹', rec.demo ? 'View demo trail' : 'View my trail') + ' <span>→</span></button>' +
+       '<button class="btn-text" data-reset="1">' + uiCopy('重新体验', 'Start again') + '</button>';
   // FR-12 / §M6：记忆可删除。承诺过「只存进我的记录」，就要给得出出口。
   if (state.pendingDelete === rec.id){
-    h += '<div class="confirm"><p>删掉这条记录？变化分、影响因素、你写的那句话都会一起消失，' +
-         '本地和服务端都不留。<b>这一步撤不回来。</b></p>' +
-         '<div class="row"><button class="no" data-delcancel="1">先留着</button>' +
-         '<button class="yes" data-delyes="' + rec.id + '">删掉</button></div></div>';
+    h += '<div class="confirm"><p>' + uiCopy('删掉这条记录？变化分、影响因素、你写的那句话都会一起消失，本地和服务端都不留。', 'Delete this visit and everything saved with it?') + '<b>' + uiCopy('这一步撤不回来。', 'This cannot be undone.') + '</b></p>' +
+         '<div class="row"><button class="no" data-delcancel="1">' + uiCopy('先留着', 'Keep it') + '</button>' +
+         '<button class="yes" data-delyes="' + rec.id + '">' + uiCopy('删掉', 'Delete') + '</button></div></div>';
   } else if (!rec.demo){
-    h += '<button class="danger" data-del="' + rec.id + '">删掉这条记录</button>';
+    h += '<button class="danger" data-del="' + rec.id + '">' + uiCopy('删掉这条记录', 'Delete this visit') + '</button>';
   }
   h += '</div>';
   h += '</div></div>';
@@ -2743,20 +2836,21 @@ function renderCard(recId, backTo){
 
 /* --- 9. 情绪空间轨迹 --- */
 const REC_FILTERS = [
-  {id:"all",   label:"全部"},
-  {id:"calm",  label:"让我安静下来"},
-  {id:"power", label:"给我能量"},
-  {id:"none",  label:"没有帮助"},
-  {id:"private",  label:"私密记录"},
-  {id:"anonymous",label:"匿名贡献"}
+  {id:"all",   label:"全部", en:"All"},
+  {id:"calm",  label:"让我安静下来", en:"Calmer"},
+  {id:"power", label:"给我能量", en:"More energy"},
+  {id:"none",  label:"没有帮助", en:"Didn’t help"},
+  {id:"private",  label:"私密记录", en:"Private"},
+  {id:"anonymous",label:"匿名贡献", en:"Anonymous"}
 ];
 function recMatches(r){
   const f = state.recFilter;
   if (f === "all") return true;
   if (f === "private" || f === "anonymous") return r.visibility === f;
   const p = placeById(r.placeId);
+  const raw = PLACES.find(place => place.placeId === r.placeId) || p;
   if (f === "none")  return r.changeScore <= 0;
-  if (f === "calm")  return r.changeScore > 0 && (p.indoor || p.category.indexOf("公园") > -1 || p.category.indexOf("植物园") > -1);
+  if (f === "calm")  return r.changeScore > 0 && (raw.indoor || raw.category.indexOf("公园") > -1 || raw.category.indexOf("植物园") > -1);
   if (f === "power") return r.changeScore > 0 && !p.indoor;
   return true;
 }
@@ -2765,24 +2859,24 @@ function renderRecords(){
   const all = state.records;
   const avg = all.length ? (all.reduce((s,r) => s + r.changeScore, 0) / all.length) : 0;
   const anon = all.filter(r => r.visibility === "anonymous").length;
-  let h = topbar("情绪空间轨迹", "长期记录", "#/talk");
+  let h = topbar(uiCopy("情绪空间轨迹", "Mood trail"), uiCopy("长期记录", "Your visits"), "#/talk");
   h += '<div class="screen">';
-  h += '<div style="padding:14px 18px 0"><button class="btn sm" data-go="#/talk">重新找一个地方 <span>→</span></button></div>';
+  h += '<div style="padding:14px 18px 0"><button class="btn sm" data-go="#/talk">' + uiCopy('重新找一个地方', 'Find another place') + ' <span>→</span></button></div>';
   // 封面 + 身份：Tara 个人页的结构，对象换成「你自己的记录」
   const read = selfRead(all);
   h += '<div class="profile"><div class="hero">' +
        '<div class="grad" style="background:radial-gradient(120% 100% at 50% 40%, rgba(30,110,114,.12), rgba(30,110,114,.05) 55%, rgba(234,240,239,.92) 100%),linear-gradient(160deg,#EAF0EF,#DDE6E4)"></div>' +
        '<div class="grain"></div>' + selfSigil(all) + '<div class="scrim"></div>' +
-       '<div class="who"><h1>你的轨迹</h1><p>' + read.line + '</p></div>' +
+       '<div class="who"><h1>' + uiCopy('你的轨迹', 'Your trail') + '</h1><p>' + read.line + '</p></div>' +
        '<div class="av"><span>' + catSVG() + '</span></div></div>';
   h += '<div class="eye"><div class="head"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
-       '</span><b>我们的此在</b></div>';
+       '</span><b>' + uiCopy('从记录里看到的', 'Patterns in your visits') + '</b></div>';
   read.rows.forEach(r => {
     h += '<div class="row"><span class="dot">' + catDot(placeById(all.length ? all[0].placeId : "liangmahe")) +
-         '</span><div><strong>' + r.t + '</strong><em>依据 · ' + r.e + '</em></div></div>';
+         '</span><div><strong>' + r.t + '</strong><em>' + uiCopy('依据 · ', 'Based on · ') + r.e + '</em></div></div>';
   });
   h += '</div>';
-  h += '<div style="padding:13px 18px 16px"><button class="btn ghost sm" data-go="#/nearby">匿名汇总是怎么算的 →</button></div></div>';
+  h += '<div style="padding:13px 18px 16px"><button class="btn ghost sm" data-go="#/nearby">' + uiCopy('匿名汇总是怎么算的 →', 'How anonymous summaries work →') + '</button></div></div>';
 
   if (state.deleteWarning){
     h += '<div class="pad" style="padding-bottom:0"><div class="sample-note" style="margin:0">' +
@@ -2793,28 +2887,29 @@ function renderRecords(){
   const learned = learnedPatterns();
   if (learned){
     h += '<div class="pad" style="padding-bottom:0"><div class="learned">';
-    h += '<div class="lh"><span>' + catSVG() + '</span>下次推荐我会怎么改</div>';
+    h += '<div class="lh"><span>' + catSVG() + '</span>' + uiCopy('下次推荐我会怎么改', 'How your next picks will change') + '</div>';
     learned.rows.forEach(row => {
       // 标题已经是结论，依据行已经是证据，中间那句解释是把结论再说一遍。
       h += '<div class="lr"><strong>' + row.t + '</strong>' +
            (row.e ? '<small>' + row.e + '</small>' : '') + '</div>';
     });
-    h += '<div class="lr"><strong>依据只有你的 ' + learned.count + ' 条记录</strong>' +
-         '<small>本机计算，没有上传</small></div>';
+    h += '<div class="lr"><strong>' + uiCopy('依据只有你的 ' + learned.count + ' 条记录', 'Based only on your ' + learned.count + (learned.count === 1 ? ' visit' : ' visits')) + '</strong>' +
+         '<small>' + uiCopy('本机计算，没有上传', 'Calculated on this device') + '</small></div>';
     h += '</div></div>';
   }
-  h += '<div class="rec-head" style="padding-top:18px"><p class="eyebrow">你去过的地方</p>' +
-       '<h1 class="title sm">' + all.length + ' 次到访，<br>攒成了一片。</h1></div>';
-  h += '<div class="rec-stat"><div><b class="num">' + (avg >= 0 ? "+" : "") + avg.toFixed(1) + '</b><small>平均变化</small></div>' +
-       '<div><b class="num">' + anon + '</b><small>匿名贡献</small></div>' +
-       '<div><b class="num">' + (all.length - anon) + '</b><small>只有你能看到</small></div></div>';
+  h += '<div class="rec-head" style="padding-top:18px"><p class="eyebrow">' + uiCopy('你去过的地方', 'Places you’ve been') + '</p>' +
+       '<h1 class="title sm">' + uiCopy(all.length + ' 次到访，<br>攒成了一片。',
+                                        all.length + (all.length === 1 ? ' visit' : ' visits') + '<br>in your trail.') + '</h1></div>';
+  h += '<div class="rec-stat"><div><b class="num">' + (avg >= 0 ? "+" : "") + avg.toFixed(1) + '</b><small>' + uiCopy('平均变化', 'Average change') + '</small></div>' +
+       '<div><b class="num">' + anon + '</b><small>' + uiCopy('匿名贡献', 'Anonymous') + '</small></div>' +
+       '<div><b class="num">' + (all.length - anon) + '</b><small>' + uiCopy('只有你能看到', 'Private') + '</small></div></div>';
   h += '<div class="filterbar" style="margin-top:14px">';
   REC_FILTERS.forEach(f => {
-    h += '<button class="chip' + (state.recFilter === f.id ? " on" : "") + '" data-recf="' + f.id + '">' + f.label + '</button>';
+    h += '<button class="chip' + (state.recFilter === f.id ? " on" : "") + '" data-recf="' + f.id + '">' + uiCopy(f.label, f.en) + '</button>';
   });
   h += '</div>';
   if (!list.length){
-    h += '<div class="empty">这个筛选下还没有记录。<br>换一个看看。</div>';
+    h += '<div class="empty">' + uiCopy('这个筛选下还没有记录。<br>换一个看看。', 'No visits match this filter yet.') + '</div>';
   } else {
     h += '<div class="falls">';
     list.forEach(r => {
@@ -2824,21 +2919,22 @@ function renderRecords(){
       h += '<button class="rcard' + (fresh ? " fresh" : "") + '" data-rec="' + r.id + '">';
       h += coverHTML(p, {nodeDist:moved, style:"aspect-ratio:" + (r.note ? "1/1" : "4/3"), tag:"r" + r.id});
       h += '<div class="b">';
-      if (fresh) h += '<span class="fresh-tag">刚刚保存</span>';
+      if (fresh) h += '<span class="fresh-tag">' + uiCopy('刚刚保存', 'Just saved') + '</span>';
       h += '<span class="date num">' + fmtDate(r.createdAt) + '</span>';
-      h += '<h4>' + r.placeName + '</h4>';
-      h += '<div class="shift">' + r.preMood + ' <span style="color:var(--ink-faint)">→</span> ' + scoreLabel(r.changeScore) +
+      h += '<h4>' + p.placeName + '</h4>';
+      h += '<div class="shift">' + moodCopy(r.preMood) + ' <span style="color:var(--ink-faint)">→</span> ' + scoreLabel(r.changeScore) +
            ' <b class="' + scoreCls(r.changeScore) + ' num">' + signed(r.changeScore) + '</b></div>';
-      if (r.factors.length) h += '<div class="mini-tags">' + r.factors.slice(0,3).map(f => '<span>' + f + '</span>').join("") + '</div>';
+      if (r.factors.length) h += '<div class="mini-tags">' + r.factors.slice(0,3).map(f => '<span>' + factorCopy(f) + '</span>').join("") + '</div>';
       if (r.note) h += '<q>' + escapeHTML(r.note) + '</q>';
       h += '<div style="margin-top:9px"><span class="stamp' + (r.visibility === "anonymous" ? " anon" : "") + '">' +
-           (r.visibility === "anonymous" ? "匿名" : "私密") + '</span></div>';
+           uiCopy(r.visibility === "anonymous" ? "匿名" : "私密", r.visibility === "anonymous" ? "Anonymous" : "Private") + '</span></div>';
       h += '</div></button>';
     });
     h += '</div>';
   }
-  h += '<p style="padding:0 18px 22px;margin:0;font:11px/1.8 var(--mono);color:var(--ink-faint)">' +
-       '前三条是示例记录。你的记录存在这台设备上，没有账号。</p>';
+  if (DEMO_MODE){
+    h += '<p style="padding:0 18px 22px;margin:0;font:11px/1.8 var(--mono);color:var(--ink-faint)">当前为演示模式。</p>';
+  }
   h += '</div>';
   h += dock('给不给别人看，每条你自己定。');
   return h;
@@ -2858,36 +2954,32 @@ function renderNearby(placeFilter){
                     .sort((a, b) => b.agg.count - a.agg.count);
   const total = rows.reduce((n, r) => n + r.agg.count, 0);
 
-  let h = topbar(p ? p.placeName : "匿名汇总", p ? "这个空间的样本" : "样本怎么算", p ? "#/place/" + p.placeId : "#/records");
+  let h = topbar(p ? p.placeName : uiCopy("匿名汇总", "Anonymous summary"), p ? uiCopy("这个空间的样本", "This place") : uiCopy("样本怎么算", "How it works"), p ? "#/place/" + p.placeId : "#/records");
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">只聚合 · 不展示单条</p>';
-  h += '<h1 class="title sm">别人去了怎么样，<br>只以汇总的形式出现。</h1>';
-  h += '<p class="lead">单条评分可以刷，聚合不行。</p>';
+  h += '<p class="eyebrow">' + uiCopy('匿名汇总', 'Anonymous summary') + '</p>';
+  h += '<h1 class="title sm">' + uiCopy('这里对去过的人<br>有没有帮助？', 'Did this place help<br>the people who went?') + '</h1>';
+  h += '<p class="lead">' + uiCopy('只显示汇总，不展示任何人的单条记录。', 'Only the combined result is shown. Individual entries stay private.') + '</p>';
 
   h += '<div class="learned" style="margin-bottom:20px">';
-  h += '<div class="lh"><span>' + catSVG() + '</span>一条反馈要满足什么才算数</div>';
-  h += '<div class="lr"><strong>你得真的去过，而且待够 5 分钟</strong></div>';
-  h += '<div class="lr"><strong>你得自己选「匿名贡献」，默认不进</strong></div>';
-  h += '<div class="lr"><strong>一个地点攒够 ' + AGGREGATE_MIN + ' 条才出汇总</strong></div>';
-  h += '<div class="lr"><strong>反馈了就算数，不看你变好没有</strong></div>';
+  h += '<div class="lh"><span>' + catSVG() + '</span>' + uiCopy('统计方式', 'How it works') + '</div>';
+  h += '<div class="lr"><strong>' + uiCopy('仅计入已确认且主动匿名贡献的到访', 'Only confirmed visits you choose to contribute are counted') + '</strong></div>';
+  h += '<div class="lr"><strong>' + uiCopy('满 ' + AGGREGATE_MIN + ' 条后显示汇总', 'A summary appears after ' + AGGREGATE_MIN + ' visits') + '</strong></div>';
   h += '</div>';
 
-  h += '<p class="eyebrow">现在攒到哪一步</p>';
+  h += '<p class="eyebrow">' + uiCopy('现在攒到哪一步', 'Current sample') + '</p>';
   if (!rows.length){
     h += '<div class="empty" style="margin:0">' +
-         (p ? "这个空间还没有任何核验过的匿名反馈。" : "还没有任何一个空间攒到反馈。") +
-         '<br>第一条可以是你的。<br><br>' +
-         '<span style="font:11px var(--mono);color:var(--ink-faint)">这里空着是真的空着——' +
-         '我们不拿原型示例数据冒充统计。</span></div>';
+         uiCopy(p ? "这个空间还没有足够的匿名到访记录。" : "还没有足够的匿名到访记录。",
+                p ? "Not enough anonymous visits here yet." : "Not enough anonymous visits yet.") + '</div>';
   } else {
     h += '<div class="here" style="margin-top:0">';
     h += '<div class="h"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
-         '</span><b>共 ' + total + ' 条核验过的反馈</b></div>';
+         '</span><b>' + uiCopy('共 ' + total + ' 条核验过的反馈', total + (total === 1 ? ' confirmed visit' : ' confirmed visits')) + '</b></div>';
     rows.forEach(r => {
       h += '<div class="e">' + r.place.placeName +
            (r.agg.enough ? ' <b class="num">' + signed(r.agg.average) + '</b>' : '') +
-           '<u>' + r.agg.count + ' / ' + AGGREGATE_MIN + ' 条' +
-           (r.agg.enough ? ' · 已出汇总' : ' · 还不够，先不给分') + '</u></div>';
+           '<u>' + uiCopy(r.agg.count + ' / ' + AGGREGATE_MIN + ' 条' + (r.agg.enough ? ' · 已出汇总' : ' · 还不够，先不给分'),
+                            r.agg.count + ' / ' + AGGREGATE_MIN + (r.agg.enough ? ' · summary ready' : ' · waiting for more')) + '</u></div>';
     });
     h += '</div>';
   }
@@ -3041,13 +3133,13 @@ function micSVG(){
    PRD 原本要对比峰值与当前 HRV。我们没有接手表，就不假装能看出来——
    问一句，然后照着答案办。 */
 function renderRecheck(){
-  let h = topbar("现在怎么样", "小在", "#/talk");
+  let h = topbar(uiCopy("现在怎么样", "How are you now?"), uiCopy("小在", "Xiaozai"), "#/talk");
   h += '<div class="screen mid"><div class="pad">';
   h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
-       '<div class="bubble"><span class="tag">小在</span><p>隔了一会儿。现在松一点了吗？</p></div></div>';
-  h += '<div class="actions"><button class="btn ghost" id="recheck-better">松了一点，不用管我</button>' +
-       '<button class="btn" style="margin-top:10px" id="recheck-same">还是那样，带我出去走走 <span>→</span></button></div>';
-  h += '<div class="reach-foot"><button data-go="#/settings">管理提醒</button></div>';
+       '<div class="bubble"><span class="tag">' + uiCopy('小在', 'Xiaozai') + '</span><p>' + uiCopy('隔了一会儿。现在松一点了吗？', 'It’s been a little while. Do you feel any lighter?') + '</p></div></div>';
+  h += '<div class="actions"><button class="btn ghost" id="recheck-better">' + uiCopy('松了一点，不用管我', 'A little. I’m okay now') + '</button>' +
+       '<button class="btn" style="margin-top:10px" id="recheck-same">' + uiCopy('还是那样，带我出去走走', 'Still the same. Find me somewhere') + ' <span>→</span></button></div>';
+  h += '<div class="reach-foot"><button data-go="#/settings">' + uiCopy('管理提醒', 'Manage reminders') + '</button></div>';
   h += '</div></div>';
   h += dock('说过只回来一次，就只回来一次。', {records:false});
   return h;
@@ -3070,81 +3162,76 @@ function tierCard(o){
 function renderSettings(){
   const r = state.reach;
   const allowed = reachAllowed();
-  let h = topbar("你说了算", "授权与打扰", "#/talk");
+  let h = topbar("设置", "权限与提醒", "#/talk");
   h += '<div class="screen"><div class="pad">';
 
-  h += '<p class="eyebrow">信号分层 · 逐项可关</p>';
-  h += '<h1 class="title sm">我拿什么来猜<br>你此刻需要什么</h1>';
-  h += '<p class="lead">默认只开最外面那层。</p>';
+  h += '<p class="eyebrow">权限</p>';
+  h += '<h1 class="title sm">只打开你愿意给的</h1>';
+  h += '<p class="lead">定位和主动提醒都可以随时关闭。</p>';
 
   // 这一页的全部意义就是「存什么、不存什么」，所以只留这两行。
   // 原来每层还有一段解释，那段是把标题再说一遍。
   h += tierCard({
-    level:"默认层", key:"base", locked:true, on:true,
-    title:"时间，和你自己说的话",
+    level:"输入", key:"base", locked:true, on:true,
+    title:"你主动输入的内容",
     keep:"存：结构化之后的需求",
     drop:"不存：原话、语音"
   });
   h += tierCard({
-    level:"手机层", key:"location", on:r.grants.location,
+    level:"位置", key:"location", on:r.grants.location,
     title:"当前位置",
     keep:"存：到访结论",
     drop:"不存：你的坐标"
   });
-  h += tierCard({
-    level:"身体层", key:"body", pending:true, on:false,
-    title:"心率变化（HRV）",
-    keep:"接入后存：到访前后的差值",
-    drop:"永远不存：原始生理流、人脸"
-  });
 
-  h += '<p class="eyebrow" style="margin-top:26px">打扰</p>';
-  h += '<div class="setrow"><div class="txt"><b>让小在主动来找我</b>' +
-       (r.stopped ? '<small>已经停了：你连着拒绝过几次，我不再自己回来。</small>' :
+  h += '<p class="eyebrow" style="margin-top:26px">提醒</p>';
+  h += '<div class="setrow"><div class="txt"><b>主动提醒我</b>' +
+       (r.stopped ? '<small>' + uiCopy('已经停了：你连着拒绝过几次，我不再自己回来。', 'Paused after several declines.') + '</small>' :
         allowed.ok ? "" : '<small>' + reachBlockedText(allowed.reason) + '</small>') + '</div>' +
-       '<button class="switch' + (r.enabled ? " on" : "") + '" data-reachtoggle="1" aria-pressed="' + r.enabled + '"><i></i></button></div>';
+       '<button class="switch' + (r.enabled ? " on" : "") + '" data-reachtoggle="1" aria-label="' + uiCopy('主动提醒', 'Reminders') + '" aria-pressed="' + r.enabled + '"><i></i></button></div>';
   h += '<div class="setrow"><div class="txt"><b>一天最多几次</b></div>' +
        '<div class="pick">' + [1,2,3].map(n =>
          '<button class="' + (r.dailyCap === n ? "on" : "") + '" data-cap="' + n + '">' + n + '</button>').join("") + '</div></div>';
   h += '<div class="setrow"><div class="txt"><b>静默时段</b>' +
-       '<small>' + r.silentFrom + ':00 到次日 ' + r.silentTo + ':00 不说话</small></div>' +
+       '<small>' + uiCopy(r.silentFrom + ':00 到次日 ' + r.silentTo + ':00 不说话',
+                          r.silentFrom + ':00–' + r.silentTo + ':00 · no reminders') + '</small></div>' +
        '<div class="pick">' + [[22,8],[21,9],[20,10]].map(w =>
          '<button class="' + (r.silentFrom === w[0] ? "on" : "") + '" data-silent="' + w[0] + ':' + w[1] + '">' +
          w[0] + '–' + w[1] + '点</button>').join("") + '</div></div>';
 
 
-  h += '<details class="fold" style="margin-top:26px"><summary>这台设备上存了什么</summary>';
+  h += '<details class="fold" style="margin-top:26px"><summary>' + uiCopy('本机数据', 'On this device') + '</summary>';
   h += '<div class="tier"><div class="tb" style="padding-top:13px">' +
-       '到访记录 ' + state.records.length + ' 条（含 3 条演示数据）<b>行程状态 ' + (state.trip ? "1 条进行中" : "无") + '</b>' +
-       '<b>打扰记录：今天 ' + (r.todayKey === ReachPolicy.startOfDay(Date.now()) ? r.todayCount : 0) + ' 次</b>' +
-       '<b>一个匿名 session ID，不含姓名、手机号、设备指纹</b></div></div></details>';
+       uiCopy('到访记录 ' + state.records.length + ' 条', state.records.length + (state.records.length === 1 ? ' visit' : ' visits')) +
+       '<b>' + uiCopy('行程状态 ' + (state.trip ? "1 条进行中" : "无"), state.trip ? 'One trip in progress' : 'No trip in progress') + '</b>' +
+       '</div></div></details>';
   h += '<button class="danger" data-wipe="1">清空这台设备上的全部记录</button>';
   if (state.pendingWipe){
-    h += '<div class="confirm"><p>清空之后，你的到访记录、行程和打扰设置都会消失。' +
-         '已经匿名贡献出去的那几条留在地点汇总里（它们已经不属于你了，也找不回是谁写的）。<b>撤不回来。</b></p>' +
-         '<div class="row"><button class="no" data-wipecancel="1">算了</button>' +
-         '<button class="yes" data-wipeyes="1">清空</button></div></div>';
+    h += '<div class="confirm"><p>' + uiCopy('清空之后，你的到访记录、行程和打扰设置都会消失。已经匿名贡献出去的那几条留在地点汇总里（它们已经不属于你了，也找不回是谁写的）。',
+                                                  'This removes your visits, trip and reminder settings from this device. Anonymous contributions already added to combined results cannot be linked back or removed.') + '<b>' + uiCopy('撤不回来。', 'This cannot be undone.') + '</b></p>' +
+         '<div class="row"><button class="no" data-wipecancel="1">' + uiCopy('算了', 'Cancel') + '</button>' +
+         '<button class="yes" data-wipeyes="1">' + uiCopy('清空', 'Erase') + '</button></div></div>';
   }
 
-  h += '<details class="fold" style="margin-top:26px"><summary>不会变的三条</summary>';
+  h += '<details class="fold" style="margin-top:26px"><summary>我们的边界</summary>';
   h += '<div class="boundary"><ul style="margin:0;padding-left:18px">' +
-       '<li>不诊断：不给情绪贴临床标签，生理数据只做校准</li>' +
+       '<li>不诊断：不给情绪贴临床标签</li>' +
        '<li>不评判：情绪变差不叫失败，只叫这次没接住</li>' +
-       '<li>不侵入社交：没有昵称、人脸、主页、私信、关注</li>' +
-       '<li>不做人脸识别，不采集原始生理流</li></ul></div></details>';
+       '<li>不做社交画像：没有人脸、主页、私信或关注</li></ul></div></details>';
   h += '</div></div>';
   h += dock('这一页上的每一项，关了就是关了。', {records:false});
   return h;
 }
 
 function reachBlockedText(reason){
-  return ({
-    disabled:"你关掉了，我不会来。",
-    muted:"你刚拒过一次，我先停一段时间。",
-    silent_hours:"现在在静默时段里，我不说话。",
-    daily_cap:"今天的次数用完了，明天再说。",
-    too_soon:"刚来过，得隔一会儿。"
-  })[reason] || "现在不来。";
+  const copy = ({
+    disabled:["你关掉了，我不会来。", "Off until you turn it back on."],
+    muted:["你刚拒过一次，我先停一段时间。", "Paused after your last no."],
+    silent_hours:["现在在静默时段里，我不说话。", "Quiet hours are on."],
+    daily_cap:["今天的次数用完了，明天再说。", "Today’s reminder limit is reached."],
+    too_soon:["刚来过，得隔一会儿。", "I checked in recently."]
+  })[reason] || ["现在不来。", "No reminder right now."];
+  return uiCopy(copy[0], copy[1]);
 }
 
 /* --- ① 说 --- */
@@ -3152,21 +3239,21 @@ function renderTalk(){
   const locationMode = CurrentAI.getLocationMode();
   let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div>' +
           '<div style="display:flex;gap:10px;align-items:center">' + langToggle() +
-          '<button class="k" data-go="#/settings" style="letter-spacing:.14em">设置</button>' +
-          '<button class="k" data-go="#/records" style="letter-spacing:.14em">记录</button></div></div>';
+          '<button class="k" data-go="#/settings" style="letter-spacing:.14em">' + uiCopy('设置', 'Settings') + '</button>' +
+          '<button class="k" data-go="#/records" style="letter-spacing:.14em">' + uiCopy('记录', 'Records') + '</button></div></div>';
   h += '<div class="talk">';
   h += '<div class="zai">' + cloudSVG("withyou") + '</div>';
-  h += '<h1>想安静，想吃烤串，<br>都可以直接说。</h1>';
+  h += '<h1>' + uiCopy('想安静，想吃烤串，<br>都可以直接说。', 'Say how you feel,<br>or what you want to do.') + '</h1>';
   // 打字时麦克风退成小圆钮：一屏一个主动作，语音的优先级靠体量表达
-  h += '<button class="mic' + (state.talkTyping ? ' small' : '') + '" id="mic-button" aria-label="用语音说">' + micSVG() + '</button>';
+  h += '<button class="mic' + (state.talkTyping ? ' small' : '') + '" id="mic-button" aria-label="' + uiCopy('用语音说', 'Speak') + '">' + micSVG() + '</button>';
   h += '<p class="mic-cap" id="mic-cap">' +
        (state.reachNote ? escapeHTML(state.reachNote) : '') + '</p>';
   if (!state.talkTyping){
-    h += '<button class="type-toggle" id="type-toggle" aria-label="打字输入">⌨ 打字输入</button>';
+    h += '<button class="type-toggle" id="type-toggle" aria-label="' + uiCopy('打字输入', 'Type instead') + '">⌨ ' + uiCopy('打字输入', 'Type instead') + '</button>';
   } else {
     h += '<div class="typing"><textarea id="natural-input" maxlength="2000" ' +
-         'placeholder="比如：好累，想找个人少、能吹风的地方">' + escapeHTML(state.talkText) + '</textarea>' +
-         '<button class="send" id="natural-submit">发送</button></div>';
+         'placeholder="' + uiCopy('比如：好累，想找个人少、能吹风的地方', 'For example: I’m exhausted and want somewhere quiet outside') + '">' + escapeHTML(state.talkText) + '</textarea>' +
+         '<button class="send" id="natural-submit">' + uiCopy('发送', 'Send') + '</button></div>';
   }
   if (guardianState() === "leaning"){
     // 守则 12 防依赖：不劝阻，只提一句「我不是唯一的出口」
@@ -3175,10 +3262,10 @@ function renderTalk(){
   }
   h += '<div class="foot">' +
        '<button id="location-input"' + (locationMode === "real" ? ' class="on"' : '') + '>' +
-       (locationMode === "real" ? '✓ 已使用当前位置' : '⌖ 使用当前位置') + '</button>' +
-       '<button id="demo-location"' + (locationMode === "demo" || locationMode === "trip-demo" ? ' class="on"' : '') + '>' +
-       (locationMode === "trip-demo" ? '✓ 演示定位' : locationMode === "demo" ? '✓ 体验北京路线' : '体验北京路线') + '</button>' +
-       '<button class="quiet" data-go="#/mood">我不想说，自己挑</button></div>';
+       uiCopy(locationMode === "real" ? '✓ 已使用当前位置' : '⌖ 使用当前位置', locationMode === "real" ? '✓ Location on' : '⌖ Use my location') + '</button>' +
+       (DEMO_MODE ? '<button id="demo-location"' + (locationMode === "demo" || locationMode === "trip-demo" ? ' class="on"' : '') + '>' +
+       uiCopy(locationMode === "trip-demo" ? '✓ 演示定位' : locationMode === "demo" ? '✓ 体验北京路线' : '体验北京路线', locationMode === "trip-demo" ? '✓ Demo location' : locationMode === "demo" ? '✓ Beijing demo' : 'Try Beijing demo') + '</button>' : '') +
+       '<button class="quiet" data-go="#/mood">' + uiCopy('我不想说，自己挑', 'Choose instead') + '</button></div>';
   h += '</div>';
   h += tripStrip();
   return h;
@@ -3188,7 +3275,7 @@ function renderTalk(){
 function renderEcho(){
   const r = state.read;
   if (!r) return renderTalk();
-  let h = topbar("我听到的", "第一步 · 只确认一次", "#/talk");
+  let h = topbar("我听到的", "确认理解", "#/talk");
   h += '<div class="screen mid"><div class="pad">';
   h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
        '<div class="bubble"><span class="tag">小在</span><p>' + keepQuotedTogether(escapeHTML(r.acknowledgement)) + '</p></div></div>';
@@ -3217,10 +3304,10 @@ function renderEcho(){
    四环放在同一屏：默认停在「状态」，最常见的情况仍然只要一次点击（US-02）；
    要改别的环才多一次。选完立即重推，不追问第二次。 */
 const FIX_LINKS = [
-  {key:"state",      label:"状态",   hint:"我把你此刻的感觉猜错了"},
-  {key:"need",       label:"需求",   hint:"状态对，但我找错了你需要什么样的环境"},
-  {key:"constraint", label:"条件",   hint:"远近、花销、室内外——有条件我漏了"},
-  {key:"place",      label:"地点",   hint:"都对，就是这几个地方不想去"}
+  {key:"state",      label:"状态", en:"Mood",       hint:"我把你此刻的感觉猜错了", enHint:"I got how you feel wrong"},
+  {key:"need",       label:"需求", en:"Need",       hint:"状态对，但我找错了你需要什么样的环境", enHint:"The mood is right, but the kind of place is wrong"},
+  {key:"constraint", label:"条件", en:"Details",    hint:"远近、花销、室内外——有条件我漏了", enHint:"I missed distance, cost, or indoor vs outdoor"},
+  {key:"place",      label:"地点", en:"Place",      hint:"都对，就是这几个地方不想去", enHint:"The read is right, but these places are not"}
 ];
 
 function renderFix(){
@@ -3235,9 +3322,9 @@ function renderFix(){
        '<div class="bubble"><span class="tag">小在</span><p>那是我猜错了。指出哪一环不对，我立刻重新找。</p></div></div>';
 
   h += '<div class="links">' + FIX_LINKS.map(l =>
-        '<button class="' + (l.key === link ? "on" : "") + '" data-fixlink="' + l.key + '">' + l.label + '</button>'
+        '<button class="' + (l.key === link ? "on" : "") + '" data-fixlink="' + l.key + '">' + uiCopy(l.label, l.en) + '</button>'
       ).join("") + '</div>';
-  h += '<p class="link-hint">' + meta.hint + '</p>';
+  h += '<p class="link-hint">' + uiCopy(meta.hint, meta.enHint) + '</p>';
 
   if (link === "place"){
     h += '<button class="place-out" id="fix-place">' +
@@ -3254,8 +3341,7 @@ function renderFix(){
     }
   }
 
-  h += '<p class="lead" style="margin-top:20px">选完直接出结果，不会再让你确认一遍。<br>' +
-       (link === "state" ? '这些都是身体上的感觉，不是病名。' : '改哪一环都算数，改完还可以再改。') + '</p>';
+  if (link === "state") h += '<p class="lead" style="margin-top:20px">选最接近的一项。</p>';
   h += '<p class="status" id="natural-status" style="min-height:18px;font:11.5px/1.55 var(--sans);color:var(--ink-faint)"></p>';
   h += '</div></div>';
   h += dock('说错、改口、再改一次，都算数。', {records:false});
@@ -3273,7 +3359,7 @@ function renderOffer(){
   const p = placeById(main.place_id);
   const alts = offer.slice(1, 3);
 
-  let h = topbar("此刻给你一个", "第二步 · 推荐", "#/echo");
+  let h = topbar("此刻给你一个", "空间推荐", "#/echo");
   h += '<div class="screen"><div class="pad" style="padding-top:16px">';
   // FR-14 守护层：给了好几次推荐都没出发，就别再推第四个地方了。
   if (guardianState() === "withdrawn" && !state.guardianDismissed){
@@ -3354,9 +3440,9 @@ function keepQuotedTogether(escaped){
 /* US-06：给用户选地图，不替他决定。
    高德收 GCJ-02，Apple / Google 收 WGS-84，后端已经按各家坐标系分别转好了。 */
 const MAP_APPS = [
-  {key:"amap",   name:"高德地图",   note:"优先打开 App"},
-  {key:"apple",  name:"Apple 地图", note:"iPhone 自带"},
-  {key:"google", name:"Google 地图", note:"Google Maps"}
+  {key:"amap",   name:"高德地图",   enName:"Amap",        note:"优先打开 App", enNote:"Open the app"},
+  {key:"apple",  name:"Apple 地图", enName:"Apple Maps",  note:"iPhone 自带", enNote:"Built into iPhone"},
+  {key:"google", name:"Google 地图", enName:"Google Maps", note:"Google Maps", enNote:"Google Maps"}
 ];
 
 function mapSheet(){
@@ -3364,19 +3450,19 @@ function mapSheet(){
   if (!t) return "";
   const links = t.links || {};
   let h = '<div class="sheet" id="map-sheet"><div class="sheet-in">';
-  h += '<h4>用哪个地图带你去？</h4>';
+  h += '<h4>' + uiCopy('用哪个地图带你去？', 'Which map do you want to use?') + '</h4>';
   h += '<p class="sub">' + escapeHTML(t.placeName) + '</p>';
   MAP_APPS.forEach(app => {
     if (!links[app.key]) return;
     if (app.key === "amap"){
-      h += '<button type="button" class="map-choice" data-mapapp="amap"><span>' + app.name +
-           '</span><i>' + app.note + '</i></button>';
+      h += '<button type="button" class="map-choice" data-mapapp="amap"><span>' + uiCopy(app.name, app.enName) +
+           '</span><i>' + uiCopy(app.note, app.enNote) + '</i></button>';
     } else {
       h += '<a class="map-choice" href="' + escapeHTML(links[app.key]) + '" target="_blank" rel="noopener" data-mapapp="' + app.key + '">' +
-           '<span>' + app.name + '</span><i>' + app.note + '</i></a>';
+           '<span>' + uiCopy(app.name, app.enName) + '</span><i>' + uiCopy(app.note, app.enNote) + '</i></a>';
     }
   });
-  h += '<button class="cancel" id="map-cancel">先不去</button>';
+  h += '<button class="cancel" id="map-cancel">' + uiCopy('先不去', 'Not now') + '</button>';
   h += '</div></div>';
   return h;
 }
@@ -3389,7 +3475,7 @@ function mapStrip(rec){
   const url = CurrentAI.staticMapUrl(rec.latitude, rec.longitude, 640, 240);
   if (!url) return "";
   return '<div class="mapstrip"><img src="' + escapeHTML(url) + '" alt="' +
-         escapeHTML(rec.place_name) + '在地图上的位置" loading="lazy" ' +
+         uiCopy(escapeHTML(rec.place_name) + '在地图上的位置', escapeHTML(rec.place_name) + ' on the map') + '" loading="lazy" ' +
          'onerror="this.closest(\'.mapstrip\').remove()"><span class="pin"></span></div>';
 }
 
@@ -3404,12 +3490,15 @@ function reachLine(rec, p){
   if (rec.distance_source === "amap" && rec.walking_minutes){
     // 8 公里说「步行 108 分钟」不是贴心，是吓人。远的地方按骑行/公交算。
     const how = {walk:"步行", ride:"骑行", transit:"公交"}[rec.travel_mode] || "步行";
-    return how + "约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km";
+    const howEn = {walk:"walk", ride:"bike", transit:"transit"}[rec.travel_mode] || "walk";
+    return uiCopy(how + "约 " + rec.walking_minutes + " 分钟 · " + rec.distance_km + " km",
+                  rec.walking_minutes + " min by " + howEn + " · " + rec.distance_km + " km");
   }
   if (rec.distance_source === "amap_straight_line" && rec.distance_km != null){
-    return "直线约 " + rec.distance_km + " km";
+    return uiCopy("直线约 " + rec.distance_km + " km", rec.distance_km + " km away");
   }
-  return "约 " + rec.reach_minutes + " 分钟 · " + p.transport;
+  return uiCopy("约 " + rec.reach_minutes + " 分钟 · " + p.transport,
+                "About " + rec.reach_minutes + " min · " + p.transport);
 }
 /* 样本诚实（FR-10b / FR-19b）：没有真实到访数据时，不给任何平均分 */
 function sampleLine(rec){
@@ -3422,10 +3511,9 @@ function sampleLine(rec){
 /* ============================================================
    英文版（FR：国际评审看得懂才评得了）
 
-   做法：不改任何渲染函数，在 render() 之后走一遍 DOM 把文案换掉。
-   理由——原型里有 1000+ 条中文散在模板字符串里，逐个包一层 T() 要动到
-   几乎每一行渲染代码，那种改法在比赛前一晚风险太大。
-   DOM 这一层是外挂的：翻译出问题，把开关关掉就回到完好的中文版。
+   做法：核心链路和所有动态句直接写中英两版，避免拼接后中英混排。
+   早期原型留下的静态骨架文案，仍在 render() 后由 DOM 词表兜底。
+   这个兜底层只管短标签，不再承担完整句子的英文表达。
 
    用户真正读到的内容（状态、理由、为什么是这里、代价）是后端生成的，
    那部分由 lang 参数在服务端就出英文，不在这里翻。
@@ -3445,7 +3533,7 @@ function setLang(lang){
 const EN = {
   "此在 · Current": "Current",
   "首页": "Home", "轨迹": "Trail", "设置": "Settings", "记录": "Records", "推荐": "Picks",
-  "小在": "Xiaozai", "代价": "What it asks", "到达": "Getting there",
+  "小在": "Xiaozai", "代价": "Trade-offs", "到达": "Getting there",
   "营业": "Hours", "距离": "Distance", "待多久": "How long", "建议停留": "Suggested stay",
   "匿名": "anonymous", "私密": "private", "取消": "Cancel", "约": "about",
   "分钟": "min", "步行约": "about a", "条记录": " records", "瀑布流": "the grid",
@@ -3644,7 +3732,7 @@ const EN = {
   "绕到银锭桥就不想走了，坐了会儿。": "Got as far as Yinding Bridge and didn't want to walk further. Sat a while.",
   "人太多了，没看进去。": "Too many people. Couldn't take anything in.",
   "明显轻了": "noticeably lighter", "松了一点": "loosened a little", "还是有点沉": "still heavy",
-  "能一直走": "room to walk", "有水": "water", "坐得住": "somewhere to sit", "不必消费": "no need to buy",
+  "能一直走": "keep walking", "有水": "water nearby", "坐得住": "easy to linger", "不必消费": "no need to spend",
   "太挤": "too crowded",
   "刚从": "Just back from ", "回来吗？": "?",
   "我不评价这个地方。我只想知道它对": "I'm not rating this place. I only want to know what it did for ",
@@ -3689,7 +3777,53 @@ const EN = {
   "第一条可以是你的。": "The first one could be yours.",
   "全部": "All", "让我安静下来": "Calmed me", "给我能量": "Gave me energy", "没有帮助": "Didn't help",
   "还没有反复出现的因素": "No factor has shown up more than once yet",
-  "去过 3 个空间，室内偏多；平均变化": "3 places so far, mostly indoors; average change"
+  "去过 3 个空间，室内偏多；平均变化": "3 places so far, mostly indoors; average change",
+
+  /* 主要用户链路使用为 App 单独撰写的英文，不做逐字翻译。 */
+  "心情与需求": "Mood and needs", "直接说一句 →": "Say it instead →",
+  "你的偏好": "Your preferences", "选择方式": "Choose how",
+  "一次看一个地方。": "One place at a time.", "同时看看更多地方。": "Browse more places at once.",
+  "这里有什么": "What to expect", "空间印象": "What it feels like",
+  "来自实地体验": "First-hand note", "离开后": "After your visit",
+  "心情变化": "Mood shift", "保存方式": "Save it", "影响因素": "What changed",
+  "这会帮助下次推荐更贴近你。": "This helps tune your next recommendation.",
+  "确认理解": "Quick check", "空间推荐": "Your recommendation",
+  "选最接近的一项。": "Choose the closest fit.",
+  "保存这段心情轨迹": "Save this mood trail",
+  "图片不会包含你的私密原话。": "Your private note won't appear in the image.",
+  "分享卡片": "Share card", "保存图片": "Save image",
+  "保存或分享心情轨迹卡": "Save or share your mood trail card",
+  "从记录里看到的": "Patterns in your visits", "当前为演示模式。": "Demo mode is on.",
+  "权限与提醒": "Permissions and reminders", "权限": "Permissions", "提醒": "Reminders",
+  "只打开你愿意给的": "Share only what you choose",
+  "定位和主动提醒都可以随时关闭。": "You can turn off location and reminders at any time.",
+  "输入": "Input", "位置": "Location", "你主动输入的内容": "What you choose to share",
+  "主动提醒我": "Send me gentle reminders",
+  "匿名会话标识，不含姓名或手机号": "An anonymous session ID, with no name or phone number",
+  "我们的边界": "Our boundaries", "不诊断：不给情绪贴临床标签": "No diagnosis or clinical labels",
+  "不做社交画像：没有人脸、主页、私信或关注": "No social profiles, faces, DMs, or follows",
+  "统计方式": "How it works",
+  "只显示汇总，不展示任何人的单条记录。": "Only the combined result is shown. Individual entries stay private.",
+  "已记下": "Saved", "这次变化会用于调整下次推荐": "I'll use this to tune your next recommendation",
+  "演示到访 · 不保存": "Demo visit · not saved", "自行确认到访": "Visit confirmed by you",
+
+  "没什么力气，也不想解释": "Low on energy. Don't want to explain.",
+  "不想再被声音和人挤着": "Need less noise and fewer people.",
+  "念头一直转，坐不住": "Thoughts keep looping. Can't settle.",
+  "有力气，只是没方向": "Have some energy, but no direction.",
+  "身体想躺，脑子不肯": "Body is tired. Mind is still racing.",
+  "不难过，就是没着落": "Not exactly sad. Just unanchored.",
+  "说不上为什么，就是绷着": "Can't name it. Just tense.",
+  "不用说话，有人就行": "Want company without having to talk.",
+  "待腻了，想看点没见过的": "Ready for a change of scene.",
+  "兴致不错，想把它接下去": "Feeling good and want to keep it going.",
+  "不用被接住，想出去走走": "Doing okay. Just want to go out.",
+  "不被人看见": "Somewhere private", "能坐很久": "Sit for a while",
+  "不用花钱": "Spend nothing", "想看见绿色": "See some green",
+  "想看没见过的": "See something new", "想听点声音": "Hear something",
+  "周围有人就行": "Have people nearby", "想要吵一点": "Somewhere lively",
+  "想慢下来": "Slow down", "想手上有事做": "Keep my hands busy",
+  "想喘口气": "Catch my breath", "什么都不想决定": "Make no decisions"
 };
 
 /* 长串优先替换，避免短词先把长句里的字吃掉。 */
@@ -3764,7 +3898,8 @@ function render(){
   const r = state.route;
   let inner = "", isCompare = false;
 
-  if (r === "#/compare"){ isCompare = true; inner = renderCompare(); }
+  if (r === "#/compare" && DEMO_MODE){ isCompare = true; inner = renderCompare(); }
+  else if (r === "#/compare"){ state.route = "#/talk"; inner = renderTalk(); }
   else if (r === "#/talk")   inner = renderTalk();
   else if (r === "#/recheck")  inner = renderRecheck();
   else if (r === "#/settings") inner = renderSettings();
@@ -3879,7 +4014,7 @@ function bind(){
     const said = (text || state.reflectText || "").trim();
     if (!said) return;
     const p = placeById(state.draft.placeId);
-    setReflectCap("我在听你刚才说的…");
+    setReflectCap(uiCopy("我在听你刚才说的…", "Working on what you said…"));
     const submit = document.getElementById("reflect-submit");
     if (submit) submit.disabled = true;
     CurrentAI.reflectOn(said, {
@@ -3893,10 +4028,10 @@ function bind(){
         return;
       }
       // 没听清就直说，然后把选择题给他——不猜。
-      state.reflectNote = "这句我没太抓准，你自己点一下更快。";
+      state.reflectNote = uiCopy("这句我没太抓准，你自己点一下更快。", "I didn’t catch that clearly. Choose an option instead.");
       go("#/feedback/" + state.draft.placeId + "?s=1");
     }).catch(() => {
-      state.reflectNote = "刚才没接住，你自己点一下更快。";
+      state.reflectNote = uiCopy("刚才没接住，你自己点一下更快。", "That didn’t work. Choose an option instead.");
       go("#/feedback/" + state.draft.placeId + "?s=1");
     });
   }
@@ -3909,12 +4044,12 @@ function bind(){
 
   /* 从后端理解结果推进到推荐。追问与纠错都走这里，所以只花一次请求。 */
   function runRecommend(needState, note){
-    setNaturalStatus("我在按你说的缩小范围…");
+    setNaturalStatus(uiCopy("我在按你说的缩小范围…", "Narrowing it down…"));
     return CurrentAI.recommendFor(needState, state.rejected).then(result => {
       if (result.blocked_by_safety){ go("#/safe"); return; }
       const list = result.recommendations || [];
       if (!list.length){
-        setNaturalStatus(result.fallback_note || "这几个条件叠起来暂时没有合适的地方。去掉一个再试试。", true);
+        setNaturalStatus(result.fallback_note || uiCopy("这几个条件叠起来暂时没有合适的地方。去掉一个再试试。", "Nothing matches all those details yet. Remove one and try again."), true);
         return;
       }
       state.offer = list;
@@ -3931,13 +4066,13 @@ function bind(){
       });
       go("#/offer");
     }).catch(error => {
-      setNaturalStatus(error.message || "刚才没有接住，请再试一次。", true);
+      setNaturalStatus(error.message || uiCopy("刚才没有接住，请再试一次。", "That didn’t work. Please try again."), true);
     });
   }
 
   function submitNatural(text){
     text = (text || (naturalInput ? naturalInput.value : "")).trim();
-    if (!text){ setNaturalStatus("说一句就好，不需要组织完整。", true); return; }
+    if (!text){ setNaturalStatus(uiCopy("说一句就好，不需要组织完整。", "One sentence is enough."), true); return; }
     state.talkText = text;
     // FR-14：又来了一轮，而上一轮给的推荐一个都没去——这才算「停在原地」。
     // 「换一批」不算：那是在挑，不是不出门。
@@ -3948,7 +4083,7 @@ function bind(){
     state.guardianDismissed = false;
     state.reachNote = null;
     if (naturalSubmit) naturalSubmit.disabled = true;
-    setNaturalStatus("我在听懂你此刻真正需要什么…");
+    setNaturalStatus(uiCopy("我在听懂你此刻真正需要什么…", "Finding what fits right now…"));
     CurrentAI.interpretAndRecommend(text).then(result => {
       if (naturalSubmit) naturalSubmit.disabled = false;
       const interpretation = result.interpretation;
@@ -3970,7 +4105,7 @@ function bind(){
       go("#/echo");
     }).catch(error => {
       if (naturalSubmit) naturalSubmit.disabled = false;
-      setNaturalStatus(error.message || "刚才没有接住，请再试一次。", true);
+      setNaturalStatus(error.message || uiCopy("刚才没有接住，请再试一次。", "That didn’t work. Please try again."), true);
     });
   }
 
@@ -4000,10 +4135,10 @@ function bind(){
   };
   if (locationInput) locationInput.onclick = () => {
     locationInput.disabled = true;
-    setNaturalStatus("正在获取位置…");
+    setNaturalStatus(uiCopy("正在获取位置…", "Getting your location…"));
     CurrentAI.requestLocation().then(() => {
       locationInput.classList.add("on");
-      locationInput.textContent = "✓ 已使用当前位置";
+      locationInput.textContent = uiCopy("✓ 已使用当前位置", "✓ Location on");
       locationInput.disabled = false;
       setNaturalStatus("");
     }).catch(error => {
@@ -4017,8 +4152,8 @@ function bind(){
     render();
     const cap = document.getElementById("mic-cap");
     if (cap) cap.textContent = CurrentAI.getLocationMode() === "trip-demo"
-      ? "演示定位已开启，可模拟抵达和离开。"
-      : "北京体验路线已开启。";
+      ? uiCopy("演示定位已开启，可模拟抵达和离开。", "Demo location is on. You can simulate arrival and leaving.")
+      : uiCopy("北京体验路线已开启。", "Beijing demo route is on.");
   };
 
   const acceptRead = root.querySelector("#accept-read");
@@ -4039,7 +4174,7 @@ function bind(){
     state.read.state = next;
     state.askAnswered = true;
     CurrentAI.track("natural_language_interpreted", {source:"clarify", mood_id:next.mood_id, need_count:next.need_keys.length, risk_level:next.risk_level});
-    runRecommend(next, "按你说的「" + el.textContent + "」重新找了一遍。");
+    runRecommend(next, uiCopy("按你说的「" + el.textContent + "」重新找了一遍。", "I searched again with “" + el.textContent + ".”"));
   });
 
   // 纠错：指出哪一环不对 → 立即重推（FR-03）
@@ -4059,22 +4194,22 @@ function bind(){
       // 只保留用户明确说过的硬约束：钱和路程。
       Object.assign(next, {mood_id:value, confidence:0.9, need_keys:[], social_mode:"either", environment:"either"});
       state.read.state_label = label;
-      state.read.acknowledgement = "好，是「" + label + "」。我按这个重新找了一遍。";
-      state.read.evidence = ["这一条是你自己改的，不是我猜的"];
-      note = "把「" + label + "」当成主线之后，排在最前面的换了。";
+      state.read.acknowledgement = uiCopy("好，是「" + label + "」。我按这个重新找了一遍。", "Got it: “" + label + ".” I searched again.");
+      state.read.evidence = [uiCopy("这一条是你自己改的，不是我猜的", "You corrected this yourself")];
+      note = uiCopy("把「" + label + "」当成主线之后，排在最前面的换了。", "I reranked the places around “" + label + ".”");
     } else if (link === "need"){
       // 状态没错，只是需要的环境找偏了：换掉诉求，状态保持不动。
       next.need_keys = [value];
-      state.read.acknowledgement = "状态我没听错，是需要的东西找偏了。改成「" + label + "」再找一遍。";
-      state.read.evidence = ["「" + label + "」是你自己指定的"];
-      note = "按「" + label + "」重新排了一遍，状态还是原来那个。";
+      state.read.acknowledgement = uiCopy("状态我没听错，是需要的东西找偏了。改成「" + label + "」再找一遍。", "I got the mood, but not the need. I’ll search again for “" + label + ".”");
+      state.read.evidence = [uiCopy("「" + label + "」是你自己指定的", "You chose “" + label + ".”")];
+      note = uiCopy("按「" + label + "」重新排了一遍，状态还是原来那个。", "I reranked the places for “" + label + ".”");
     } else {
       // 条件：key 形如 "字段:值"。服务端会按 NeedState 的字面量再校验一次。
       const [field, raw] = value.split(":");
       next[field] = field === "max_travel_minutes" ? parseInt(raw, 10) : raw;
-      state.read.acknowledgement = "记下了：" + label + "。这一条会一直生效，直到你再改。";
-      state.read.evidence = ["「" + label + "」是你自己加的条件"];
-      note = "加上「" + label + "」之后，不符合的我都拿掉了。";
+      state.read.acknowledgement = uiCopy("记下了：" + label + "。这一条会一直生效，直到你再改。", "Saved: " + label + ". I’ll keep it until you change it.");
+      state.read.evidence = [uiCopy("「" + label + "」是你自己加的条件", "You added “" + label + "”.")];
+      note = uiCopy("加上「" + label + "」之后，不符合的我都拿掉了。", "I removed places that don’t match “" + label + ".”");
     }
 
     state.read.state = next;
@@ -4094,7 +4229,7 @@ function bind(){
       CurrentAI.track("recommendation_rejected", {place_id:x.place_id, recommendation_id:x.recommendation_id, reason:"corrected", stage:"place"});
     });
     state.rejected = state.rejected.slice(-20);
-    runRecommend(state.read.state, "这几个都不给你了。状态和需求我没动。");
+    runRecommend(state.read.state, uiCopy("这几个都不给你了。状态和需求我没动。", "I removed these places and kept everything else the same."));
   };
 
   // 备选升为主推：不是新一轮推荐，只是换一个此刻的答案
@@ -4105,7 +4240,7 @@ function bind(){
     if (!picked.length) return;
     CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:picked[0].recommendation_id});
     state.offer = picked.concat(rest);
-    state.offerNote = "换成这个了。前一个我记下来，这次不再给你。";
+    state.offerNote = uiCopy("换成这个了。前一个我记下来，这次不再给你。", "Here’s the other option. I’ll leave the first one out this time.");
     state.aiPlaceOrder = state.offer.map(x => x.place_id);
     render();
   });
@@ -4117,7 +4252,7 @@ function bind(){
       CurrentAI.track("recommendation_rejected", {place_id:x.place_id, recommendation_id:x.recommendation_id, reason:"swap"});
     });
     state.rejected = state.rejected.slice(-20);
-    runRecommend(state.read.state, "换了一批。前面那三个这次不会再出现。");
+    runRecommend(state.read.state, uiCopy("换了一批。前面那三个这次不会再出现。", "Here are three different places."));
   };
 
   // 有地图链接时，先让用户选地图；真正选定之后才把行程记成已出发。
@@ -4272,8 +4407,9 @@ function bind(){
     const at = ReachPolicy.scheduleRecheck(Date.now(), 18, state.reach);
     saveReach({recheckAt:at, recheckHandled:!at});
     state.reflectNote = at
-      ? "好，我 " + fmtDate(new Date(at).toISOString()).split(" ")[1] + " 回来问一次。这中间不打扰。"
-      : "好，那今天就不打扰了。";
+      ? uiCopy("好，我 " + fmtDate(new Date(at).toISOString()).split(" ")[1] + " 回来问一次。这中间不打扰。",
+               "Okay. I’ll check in once at " + fmtDate(new Date(at).toISOString()).split(" ")[1] + ".")
+      : uiCopy("好，那今天就不打扰了。", "Okay. No check-in today.");
     render();
   });
 
@@ -4357,7 +4493,7 @@ function bind(){
   const recheckBetter = root.querySelector("#recheck-better");
   if (recheckBetter) recheckBetter.onclick = () => {
     saveReach({recheckHandled:true, declineStreak:0, mutedUntil:ReachPolicy.startOfDay(Date.now()) + 86400000});
-    state.reachNote = "那就好。今晚不打扰了。";
+    state.reachNote = uiCopy("那就好。今晚不打扰了。", "Glad to hear it. I’ll leave you to your evening.");
     go("#/talk");
   };
 
@@ -4369,7 +4505,7 @@ function bind(){
       needs_clarification:false, clarifying_question:null, risk_level:"ordinary", risk_signals:[],
       time_minutes:null, max_travel_minutes:null};
     if (!state.read) state.read = {state:fallback, acknowledgement:"", evidence:[], corrections:{state:[],need:[],constraint:[]}};
-    runRecommend(fallback, "还是那样的话，先去个近的走走。就一个，不合适再说。");
+    runRecommend(fallback, uiCopy("还是那样的话，先去个近的走走。就一个，不合适再说。", "If it still feels the same, here’s one nearby place to try."));
   };
 
   root.querySelectorAll("[data-guard]").forEach(el => el.onclick = () => {
@@ -4377,7 +4513,7 @@ function bind(){
       saveReach({offersWithoutDeparture:0, enabled:false,
                  mutedUntil:Date.now() + 7 * 86400000, stopped:true});
       state.guardianDismissed = true;
-      state.reachNote = "好。这一周我不主动来找你了，设置里随时能打开。";
+      state.reachNote = uiCopy("好。这一周我不主动来找你了，设置里随时能打开。", "Okay. I won’t check in for a week. You can turn it back on in Settings.");
       go("#/talk");
     } else {
       saveReach({offersWithoutDeparture:0});
@@ -4428,7 +4564,7 @@ function bind(){
     state.trip = null;
     state.records = [];
     state.pendingWipe = false;
-    state.reachNote = "清空了。这台设备上不剩什么了。";
+    state.reachNote = uiCopy("清空了。这台设备上不剩什么了。", "Your records on this device are gone.");
     // 本地清了，服务端那几条也得删——否则「清空」只是个说法
     ids.forEach(id => CurrentAI.deleteOutcome(id).catch(() => {}));
     go("#/talk");
@@ -4451,7 +4587,7 @@ function bind(){
     go("#/records");
     if (remoteId){
       CurrentAI.deleteOutcome(remoteId).catch(() => {
-        state.deleteWarning = "本地这条已经删了，但服务端没删成功。等下再进来一次，我会重试。";
+        state.deleteWarning = uiCopy("本地这条已经删了，但服务端没删成功。等下再进来一次，我会重试。", "It’s gone from this device, but the online copy could not be deleted. I’ll retry when you return.");
         render();
       });
     }
@@ -4500,12 +4636,12 @@ function bind(){
     Promise.resolve(result).then(outcome => {
       const en = currentLang() === "en";
       let message;
-      if (outcome.method === "share") message = en ? "Shared through the system share sheet." : "已通过系统分享菜单完成分享。";
+      if (outcome.method === "share") message = en ? "Shared." : "已分享。";
       else if (outcome.method === "cancelled") message = en ? "Share cancelled. Nothing was sent." : "已取消分享，卡片没有发出去。";
       else if (action === "share") message = en
-        ? "Image sharing is unavailable here, so the PNG was downloaded instead."
-        : "当前浏览器不能直接分享图片，已改为下载 PNG。";
-      else message = en ? "PNG downloaded." : "PNG 已下载。";
+        ? "Sharing is unavailable here, so the image was saved instead."
+        : "当前浏览器不能直接分享，图片已保存。";
+      else message = en ? "Image saved." : "图片已保存。";
       setCardExportUi(scope, false, message, false);
       if (outcome.method !== "cancelled") {
         CurrentAI.track("mood_card_exported", {place_id:place.placeId, method:outcome.method});

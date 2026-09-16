@@ -398,7 +398,7 @@ def test_the_detail_page_shows_exactly_one_aggregate_block():
     """改口径的时候很容易新旧两块并存，屏幕上出现两个「匿名汇总」。"""
     source = PROTOTYPE.read_text(encoding="utf-8")
     block = source[slice(*_function_body(source, "function renderPlace(id)"))]
-    assert block.count('<p class="sec-k">匿名汇总</p>') == 1
+    assert block.count("uiCopy('匿名汇总', 'Anonymous summary')") == 1
 
 
 def test_first_hand_quotes_are_labelled_as_profile_source_not_as_feedback():
@@ -499,9 +499,10 @@ def test_primary_voice_screen_keeps_operational_copy_out_of_the_way():
     assert "本产品不保存录音" not in talk
     assert "想吃烤串" in talk
     assert 'id="type-toggle"' in talk
-    assert "⌨ 打字输入" in talk
+    assert "'打字输入', 'Type instead'" in talk
     assert ".talk .type-toggle{margin-top:18px;min-height:44px" in prototype
-    assert 'id="natural-submit">发送' in talk
+    assert 'id="natural-submit"' in talk
+    assert "uiCopy('发送', 'Send')" in talk
 
 
 def test_beijing_demo_mode_is_explicit_and_completes_without_uploading_fake_visits():
@@ -549,7 +550,7 @@ def test_demo_feedback_card_keeps_its_duration_and_copy_honest():
     assert "不会保存" in presence
 
     card = prototype[slice(*_function_body(prototype, "function renderCard(recId, backTo)"))]
-    assert 'rec.demo ? "第四步 · 演示完成" : "第四步 · 已保存"' in card
+    assert 'rec.demo ? "演示完成" : "已保存"' in card
     assert "仅用于本次演示 · 不上传，刷新后消失" in card
     assert "查看本次演示轨迹" in card
 
@@ -575,7 +576,8 @@ def test_manual_arrival_never_claims_a_geofence_confirmation():
 
     strip = prototype[slice(*_function_body(prototype, "function tripStrip()"))]
     assert "confirmedInside" in strip
-    assert 'confirmedInside && !demo ? " · 围栏内" : ""' in strip
+    assert 'confirmedInside ? uiCopy("离开后会自动提醒"' in strip
+    assert 'PRESENCE_LABEL[level] + " · 离开时按一下"' in strip
     assert 'const note = fenced ? "走了我自己知道"' not in strip
 
 
@@ -690,3 +692,118 @@ def test_the_english_path_survives_a_full_interpret():
     # 纠错选项正是线上炸掉的地方——它们必须真的被构造出来。
     assert body["corrections"]["state"]
     assert body["corrections"]["need"]
+
+
+def test_default_ui_does_not_expose_demo_or_roadmap_controls():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    seed = source[slice(*_function_body(source, "function seed("))]
+    talk = source[slice(*_function_body(source, "function renderTalk("))]
+    settings = source[slice(*_function_body(source, "function renderSettings("))]
+
+    assert "if (!DEMO_MODE)" in seed
+    assert "state.records = []" in seed
+    assert "DEMO_MODE ?" in talk, "北京演示入口只能在显式 demo 模式出现"
+    assert "心率变化（HRV）" not in settings, "未完成的路线图不能出现在用户设置里"
+    assert 'r === "#/compare" && DEMO_MODE' in source
+
+
+def test_primary_ui_copy_hides_implementation_details():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    signatures = (
+        "function renderTalk(",
+        "function renderSettings(",
+        "function renderRecords(",
+        "function renderNearby(",
+        "function renderScore(",
+        "function renderFactors(",
+        "function renderCard(",
+    )
+    visible = "\n".join(
+        source[slice(*_function_body(source, signature))]
+        for signature in signatures
+    )
+    for internal_copy in (
+        "含 3 条演示数据",
+        "初始不预选",
+        "系统分享菜单",
+        "4:5 PNG",
+        "单条评分可以刷",
+        "原型示例数据冒充统计",
+        "还没做",
+    ):
+        assert internal_copy not in visible
+
+
+def test_primary_bilingual_copy_is_written_as_app_english():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    # These are deliberately authored English lines, not word-by-word fragments.
+    for english in (
+        "Say how you feel,<br>or what you want to do.",
+        "Share only what you choose",
+        "Your private note won't appear in the image.",
+        "Only the combined result is shown. Individual entries stay private.",
+        "A couple more visits will make patterns easier to see.",
+    ):
+        assert english in source
+
+    # Common prototype/developer wording must not leak into the revised English UI.
+    for awkward in (
+        "Single ratings can be gamed. Aggregates can't.",
+        "not built yet",
+        "Creates a 4:5 PNG",
+    ):
+        # Old fallback dictionary entries may remain during the migration, but
+        # revised render functions must not emit these strings directly.
+        renderers = source[source.index("function renderTalk("):source.index("const EN = {")]
+        assert awkward not in renderers
+
+
+def test_low_energy_browse_and_settings_do_not_repeat_internal_details():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    pick = source[slice(*_function_body(source, "function renderPick("))]
+    settings = source[slice(*_function_body(source, "function renderSettings("))]
+
+    for repeated in ("SAMPLE_EMPTY", "会看到什么", "消费压力", "样本还少"):
+        assert repeated not in pick
+    for internal in ("匿名会话标识", "Reminders today", "打扰记录：今天"):
+        assert internal not in settings
+
+
+def test_english_place_and_feedback_views_use_localized_display_data():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    ranked = source[slice(*_function_body(source, "function rankedPlaces("))]
+    factors = source[slice(*_function_body(source, "function renderFactors("))]
+    records = source[slice(*_function_body(source, "function renderRecords("))]
+
+    assert ").map(localized)" in ranked, "英文浏览页不能继续直接渲染中文 PLACES"
+    assert "factorCopy(o.label)" in factors
+    assert "factorCopy(f)" in records
+    assert '"Chaoyang"' in source and '"Xicheng"' in source
+
+
+def test_frontend_and_backend_share_the_same_reviewed_english_place_copy():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    match = re.search(r"const PLACES_EN = (\{.*?\});\nconst AREA_EN", source, re.DOTALL)
+    assert match, "找不到前端英文地点表"
+
+    frontend = json.loads(match.group(1))
+    backend_path = PROTOTYPE.parent / "backend_app" / "data" / "places.en.json"
+    backend = json.loads(backend_path.read_text(encoding="utf-8"))["places"]
+    assert frontend == backend
+
+    rendered = json.dumps(frontend, ensure_ascii=False)
+    for awkward in (
+        "Browse a round after the movie",
+        "eat · indoors",
+        "livehouse · indoors",
+        "Dance until your brain shuts off",
+    ):
+        assert awkward not in rendered
+
+
+def test_safety_screen_uses_the_current_national_support_number():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    safe = source[slice(*_function_body(source, "function renderSafe("))]
+
+    assert "12356" in safe
+    assert "400-161-9995" not in safe
