@@ -37,6 +37,10 @@ def test_distinct_states_do_not_collapse_to_tired(text, mood_id):
     assert interpret_with_rules(text).state.mood_id == mood_id
 
 
+def test_gym_is_not_diluted_into_generic_sports():
+    assert interpret_with_rules("我想去健身房").state.place_types == ["gym"]
+
+
 def test_positive_excitement_is_not_mistaken_for_racing_thoughts():
     state = interpret_with_rules("拿到 offer 以后特别兴奋，坐不住，想庆祝").state
     assert state.mood_id == "bright"

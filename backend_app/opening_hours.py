@@ -137,7 +137,7 @@ def open_state(place: dict, now: datetime | None = None, lang: str = "zh") -> tu
     en = lang == "en"
 
     if source == "always_open":
-        return ALWAYS_OPEN, ("No door. Open whenever." if en else "没有门，什么时候都能去"), source
+        return ALWAYS_OPEN, ("Open all day" if en else "全天开放"), source
     if source == "unknown":
         return "unknown", ("Hours unclear — worth checking first" if en else "营业时间不确定，去之前最好查一下"), source
 

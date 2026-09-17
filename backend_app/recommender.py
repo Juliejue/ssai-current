@@ -90,7 +90,8 @@ PLACE_TYPE_TERMS: dict[str, tuple[str, ...]] = {
     "dessert": ("甜品", "蛋糕", "冰淇淋", "面包店", "糖水", "dessert"),
     "craft": ("手作", "手工", "陶艺", "做陶", "木工", "编织", "银饰", "craft"),
     "flower": ("插花", "花艺", "花店", "鲜花", "flower"),
-    "sports": ("运动馆", "体育馆", "体育中心", "健身", "workout", "gym"),
+    "sports": ("运动馆", "体育馆", "体育中心", "运动场", "跑步道", "骑行道", "轮滑场"),
+    "gym": ("健身房", "健身", "fitness center", "workout", "gym"),
     "climbing": ("攀岩", "抱石", "climbing", "bouldering"),
     "swimming": ("游泳", "泳池", "swimming"),
     "badminton": ("羽毛球", "badminton"),
@@ -116,7 +117,7 @@ PLACE_TYPE_TERMS: dict[str, tuple[str, ...]] = {
 PLACE_TYPE_FAMILIES: tuple[frozenset[str], ...] = (
     frozenset({"barbecue", "restaurant", "hotpot", "dessert"}),
     frozenset({"craft", "flower"}),
-    frozenset({"sports", "climbing", "swimming", "badminton", "basketball", "tennis", "yoga"}),
+    frozenset({"sports", "gym", "climbing", "swimming", "badminton", "basketball", "tennis", "yoga"}),
     frozenset({"music", "bar", "club", "karaoke"}),
     frozenset({"books", "records", "cafe", "tea", "gallery", "cinema", "vintage"}),
     frozenset({"park", "river", "lane"}),
@@ -134,7 +135,7 @@ def _place_types(place: dict) -> set[str]:
     # 具体餐饮类型也是餐厅，但“想吃烤串”仍只有 barbecue 才算精确命中。
     if explicit & {"barbecue", "hotpot", "dessert"}:
         explicit.add("restaurant")
-    if explicit & {"climbing", "swimming", "badminton", "basketball", "tennis", "yoga"}:
+    if explicit & {"gym", "climbing", "swimming", "badminton", "basketball", "tennis", "yoga"}:
         explicit.add("sports")
     return explicit
 
@@ -369,7 +370,7 @@ TRADEOFF_EN = {
 
 
 def _tradeoffs(place: dict, lang: str = "zh") -> list[str]:
-    """代价照实写. Derived from the reviewed place record, never invented."""
+    """Return only concrete cautions; silence is better than invented filler."""
     tags = place.get("tags", {})
     costs: list[str] = []
     if place.get("crowd") == "high":
@@ -385,22 +386,7 @@ def _tradeoffs(place: dict, lang: str = "zh") -> list[str]:
     if costs:
         picked = costs[:3]
         return [TRADEOFF_EN.get(c, c) for c in picked] if lang == "en" else picked
-
-    # 真的没有代价也是一条信息，但要说清楚「凭什么没有」，
-    # 否则「暂时没看到」读起来像系统没算出来。
-    upsides = []
-    if place.get("free"):
-        upsides.append("不用花钱")
-    if place.get("crowd") == "low":
-        upsides.append("人不多")
-    if tags.get("l", 1) < 0.4:
-        upsides.append("不吵")
-    if tags.get("s", 0) >= 0.7:
-        upsides.append("一个人去不奇怪")
-    if lang == "en":
-        english = [TRADEOFF_EN.get(u, u) for u in upsides[:3]]
-        return [ui("tradeoff_lead", "en") + ", ".join(english)] if english else [ui("no_tradeoff", "en") or ""]
-    return ["没什么要你付出的：" + "、".join(upsides[:3])] if upsides else ["没看出明显的代价"]
+    return []
 
 
 def _rank(

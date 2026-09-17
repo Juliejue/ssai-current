@@ -109,6 +109,17 @@
     return output.trim();
   }
 
+  function speechPreview(parts) {
+    var joined = joinSpeechParts(parts);
+    var last = (parts || []).filter(function (part) {
+      return normalizeSpeechText(part && part.text);
+    }).pop();
+    // A provider's "final" flag means this phrase is stable. Show punctuation
+    // immediately instead of making the user wait until the whole microphone
+    // session ends. If they keep speaking, the next update rebuilds the line.
+    return last && last.final ? formatSpeechTranscript(joined) : joined;
+  }
+
   // 第三方服务的错误原文可能很长，甚至夹带控制台和付费链接。
   // 第一屏只告诉用户下一步能做什么，不把供应商后台文案直接甩给人。
   function voiceErrorMessage(message) {
@@ -517,9 +528,12 @@
     var latestText = '';
     var finished = false;
     var stopRequested = false;
+    var started = false;
+    var startTimer = null;
     var controller = null;
 
     function cleanup() {
+      if (startTimer) clearTimeout(startTimer);
       recognition.onstart = null;
       recognition.onresult = null;
       recognition.onerror = null;
@@ -555,6 +569,8 @@
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
     recognition.onstart = function () {
+      started = true;
+      if (startTimer) clearTimeout(startTimer);
       callbacks.onStatus(stopRequested
         ? voiceCopy('正在整理你刚才说的…', 'Finishing what you just said…')
         : voiceCopy('我在听，再按一次结束', 'Listening · tap again to stop'));
@@ -570,7 +586,7 @@
         if (result && result.isFinal) hasFinal = true;
       }
       latestText = joinSpeechParts(parts);
-      if (latestText) callbacks.onPartial(latestText);
+      if (latestText) callbacks.onPartial(speechPreview(parts));
       // `isFinal` means this phrase is stable, not that the user has finished
       // speaking. Only the explicit second tap may end the capture.
       if (hasFinal && !stopRequested) {
@@ -589,6 +605,19 @@
     catch (error) {
       cleanup();
       throw new Error(voiceSetupError(error));
+    }
+    if (!started && !finished) {
+      startTimer = setTimeout(function () {
+        if (started || finished) return;
+        try {
+          if (typeof recognition.abort === 'function') recognition.abort();
+          else recognition.stop();
+        } catch (_) {}
+        finish(voiceCopy(
+          '语音没有启动，再点一次可以重试，也可以直接打字。',
+          'Voice input did not start. Tap again to retry, or type instead.'
+        ));
+      }, 5000);
     }
     return Promise.resolve();
   }
@@ -761,14 +790,17 @@
         var text = result.voice_text_str || message.text || '';
         if (text) {
           var index = Number(result.index);
+          var partialParts = [];
           if (Number.isFinite(index)) {
             transcriptSlices[index] = { text: text, final: Number(result.slice_type) === 2 };
-            latestText = joinSpeechParts(Object.keys(transcriptSlices).map(Number).sort(function (a, b) { return a - b; })
-              .map(function (key) { return transcriptSlices[key]; }));
+            partialParts = Object.keys(transcriptSlices).map(Number).sort(function (a, b) { return a - b; })
+              .map(function (key) { return transcriptSlices[key]; });
+            latestText = joinSpeechParts(partialParts);
           } else {
             latestText = normalizeSpeechText(text);
+            partialParts = [{ text: latestText, final: Number(result.slice_type) === 2 }];
           }
-          callbacks.onPartial(latestText);
+          callbacks.onPartial(speechPreview(partialParts));
         }
         // slice_type=2 only stabilizes one sentence. The stream is complete
         // exclusively when Tencent returns final=1 after our end message.

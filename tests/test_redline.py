@@ -328,10 +328,20 @@ def test_judge_question_leave_me_alone():
     """「别烦我」——被拒之后不能追问，出口要一直在。"""
     source = PROTOTYPE.read_text(encoding="utf-8")
     assert "不太对" in source, "任何提议旁边都要有否定出口"
-    assert "都不合适，换一批" in source
+    assert "uiCopy('换一批', 'More')" in source
     # 追问只问一次：选项一旦被回答，askAnswered 就把追问关掉
     assert "state.askAnswered = true" in source
     assert "const asking = r.clarify_field && !state.askAnswered" in source
+
+
+def test_recommendation_ui_does_not_repeat_the_users_input_or_pad_buttons():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    assert '<p class="eyebrow">推荐依据</p>' not in source
+    assert '<ul class="chain">' not in source
+    assert "先看看细节</button>" not in source
+    assert "都不合适，换一批</button>" not in source
+    assert "要是这个不对，还有</p>" not in source
+    assert "<i>代价</i>" not in source
 
 
 # --- US-04：反馈不展示单条，只聚合并附样本量 -------------------------------
