@@ -320,7 +320,7 @@ def test_judge_question_are_you_saying_something_is_wrong_with_me():
             assert word not in blob
         assert read.state_label in (
             "心情有点沉", "需要安静", "脑子停不下来", "想要点灵感", "累但静不下来",
-            "空落落的", "心里发紧", "想有人在旁边", "想换个地方", "心情很明亮", "状态还行",
+            "空落落的", "心里发紧", "心里有股火", "想有人在旁边", "想换个地方", "心情很明亮", "状态还行",
         ), "状态标签必须来自身体化白名单"
 
 

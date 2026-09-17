@@ -1,8 +1,11 @@
 import asyncio
+from datetime import datetime
 import re
 
 from backend_app import recommender
+from backend_app.interpretation import interpret_with_rules
 from backend_app.map_provider import WalkingRoute
+from backend_app.opening_hours import BEIJING
 from backend_app.recommender import load_catalog, recommend
 from backend_app.schemas import Location, NeedState, RecommendRequest
 
@@ -97,6 +100,31 @@ def test_free_request_only_returns_free_places():
     catalog = {place["placeId"]: place for place in load_catalog()["PLACES"]}
     assert results
     assert all(catalog[item.place_id]["free"] for item in results)
+
+
+def test_distinct_states_reorder_the_same_curated_catalog():
+    """The demo must prove matching, not just show the same calm places every time."""
+    now = datetime(2026, 9, 17, 19, 0, tzinfo=BEIJING)
+    texts = (
+        "今天特别开心，想找个热闹的地方继续玩",
+        "今天很累，只想找个能坐很久的地方",
+        "我很生气，想出去走走吹吹风",
+    )
+    first_places = []
+    for text in texts:
+        state = interpret_with_rules(text).state
+        first_places.append(recommend(RecommendRequest(state=state, limit=3), now=now)[0].place_id)
+
+    assert first_places == ["lasocial", "ziliaoguan", "shichahai"]
+
+
+def test_happy_but_noise_averse_does_not_get_the_loudest_happy_option():
+    now = datetime(2026, 9, 17, 19, 0, tzinfo=BEIJING)
+    lively = interpret_with_rules("今天很开心，想找个热闹的地方").state
+    quiet_happy = interpret_with_rules("今天很开心，但不想去太吵的地方").state
+
+    assert recommend(RecommendRequest(state=lively, limit=1), now=now)[0].place_id == "lasocial"
+    assert recommend(RecommendRequest(state=quiet_happy, limit=1), now=now)[0].place_id != "lasocial"
 
 
 def test_rejected_place_is_not_returned():

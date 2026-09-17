@@ -25,6 +25,7 @@ STATE_LABELS_EN: dict[str, str] = {
     "tired": "tired but wired",
     "empty": "feeling hollow",
     "tight": "wound tight",
+    "heated": "worked up",
     "near": "want someone nearby",
     "fresh": "need a change of scene",
     "bright": "in a bright mood",
@@ -149,7 +150,7 @@ CLARIFY_EN: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
 
 # 四环纠错的选项。和中文一样：这些是身体感觉，不是病名。
 CORRECTION_CHIPS_EN: tuple[tuple[str, str], ...] = (
-    ("tight", "wound tight"), ("noisy", "can't stop thinking"), ("tired", "tired but wired"),
+    ("tight", "wound tight"), ("heated", "worked up"), ("noisy", "can't stop thinking"), ("tired", "tired but wired"),
     ("empty", "feeling hollow"), ("near", "want someone nearby"), ("fresh", "need a change"),
     ("quiet", "need it quiet"), ("low", "feeling low"), ("spark", "want something new"),
     ("bright", "in a bright mood"), ("okay", "doing okay"),

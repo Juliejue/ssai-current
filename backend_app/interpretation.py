@@ -18,7 +18,7 @@ from .schemas import ClarifyOption, CorrectionOptions, InterpretResponse, NeedSt
 logger = logging.getLogger("current.interpretation")
 
 # 每次改 SYSTEM_PROMPT 都要抬版本号——留痕靠它才能对得上（FR-30）。
-PROMPT_VERSION = "sp2-interpret-v0.5"
+PROMPT_VERSION = "sp2-interpret-v0.6"
 
 # 限流和 schema 失败是两回事，重试方式也不一样：
 # 429/5xx 是「现在排不上队」，立刻重试等于白试，要等一下；
@@ -30,16 +30,26 @@ RATE_LIMIT_BACKOFF_SECONDS = 1.5
 
 MOOD_RULES: dict[str, tuple[str, ...]] = {
     "quiet": ("安静", "太吵", "不想听", "别说话", "need it quiet", "need quiet", "too loud"),
-    "noisy": ("脑子停不下来", "想太多", "一直想", "坐不住", "很乱", "can't stop thinking", "mind won't stop", "racing thoughts", "restless"),
+    "noisy": ("脑子停不下来", "想太多", "一直想", "念头停不下来", "很乱",
+              "can't stop thinking", "mind won't stop", "racing thoughts"),
     "spark": ("灵感", "没方向", "想创作", "想看看", "need inspiration", "feel creative", "want inspiration"),
-    "tired": ("很累", "好累", "累坏了", "累死了", "没睡", "困", "疲惫", "躺不住", "tired", "exhausted", "wiped out", "drained", "sleepy", "no energy"),
+    "tired": ("累坏了", "累死了", "筋疲力尽", "没睡好", "睡不够", "熬夜", "通宵",
+              "很累", "好累", "累了", "疲惫", "没精神", "没力气", "困", "累",
+              "tired", "exhausted", "wiped out", "drained", "sleepy", "no energy"),
     "empty": ("空落落", "没着落", "空空", "没意思", "feel empty", "feeling empty", "feel hollow", "unanchored"),
-    "tight": ("发紧", "绷着", "喘不过", "心慌", "tense", "stressed", "wound up", "on edge", "can't breathe"),
-    "near": ("想有人", "陪我", "一个人难受", "有人在", "want company", "someone nearby", "not be alone"),
+    "tight": ("发紧", "紧绷", "绷着", "喘不过", "心慌", "紧张", "不安",
+              "tense", "stressed", "wound up", "on edge", "can't breathe"),
+    "heated": ("气死我", "气炸了", "想发火", "有股火", "特别生气", "很生气", "火大", "恼火",
+               "窝火", "愤怒", "生气", "angry", "furious", "worked up", "want to yell"),
+    "near": ("不想一个人待着", "不想自己待着", "不想独处", "想有人", "陪我", "一个人难受", "有人在",
+             "want company", "someone nearby", "not be alone"),
     "fresh": ("换个地方", "待腻", "没见过", "出去看看", "change of scene", "somewhere new", "get out of here"),
-    "bright": ("很开心", "挺开心", "开心", "高兴", "快乐", "心情很好", "状态不错", "兴致很好", "happy", "great mood", "excited"),
+    "bright": ("特别兴奋", "好兴奋", "很兴奋", "想庆祝", "值得庆祝", "很开心", "挺开心",
+               "心情很好", "状态不错", "兴致很好", "太爽了", "开心", "高兴", "快乐", "兴奋", "庆祝",
+               "happy", "great mood", "excited", "celebrate"),
     "okay": ("还行", "挺好", "没事", "随便走走", "跳舞", "蹦迪", "想动", "出去嗨", "想玩", "doing okay", "feel okay", "walk around", "go out"),
-    "low": ("低落", "难过", "伤心", "难受", "委屈", "想哭", "没力气", "不开心", "心情不好", "糟糕", "feel low", "feeling low", "sad", "upset", "bad mood", "feel awful"),
+    "low": ("心情不好", "不开心", "低落", "失落", "沮丧", "难过", "伤心", "难受", "委屈", "想哭", "糟糕",
+            "feel low", "feeling low", "sad", "upset", "bad mood", "feel awful"),
 }
 
 
@@ -86,18 +96,22 @@ PLACE_TYPE_LABELS: dict[str, str] = {
 }
 
 NEED_RULES: dict[str, tuple[str, ...]] = {
-    "hide": ("不想见人", "不被看见", "躲", "一个人", "don't want to see anyone", "want to be alone", "somewhere private"),
+    "hide": ("不想见人", "不想被看见", "不被看见", "没人看见我", "想一个人", "自己待着", "躲一躲", "躲",
+             "don't want to see anyone", "do not want to see anyone", "want to be alone", "somewhere private"),
     "sit": ("坐一会", "坐很久", "不想动", "sit down", "sit for a while", "don't want to move"),
     "walk": ("走走", "散步", "一直走", "走一会", "take a walk", "keep walking", "go for a walk"),
     "free": ("不花钱", "不想花钱", "不想花很多钱", "没钱", "便宜", "预算低", "少花点", "don't want to spend", "spend nothing", "free", "cheap", "low budget"),
     "green": ("树", "绿色", "公园", "自然", "trees", "greenery", "nature"),
     "new": ("没见过", "新鲜", "换个地方", "something new", "somewhere new", "change of scene"),
     "sound": ("听音乐", "听点声音", "唱片", "listen to music", "hear music", "some sound", "records"),
-    "people": ("有人在", "有人就行", "生活气", "想聊天", "和人说话", "找人聊", "认识人", "想社交", "people around", "someone nearby", "talk to someone", "want company", "socialize"),
+    "people": ("不想一个人待着", "不想自己待着", "不想独处", "想有人", "陪我", "有人在", "有人就行",
+               "生活气", "想聊天", "和人说话", "找人聊", "认识人", "想社交",
+               "people around", "someone nearby", "talk to someone", "want company", "socialize"),
     "loud": ("吵一点", "热闹", "蹦迪", "跳舞", "嗨一点", "somewhere loud", "somewhere lively", "party", "go dancing"),
     "slow": ("慢下来", "安静", "缓一缓", "slow down", "take it slow", "somewhere quiet"),
     "hands": ("手上有事", "做点什么", "翻书", "something to do", "keep my hands busy", "browse books"),
-    "breathe": ("喘口气", "透气", "发紧", "吹吹风", "吹风", "微风", "有风", "fresh air", "a breeze", "somewhere outside", "catch my breath"),
+    "breathe": ("喘口气", "透气", "发紧", "开阔", "视野", "看远一点", "看夕阳", "夕阳", "吹吹风", "吹风", "微风", "有风",
+                "fresh air", "a breeze", "somewhere outside", "catch my breath"),
     "nothing": ("不想决定", "你替我选", "随便", "都可以", "don't want to decide", "you choose", "anything works", "no decisions"),
 }
 
@@ -128,6 +142,7 @@ STATE_LABELS: dict[str, str] = {
     "tired": "累但静不下来",
     "empty": "空落落的",
     "tight": "心里发紧",
+    "heated": "心里有股火",
     "near": "想有人在旁边",
     "fresh": "想换个地方",
     "bright": "心情很明亮",
@@ -165,6 +180,7 @@ NEED_LABELS: dict[str, str] = {
 # The six body-feeling chips offered when the user says "不太对" (FR-03 / US-02).
 CORRECTION_CHIPS: tuple[tuple[str, str], ...] = (
     ("tight", "心里发紧"),
+    ("heated", "心里有股火"),
     ("noisy", "脑子停不下来"),
     ("tired", "累但静不下来"),
     ("empty", "空落落的"),
@@ -211,40 +227,97 @@ CLARIFY_QUESTIONS: dict[str, tuple[str, tuple[tuple[str, str], ...]]] = {
 AVOID_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("people", ("不想见人", "不想见到人", "别跟人说话", "不想说话", "不想社交",
                 "人少点", "人少的", "少点人", "没什么人", "不要太多人", "别太多人", "不想应付",
-                "don't want to see anyone", "avoid people", "fewer people", "not crowded", "don't want to socialize")),
-    ("loud", ("不想吵", "别太吵", "太吵了", "怕吵", "安静点", "不要吵", "not loud", "too loud", "avoid noise", "somewhere quiet")),
+                "don't want to see anyone", "do not want to see anyone", "avoid people", "fewer people", "not crowded",
+                "don't want to socialize", "do not want to socialize")),
+    ("loud", ("不想去太吵", "不想太吵", "不想吵", "别太吵", "不要太吵", "太吵了", "怕吵", "安静点", "不要吵",
+              "not loud", "too loud", "avoid noise", "somewhere quiet")),
     ("hands", ("什么都不做", "啥都不想做", "不想动手", "不想干活", "不用动脑", "do nothing", "nothing to do")),
 )
 
 
-def _token_match(text: str, token: str) -> re.Match[str] | None:
-    """Match Latin tokens as words while keeping Chinese substring behaviour."""
+def _token_pattern(token: str) -> re.Pattern[str]:
+    """Compile Latin tokens as words while keeping Chinese substring behaviour."""
     escaped = re.escape(token)
     if token.isascii() and re.search(r"[A-Za-z0-9]", token):
         escaped = rf"(?<![A-Za-z0-9_]){escaped}(?![A-Za-z0-9_])"
-    return re.search(escaped, text, flags=re.IGNORECASE)
+    return re.compile(escaped, flags=re.IGNORECASE)
+
+
+def _token_match(text: str, token: str) -> re.Match[str] | None:
+    return _token_pattern(token).search(text)
 
 
 def _contains_any(text: str, patterns: tuple[str, ...]) -> bool:
     return any(_token_match(text, item) for item in patterns)
 
 
+_NEGATED_PREFIX = re.compile(
+    r"(?:并不想|并不愿|不想|不愿|不要|没想|没有|不是|并不|并没有|谈不上|算不上|不|没)"
+    r"[^，。！？,.!?；;]{0,3}$|"
+    r"(?:\b(?:do not|don't|doesn't|didn't|can't|cannot|won't|wouldn't|shouldn't|not|never|no)\b)"
+    r"(?:\s+[A-Za-z'-]+){0,4}\s*$",
+    flags=re.IGNORECASE,
+)
+
+
+def _affirmed_matches(text: str, patterns: tuple[str, ...]) -> list[tuple[int, str]]:
+    """Return longest, non-overlapping mentions that are not negated.
+
+    Substring counting made ``不难过`` count as low and let ``开心`` inside
+    ``不开心`` compete with the negative phrase. Mood words need a little
+    scope awareness; explicit request phrases keep their separate rules.
+    """
+    spans: list[tuple[int, int, str]] = []
+    for token in sorted(patterns, key=len, reverse=True):
+        for match in _token_pattern(token).finditer(text):
+            index, end = match.span()
+            prefix = text[max(0, index - 48):index]
+            folded_token = token.casefold()
+            token_is_negative_phrase = token.startswith(("不", "没", "别", "无")) or folded_token.startswith(
+                ("don't", "do not", "not ", "no ", "never ")
+            )
+            overlaps = any(index < used_end and end > used_start for used_start, used_end, _ in spans)
+            if not overlaps and (token_is_negative_phrase or not _NEGATED_PREFIX.search(prefix)):
+                spans.append((index, end, match.group(0)))
+    return sorted(((start, token) for start, _end, token in spans), key=lambda item: item[0])
+
+
+def _mood_matches(text: str) -> dict[str, list[tuple[int, str]]]:
+    return {mood: _affirmed_matches(text, tokens) for mood, tokens in MOOD_RULES.items()}
+
+
+def _last_pattern_position(text: str, patterns: tuple[str, ...]) -> int:
+    matches = _affirmed_matches(text, patterns)
+    return matches[-1][0] if matches else -1
+
+
 def interpret_with_rules(text: str) -> InterpretResponse:
-    mood_scores = {
-        mood: sum(1 for token in tokens if _token_match(text, token))
-        for mood, tokens in MOOD_RULES.items()
-    }
+    mood_matches = _mood_matches(text)
+    mood_scores = {mood: len(matches) for mood, matches in mood_matches.items()}
     # 「难过 + 想找个安静的地方」里，难过是状态，安静是要求；不能因为词表
-    # 顺序把要求反过来当成情绪。明确的身体/情绪词先决定 mood，环境仍进 need_keys。
-    felt_moods = ("low", "bright", "tired", "empty", "tight")
-    felt_scores = {mood: mood_scores[mood] for mood in felt_moods}
-    mood_id = max(felt_scores, key=felt_scores.get) if max(felt_scores.values()) else max(mood_scores, key=mood_scores.get)
+    # 顺序把要求反过来当成情绪。多个明确感受同时出现时，同分取后说的那一个，
+    # 才能读懂「虽然很累，但现在特别高兴」这类转折句。
+    felt_moods = ("low", "bright", "tired", "empty", "tight", "heated")
+    candidates = felt_moods if any(mood_scores[mood] for mood in felt_moods) else tuple(MOOD_RULES)
+    mood_id = max(
+        candidates,
+        key=lambda mood: (mood_scores[mood], mood_matches[mood][-1][0] if mood_matches[mood] else -1),
+    )
     if mood_scores[mood_id] == 0:
         # 没提情绪，不等于低落。后面的复述会按低置信度明确说“不硬猜”。
         mood_id = "okay"
 
-    needs = [key for key, tokens in NEED_RULES.items() if _contains_any(text, tokens)]
-    place_types = [key for key, tokens in PLACE_TYPE_RULES.items() if _contains_any(text, tokens)]
+    not_alone = _contains_any(
+        text,
+        ("不想一个人待着", "不想一个人", "不想自己待着", "不想独处",
+         "don't want to be alone", "do not want to be alone", "not be alone"),
+    )
+    needs = [key for key, tokens in NEED_RULES.items() if _affirmed_matches(text, tokens)]
+    folded = text.casefold()
+    place_types = [
+        key for key, tokens in PLACE_TYPE_RULES.items()
+        if _affirmed_matches(folded, tuple(token.casefold() for token in tokens))
+    ]
     risk_text = text.casefold()
     self_harm = _contains_any(risk_text, URGENT_SELF_HARM_PATTERNS)
     harm_to_others = _contains_any(risk_text, URGENT_HARM_TO_OTHERS_PATTERNS)
@@ -260,30 +333,56 @@ def interpret_with_rules(text: str) -> InterpretResponse:
     if elevated:
         risk_signals.append("severe_distress_language")
 
+    low_energy = ("没力气", "筋疲力尽", "很累", "好累", "累坏了", "累死了", "动不了", "不想动",
+                  "no energy", "tired", "exhausted", "wiped out", "drained", "don't want to move")
+    high_energy = ("有力气", "想运动", "想跳", "想跑", "跳舞", "蹦迪", "想动", "出去嗨",
+                   "work out", "workout", "go running", "go dancing", "want to move")
+    activated = ("特别兴奋", "好兴奋", "很兴奋", "兴奋", "激动", "坐不住",
+                 "very excited", "so excited", "excited", "thrilled", "can't sit still")
+    low_at = _last_pattern_position(text, low_energy)
+    high_at = _last_pattern_position(text, high_energy)
+    activated_at = _last_pattern_position(text, activated)
     energy = 2
-    if _contains_any(text, ("没力气", "很累", "好累", "累坏了", "累死了", "动不了", "不想动",
-                            "no energy", "tired", "exhausted", "wiped out", "drained", "don't want to move")):
+    if max(high_at, activated_at) > low_at:
+        energy = 4 if high_at >= activated_at else 3
+    elif low_at >= 0:
         energy = 1
-    elif _contains_any(text, ("有力气", "想运动", "想跳", "想跑", "跳舞", "蹦迪", "想动", "出去嗨",
-                              "work out", "workout", "go running", "go dancing", "want to move")):
-        energy = 4
 
-    budget = "free" if _contains_any(text, ("不花钱", "不想花钱", "没钱", "免费", "spend nothing", "don't want to spend", "free")) else "low" if _contains_any(text, ("便宜", "不想花很多钱", "预算低", "少花点", "cheap", "low budget", "not spend much")) else "unknown"
-    social = (
-        "alone" if _contains_any(text, ("不想见人", "想一个人", "自己待着", "别跟人说话", "don't want to see anyone", "want to be alone", "avoid people"))
-        else "low_contact" if _contains_any(text, ("有人但不说话", "不用说话", "有人就行", "有人在旁边", "people nearby but no talking", "company without talking"))
-        else "with_people" if _contains_any(text, ("想有人", "热闹", "很闹", "陪我", "想聊天", "和人说话", "认识人", "想社交", "want company", "talk to someone", "meet people", "socialize", "somewhere lively"))
-        else "either"
-    )
-    explicitly_outdoor = _contains_any(text, ("don't want to stay inside", "not indoors"))
-    explicitly_indoor = _contains_any(text, ("not outside", "don't want to be outside"))
-    wants_outdoor = _contains_any(text, (
-        "想去户外", "想在户外", "想去外面", "露天", "晒太阳", "能吹风", "吹吹风",
-        "微风", "有风", "河边", "江边", "水边", "湖边", "outside", "outdoors", "fresh air", "a breeze",
-        "by the river", "by the water", "in the sun",
+    budget = "free" if _contains_any(
+        text, ("不花钱", "不想花钱", "没钱", "免费", "spend nothing", "don't want to spend", "free")
+    ) else "low" if _contains_any(
+        text, ("便宜", "不想花很多钱", "预算低", "少花点", "cheap", "low budget", "not spend much")
+    ) else "unknown"
+    wants_interaction = bool(_affirmed_matches(
+        text,
+        ("热闹", "很闹", "想聊天", "和人说话", "找人聊", "认识人", "想社交",
+         "talk to someone", "meet people", "socialize", "somewhere lively"),
     ))
-    wants_indoor = _contains_any(text, (
-        "想待在室内", "想去室内", "不要户外", "不想在外面", "indoors", "stay inside",
+    wants_company = not_alone or bool(_affirmed_matches(
+        text,
+        ("想有人", "陪我", "有人但不说话", "不用说话", "有人就行", "有人在旁边",
+         "want company", "people nearby but no talking", "company without talking"),
+    ))
+    wants_alone = bool(_affirmed_matches(
+        text,
+        ("不想见人", "想一个人", "自己待着", "别跟人说话",
+         "don't want to see anyone", "do not want to see anyone", "want to be alone", "avoid people"),
+    )) and not not_alone
+    social = "with_people" if wants_interaction else "low_contact" if wants_company else "alone" if wants_alone else "either"
+    explicitly_outdoor = _contains_any(
+        text, ("不想待在室内", "不要室内", "don't want to stay inside", "not indoors")
+    )
+    explicitly_indoor = _contains_any(
+        text, ("不要户外", "不想在外面", "not outside", "don't want to be outside")
+    )
+    wants_outdoor = bool(_affirmed_matches(text, (
+        "想去户外", "想在户外", "想去外面", "露天", "晒太阳", "开阔视野", "视野开阔",
+        "看远一点", "看夕阳", "夕阳", "能吹风", "吹吹风", "吹风", "微风", "有风",
+        "河边", "江边", "水边", "湖边", "outside", "outdoors", "fresh air", "a breeze",
+        "by the river", "by the water", "in the sun",
+    )))
+    wants_indoor = bool(_affirmed_matches(
+        text, ("想待在室内", "想去室内", "indoors", "stay inside")
     ))
     environment = (
         "outdoor" if explicitly_outdoor or (wants_outdoor and not explicitly_indoor)
@@ -316,12 +415,7 @@ def interpret_with_rules(text: str) -> InterpretResponse:
 
 def _matched_tokens(text: str, patterns: tuple[str, ...]) -> list[str]:
     """Return the exact text the user typed, even for case-insensitive English matches."""
-    found: list[str] = []
-    for token in patterns:
-        match = _token_match(text, token)
-        if match:
-            found.append(match.group(0))
-    return found
+    return [token for _position, token in _affirmed_matches(text, patterns)]
 
 
 def _evidence_for(text: str, state: NeedState, lang: str = "zh") -> list[str]:
@@ -334,7 +428,7 @@ def _evidence_for(text: str, state: NeedState, lang: str = "zh") -> list[str]:
     cited: set[str] = set()
     english = lang == "en"
 
-    for token in _matched_tokens(text, MOOD_RULES.get(state.mood_id, ())):
+    for _position, token in _affirmed_matches(text, MOOD_RULES.get(state.mood_id, ())):
         evidence.append(f"You said 「{token}」" if english else f"你说了「{token}」")
         cited.add(token.casefold())
         break
@@ -363,7 +457,7 @@ def _evidence_for(text: str, state: NeedState, lang: str = "zh") -> list[str]:
         # 兜底那条也必须引用用户真说过的词，不能写死一句「你说了不想见人」。
         constraints: list[tuple[bool, tuple[str, ...], str, str]] = [
             (state.budget_level in {"free", "low"}, ("不花钱", "不想花钱", "不想花很多钱", "没钱", "免费", "便宜", "预算低", "少花点", "spend nothing", "don't want to spend", "free", "cheap", "low budget"), "所以我只找花不了什么钱的地方", "so I’ll keep the cost low"),
-            (state.social_mode == "alone", ("不想见人", "一个人", "别跟人说话", "躲", "don't want to see anyone", "want to be alone", "avoid people"), "所以我把人多的地方去掉了", "so I’ll leave crowded places out"),
+            (state.social_mode == "alone", ("不想见人", "一个人", "别跟人说话", "躲", "don't want to see anyone", "do not want to see anyone", "want to be alone", "avoid people"), "所以我把人多的地方去掉了", "so I’ll leave crowded places out"),
             ("people" in state.avoid_tags, ("不想见人", "不想见到人", "人少点", "人少的", "少点人", "没什么人", "不要太多人", "别太多人", "fewer people", "not crowded", "avoid people"), "所以我把人多的地方往后放了", "so crowded places will move down"),
             (state.energy <= 1, ("没力气", "很累", "好累", "累坏了", "累死了", "动不了", "不想动", "困", "疲惫", "no energy", "tired", "exhausted", "wiped out", "drained"), "所以我把远的地方往后放了", "so I’ll keep the trip short"),
         ]
@@ -419,6 +513,7 @@ def _restatement(state: NeedState, lang: str = "zh") -> str:
             return "I hear you. You were clear about what you want: " + " and ".join(named) + ". I’ll start there."
         empathy = {
             "low": "听起来今天有点不好受。", "tight": "听起来你现在还绷着。",
+            "heated": "听起来你现在心里有股火。",
             "tired": "听起来你真的累了。", "empty": "听起来心里有点空。",
             "bright": "听起来你现在兴致不错。",
         }.get(state.mood_id, "")
@@ -436,6 +531,7 @@ def _restatement(state: NeedState, lang: str = "zh") -> str:
     tail = "，需要一个" + "、".join(needs) + "的地方" if needs else ""
     empathy = {
         "low": "听起来今天有点不好受。", "tight": "听起来你现在还绷着。",
+        "heated": "听起来你现在心里有股火。",
         "tired": "听起来你真的累了。", "empty": "听起来心里有点空。",
         "bright": "听起来你现在兴致不错。",
     }.get(state.mood_id, "我听见了。")
@@ -524,7 +620,7 @@ def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[st
 SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户的中文自然表达转换为 JSON，不能诊断、不能给人格贴标签。
 只输出 JSON，字段必须符合：
 {
-  "mood_id": "low|quiet|noisy|spark|tired|empty|tight|near|fresh|bright|okay",
+  "mood_id": "low|quiet|noisy|spark|tired|empty|tight|heated|near|fresh|bright|okay",
   "need_keys": ["hide|sit|walk|free|green|new|sound|people|loud|slow|hands|breathe|nothing"],
   "place_types": ["barbecue|restaurant|hotpot|dessert|craft|flower|sports|climbing|swimming|badminton|basketball|tennis|yoga|music|bar|club|karaoke|books|records|cafe|tea|park|gallery|cinema|river|vintage|lane"],
   "energy": 0-4,
@@ -543,6 +639,15 @@ SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户的中文自然�
 }
 只有缺失会改变推荐的关键事实时才追问一个问题。不要根据语气、身份或疾病做推断。
 
+mood_id 是当前最接近的身体/情绪状态，不是默认的“需要放松”：
+- low：明确的难过、失落、委屈；quiet：明确受不了声音或人群。
+- noisy：念头反复、脑子停不下来；不能把正面的兴奋或庆祝归到这里。
+- tired：用户明确说累、困、没睡好或没力气时才用。加班、开会、很晚本身不能证明累。
+- empty：空落落、没着落；tight：紧张、心慌、绷着；heated：生气、窝火、想发火。
+- near：不想独处、想有人在旁边；fresh：想换环境；bright：开心、兴奋、庆祝；okay：中性或证据不足。
+直接说出的感受高于你对事件的刻板推断。转折句以用户最后强调的当前状态为准。
+正面情绪要帮助延续或表达，不要自动改写成休息；负面情绪也不自动等于安静。
+
 need_keys 放用户想要的，avoid_tags 放他明说不想要的，两边都用上面那套词表。
 「不想见人」→ avoid_tags 里放 people；「不想吵」→ 放 loud；「什么都不做」→ 放 hands。
 别把同一个词同时放进两边。没明说的不要替他填。
@@ -550,6 +655,10 @@ need_keys 放用户想要的，avoid_tags 放他明说不想要的，两边都�
 place_types 只放用户明确说出的地点或活动，不许从情绪猜。
 「心情不好，我想吃烤串」→ mood_id=low，place_types=["barbecue"]。
 「很累，想做陶艺」→ mood_id=tired，place_types=["craft"]。
+「拿到 offer 很兴奋，想找个热闹的地方庆祝」→ mood_id=bright，need_keys=["loud"], energy=3。
+「我很生气，想出去走走吹风」→ mood_id=heated，need_keys=["walk","breathe"]。
+「不想一个人待着，但也不想说话」→ mood_id=near，need_keys=["people"], social_mode=low_contact；绝不能读成 alone 或 hide。
+「刚开完会，现在不知道去哪儿」没有明确情绪 → mood_id=okay，低 confidence；绝不能只因开会猜 tired。
 明确地点/活动是硬要求，绝不能用推断出的情绪把它替换成另一类空间。
 
 evidence 的写法（这是给用户看的，不是给程序看的）：
@@ -701,10 +810,16 @@ async def interpret(text: str, lang: str = "zh") -> InterpretResponse:
                 state.energy = rule_result.state.energy
             if rule_result.state.budget_level != "unknown":
                 state.budget_level = rule_result.state.budget_level
-            if any(score > 0 for score in (
-                sum(text.count(token) for token in tokens) for tokens in MOOD_RULES.values()
-            )):
+            explicit_moods = _mood_matches(text)
+            if any(explicit_moods.values()):
                 state.mood_id = rule_result.state.mood_id
+            elif state.mood_id == "tired":
+                # “加班 / 开会 / 很晚”不等于身体疲惫。生产模型一旦把含糊场景
+                # 统一归到 tired，整个推荐就会塌成安静休息。没有明确疲劳证据时
+                # 宁可承认没听准，也不替用户制造一个状态。
+                state.mood_id = "okay"
+                state.confidence = min(state.confidence, 0.4)
+                model_evidence = None
             _trace(outcome="model_ok", text=text, attempt=attempt, model=model)
             return _decorate(
                 InterpretResponse(

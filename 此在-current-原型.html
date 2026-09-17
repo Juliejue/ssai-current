@@ -762,9 +762,10 @@ const MOODS = [
   {id:"spark", name:"想要点灵感",  desc:"有力气，只是没方向"},
   {id:"tired", name:"累但静不下来",desc:"身体想躺，脑子不肯"},
   {id:"empty", name:"空落落的",    desc:"不难过，就是没着落"},
-  /* 以下四个按组员建议补充。刻意不用「焦虑 / 疲惫」这类临床标签——
+  /* 以下状态按组员建议补充。刻意不用「焦虑 / 疲惫」这类临床标签——
      手册第一条边界是不诊断，情绪要用白话和身体感来说。 */
   {id:"tight", name:"心里发紧",    desc:"说不上为什么，就是绷着"},
+  {id:"heated",name:"心里有股火",  desc:"想动一动，不想被劝冷静"},
   {id:"near",  name:"想有人在旁边",desc:"不用说话，有人就行"},
   {id:"fresh", name:"想换个地方",  desc:"待腻了，想看点没见过的"},
   {id:"bright",name:"心情很明亮",  desc:"兴致不错，想把它接下去"},
@@ -831,6 +832,7 @@ const MOOD_TARGET = {
   tired: {r:.85, st:.9, q:.7,  s:.8,  cp:.25, w:.2},
   empty: {co:.75, l:.5, w:.7,  s:.7,  e:.5},
   tight: {q:.8,  g:.85, r:.9,  c:.1,  w:.6,  cp:.2},
+  heated:{w:.95, g:.6,  q:.45, c:.2,  s:.75, r:.45},
   near:  {co:.9, l:.6,  c:.5,  s:.75, st:.7},
   fresh: {e:.95, cr:.6, l:.6,  w:.5},
   bright:{e:.8,  l:.85, co:.8, cr:.7, c:.6, w:.55},
@@ -3845,7 +3847,7 @@ const EN_FRAGMENTS = [
 const MOODS_EN = {
   low: "feeling low", quiet: "need it quiet", noisy: "can't stop thinking",
   spark: "want something new", tired: "tired but wired", empty: "feeling hollow",
-  tight: "wound tight", near: "want someone nearby", fresh: "need a change of scene",
+  tight: "wound tight", heated: "worked up", near: "want someone nearby", fresh: "need a change of scene",
   bright: "in a bright mood",
   okay: "doing okay"
 };
