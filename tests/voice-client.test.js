@@ -17,6 +17,7 @@ function makeVoiceRuntime(options = {}) {
   const sources = [];
   const recognitions = [];
   const fetchUrls = [];
+  const timers = [];
 
   class FakeNode {
     constructor() { this.connections = []; }
@@ -84,9 +85,10 @@ function makeVoiceRuntime(options = {}) {
     start() {
       if (options.recognitionStartError) throw options.recognitionStartError;
       this.started = true;
-      if (this.onstart) this.onstart();
+      if (!options.suppressRecognitionStart && this.onstart) this.onstart();
     }
     stop() { this.stopped = true; }
+    abort() { this.aborted = true; }
     result(entries) {
       const results = entries.map(entry => {
         const result = [{ transcript: entry.text }];
@@ -146,8 +148,8 @@ function makeVoiceRuntime(options = {}) {
     console,
     setInterval: () => 1,
     clearInterval: () => {},
-    setTimeout: () => 2,
-    clearTimeout: () => {},
+    setTimeout: callback => { timers.push(callback); return timers.length; },
+    clearTimeout: id => { if (id) timers[id - 1] = null; },
     Uint8Array,
     Date,
     Math,
@@ -175,6 +177,7 @@ function makeVoiceRuntime(options = {}) {
     recognitions,
     fetchUrls,
     settleCapabilities: () => new Promise(resolve => setImmediate(resolve)),
+    runTimers: () => timers.splice(0).forEach(callback => { if (callback) callback(); }),
   };
 }
 
@@ -211,7 +214,7 @@ test('voice capture starts after provider code 0 and flushes before end', async 
   assert.equal(socket.sent.length, sentAtEnd, 'audio must never be sent after end');
 
   socket.receive({ code: 0, result: { voice_text_str: '想去安静一点的地方', slice_type: 2 } });
-  assert.ok(runtime.transcripts.includes('想去安静一点的地方'));
+  assert.ok(runtime.transcripts.includes('想去安静一点的地方。'));
   assert.equal(runtime.tracks[0].stopped, false, 'a stable sentence is not the end of the stream');
   socket.receive({ code: 0, final: 1 });
   assert.ok(runtime.transcripts.includes('final:想去安静一点的地方。'));
@@ -230,7 +233,7 @@ test('Tencent keeps and punctuates every finalized sentence slice', async () => 
   await runtime.current.toggleVoice(runtime.callbacks);
   socket.receive({ code: 0, final: 1 });
 
-  assert.ok(runtime.transcripts.includes('今天开完会很累，想找个人少的地方'));
+  assert.ok(runtime.transcripts.includes('今天开完会很累，想找个人少的地方。'));
   assert.ok(runtime.transcripts.includes('final:今天开完会很累，想找个人少的地方。'));
 });
 
@@ -268,6 +271,7 @@ test('browser dictation is a real first-tap fallback when Tencent is not configu
   recognition.result([{ text: '想去安静一点的地方', final: false }]);
   assert.ok(runtime.transcripts.includes('想去安静一点的地方'));
   recognition.result([{ text: '想去安静一点的地方', final: true }]);
+  assert.ok(runtime.transcripts.includes('想去安静一点的地方。'));
   assert.equal(recognition.stopped, undefined, 'a stable phrase is not permission to stop');
   assert.equal(runtime.transcripts.some(text => text.startsWith('final:')), false);
   await runtime.current.toggleVoice(runtime.callbacks);
@@ -291,7 +295,7 @@ test('browser dictation punctuates stable phrases without changing recognized wo
   await runtime.current.toggleVoice(runtime.callbacks);
   recognition.end();
 
-  assert.ok(runtime.transcripts.includes('今天开完会很累，想找个人少的地方'));
+  assert.ok(runtime.transcripts.includes('今天开完会很累，想找个人少的地方。'));
   assert.ok(runtime.transcripts.includes('final:今天开完会很累，想找个人少的地方。'));
 });
 
@@ -319,6 +323,23 @@ test('browser dictation errors clean up and allow a fresh retry', async () => {
   await runtime.current.toggleVoice(runtime.callbacks);
   assert.equal(runtime.recognitions.length, 2);
   assert.equal(runtime.recognitions[1].started, true);
+});
+
+test('a browser recognizer that never starts times out and permits retry', async () => {
+  const runtime = makeVoiceRuntime({
+    browserSpeech: true,
+    tencentConfigured: false,
+    suppressRecognitionStart: true,
+  });
+  await runtime.settleCapabilities();
+
+  await runtime.current.toggleVoice(runtime.callbacks);
+  runtime.runTimers();
+
+  assert.equal(runtime.recognitions[0].aborted, true);
+  assert.match(runtime.errors[0], /语音没有启动/);
+  await runtime.current.toggleVoice(runtime.callbacks);
+  assert.equal(runtime.recognitions.length, 2);
 });
 
 test('Tencent is tried when the capability endpoint is offline', async () => {

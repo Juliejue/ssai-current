@@ -46,6 +46,43 @@ def test_sports_requests_keep_the_specific_activity_in_live_search():
     assert set(place["placeTypes"]) == {"yoga", "sports"}
 
 
+def test_generic_sports_searches_for_visible_sports_infrastructure():
+    from backend_app.discovery import keywords_for, to_place
+
+    state = NeedState(place_types=["sports"])
+    assert keywords_for(state)[:6] == [
+        "跑步道", "骑行道", "轮滑场", "羽毛球场", "小区运动场", "公共游泳馆",
+    ]
+
+    poi = {
+        "id": "B0TESTRUN", "name": "社区环形跑步道", "longitude": 116.4,
+        "latitude": 39.9, "distance": "420", "adname": "朝阳区", "cityname": "北京市",
+        "address": "测试公园内", "photos": [],
+    }
+    place = to_place(poi, "running")
+    assert place is not None
+    assert place["category"].startswith("跑步道")
+    assert place["placeTypes"] == ["sports"]
+    assert "跑" in place["action"]
+    assert place["coverImage"] == "sigil:running"
+
+
+def test_gym_request_stays_a_gym_request():
+    from backend_app.discovery import keywords_for, to_place
+
+    state = interpret_with_rules("我想去健身房").state
+    assert state.place_types == ["gym"]
+    assert keywords_for(state)[0] == "健身房"
+
+    place = to_place({
+        "id": "B0TESTGYM", "name": "社区健身房", "longitude": 116.4,
+        "latitude": 39.9, "distance": "350", "photos": [],
+    }, "gym")
+    assert place is not None
+    assert place["placeTypes"] == ["gym", "sports"]
+    assert place["category"].startswith("健身房")
+
+
 def test_live_search_has_authored_english_even_when_narration_is_offline():
     from backend_app.discovery import CATEGORY_PROFILE, DISCOVERY_ACTION_EN, DISCOVERY_SEE_EN, to_place
 

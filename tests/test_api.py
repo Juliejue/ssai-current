@@ -73,3 +73,21 @@ def test_urgent_request_does_not_return_places():
     assert response.status_code == 200
     assert response.json()["blocked_by_safety"] is True
     assert response.json()["recommendations"] == []
+
+
+def test_specific_activity_only_asks_for_location_when_location_is_missing():
+    without_location = client.post(
+        "/api/v1/recommendations",
+        json={"state": {"mood_id": "okay", "place_types": ["sports"]}},
+    ).json()
+    assert without_location["recommendations"] == []
+    assert "开启定位" in without_location["fallback_note"]
+
+    with_location = client.post(
+        "/api/v1/recommendations",
+        json={
+            "state": {"mood_id": "okay", "place_types": ["sports"]},
+            "location": {"latitude": 39.9244, "longitude": 116.4173},
+        },
+    ).json()
+    assert "开启定位" not in (with_location["fallback_note"] or "")

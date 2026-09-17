@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 
 PlaceType = Literal[
     "barbecue", "restaurant", "hotpot", "dessert",
-    "craft", "flower", "sports", "climbing", "swimming", "badminton",
+    "craft", "flower", "sports", "gym", "climbing", "swimming", "badminton",
     "basketball", "tennis", "yoga",
     "music", "bar", "club", "karaoke",
     "books", "records", "cafe", "tea", "park", "gallery", "cinema",

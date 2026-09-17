@@ -79,7 +79,17 @@ PLACE_TYPE_SEARCHES: dict[str, tuple[tuple[str, str], ...]] = {
     "dessert": (("甜品", "dessert"),),
     "craft": (("手作", "craft"), ("陶艺", "craft")),
     "flower": (("花艺", "flower"), ("插花", "flower")),
-    "sports": (("体育中心", "sports"), ("健身房", "sports")),
+    # “想运动”不是“想去一个泛泛的户外”。优先搜一眼就能看出运动属性的
+    # 真实设施；用户明确说“健身房”时则走下面独立的 gym 搜索。
+    "sports": (
+        ("跑步道", "running"),
+        ("骑行道", "cycling"),
+        ("轮滑场", "skating"),
+        ("羽毛球场", "badminton"),
+        ("小区运动场", "sports"),
+        ("公共游泳馆", "swimming"),
+    ),
+    "gym": (("健身房", "gym"),),
     "climbing": (("攀岩馆", "climbing"),),
     "swimming": (("游泳馆", "swimming"),),
     "badminton": (("羽毛球馆", "badminton"),),
@@ -323,6 +333,18 @@ CATEGORY_PROFILE.update({
     "sports": _dynamic_profile("运动场馆 · 室内", "sports venue · indoors", "选一个项目，让身体先动起来",
         indoor=True, free=False, crowd="mid", duration="60–120 分钟", cost="可能需要购票或预约",
         see="可以活动身体的场地", place_types=("sports",), tags={"q":.3,"l":.8,"r":.7,"cr":.4,"st":.75,"cp":.6}),
+    "gym": _dynamic_profile("健身房 · 室内", "gym · indoors", "选一项熟悉的训练，先动十分钟",
+        indoor=True, free=False, crowd="mid", duration="45–90 分钟", cost="通常需要购票或会员",
+        see="力量和有氧训练器械", place_types=("gym","sports"), tags={"q":.3,"l":.7,"r":.75,"cr":.35,"st":.75,"cp":.75}),
+    "running": _dynamic_profile("跑步道 · 户外", "running track · outdoors", "沿跑道跑一段，按自己的速度停",
+        indoor=False, free=True, crowd="mid", duration="30–90 分钟", cost="通常免费",
+        see="明确的跑步路线和连续的路面", place_types=("sports",), tags={"q":.45,"l":.55,"r":.85,"st":.75,"cp":.05,"w":.95}),
+    "cycling": _dynamic_profile("骑行道 · 户外", "cycle path · outdoors", "沿骑行道骑一段再折返",
+        indoor=False, free=True, crowd="mid", duration="40–120 分钟", cost="自带车辆通常免费",
+        see="连续的骑行路线和开阔视野", place_types=("sports",), tags={"q":.45,"l":.6,"r":.85,"st":.7,"cp":.1,"w":1.0}),
+    "skating": _dynamic_profile("轮滑场 · 户外", "skating area · outdoors", "在场地里滑几圈，累了就停",
+        indoor=False, free=True, crowd="mid", duration="30–90 分钟", cost="自带装备通常免费",
+        see="适合轮滑的平整场地", place_types=("sports",), tags={"q":.4,"l":.65,"r":.8,"st":.7,"cp":.1,"w":.65}),
     "climbing": _dynamic_profile("攀岩馆 · 室内", "climbing gym · indoors", "挑一条简单线路爬一次",
         indoor=True, free=False, crowd="mid", duration="60–120 分钟", cost="需要购票或预约",
         see="岩壁和一条明确的路线", place_types=("climbing","sports"), tags={"q":.45,"l":.65,"r":.75,"cr":.75,"cp":.65}),
@@ -374,6 +396,10 @@ DISCOVERY_ACTION_EN: dict[str, str] = {
     "hotpot": "Sit down for something hot",
     "dessert": "Choose the dessert you want right now",
     "sports": "Pick one activity and get moving",
+    "gym": "Start with ten minutes of a familiar workout",
+    "running": "Run one stretch at your own pace",
+    "cycling": "Ride one stretch and turn back when you want",
+    "skating": "Skate a few laps and stop when you are ready",
     "climbing": "Try one easy route",
     "swimming": "Swim a few laps at your own pace",
     "badminton": "Book a court and play a game",
@@ -405,6 +431,10 @@ DISCOVERY_SEE_EN: dict[str, str] = {
     "hotpot": "A hot meal around one table",
     "dessert": "Something sweet and somewhere to sit",
     "sports": "Space to move your body",
+    "gym": "Strength and cardio equipment",
+    "running": "A marked route made for running",
+    "cycling": "A continuous cycle path and an open view",
+    "skating": "A flat area made for skating",
     "climbing": "A wall and one clear route",
     "swimming": "A pool and repeatable laps",
     "badminton": "A court and a game to focus on",
@@ -424,7 +454,7 @@ def _discovery_cost_en(category: str, profile: dict[str, Any]) -> str:
         return "You’ll need to order."
     if category in {"records", "vintage"}:
         return "Browsing is free; buying is optional."
-    if category in {"craft", "flower", "sports", "climbing", "swimming", "badminton", "basketball", "tennis", "yoga", "karaoke"}:
+    if category in {"craft", "flower", "sports", "gym", "climbing", "swimming", "badminton", "basketball", "tennis", "yoga", "karaoke"}:
         return "Booking or admission may be required."
     return "Admission may be required."
 
@@ -508,7 +538,7 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
     if not profile:
         return None
     photos = _photo_urls(poi)
-    if not photos:
+    if not photos and category not in {"sports", "gym", "running", "cycling", "skating", "swimming", "badminton"}:
         # 没有照片的现场结果不要。#2 的整个意义就是让人看见真实的地方，
         # 一张没有的话，它在卡片上还是一个抽象符号。
         return None
@@ -529,7 +559,7 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
         # 公交路线要城市编码。周边搜索本来就返回它，捡起来用，
         # 免得为了一条公交路线再去做一次逆地理编码。
         "citycode": str(poi.get("citycode") or ""),
-        "coverImage": f"photo:{photos[0]}",
+        "coverImage": f"photo:{photos[0]}" if photos else f"sigil:{category}",
         "photos": photos,
         "ratio": "4/5",
         "distanceKm": round(distance_m / 1000, 2) if distance_m else None,

@@ -62,7 +62,8 @@ PLACE_TYPE_RULES: dict[str, tuple[str, ...]] = {
     "dessert": ("甜品", "蛋糕", "冰淇淋", "面包店", "糖水", "dessert"),
     "craft": ("手作", "手工", "陶艺", "做陶", "木工", "编织", "银饰", "craft"),
     "flower": ("插花", "花艺", "花店", "鲜花", "flower"),
-    "sports": ("运动馆", "体育馆", "体育中心", "健身房", "健身", "锻炼", "想运动", "workout", "gym"),
+    "sports": ("运动馆", "体育馆", "体育中心", "锻炼", "想运动", "运动一下", "work out"),
+    "gym": ("健身房", "健身", "fitness center", "gym", "workout"),
     "climbing": ("攀岩", "抱石", "climbing", "bouldering"),
     "swimming": ("游泳", "泳池", "swimming"),
     "badminton": ("羽毛球", "badminton"),
@@ -87,7 +88,7 @@ PLACE_TYPE_RULES: dict[str, tuple[str, ...]] = {
 
 PLACE_TYPE_LABELS: dict[str, str] = {
     "barbecue": "吃烤串", "restaurant": "吃顿饭", "hotpot": "吃火锅", "dessert": "吃甜品",
-    "craft": "做手作", "flower": "插花", "sports": "运动", "climbing": "攀岩",
+    "craft": "做手作", "flower": "插花", "sports": "运动", "gym": "去健身房", "climbing": "攀岩",
     "swimming": "游泳", "badminton": "打羽毛球", "basketball": "打篮球",
     "tennis": "打网球", "yoga": "做瑜伽或普拉提", "music": "听现场音乐", "bar": "去酒吧",
     "club": "跳舞", "karaoke": "唱歌", "books": "逛书店", "records": "逛唱片店",
@@ -622,7 +623,7 @@ SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户的中文自然�
 {
   "mood_id": "low|quiet|noisy|spark|tired|empty|tight|heated|near|fresh|bright|okay",
   "need_keys": ["hide|sit|walk|free|green|new|sound|people|loud|slow|hands|breathe|nothing"],
-  "place_types": ["barbecue|restaurant|hotpot|dessert|craft|flower|sports|climbing|swimming|badminton|basketball|tennis|yoga|music|bar|club|karaoke|books|records|cafe|tea|park|gallery|cinema|river|vintage|lane"],
+  "place_types": ["barbecue|restaurant|hotpot|dessert|craft|flower|sports|gym|climbing|swimming|badminton|basketball|tennis|yoga|music|bar|club|karaoke|books|records|cafe|tea|park|gallery|cinema|river|vintage|lane"],
   "energy": 0-4,
   "social_mode": "alone|low_contact|with_people|either",
   "time_minutes": 10-720 或 null,

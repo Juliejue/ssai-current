@@ -165,9 +165,9 @@ def test_hurried_state_prefers_somewhere_reachable_now():
     assert all(item.reach_minutes and item.reach_minutes > 0 for item in hurried)
 
 
-def test_trade_offs_come_from_the_place_record_not_from_feedback_options():
+def test_trade_offs_never_invent_a_positive_filler_sentence():
     for item in recommend(RecommendRequest(state=NeedState(mood_id="low"), limit=5)):
-        assert item.tradeoffs
+        assert all("没什么要你付出的" not in cost for cost in item.tradeoffs)
 
 
 def test_travel_time_is_stated_once_and_never_repeated_as_a_cost():
@@ -229,7 +229,7 @@ def test_open_spaces_have_no_opening_hours_to_get_wrong():
         status, label, source = open_state(_place(place_id), datetime(2026, 9, 9, 3, tzinfo=BEIJING))
         assert status == "always_open"
         assert source == "always_open"
-        assert "没有门" in label
+        assert "全天开放" in label
 
 
 def test_late_night_stops_recommending_places_with_doors():

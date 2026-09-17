@@ -36,7 +36,7 @@ STATE_LABELS_EN: dict[str, str] = {
 PLACE_TYPE_LABELS_EN: dict[str, str] = {
     "barbecue": "barbecue", "restaurant": "get a meal", "hotpot": "hot pot",
     "dessert": "dessert", "craft": "make something", "flower": "arrange flowers",
-    "sports": "work out", "climbing": "go climbing", "swimming": "go swimming",
+    "sports": "work out", "gym": "go to a gym", "climbing": "go climbing", "swimming": "go swimming",
     "badminton": "play badminton", "basketball": "play basketball", "tennis": "play tennis",
     "yoga": "do yoga or Pilates", "music": "hear live music", "bar": "go to a bar",
     "club": "go dancing", "karaoke": "sing karaoke", "books": "browse books",
