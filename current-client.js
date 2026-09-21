@@ -12,6 +12,13 @@
   var preferBrowserVoice = false;
   var activeLocation = null;
   var activeLocationMode = null;
+  var activeLocationCity = null;
+  var PILOT_BOUNDS = [
+    {name:'北京', minLat:39.4, maxLat:41.1, minLng:115.4, maxLng:117.6},
+    {name:'上海', minLat:30.7, maxLat:31.9, minLng:120.8, maxLng:122.2},
+    {name:'广州', minLat:22.85, maxLat:23.9, minLng:112.7, maxLng:114.2},
+    {name:'深圳', minLat:22.3, maxLat:22.85, minLng:113.7, maxLng:114.7}
+  ];
   // 公开的演示起点，不代表评委当前位置。坐标采用高德使用的 GCJ-02。
   var BEIJING_DEMO_ORIGIN = { latitude: 39.9244, longitude: 116.4173 };
   var tripDemoEnabled = false;
@@ -246,13 +253,16 @@
       navigator.geolocation.getCurrentPosition(function (position) {
         var latitude = position.coords.latitude;
         var longitude = position.coords.longitude;
-        // 北京是当前唯一开放的真实地点库。跨城步行没有意义，也不能把上海或
-        // 深圳的位置伪装成北京起点；异地用户应显式选择体验模式。
-        var inBeijingPilot = latitude >= 39.4 && latitude <= 41.1 && longitude >= 115.4 && longitude <= 117.6;
-        if (!inBeijingPilot) {
+        var city = PILOT_BOUNDS.find(function (item) {
+          return latitude >= item.minLat && latitude <= item.maxLat &&
+            longitude >= item.minLng && longitude <= item.maxLng;
+        });
+        if (!city) {
           activeLocation = null;
           activeLocationMode = null;
-          reject(new Error(voiceCopy('当前只开放北京地点，仍可以继续浏览。', 'Current places are in Beijing. You can still browse them.')));
+          activeLocationCity = null;
+          reject(new Error(voiceCopy('当前位置暂未开放；目前支持北京、上海、广州和深圳。',
+            'Your city is not open yet. Beijing, Shanghai, Guangzhou and Shenzhen are supported.')));
           return;
         }
         // Kept only in page memory. The backend uses it for this route request and
@@ -260,6 +270,7 @@
         // 浏览器给 WGS-84，高德路线接口收 GCJ-02，所以只在内存中转换一次。
         activeLocation = wgs2gcj(latitude, longitude);
         activeLocationMode = 'real';
+        activeLocationCity = city.name;
         resolve(activeLocation);
       }, function () {
         reject(new Error(voiceCopy('没有获得位置权限，仍可以继续推荐。', 'Location is off. Recommendations still work.')));
@@ -271,6 +282,7 @@
     stopPresence();
     activeLocation = { latitude: BEIJING_DEMO_ORIGIN.latitude, longitude: BEIJING_DEMO_ORIGIN.longitude };
     activeLocationMode = tripDemoEnabled ? 'trip-demo' : 'demo';
+    activeLocationCity = '北京';
     return activeLocation;
   }
 
@@ -919,6 +931,7 @@
     deleteOutcome: deleteOutcome,
     hasLocation: function () { return Boolean(activeLocation); },
     getLocationMode: function () { return activeLocationMode; },
+    getLocationCity: function () { return activeLocationCity; },
     useBeijingDemo: useBeijingDemo,
     requestLocation: requestLocation,
     watchPresence: watchPresence,

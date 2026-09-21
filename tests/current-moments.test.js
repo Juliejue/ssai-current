@@ -20,12 +20,28 @@ test("demo moments are visibly synthetic and expire", () => {
 });
 
 test("a named contribution requires a nickname and stays a local draft", () => {
-  const input = {place:"楼下", reason:"桂花开了", mood:"low", city:"深圳", visibility:"named"};
+  const input = {place:"楼下", reason:"桂花开了", mood:"low", city:"深圳", visibility:"named", kind:"timed_beauty"};
   assert.equal(Moments.contribution(input, 1, "x"), null);
   const item = Moments.contribution({...input, nickname:"小叶"}, 1, "x");
   assert.equal(item.nickname, "小叶");
   assert.equal(item.published, false);
   assert.equal(item.source, "local_draft");
+  assert.equal(item.kind, "timed_beauty");
+  assert.equal(item.expiresAt, 60 * 60000 + 1);
+});
+
+test("moments cover all four pilot cities and carry licensed images", () => {
+  const seeds = Moments.demoMoments(1);
+  assert.deepEqual([...new Set(seeds.map(item => item.city))].sort(), ["上海", "北京", "广州", "深圳"].sort());
+  assert.ok(seeds.every(item => item.image.startsWith("/assets/moments/") && item.image.endsWith(".jpg")));
+  assert.ok(seeds.every(item => item.imageLicenseUrl === "https://unsplash.com/license"));
+});
+
+test("contribution types have intentional expiry windows", () => {
+  const base = {place:"一处", reason:"有一束光", mood:"okay", city:"上海", visibility:"anonymous"};
+  assert.equal(Moments.contribution({...base, kind:"lasting_place"}, 100, "a").expiresAt, null);
+  assert.equal(Moments.contribution({...base, kind:"sensory"}, 100, "b").expiresAt, 100 + 180 * 60000);
+  assert.equal(Moments.contribution({...base, kind:"seasonal"}, 100, "c").expiresAt, 100 + 10080 * 60000);
 });
 
 test("consent is mutual, temporary, and never persisted", () => {
