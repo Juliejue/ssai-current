@@ -12,7 +12,7 @@ from pydantic import ValidationError
 
 from .i18n import (AVOID_LABELS_EN, CLARIFY_EN, CONSTRAINT_CORRECTIONS_EN, CORRECTION_CHIPS_EN,
                     NEED_LABELS_EN, PLACE_TYPE_LABELS_EN, state_label, ui)
-from .schemas import ClarifyOption, CorrectionOptions, InterpretResponse, NeedState, RiskLevel
+from .schemas import ClarifyOption, CorrectionOptions, InterpretResponse, NeedState, RiskLevel, SelfReport
 
 
 logger = logging.getLogger("current.interpretation")
@@ -562,6 +562,8 @@ def _quotes_the_user(line: str, text: str) -> bool:
 
 def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[str] | None = None, lang: str = "zh") -> InterpretResponse:
     state = response.state
+    # These controls are filled by the user after interpretation, never by the LLM.
+    state.self_report = SelfReport()
     # 代码侧护栏：avoid_tags 现在真的会压分，所以它必须和 need_keys 用同一套词表，
     # 且不能自相矛盾。模型编出来的词直接丢掉，两边都出现时「想要」压过「不想要」。
     state.avoid_tags = [

@@ -7,7 +7,20 @@ from backend_app.interpretation import interpret_with_rules
 from backend_app.map_provider import WalkingRoute
 from backend_app.opening_hours import BEIJING
 from backend_app.recommender import load_catalog, recommend
-from backend_app.schemas import Location, NeedState, RecommendRequest
+from backend_app.schemas import Location, NeedState, RecommendRequest, SelfReport
+
+
+def test_explicit_stimulus_preference_changes_target_without_inferring_valence():
+    catalog = load_catalog()
+    quiet = NeedState(mood_id="okay", self_report=SelfReport(stimulus="less"))
+    lively = NeedState(mood_id="okay", self_report=SelfReport(stimulus="more"))
+
+    quiet_target, _ = recommender._target_for(quiet, catalog)
+    lively_target, _ = recommender._target_for(lively, catalog)
+
+    assert quiet_target["l"] == 0.1
+    assert lively_target["l"] == 0.8
+    assert quiet.self_report.valence == "unknown"
 
 
 def test_discovery_keeps_the_activity_categories_that_used_to_be_dropped():

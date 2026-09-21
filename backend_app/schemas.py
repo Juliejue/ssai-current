@@ -22,8 +22,17 @@ class RiskLevel(str, Enum):
     urgent = "urgent"
 
 
+class SelfReport(BaseModel):
+    """Optional, explicit answers; unknown never becomes a physiological inference."""
+
+    valence: Literal["unpleasant", "neutral", "pleasant", "mixed", "unknown"] = "unknown"
+    arousal: int | None = Field(default=None, ge=0, le=4)
+    stimulus: Literal["less", "more", "unknown"] = "unknown"
+
+
 class NeedState(BaseModel):
     mood_id: str = "low"
+    self_report: SelfReport = Field(default_factory=SelfReport)
     need_keys: list[str] = Field(default_factory=list, max_length=6)
     # 用户明确说出的地点/活动是硬信号。只存受限枚举，不存原话。
     # 例如「心情不好，我想吃烤串」不能被情绪推断改写成“去公园”。
@@ -184,6 +193,7 @@ class Recommendation(BaseModel):
     # 地点坐标是公开信息，可以下发——用来在地图上画点。用户的坐标不上传。
     latitude: float | None = None
     longitude: float | None = None
+    attribute_source: Literal["editorial_estimate", "category_estimate"] = "editorial_estimate"
 
 
 class RecommendResponse(BaseModel):

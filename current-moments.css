@@ -1,0 +1,31 @@
+.moment-entry{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.moment-entry button{border:1px solid var(--line,#c5d1ce);border-radius:20px;padding:9px 14px;color:var(--ink);background:transparent;font:inherit;font-size:12px}
+.moment-wrap{max-width:580px;margin:auto}
+.moment-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 22px}
+.moment-tabs button,.moment-controls button{padding:8px 12px;border:1px solid #c4d2d0;border-radius:18px;background:transparent;color:#24454b;font:inherit;font-size:12px}
+.moment-tabs button.on,.moment-controls button.on{background:#23474a;color:#f1f6f3}
+.moment-card{padding:20px;margin:14px 0;background:#f3f6f2;border:1px solid #cbd8d4;border-radius:16px;color:#19353a}
+.moment-card h3{font:500 24px/1.4 var(--serif,serif);margin:14px 0 8px}
+.moment-card p,.moment-note{font:13px/1.8 var(--sans,sans-serif);color:#496569}
+.moment-badge{font:10px/1.6 var(--sans,sans-serif);letter-spacing:.08em;background:#e0e9e4;border-radius:5px;padding:4px 7px}
+.moment-meta{display:flex;justify-content:space-between;gap:12px;margin-top:12px;font:11px/1.7 var(--sans,sans-serif)}
+.moment-scene{height:110px;border-radius:10px;margin:14px 0;background:linear-gradient(170deg,#dbe8e5,#d8e2de 60%,#a6c0bb);position:relative;overflow:hidden}
+.moment-scene.light{background:linear-gradient(170deg,#c7dbe0,#e7d9d8 60%,#cedad5)}
+.moment-scene:after{content:"";position:absolute;width:100%;height:60px;border-top:1px solid #789991;border-radius:50%;top:65px;left:25px;transform:rotate(-8deg)}
+.moment-card .btn{font-size:13px;margin:5px 4px 0 0}
+.moment-form{display:grid;gap:14px;margin:20px 0}
+.moment-form label{font:12px/1.8 var(--sans,sans-serif);display:grid;gap:5px}
+.moment-form .moment-nickname[hidden]{display:none}
+.moment-form input,.moment-form textarea,.moment-form select{box-sizing:border-box;width:100%;font:14px/1.6 var(--sans,sans-serif);padding:10px;border:1px solid #b9ceca;border-radius:8px;background:#f8faf6;color:#19353a}
+.moment-controls{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.moment-status{font:12px/1.7 var(--sans,sans-serif);min-height:24px;color:#28555a}
+.cloud-body{fill:transparent;transition:fill .7s ease,stroke .7s ease}
+.cloud-heavy .cloud-body{fill:#9cadb4;stroke:#354a54}
+.cloud-rainbow .cloud-body{fill:#dceae3}
+.cloud-rainbow .cloud-colour{opacity:.65}
+.cloud-colour{opacity:0;transition:opacity .9s}
+.cloud-heavy{animation:cloud-breathe 5s ease-in-out infinite}
+.cloud-rainbow{animation:cloud-breathe 3.6s ease-in-out infinite}
+@keyframes cloud-breathe{50%{transform:translateY(-3px)}}
+@media(prefers-reduced-motion:reduce){.cloud-heavy,.cloud-rainbow{animation:none}.cloud-body,.cloud-colour{transition:none}}
+@media(max-width:380px){.moment-card{padding:15px}.moment-card h3{font-size:21px}}

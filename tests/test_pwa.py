@@ -32,12 +32,15 @@ def test_html_links_the_manifest_and_ios_icon():
     assert 'name="apple-mobile-web-app-capable" content="yes"' in html
     assert 'rel="apple-touch-icon" href="/pwa/icon-180.png"' in html
     assert '<script src="/mood-card.js"></script>' in html
+    assert '<script src="/current-moments.js"></script>' in html
+    assert '<link rel="stylesheet" href="/current-moments.css">' in html
     assert _png_size(ROOT / "pwa/icon-180.png") == (180, 180)
 
 
 def test_service_worker_caches_the_shell_but_never_intercepts_api_calls():
     worker = (ROOT / "sw.js").read_text(encoding="utf-8")
 
-    for asset in ("/current/", "/current-client.js", "/mood-card.js", "/voice-worklet.mjs", "/manifest.webmanifest"):
+    for asset in ("/current/", "/current-client.js", "/mood-card.js", "/current-moments.js",
+                  "/current-moments.css", "/voice-worklet.mjs", "/manifest.webmanifest"):
         assert asset in worker
     assert "url.pathname.startsWith('/api/')" in worker
