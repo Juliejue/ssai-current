@@ -23,6 +23,7 @@
 <script src="/reach-policy.js"></script>
 <script src="/current-client.js"></script>
 <script src="/mood-card.js"></script>
+<script src="/place-photos.js"></script>
 <script src="/current-moments.js"></script>
 <style>
 :root{
@@ -1686,8 +1687,22 @@ function photoFor(p){
   const rec = state.aiRecommendations[p.placeId];
   if (rec && rec.photos && rec.photos.length) return rec.photos[0];
   if (p.photos && p.photos.length) return p.photos[0];
+  const reviewed = (window.CURRENT_PLACE_PHOTOS || {})[p.placeId];
+  if (reviewed && reviewed.length) return reviewed[0];
   if (typeof p.coverImage === "string" && p.coverImage.indexOf("photo:") === 0) return p.coverImage.slice(6);
   return null;
+}
+const CATEGORY_PHOTO_FALLBACKS = [
+  {test:/书店|唱片|影院|book|record|cinema/i, url:"/assets/moments/book.jpg"},
+  {test:/咖啡|茶|cafe|coffee|tea/i, url:"/assets/moments/cafe.jpg"},
+  {test:/公园|河岸|水边|胡同|户外|park|river|lane/i, url:"/assets/moments/leaf.jpg"},
+  {test:/吃|餐厅|restaurant|food/i, url:"/assets/moments/food.jpg"},
+  {test:/酒吧|livehouse|club|bar/i, url:"/assets/moments/bar.jpg"}
+];
+function categoryPhotoFor(p){
+  const text = [p.category, p.action, p.placeName].join(" ");
+  const match = CATEGORY_PHOTO_FALLBACKS.find(item => item.test.test(text));
+  return match ? match.url : "/assets/moments/city.jpg";
 }
 function coverHTML(p, o){
   o = o || {};
@@ -1696,12 +1711,14 @@ function coverHTML(p, o){
                ' 52%, rgba(234,240,239,.92) 100%), linear-gradient(160deg,#EAF0EF,#DDE6E4)';
   let h = '<div class="cover ' + (o.cls||'') + '"' + style + '>';
   h += '<div class="grad" style="' + grad + '"></div><div class="grain"></div>';
-  const photo = photoFor(p);
+  const reviewedPhoto = photoFor(p);
+  const photo = reviewedPhoto || categoryPhotoFor(p);
   if (photo){
     // 图挂了就把自己藏起来，露出下面那层符号——不留一个破图图标。
     h += '<img class="shot" src="' + escapeHTML(photo) + '" alt="" loading="lazy" referrerpolicy="no-referrer" ' +
          'onerror="this.remove()">';
   }
+  if (!reviewedPhoto) h += '<span class="photo-demo-badge">' + uiCopy('空间类型示意图', 'Category image') + '</span>';
   h += sigil(p, o);
   if (o.badge) h += '<span class="cat-badge">' + catSVG() + '</span>';
   if (o.caption) h += '<div class="cap"><small>' + p.category + ' · ' + p.area + '</small><strong>' + p.placeName + '</strong></div>';
@@ -1789,7 +1806,9 @@ const state = {
   momentData: CurrentMoments.read(localStorage),
   momentScenarioAt: CurrentMoments.scenario(localStorage, Date.now()),
   momentNote: "",
-  momentDraft: null
+  momentDraft: null,
+  pendingMedia: [],
+  socialName: localStorage.getItem("current.social.name.v1") || ""
 };
 
 const DEMO_MODE = (() => {
@@ -3269,12 +3288,16 @@ function momentCard(moment){
   const left = momentMinutes(moment);
   return '<article class="moment-card"><span class="moment-badge">' +
     uiCopy('演示 · 非实时信息', 'DEMO · not live') + '</span>' +
-    '<div class="moment-scene ' + escapeHTML(moment.kind) + '"></div>' +
+    '<div class="moment-scene ' + escapeHTML(moment.kind) + '">' +
+    (moment.image ? '<img src="' + escapeHTML(moment.image) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '') +
+    '</div>' +
     '<h3>' + escapeHTML(momentTitle(moment)) + '</h3>' +
     '<p>' + uiCopy('小在按你此刻选择的状态带回这一幕。数据来自演示种子，出发前请看真实天气和开放时间。',
       'Xiaozai brought this back for the mood you chose. This is demo seed data; check live weather and opening hours before leaving.') + '</p>' +
     '<div class="moment-meta"><span>' + escapeHTML(momentPlace(moment)) + '</span><span>' +
     uiCopy('还剩约 ' + left + ' 分钟', 'about ' + left + ' min left') + '</span></div>' +
+    (moment.imageLicenseUrl ? '<a class="moment-credit" href="' + escapeHTML(moment.imageLicenseUrl) +
+      '" target="_blank" rel="noreferrer">' + escapeHTML(moment.imageLicense) + '</a>' : '') +
     '<div style="margin-top:12px"><button class="btn sm" data-collect="' + escapeHTML(moment.id) + '">' +
     uiCopy('我赶上了', 'I caught it') + '</button> <button class="btn ghost sm" data-go="' +
     (moment.placeId ? '#/place/' + escapeHTML(moment.placeId) : '#/talk') + '">' +
@@ -3286,8 +3309,9 @@ function renderMoments(){
   const now = Date.now();
   const list = CurrentMoments.select(momentSeeds(), {city:state.momentCity, mood:state.mood, now:now});
   h += '<div class="screen"><div class="pad moment-wrap">';
-  h += '<div class="moment-tabs"><button class="' + (state.momentCity === '深圳' ? 'on' : '') + '" data-city="深圳">深圳</button>' +
-    '<button class="' + (state.momentCity === '北京' ? 'on' : '') + '" data-city="北京">北京</button>' +
+  h += '<div class="moment-tabs">' + CurrentMoments.CITIES.map(city =>
+    '<button class="' + (state.momentCity === city ? 'on' : '') + '" data-city="' + city + '">' + city + '</button>'
+  ).join('') +
     '<button data-go="#/community">' + uiCopy('接力社群', 'Community relay') + '</button></div>';
   h += '<p class="lead">' + uiCopy('不是“推荐一个公园”，是告诉你：此刻那里有什么值得赶上。',
     'A place, a reason, and a moment that will pass.') + '</p>';
@@ -3304,6 +3328,7 @@ function communityItem(item){
   return '<article class="moment-card"><span class="moment-badge">' +
     (item.published ? uiCopy('已发布', 'Published') : uiCopy('只存在这台设备 · 草稿', 'On this device · draft')) +
     '</span><h3>' + escapeHTML(item.place) + '</h3><p>“' + escapeHTML(item.reason) + '”</p>' +
+    ((item.media || []).length ? '<div class="community-media" data-media-owner="' + escapeHTML(item.id) + '"></div>' : '') +
     '<div class="moment-meta"><span>' + escapeHTML(who) + '</span><span>' + escapeHTML(item.city) + '</span></div></article>';
 }
 function renderCommunity(){
@@ -3313,11 +3338,21 @@ function renderCommunity(){
     'Anonymous by default. It stays on this device until accounts and moderation are connected.') + '</p>';
   h += '<form class="moment-form" id="moment-form"><label>' + uiCopy('地方', 'Place') +
     '<input name="place" maxlength="80" required placeholder="' + uiCopy('例如：楼下那棵桂花树', 'e.g. the tree downstairs') + '"></label>' +
+    '<label>' + uiCopy('城市', 'City') + '<select name="city">' +
+    CurrentMoments.CITIES.map(city => '<option value="' + city + '"' + (city === state.momentCity ? ' selected' : '') + '>' + city + '</option>').join('') +
+    '</select></label>' +
     '<label>' + uiCopy('它在此刻帮到了什么', 'What helped') +
     '<textarea name="reason" maxlength="160" required placeholder="' + uiCopy('一句具体的理由', 'One concrete reason') + '"></textarea></label>' +
-    '<label>' + uiCopy('贡献类型', 'Contribution type') + '<select name="kind"><option value="place">' +
-    uiCopy('一个可以再去的地方', 'A place worth returning to') + '</option><option value="moment">' +
-    uiCopy('一小时内会消失的此刻', 'A moment that expires in an hour') + '</option></select></label>' +
+    '<label>' + uiCopy('贡献类型', 'Contribution type') + '<select name="kind">' +
+    '<option value="lasting_place">' + uiCopy('一个能反复去的空间', 'A place to return to') + '</option>' +
+    '<option value="timed_beauty">' + uiCopy('一小时内会消失的美好', 'Beauty that fades within an hour') + '</option>' +
+    '<option value="seasonal">' + uiCopy('这一季才有的变化', 'Something seasonal') + '</option>' +
+    '<option value="sensory">' + uiCopy('刚刚闻到或听到的瞬间', 'A sound or scent just noticed') + '</option>' +
+    '<option value="quiet_corner">' + uiCopy('一个不必说话的角落', 'A corner that asks nothing') + '</option></select></label>' +
+    '<label>' + uiCopy('照片或视频', 'Photos or video') +
+    '<input id="moment-media" name="media" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple>' +
+    '<small>' + uiCopy('最多 3 张照片，或 1 段不超过 1 分钟的视频。先保存在这台设备上。', 'Up to 3 photos, or one video under 1 minute. Saved on this device.') + '</small></label>' +
+    '<div id="moment-media-preview" class="media-preview"></div>' +
     '<label>' + uiCopy('显示方式', 'Identity') + '<select name="visibility"><option value="anonymous">' +
     uiCopy('匿名（默认）', 'Anonymous (default)') + '</option><option value="named">' +
     uiCopy('署名', 'Named') + '</option></select></label>' +
@@ -3348,14 +3383,22 @@ function renderMatching(){
           'Six anonymous signals this week; two shared-scene candidates. The other person appears only after both agree.')
       : uiCopy('本周递出 6 个匿名信号，筛出 2 个同场景候选。对方现在仍然匿名。',
           'Six anonymous signals this week; two shared-scene candidates. The other person stays anonymous for now.')) + '</p>';
-  if (!match) h += '<button class="btn sm" data-match="mine">' + uiCopy('我愿意认识', 'I am open to meeting') + '</button>';
-  else if (!match.theirs) h += '<p class="moment-status">' + uiCopy('已递出信号。只有对方也同意，才会揭面。',
-    'Signal sent. Identity is revealed only after they agree too.') + '</p><button class="btn ghost sm" data-match="theirs">' +
-    uiCopy('演示：对方同意', 'Demo: they agree') + '</button>';
+  if (!match) h += '<label class="social-name">' + uiCopy('本次使用的昵称', 'Name for this session') +
+    '<input id="social-name" maxlength="24" value="' + escapeHTML(state.socialName) + '" placeholder="' +
+    uiCopy('例如：小满', 'e.g. Mallow') + '"></label><button class="btn sm" data-match="mine">' +
+    uiCopy('我愿意认识', 'I am open to meeting') + '</button>';
+  else if (!match.theirs) h += '<p class="moment-status waiting">' + uiCopy('信号已经递出，小在正在等对方回应…',
+    'Signal sent. Xiaozai is waiting for the other person…') + '</p>';
   else if (revealed) h += '<p class="moment-status"><b>' + uiCopy('阿简 · 演示身份', 'Jian · demo identity') + '</b><br>' +
     uiCopy('双方都同意了。开场：你们都选了“安静坐一会儿”，要不要从交换一本最近喜欢的书开始？',
     'Both agreed. Opener: you both chose a quiet sit — start by sharing a recent favourite book?') +
-    '</p><button class="btn ghost sm" data-match="decline">' + uiCopy('结束这次连接', 'End this connection') + '</button>';
+    '</p><div class="private-chat"><span class="moment-badge">' + uiCopy('演示私信 · 只在本次会话', 'Demo DM · this session only') + '</span>' +
+    (match.messages || []).map(message => '<p class="' + (message.from === 'me' ? 'mine' : 'theirs') + '"><b>' +
+      escapeHTML(message.from === 'me' ? (state.socialName || uiCopy('我','Me')) : uiCopy('阿简','Jian')) +
+      '</b>' + escapeHTML(message.text) + '</p>').join('') +
+    '<form id="match-chat"><input maxlength="200" required placeholder="' + uiCopy('发一条私信…', 'Send a private message…') +
+    '"><button type="submit">' + uiCopy('发送', 'Send') + '</button></form></div>' +
+    '<button class="btn ghost sm" data-match="decline">' + uiCopy('结束这次连接', 'End this connection') + '</button>';
   h += '</div><p class="moment-note">' + uiCopy('小在展示的是筛选进度和共同场景，不展示“宠物玩得多开心”。连接 30 分钟后自动失效，任一方都可以结束。',
     'Xiaozai shows the search and shared context. The connection expires after 30 minutes; either person can end it.') + '</p>';
   h += '</div></div>';
@@ -3370,8 +3413,7 @@ function renderTalk(){
           '<button class="k" data-go="#/settings" style="letter-spacing:.14em">' + uiCopy('设置', 'Settings') + '</button>' +
           '<button class="k" data-go="#/records" style="letter-spacing:.14em">' + uiCopy('记录', 'Records') + '</button></div></div>';
   h += '<div class="talk">';
-  h += '<div class="zai">' + cloudSVG("withyou") + '</div>';
-  h += '<h1>' + uiCopy('想安静，想吃烤串，<br>都可以直接说。', 'Say how you feel,<br>or what you want to do.') + '</h1>';
+  h += '<div class="zai" style="margin-bottom:26px">' + cloudSVG("withyou") + '</div>';
   // 打字时麦克风退成小圆钮：一屏一个主动作，语音的优先级靠体量表达
   h += '<button class="mic' + (state.talkTyping ? ' small' : '') + '" id="mic-button" aria-label="' + uiCopy('用语音说', 'Speak') + '">' + micSVG() + '</button>';
   h += '<p class="mic-cap" id="mic-cap">' +
@@ -3695,7 +3737,6 @@ const EN = {
   "刚刚保存": "just saved", "回到开头": "Back to start", "先停一下": "Hold on",
   "先不去": "Not now", "取消": "Cancel",
 
-  "想安静，想吃烤串，都可以直接说。": "Say what you feel or what you want to do.",
   "不用组织语言，也不用先想清楚要去哪。": "You don't have to phrase it well, or know where you want to go.",
   "你说，我来找。": "You talk. I'll look.",
   "不想说话，我打字": "I'd rather type",
@@ -4155,11 +4196,71 @@ function bind(){
     const identity = momentForm.elements.visibility;
     const nickname = momentForm.querySelector(".moment-nickname");
     identity.onchange = () => { nickname.hidden = identity.value !== "named"; };
-    momentForm.onsubmit = event => {
+    const mediaInput = momentForm.querySelector("#moment-media");
+    const mediaPreview = momentForm.querySelector("#moment-media-preview");
+    if (mediaInput) mediaInput.onchange = () => {
+      const files = Array.from(mediaInput.files || []);
+      const videos = files.filter(file => file.type.startsWith("video/"));
+      const photos = files.filter(file => file.type.startsWith("image/"));
+      const tooLarge = files.find(file => file.size > (file.type.startsWith("video/") ? 80 : 12) * 1024 * 1024);
+      if (tooLarge) {
+        state.pendingMedia = [];
+        state.momentNote = uiCopy("照片请小于 12 MB，视频请小于 80 MB。", "Photos must be under 12 MB and video under 80 MB.");
+        mediaInput.value = "";
+        render();
+        return;
+      }
+      if (videos.length > 1 || (videos.length && photos.length) || photos.length > 3) {
+        state.pendingMedia = [];
+        state.momentNote = uiCopy("请选择最多 3 张照片，或单独选择 1 段视频。", "Choose up to 3 photos, or one video by itself.");
+        mediaInput.value = "";
+        render();
+        return;
+      }
+      state.pendingMedia = files;
+      mediaPreview.innerHTML = files.map(file => file.type.startsWith("video/")
+        ? '<video controls muted playsinline src="' + URL.createObjectURL(file) + '"></video>'
+        : '<img alt="" src="' + URL.createObjectURL(file) + '">').join("");
+    };
+    momentForm.onsubmit = async event => {
       event.preventDefault();
       const values = Object.fromEntries(new FormData(momentForm).entries());
-      const item = CurrentMoments.contribution(Object.assign(values, {mood:state.mood, city:state.momentCity}),
-        Date.now(), "local_" + Date.now().toString(36));
+      const now = Date.now();
+      const contributionId = "local_" + now.toString(36);
+      const video = state.pendingMedia.find(file => file.type.startsWith("video/"));
+      if (video) {
+        try {
+          const duration = await new Promise((resolve, reject) => {
+            const el = document.createElement("video");
+            el.preload = "metadata";
+            el.onloadedmetadata = () => { URL.revokeObjectURL(el.src); resolve(el.duration); };
+            el.onerror = reject;
+            el.src = URL.createObjectURL(video);
+          });
+          if (!Number.isFinite(duration) || duration > 60.5) {
+            state.momentNote = uiCopy("视频超过 1 分钟，请剪短后再选。", "The video is over one minute. Trim it and try again.");
+            render();
+            return;
+          }
+        } catch (_) {
+          state.momentNote = uiCopy("没有读懂这段视频，请换一个 MP4 或 WebM。", "I could not read this video. Try MP4 or WebM.");
+          render();
+          return;
+        }
+      }
+      const savedMedia = [];
+      try {
+        for (let index = 0; index < state.pendingMedia.length; index += 1) {
+          savedMedia.push(await CurrentMoments.saveMedia(contributionId + "_" + index, state.pendingMedia[index]));
+        }
+      } catch (_) {
+        state.momentNote = uiCopy("这台设备没有留出媒体存储空间。", "This device could not save the media.");
+        render();
+        return;
+      }
+      const item = CurrentMoments.contribution(Object.assign(values, {
+        mood:state.mood, media:savedMedia
+      }), now, contributionId);
       if (!item) {
         state.momentNote = uiCopy("还差地方、理由，或署名。", "Add a place, reason, and name if named.");
         render();
@@ -4167,18 +4268,55 @@ function bind(){
       }
       state.momentData.contributions.push(item);
       CurrentMoments.write(localStorage, state.momentData);
+      state.pendingMedia = [];
       state.momentNote = uiCopy("已存为本机草稿。还没有对外发布。", "Saved locally. It has not been published.");
       render();
     };
   }
   root.querySelectorAll("[data-match]").forEach(el => el.onclick = () => {
     const action = el.dataset.match;
-    if (action === "mine") state.momentData.match = {
-      isDemo:true, intent:"meet", mine:true, theirs:false, blocked:false, expiresAt:Date.now() + 30 * 60000
-    };
-    else if (action === "theirs" && state.momentData.match) state.momentData.match.theirs = true;
+    if (action === "mine") {
+      const name = String((root.querySelector("#social-name") || {}).value || "").trim().slice(0, 24);
+      state.socialName = name || uiCopy("我", "Me");
+      try { localStorage.setItem("current.social.name.v1", state.socialName); } catch (_) {}
+      state.momentData.match = {
+        isDemo:true, intent:"meet", mine:true, theirs:false, blocked:false,
+        expiresAt:Date.now() + 30 * 60000, messages:[]
+      };
+      render();
+      setTimeout(() => {
+        if (!state.momentData.match || !state.momentData.match.mine) return;
+        state.momentData.match.theirs = true;
+        state.momentData.match.messages = [{
+          from:"them", text:uiCopy("小在说我们都想安静待一会儿。你最近在看什么书？",
+            "Xiaozai says we both want a quiet place. What are you reading lately?")
+        }];
+        render();
+      }, 900);
+      return;
+    }
     else if (action === "decline") state.momentData.match = null;
     render();
+  });
+  const matchChat = root.querySelector("#match-chat");
+  if (matchChat) matchChat.onsubmit = event => {
+    event.preventDefault();
+    const input = matchChat.querySelector("input");
+    const text = input.value.trim();
+    if (!text || !state.momentData.match) return;
+    state.momentData.match.messages.push({from:"me", text:text});
+    input.value = "";
+    render();
+  };
+  root.querySelectorAll("[data-media-owner]").forEach(container => {
+    const item = state.momentData.contributions.find(entry => entry.id === container.dataset.mediaOwner);
+    (item && item.media || []).forEach(meta => CurrentMoments.mediaURL(meta.id).then(url => {
+      if (!url || !container.isConnected) return;
+      const element = document.createElement(meta.type.startsWith("video/") ? "video" : "img");
+      element.src = url;
+      if (element.tagName === "VIDEO") { element.controls = true; element.playsInline = true; }
+      container.appendChild(element);
+    }).catch(() => {}));
   });
   root.querySelectorAll("[data-stimulus]").forEach(el => el.onclick = () => {
     if (!state.read || !state.read.state) return;
@@ -4450,7 +4588,7 @@ function bind(){
     if (!picked.length) return;
     CurrentAI.track("recommendation_accepted", {place_id:id, recommendation_id:picked[0].recommendation_id});
     state.offer = picked.concat(rest);
-    state.offerNote = uiCopy("换成这个了。前一个我记下来，这次不再给你。", "Here’s the other option. I’ll leave the first one out this time.");
+    state.offerNote = null;
     state.aiPlaceOrder = state.offer.map(x => x.place_id);
     render();
   });

@@ -507,7 +507,7 @@ def test_primary_voice_screen_keeps_operational_copy_out_of_the_way():
     assert "按一下开始说" not in talk
     assert "按一下开始说" not in reflect
     assert "本产品不保存录音" not in talk
-    assert "想吃烤串" in talk
+    assert "想吃烤串" not in talk
     assert 'id="type-toggle"' in talk
     assert "'打字输入', 'Type instead'" in talk
     assert ".talk .type-toggle{margin-top:18px;min-height:44px" in prototype
@@ -748,7 +748,6 @@ def test_primary_bilingual_copy_is_written_as_app_english():
     source = PROTOTYPE.read_text(encoding="utf-8")
     # These are deliberately authored English lines, not word-by-word fragments.
     for english in (
-        "Say how you feel,<br>or what you want to do.",
         "Share only what you choose",
         "Your private note won't appear in the image.",
         "Only the combined result is shown. Individual entries stay private.",

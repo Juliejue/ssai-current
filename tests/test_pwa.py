@@ -33,6 +33,7 @@ def test_html_links_the_manifest_and_ios_icon():
     assert 'rel="apple-touch-icon" href="/pwa/icon-180.png"' in html
     assert '<script src="/mood-card.js"></script>' in html
     assert '<script src="/current-moments.js"></script>' in html
+    assert '<script src="/place-photos.js"></script>' in html
     assert '<link rel="stylesheet" href="/current-moments.css">' in html
     assert _png_size(ROOT / "pwa/icon-180.png") == (180, 180)
 
@@ -40,7 +41,28 @@ def test_html_links_the_manifest_and_ios_icon():
 def test_service_worker_caches_the_shell_but_never_intercepts_api_calls():
     worker = (ROOT / "sw.js").read_text(encoding="utf-8")
 
-    for asset in ("/current/", "/current-client.js", "/mood-card.js", "/current-moments.js",
+    for asset in ("/current/", "/current-client.js", "/mood-card.js", "/place-photos.js", "/current-moments.js",
                   "/current-moments.css", "/voice-worklet.mjs", "/manifest.webmanifest"):
         assert asset in worker
     assert "url.pathname.startsWith('/api/')" in worker
+
+
+def test_iteration_ui_has_four_cities_media_and_no_removed_home_copy():
+    html = (ROOT / "此在-current-原型.html").read_text(encoding="utf-8")
+    moments = (ROOT / "current-moments.js").read_text(encoding="utf-8")
+    for city in ("北京", "上海", "广州", "深圳"):
+        assert city in moments
+    assert 'id="moment-media"' in html
+    assert "video/mp4" in html
+    assert "想安静，想吃烤串" not in html
+    assert "换成这个了。前一个我记下来" not in html
+    assert 'id="social-name"' in html
+    assert 'id="match-chat"' in html
+    assert "演示私信 · 只在本次会话" in html
+    assert "空间类型示意图" in html
+
+
+def test_reviewed_place_photo_map_is_generated():
+    photos = (ROOT / "place-photos.js").read_text(encoding="utf-8")
+    assert "window.CURRENT_PLACE_PHOTOS" in photos
+    assert photos.count("https://") >= 20

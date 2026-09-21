@@ -1,8 +1,9 @@
-const CACHE_NAME = 'current-shell-v3';
+const CACHE_NAME = 'current-shell-v4';
 const SHELL = [
   '/current/',
   '/current-client.js',
   '/mood-card.js',
+  '/place-photos.js',
   '/current-moments.js',
   '/current-moments.css',
   '/reach-policy.js',
@@ -10,6 +11,15 @@ const SHELL = [
   '/manifest.webmanifest',
   '/pwa/icon-192.png',
   '/pwa/icon-512.png',
+  '/assets/moments/sunset.jpg',
+  '/assets/moments/leaf.jpg',
+  '/assets/moments/cloud.jpg',
+  '/assets/moments/dew.jpg',
+  '/assets/moments/book.jpg',
+  '/assets/moments/cafe.jpg',
+  '/assets/moments/food.jpg',
+  '/assets/moments/bar.jpg',
+  '/assets/moments/city.jpg',
 ];
 
 self.addEventListener('install', event => {

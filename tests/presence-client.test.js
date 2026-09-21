@@ -160,3 +160,25 @@ test('a browser without geolocation reports an honest manual fallback', () => {
   assert.equal(watcher, null);
   assert.deepEqual(unavailable, ['当前浏览器不支持定位，到了按一下就行']);
 });
+
+test('real location accepts all four pilot cities', async () => {
+  const cases = [
+    [39.9, 116.4, '北京'],
+    [31.23, 121.47, '上海'],
+    [23.13, 113.26, '广州'],
+    [22.54, 114.06, '深圳'],
+  ];
+  for (const [latitude, longitude, city] of cases) {
+    const runtime = makePresenceRuntime();
+    runtime.setCurrentPosition(runtime.position(latitude, longitude));
+    await runtime.current.requestLocation();
+    assert.equal(runtime.current.getLocationMode(), 'real');
+    assert.equal(runtime.current.getLocationCity(), city);
+  }
+});
+
+test('real location outside the four pilots stays honest', async () => {
+  const runtime = makePresenceRuntime();
+  runtime.setCurrentPosition(runtime.position(30.57, 104.07));
+  await assert.rejects(runtime.current.requestLocation(), /北京、上海、广州和深圳/);
+});
