@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="此在">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/pwa/icon-180.png">
+<link rel="stylesheet" href="/current-moments.css">
 <title>此在 Current · 情绪空间闭环</title>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -22,6 +23,7 @@
 <script src="/reach-policy.js"></script>
 <script src="/current-client.js"></script>
 <script src="/mood-card.js"></script>
+<script src="/current-moments.js"></script>
 <style>
 :root{
   /* ── 品牌浅色体系 · 与品牌手册 / 路演物料同源 ── */
@@ -1723,10 +1725,15 @@ function cloudSVG(mood){
     eyes = '<circle cx="' + (84+dx) + '" cy="80" r="6" fill="#122A2E"/>' +
            '<circle cx="' + (116+dx) + '" cy="80" r="6" fill="#122A2E"/>';
   }
+  const tone = (mood === 'withyou' || mood === 'look' || mood === 'closed') ? mood :
+    CurrentMoments.cloudTone(state && state.mood ? state.mood : "okay",
+      state && state.read && state.read.state ? state.read.state.self_report : {});
   const you = (mood === 'withyou')            /* 旁边那个暖点是「你」，不是小在的一部分 */
     ? '<circle cx="170" cy="104" r="8" fill="#C4703C"/>' : '';
-  return '<svg viewBox="0 22 200 100" width="100%" height="100%" aria-hidden="true">' +
-    '<path d="' + D + '" fill="none" stroke="#122A2E" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>' +
+  return '<svg class="cloud-' + tone + '" viewBox="0 22 200 100" width="100%" height="100%" aria-hidden="true">' +
+    '<defs><linearGradient id="current-rainbow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#91BFC4"/><stop offset=".52" stop-color="#E7D3B7"/><stop offset="1" stop-color="#B996A5"/></linearGradient></defs>' +
+    '<path class="cloud-body" d="' + D + '" fill="none" stroke="#122A2E" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<path class="cloud-colour" d="' + D + '" fill="url(#current-rainbow)" stroke="none"/>' +
     eyes + you + '</svg>';
 }
 function catSVG(mood){ return cloudSVG(mood); }
@@ -1776,7 +1783,13 @@ const state = {
   lastRecordId: null,
   aiPlaceOrder: [],
   aiRecommendations: {},
-  shownRecommendationId: null
+  shownRecommendationId: null,
+  momentCity: "深圳",
+  momentFilter: "all",
+  momentData: CurrentMoments.read(localStorage),
+  momentScenarioAt: CurrentMoments.scenario(localStorage, Date.now()),
+  momentNote: "",
+  momentDraft: null
 };
 
 const DEMO_MODE = (() => {
@@ -3219,7 +3232,7 @@ function renderSettings(){
   h += '<div class="boundary"><ul style="margin:0;padding-left:18px">' +
        '<li>不诊断：不给情绪贴临床标签</li>' +
        '<li>不评判：情绪变差不叫失败，只叫这次没接住</li>' +
-       '<li>不做社交画像：没有人脸、主页、私信或关注</li></ul></div></details>';
+       '<li>社交只读你主动选择的意愿；双向同意前不揭面</li></ul></div></details>';
   h += '</div></div>';
   h += dock('这一页上的每一项，关了就是关了。', {records:false});
   return h;
@@ -3234,6 +3247,119 @@ function reachBlockedText(reason){
     too_soon:["刚来过，得隔一会儿。", "I checked in recently."]
   })[reason] || ["现在不来。", "No reminder right now."];
   return uiCopy(copy[0], copy[1]);
+}
+
+/* --- 小在带回的此刻：所有种子都明确标为演示，倒计时基于本次体验开始时间。 --- */
+function momentSeeds(){
+  return CurrentMoments.demoMoments(state.momentScenarioAt);
+}
+function momentById(id){
+  return momentSeeds().find(item => item.id === id);
+}
+function momentMinutes(moment){
+  return Math.max(0, Math.ceil((moment.expiresAt - Date.now()) / 60000));
+}
+function momentTitle(moment){
+  return currentLang() === "en" ? moment.titleEn : moment.title;
+}
+function momentPlace(moment){
+  return currentLang() === "en" ? moment.placeEn : moment.place;
+}
+function momentCard(moment){
+  const left = momentMinutes(moment);
+  return '<article class="moment-card"><span class="moment-badge">' +
+    uiCopy('演示 · 非实时信息', 'DEMO · not live') + '</span>' +
+    '<div class="moment-scene ' + escapeHTML(moment.kind) + '"></div>' +
+    '<h3>' + escapeHTML(momentTitle(moment)) + '</h3>' +
+    '<p>' + uiCopy('小在按你此刻选择的状态带回这一幕。数据来自演示种子，出发前请看真实天气和开放时间。',
+      'Xiaozai brought this back for the mood you chose. This is demo seed data; check live weather and opening hours before leaving.') + '</p>' +
+    '<div class="moment-meta"><span>' + escapeHTML(momentPlace(moment)) + '</span><span>' +
+    uiCopy('还剩约 ' + left + ' 分钟', 'about ' + left + ' min left') + '</span></div>' +
+    '<div style="margin-top:12px"><button class="btn sm" data-collect="' + escapeHTML(moment.id) + '">' +
+    uiCopy('我赶上了', 'I caught it') + '</button> <button class="btn ghost sm" data-go="' +
+    (moment.placeId ? '#/place/' + escapeHTML(moment.placeId) : '#/talk') + '">' +
+    uiCopy(moment.placeId ? '去这里' : '从附近找起', moment.placeId ? 'Go here' : 'Find nearby') +
+    '</button></div></article>';
+}
+function renderMoments(){
+  let h = topbar(uiCopy('小在带回的此刻', 'Moments Xiaozai found'), uiCopy('美的采集者', 'Collector of beauty'), '#/talk');
+  const now = Date.now();
+  const list = CurrentMoments.select(momentSeeds(), {city:state.momentCity, mood:state.mood, now:now});
+  h += '<div class="screen"><div class="pad moment-wrap">';
+  h += '<div class="moment-tabs"><button class="' + (state.momentCity === '深圳' ? 'on' : '') + '" data-city="深圳">深圳</button>' +
+    '<button class="' + (state.momentCity === '北京' ? 'on' : '') + '" data-city="北京">北京</button>' +
+    '<button data-go="#/community">' + uiCopy('接力社群', 'Community relay') + '</button></div>';
+  h += '<p class="lead">' + uiCopy('不是“推荐一个公园”，是告诉你：此刻那里有什么值得赶上。',
+    'A place, a reason, and a moment that will pass.') + '</p>';
+  if (state.momentNote) h += '<p class="moment-status">' + escapeHTML(state.momentNote) + '</p>';
+  h += list.length ? list.map(momentCard).join('') :
+    '<div class="moment-card"><p>' + uiCopy('这批演示此刻已经过去。刷新体验会从新的演示时刻开始。',
+      'These demo moments have passed. Reload to begin a fresh demo window.') + '</p></div>';
+  h += '</div></div>';
+  return h;
+}
+
+function communityItem(item){
+  const who = item.visibility === 'named' ? item.nickname : uiCopy('匿名路过的人', 'Anonymous visitor');
+  return '<article class="moment-card"><span class="moment-badge">' +
+    (item.published ? uiCopy('已发布', 'Published') : uiCopy('只存在这台设备 · 草稿', 'On this device · draft')) +
+    '</span><h3>' + escapeHTML(item.place) + '</h3><p>“' + escapeHTML(item.reason) + '”</p>' +
+    '<div class="moment-meta"><span>' + escapeHTML(who) + '</span><span>' + escapeHTML(item.city) + '</span></div></article>';
+}
+function renderCommunity(){
+  let h = topbar(uiCopy('把好地方递下去', 'Pass a place along'), uiCopy('接力社群', 'Community relay'), '#/moments');
+  h += '<div class="screen"><div class="pad moment-wrap">';
+  h += '<p class="lead">' + uiCopy('默认匿名。提交后先存在这台设备上；接入账号与审核前，它不会被说成已经发布。',
+    'Anonymous by default. It stays on this device until accounts and moderation are connected.') + '</p>';
+  h += '<form class="moment-form" id="moment-form"><label>' + uiCopy('地方', 'Place') +
+    '<input name="place" maxlength="80" required placeholder="' + uiCopy('例如：楼下那棵桂花树', 'e.g. the tree downstairs') + '"></label>' +
+    '<label>' + uiCopy('它在此刻帮到了什么', 'What helped') +
+    '<textarea name="reason" maxlength="160" required placeholder="' + uiCopy('一句具体的理由', 'One concrete reason') + '"></textarea></label>' +
+    '<label>' + uiCopy('贡献类型', 'Contribution type') + '<select name="kind"><option value="place">' +
+    uiCopy('一个可以再去的地方', 'A place worth returning to') + '</option><option value="moment">' +
+    uiCopy('一小时内会消失的此刻', 'A moment that expires in an hour') + '</option></select></label>' +
+    '<label>' + uiCopy('显示方式', 'Identity') + '<select name="visibility"><option value="anonymous">' +
+    uiCopy('匿名（默认）', 'Anonymous (default)') + '</option><option value="named">' +
+    uiCopy('署名', 'Named') + '</option></select></label>' +
+    '<label class="moment-nickname" hidden>' + uiCopy('怎么称呼你', 'Name shown') + '<input name="nickname" maxlength="24"></label>' +
+    '<button class="btn sm" type="submit">' + uiCopy('存为本机草稿', 'Save local draft') + '</button></form>';
+  if (state.momentNote) h += '<p class="moment-status">' + escapeHTML(state.momentNote) + '</p>';
+  const samples = [
+    {place:uiCopy('深圳湾公园白鹭坡书吧','Bailupo Book Bar'),reason:uiCopy('海风吹到书页上，坐着不用解释。','Sea air reaches the pages; sitting alone feels ordinary.'),visibility:'anonymous',city:'深圳',published:false},
+    {place:uiCopy('亮马河','Liangma River'),reason:uiCopy('今天的水面有一小块粉色。','A small patch of pink was on the water.'),visibility:'anonymous',city:'北京',published:false}
+  ];
+  h += '<h2 style="margin-top:26px">' + uiCopy('演示接力', 'Demo relay') + '</h2>' +
+    samples.concat(state.momentData.contributions.slice().reverse()).map(communityItem).join('');
+  h += '<div class="actions"><button class="btn ghost sm" data-go="#/matching">' +
+    uiCopy('看看小在怎么物色同行的人', 'See how Xiaozai looks for company') + '</button></div>';
+  h += '</div></div>';
+  return h;
+}
+
+function renderMatching(){
+  const match = state.momentData.match;
+  const revealed = CurrentMoments.canReveal(match, Date.now());
+  let h = topbar(uiCopy('小在替你物色', 'Xiaozai is looking'), uiCopy('双向同意', 'Mutual consent'), '#/community');
+  h += '<div class="screen"><div class="pad moment-wrap">';
+  h += '<div class="moment-card"><span class="moment-badge">' + uiCopy('演示', 'DEMO') + '</span>' +
+    '<h3>' + uiCopy('共同场景：都想在书店安静坐一会儿', 'Shared scene: both want a quiet bookstore') + '</h3>' +
+    '<p>' + (revealed
+      ? uiCopy('本周递出 6 个匿名信号，筛出 2 个同场景候选。双方同意后，这次才显示对方。',
+          'Six anonymous signals this week; two shared-scene candidates. The other person appears only after both agree.')
+      : uiCopy('本周递出 6 个匿名信号，筛出 2 个同场景候选。对方现在仍然匿名。',
+          'Six anonymous signals this week; two shared-scene candidates. The other person stays anonymous for now.')) + '</p>';
+  if (!match) h += '<button class="btn sm" data-match="mine">' + uiCopy('我愿意认识', 'I am open to meeting') + '</button>';
+  else if (!match.theirs) h += '<p class="moment-status">' + uiCopy('已递出信号。只有对方也同意，才会揭面。',
+    'Signal sent. Identity is revealed only after they agree too.') + '</p><button class="btn ghost sm" data-match="theirs">' +
+    uiCopy('演示：对方同意', 'Demo: they agree') + '</button>';
+  else if (revealed) h += '<p class="moment-status"><b>' + uiCopy('阿简 · 演示身份', 'Jian · demo identity') + '</b><br>' +
+    uiCopy('双方都同意了。开场：你们都选了“安静坐一会儿”，要不要从交换一本最近喜欢的书开始？',
+    'Both agreed. Opener: you both chose a quiet sit — start by sharing a recent favourite book?') +
+    '</p><button class="btn ghost sm" data-match="decline">' + uiCopy('结束这次连接', 'End this connection') + '</button>';
+  h += '</div><p class="moment-note">' + uiCopy('小在展示的是筛选进度和共同场景，不展示“宠物玩得多开心”。连接 30 分钟后自动失效，任一方都可以结束。',
+    'Xiaozai shows the search and shared context. The connection expires after 30 minutes; either person can end it.') + '</p>';
+  h += '</div></div>';
+  return h;
 }
 
 /* --- ① 说 --- */
@@ -3268,6 +3394,9 @@ function renderTalk(){
        (DEMO_MODE ? '<button id="demo-location"' + (locationMode === "demo" || locationMode === "trip-demo" ? ' class="on"' : '') + '>' +
        uiCopy(locationMode === "trip-demo" ? '✓ 演示定位' : locationMode === "demo" ? '✓ 体验北京路线' : '体验北京路线', locationMode === "trip-demo" ? '✓ Demo location' : locationMode === "demo" ? '✓ Beijing demo' : 'Try Beijing demo') + '</button>' : '') +
        '<button class="quiet" data-go="#/mood">' + uiCopy('我不想说，自己挑', 'Choose instead') + '</button></div>';
+  h += '<div class="moment-entry"><button data-go="#/moments">☁ ' +
+       uiCopy('看看小在带回了什么', 'See what Xiaozai found') + '</button>' +
+       '<button data-go="#/community">' + uiCopy('接力一个地方', 'Pass a place along') + '</button></div>';
   h += '</div>';
   h += tripStrip();
   return h;
@@ -3399,6 +3528,12 @@ function renderOffer(){
     h += '<div class="say"><span class="zai">' + cloudSVG() + '</span><div class="bubble">' +
          '<span class="tag">小在</span><p>' + keepQuotedTogether(escapeHTML(note)) + '</p></div></div>';
   }
+  const report = (state.read && state.read.state && state.read.state.self_report) || {};
+  h += '<div class="moment-controls"><span style="font:12px/2 var(--sans);color:var(--ink-dim)">' +
+       uiCopy('再校准一下：', 'Tune it:') + '</span><button data-stimulus="less" class="' +
+       (report.stimulus === 'less' ? 'on' : '') + '">' + uiCopy('少一点声音', 'Less sound') +
+       '</button><button data-stimulus="more" class="' + (report.stimulus === 'more' ? 'on' : '') + '">' +
+       uiCopy('多一点热闹', 'More energy') + '</button></div>';
 
   h += '<div class="primary-card">';
   h += coverHTML(p, {style:"aspect-ratio:24/9;border:0;border-radius:0"});
@@ -3912,6 +4047,9 @@ function render(){
   else if (r === "#/talk")   inner = renderTalk();
   else if (r === "#/recheck")  inner = renderRecheck();
   else if (r === "#/settings") inner = renderSettings();
+  else if (r === "#/moments") inner = renderMoments();
+  else if (r === "#/community") inner = renderCommunity();
+  else if (r === "#/matching") inner = renderMatching();
   else if (r === "#/echo")   inner = renderEcho();
   else if (r === "#/fix")    inner = renderFix();
   else if (r === "#/offer")  inner = renderOffer();
@@ -3997,6 +4135,57 @@ function bind(){
   });
 
   root.querySelectorAll("[data-mood]").forEach(el => el.onclick = () => { state.mood = el.dataset.mood; state.needs = []; render(); });
+
+  root.querySelectorAll("[data-city]").forEach(el => el.onclick = () => {
+    state.momentCity = el.dataset.city;
+    state.momentNote = "";
+    render();
+  });
+  root.querySelectorAll("[data-collect]").forEach(el => el.onclick = () => {
+    const moment = momentById(el.dataset.collect);
+    const card = CurrentMoments.collect(moment, Date.now(), state.mood, "caught");
+    if (!card) return;
+    state.momentData.cards = state.momentData.cards.filter(item => item.id !== card.id).concat(card);
+    CurrentMoments.write(localStorage, state.momentData);
+    state.momentNote = uiCopy("收好了：我赶上的这一场。", "Saved: a moment I caught.");
+    render();
+  });
+  const momentForm = root.querySelector("#moment-form");
+  if (momentForm) {
+    const identity = momentForm.elements.visibility;
+    const nickname = momentForm.querySelector(".moment-nickname");
+    identity.onchange = () => { nickname.hidden = identity.value !== "named"; };
+    momentForm.onsubmit = event => {
+      event.preventDefault();
+      const values = Object.fromEntries(new FormData(momentForm).entries());
+      const item = CurrentMoments.contribution(Object.assign(values, {mood:state.mood, city:state.momentCity}),
+        Date.now(), "local_" + Date.now().toString(36));
+      if (!item) {
+        state.momentNote = uiCopy("还差地方、理由，或署名。", "Add a place, reason, and name if named.");
+        render();
+        return;
+      }
+      state.momentData.contributions.push(item);
+      CurrentMoments.write(localStorage, state.momentData);
+      state.momentNote = uiCopy("已存为本机草稿。还没有对外发布。", "Saved locally. It has not been published.");
+      render();
+    };
+  }
+  root.querySelectorAll("[data-match]").forEach(el => el.onclick = () => {
+    const action = el.dataset.match;
+    if (action === "mine") state.momentData.match = {
+      isDemo:true, intent:"meet", mine:true, theirs:false, blocked:false, expiresAt:Date.now() + 30 * 60000
+    };
+    else if (action === "theirs" && state.momentData.match) state.momentData.match.theirs = true;
+    else if (action === "decline") state.momentData.match = null;
+    render();
+  });
+  root.querySelectorAll("[data-stimulus]").forEach(el => el.onclick = () => {
+    if (!state.read || !state.read.state) return;
+    state.read.state.self_report = state.read.state.self_report || {};
+    state.read.state.self_report.stimulus = el.dataset.stimulus;
+    runRecommend(state.read.state, uiCopy("按你刚选的环境重新排了。", "Re-ranked for that environment."));
+  });
 
   const naturalInput = root.querySelector("#natural-input");
   const naturalSubmit = root.querySelector("#natural-submit");
@@ -4578,12 +4767,19 @@ function bind(){
   root.querySelectorAll("[data-wipecancel]").forEach(el => el.onclick = () => { state.pendingWipe = false; render(); });
   root.querySelectorAll("[data-wipeyes]").forEach(el => el.onclick = () => {
     const ids = state.records.filter(r => !r.demo && r.recommendationId).map(r => r.recommendationId);
-    try { localStorage.removeItem(REACH_KEY); localStorage.removeItem(TRIP_KEY); } catch(e){}
+    try {
+      localStorage.removeItem(REACH_KEY);
+      localStorage.removeItem(TRIP_KEY);
+      localStorage.removeItem(CurrentMoments.KEY);
+      localStorage.removeItem(CurrentMoments.SCENARIO_KEY);
+    } catch(e){}
     CurrentAI.stopPresence();
     state.watchingPlaceId = null;
     state.reach = loadReach();
     state.trip = null;
     state.records = [];
+    state.momentData = CurrentMoments.read(localStorage);
+    state.momentScenarioAt = CurrentMoments.scenario(localStorage, Date.now());
     state.pendingWipe = false;
     state.reachNote = uiCopy("清空了。这台设备上不剩什么了。", "Your records on this device are gone.");
     // 本地清了，服务端那几条也得删——否则「清空」只是个说法

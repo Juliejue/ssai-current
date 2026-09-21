@@ -65,6 +65,11 @@ def _target_for(state: NeedState, catalog: dict) -> tuple[dict[str, float], dict
         for dimension, value in need["target"].items():
             target[dimension] = value
             boosts[dimension] = boosts.get(dimension, 0) + 1
+    # Explicit environmental preference outranks the coarse mood prior.
+    # High arousal alone cannot tell us whether someone wants calm or excitement.
+    if state.self_report.stimulus != "unknown":
+        target["l"] = 0.1 if state.self_report.stimulus == "less" else 0.8
+        boosts["l"] = boosts.get("l", 0) + 2
     return target, boosts
 
 
@@ -314,6 +319,9 @@ def _reason_chain(place: dict, state: NeedState, catalog: dict, lang: str = "zh"
     # 「不想要」是用户自己说出口的，比任何推断都硬，所以它占掉那三样里的一个。
     avoided = [avoid_table[key] for key in state.avoid_tags if key in avoid_table][:1]
     wanted = [need_table[key] for key in state.need_keys if key in need_table]
+    if state.self_report.stimulus != "unknown":
+        wanted.insert(0, ("less sound" if state.self_report.stimulus == "less" else "more sound")
+                      if english else ("少一些声音" if state.self_report.stimulus == "less" else "多一些声音"))
     explicit = [place_type_table[key] for key in state.place_types if key in place_type_table][:2]
     inferred = [state_table.get(state.mood_id, "hard to name" if english else "说不太清楚")] + wanted
     # 明说“不想要”的信号不能被三个名额挤掉；它比情绪推断更硬。
@@ -536,6 +544,7 @@ def _to_recommendation(
         ),
         map_verified=(place.get("amap") or {}).get("verification_status") == "verified",
         source=place.get("source") or "curated",
+        attribute_source="category_estimate" if place.get("source") == "discovered" else "editorial_estimate",
         photos=[url for url in (place.get("photos") or []) if isinstance(url, str)][:3],
         category=category,
         area=place.get("area"),
