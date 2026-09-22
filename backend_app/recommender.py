@@ -18,6 +18,7 @@ from .map_provider import (AmapClient, MapProviderError, TRUSTWORTHY_COORDINATES
 from .opening_hours import open_state
 from .presence import geofence_radius_m, has_geofence
 from .schemas import Geofence, Location, NeedState, RecommendRequest, Recommendation
+from .space_profiles import apply_profile, load_space_profiles
 
 
 logger = logging.getLogger("current.recommender")
@@ -401,6 +402,7 @@ def _rank(
     request: RecommendRequest,
     now: datetime | None = None,
     discovered: list[dict] | None = None,
+    profile_overlays: dict[str, dict] | None = None,
 ) -> list[tuple[float, dict, dict[str, float]]]:
     catalog = load_catalog()
     rejected = set(request.rejected_place_ids)
@@ -408,7 +410,11 @@ def _rank(
     ranked: list[tuple[float, dict, dict[str, float]]] = []
 
     # 人工核对过的和现场搜出来的走同一套打分——差别在数据可信度，不在算法。
-    for place in list(catalog["PLACES"]) + list(discovered or []):
+    for original in list(catalog["PLACES"]) + list(discovered or []):
+        place = apply_profile(
+            original,
+            (profile_overlays or {}).get(str(original.get("placeId") or "")),
+        )
         if not _hard_filter(place, request.state, rejected, now):
             continue
         need_match = _match_score(place, request.state, catalog)
@@ -544,7 +550,13 @@ def _to_recommendation(
         ),
         map_verified=(place.get("amap") or {}).get("verification_status") == "verified",
         source=place.get("source") or "curated",
-        attribute_source="category_estimate" if place.get("source") == "discovered" else "editorial_estimate",
+        attribute_source=(
+            "category_estimate"
+            if place.get("source") == "discovered"
+            else "verified_feedback"
+            if place.get("profile_source") == "verified_feedback"
+            else "editorial_estimate"
+        ),
         photos=[url for url in (place.get("photos") or []) if isinstance(url, str)][:3],
         category=category,
         area=place.get("area"),
@@ -562,10 +574,8 @@ def _to_recommendation(
         time_to_relief=tier,  # type: ignore[arg-type]
         relief_label=relief_label,
         reason_chain=_reason_chain(place, state, load_catalog(), lang),
-        # Current has no verified visit feedback yet, so nothing may be
-        # presented as an average (FR-10b). The prototype numbers stay out.
-        sample_size=0,
-        low_support=True,
+        sample_size=int(place.get("profile_sample_size") or 0),
+        low_support=int(place.get("profile_sample_size") or 0) < 5,
         open_state=status,  # type: ignore[arg-type]
         open_label=open_label,
         hours_source=hours_source,  # type: ignore[arg-type]
@@ -624,9 +634,25 @@ async def recommend_with_live_context(
     now: datetime | None = None,
 ) -> list[Recommendation]:
     client = map_client or AmapClient()
+    curated_ids = [str(place.get("placeId")) for place in load_catalog()["PLACES"] if place.get("placeId")]
+    # Feedback profiles come from verified dwell visits only. Load them beside
+    # map discovery so a slow database cannot turn into serial user latency.
+    profile_task = asyncio.create_task(load_space_profiles(curated_ids))
     # 现场从地图上搜候选。搜不到就退回人工那 26 个——少给选项，但绝不编。
     discovered = await discover(client, request.location, request.state) if request.location else []
-    ranked = _rank(request, now, discovered=discovered)
+    try:
+        profile_overlays = await asyncio.wait_for(profile_task, timeout=0.75)
+    except (TimeoutError, asyncio.CancelledError):
+        profile_overlays = {}
+    try:
+        ranked = _rank(request, now, discovered=discovered, profile_overlays=profile_overlays)
+    except TypeError as error:
+        # A few integrators replace the ranking function with a narrow test or
+        # experiment hook. Preserve that public seam while the built-in ranker
+        # accepts verified profile overlays.
+        if "profile_overlays" not in str(error):
+            raise
+        ranked = _rank(request, now, discovered=discovered)
     if not request.location or not client.configured:
         return [
             _to_recommendation(score, place, breakdown, request.state, role="primary" if index == 0 else "alternate", now=now, lang=request.lang)

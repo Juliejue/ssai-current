@@ -10,29 +10,37 @@ import uuid
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
+from .community import delete_contribution, list_approved_contributions, submit_contribution
 from .interpretation import interpret
 from .i18n import ui
-from .map_provider import MapProviderError, static_map_png
+from .map_provider import AmapClient, MapProviderError, static_map_png
 from .realtime_asr import build_asr_connect_url, is_configured as realtime_asr_is_configured
 from .presence import verify as verify_presence
 from .relay import append_event, create_session, normalize_code, read_events, safe_payload, valid_code
 from .reflect import reflect_quietly
 from .recommender import load_catalog, recommend_with_live_context, warm_discovery
 from .schemas import (
+    CommunityContributionDelete,
+    CommunityContributionList,
+    CommunityContributionRequest,
+    CommunityContributionResponse,
     InterpretRequest,
     InterpretResponse,
+    Location,
     OutcomeDeleteRequest,
     OutcomeRequest,
     ProductEvent,
     RelayEventRequest,
     RelayReadResponse,
     RelaySessionResponse,
+    ReverseLocationResponse,
     RecommendRequest,
     ReflectRequest,
     ReflectResponse,
     RecommendResponse,
     RiskLevel,
 )
+from .space_profiles import refresh_space_profile
 from .storage import delete_outcome, safe_event_properties, store_outcome, store_product_event, store_recommendations
 
 
@@ -66,6 +74,46 @@ async def structured_logging(request: Request, call_next):
 @app.get("/api/v1/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.post("/api/v1/location/reverse", response_model=ReverseLocationResponse)
+async def reverse_location(payload: Location) -> ReverseLocationResponse:
+    """Resolve city without putting a user's coordinates in our logs or database."""
+    try:
+        result = await AmapClient().reverse_geocode(
+            longitude=payload.longitude,
+            latitude=payload.latitude,
+        )
+    except MapProviderError as error:
+        raise HTTPException(status_code=503, detail="城市暂时识别不了") from error
+    return ReverseLocationResponse(**result.__dict__)
+
+
+@app.post(
+    "/api/v1/community/contributions",
+    response_model=CommunityContributionResponse,
+    status_code=202,
+)
+async def community_submit(payload: CommunityContributionRequest) -> CommunityContributionResponse:
+    contribution_id, receipt_token, persisted = await submit_contribution(payload)
+    return CommunityContributionResponse(
+        persisted=persisted,
+        contribution_id=contribution_id,
+        receipt_token=receipt_token,
+    )
+
+
+@app.get("/api/v1/community/contributions", response_model=CommunityContributionList)
+async def community_list(city: str | None = None) -> CommunityContributionList:
+    clean_city = city.strip()[:40] if city else None
+    contributions = await list_approved_contributions(clean_city or None)
+    return CommunityContributionList(contributions=contributions)
+
+
+@app.post("/api/v1/community/contributions/delete", status_code=202)
+async def community_delete(payload: CommunityContributionDelete) -> dict[str, bool]:
+    deleted = await delete_contribution(payload.contribution_id, payload.receipt_token)
+    return {"accepted": True, "deleted": deleted}
 
 
 @app.post("/api/v1/relay/sessions", response_model=RelaySessionResponse)
@@ -267,13 +315,15 @@ def _place_by_id(place_id: str) -> dict | None:
 
 
 @app.post("/api/v1/outcomes", status_code=202)
-async def outcome(payload: OutcomeRequest) -> dict[str, bool | str]:
+async def outcome(payload: OutcomeRequest, background_tasks: BackgroundTasks) -> dict[str, bool | str]:
     # 浏览器的在场声明只会被往下降，永远不会被采信为更高等级（FR-08 L3）。
     level, presence_reason = verify_presence(payload.presence_level, payload.dwell_minutes, _place_by_id(payload.place_id))
     payload = payload.model_copy(update={"presence_level": level})
     # Never log the optional note, even when the user explicitly shares it anonymously.
     logger.info(json.dumps({"event": "outcome_saved", "session_id": payload.session_id, "recommendation_id": payload.recommendation_id, "place_id": payload.place_id, "change_score": payload.change_score, "factor_count": len(payload.factor_keys), "visibility": payload.visibility, "mismatch_stage": payload.mismatch_stage, "presence_level": level, "dwell_minutes": payload.dwell_minutes}, ensure_ascii=False))
     persisted = await store_outcome(payload)
+    if persisted and level == "geofence_dwell":
+        background_tasks.add_task(refresh_space_profile, payload.place_id)
     return {"accepted": True, "persisted": persisted, "presence_level": level, "presence_reason": presence_reason}
 
 

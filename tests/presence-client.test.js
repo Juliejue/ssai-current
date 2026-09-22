@@ -56,7 +56,11 @@ function makePresenceRuntime(search = '', options = {}) {
       setItem: (key, value) => storage.set(key, value),
     },
     crypto: { randomUUID: () => 'presence-test' },
-    fetch: async () => ({ ok: true, json: async () => ({}) }),
+    fetch: async (url) => ({
+      ok: true,
+      json: async () => url.endsWith('/location/reverse') && options.reverseCity
+        ? {city: options.reverseCity, source: 'amap'} : {},
+    }),
     URL,
     URLSearchParams,
     console,
@@ -177,8 +181,10 @@ test('real location accepts all four pilot cities', async () => {
   }
 });
 
-test('real location outside the four pilots stays honest', async () => {
-  const runtime = makePresenceRuntime();
+test('real location outside the four pilots uses exact reverse geocoding', async () => {
+  const runtime = makePresenceRuntime('', {reverseCity:'成都'});
   runtime.setCurrentPosition(runtime.position(30.57, 104.07));
-  await assert.rejects(runtime.current.requestLocation(), /北京、上海、广州和深圳/);
+  await runtime.current.requestLocation();
+  assert.equal(runtime.current.getLocationMode(), 'real');
+  assert.equal(runtime.current.getLocationCity(), '成都');
 });

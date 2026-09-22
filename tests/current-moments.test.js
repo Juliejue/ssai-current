@@ -44,6 +44,13 @@ test("contribution types have intentional expiry windows", () => {
   assert.equal(Moments.contribution({...base, kind:"seasonal"}, 100, "c").expiresAt, 100 + 10080 * 60000);
 });
 
+test("a real city outside the four demo cities is preserved", () => {
+  const item = Moments.contribution({
+    place:"河边", reason:"风很轻", mood:"quiet", city:"成都", kind:"lasting_place"
+  }, 100, "chengdu");
+  assert.equal(item.city, "成都");
+});
+
 test("local storage never persists identity or matching state", () => {
   const store = memory();
   Moments.write(store, {contributions:[], cards:[], match:{mine:true}, nickname:"小叶"});

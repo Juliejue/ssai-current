@@ -90,7 +90,10 @@
     if (!place || !reason || !mood) return null;
     const kind = KINDS.includes(input.kind) ? input.kind : "lasting_place";
     const expiry = {timed_beauty: 60, sensory: 180, seasonal: 10080}[kind] || null;
-    const city = CITIES.includes(input.city) ? input.city : "北京";
+    // Nearby search is no longer limited to four pilots. Keep the four seeded
+    // demo cities, but let an explicitly selected real city travel with a draft.
+    const requestedCity = String(input.city || "").trim().slice(0, 40);
+    const city = requestedCity || "北京";
     const media = Array.isArray(input.media) ? input.media.slice(0, 4) : [];
     return {id, place, reason, mood, visibility, kind, city,
       createdAt: now, expiresAt: expiry ? now + expiry * 60000 : null, media,

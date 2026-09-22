@@ -62,6 +62,69 @@ class Location(BaseModel):
     longitude: float = Field(ge=-180, le=180)
 
 
+class ReverseLocationResponse(BaseModel):
+    city: str = Field(min_length=1, max_length=40)
+    province: str = Field(default="", max_length=40)
+    district: str = Field(default="", max_length=60)
+    adcode: str = Field(default="", max_length=12)
+    citycode: str = Field(default="", max_length=12)
+    source: Literal["amap"] = "amap"
+
+
+CommunityKind = Literal[
+    "lasting_place", "timed_beauty", "seasonal", "sensory", "quiet_corner"
+]
+
+
+class CommunityContributionRequest(BaseModel):
+    """An explicit submission to moderation; browser-only drafts never call this API."""
+
+    place_name: str = Field(min_length=1, max_length=80)
+    city: str = Field(min_length=1, max_length=40)
+    reason: str = Field(min_length=1, max_length=160)
+    kind: CommunityKind
+    mood_id: str | None = Field(default=None, max_length=40)
+    source_place_id: str | None = Field(default=None, max_length=120)
+    media_count: int = Field(default=0, ge=0, le=4)
+
+    @field_validator("place_name", "city", "reason")
+    @classmethod
+    def strip_community_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("must not be blank")
+        return value
+
+
+class CommunityContributionResponse(BaseModel):
+    accepted: bool = True
+    persisted: bool
+    contribution_id: str | None = None
+    receipt_token: str | None = None
+    moderation_status: Literal["pending"] = "pending"
+
+
+class CommunityContributionPublic(BaseModel):
+    contribution_id: str
+    place_name: str
+    city: str
+    reason: str
+    kind: CommunityKind
+    mood_id: str | None = None
+    media_count: int = 0
+    created_at: str
+    expires_at: str | None = None
+
+
+class CommunityContributionList(BaseModel):
+    contributions: list[CommunityContributionPublic] = Field(default_factory=list, max_length=50)
+
+
+class CommunityContributionDelete(BaseModel):
+    contribution_id: str = Field(min_length=1, max_length=80)
+    receipt_token: str = Field(min_length=20, max_length=200)
+
+
 class InterpretRequest(BaseModel):
     text: str = Field(min_length=1, max_length=2000)
     # 比赛有英文评委。用户读到的内容大半是后端生成的，所以语言必须传到这一层，
@@ -193,7 +256,7 @@ class Recommendation(BaseModel):
     # 地点坐标是公开信息，可以下发——用来在地图上画点。用户的坐标不上传。
     latitude: float | None = None
     longitude: float | None = None
-    attribute_source: Literal["editorial_estimate", "category_estimate"] = "editorial_estimate"
+    attribute_source: Literal["editorial_estimate", "category_estimate", "verified_feedback"] = "editorial_estimate"
 
 
 class RecommendResponse(BaseModel):

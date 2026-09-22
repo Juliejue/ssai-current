@@ -31,6 +31,17 @@ class WalkingRoute:
     mode: str = "walk"
 
 
+@dataclass(frozen=True)
+class ReverseLocation:
+    """Administrative identity returned by Amap, without keeping coordinates."""
+
+    city: str
+    province: str = ""
+    district: str = ""
+    adcode: str = ""
+    citycode: str = ""
+
+
 def parse_location(value: str) -> tuple[float, float]:
     try:
         longitude_text, latitude_text = value.split(",", 1)
@@ -132,6 +143,42 @@ class AmapClient:
                 }
             )
         return candidates
+
+    async def reverse_geocode(self, *, longitude: float, latitude: float) -> ReverseLocation:
+        """Resolve an exact administrative city instead of guessing with rectangles.
+
+        The caller sends GCJ-02 coordinates already used by Amap routing. We ask
+        only for the base address component and deliberately return no coordinate
+        or nearby-POI payload.
+        """
+        if not (-180 <= longitude <= 180 and -90 <= latitude <= 90):
+            raise MapProviderError("坐标超出范围")
+        payload = await self._get(
+            "/v3/geocode/regeo",
+            {
+                "location": f"{longitude:.6f},{latitude:.6f}",
+                "extensions": "base",
+                "radius": 0,
+            },
+        )
+        component = (payload.get("regeocode") or {}).get("addressComponent") or {}
+
+        def scalar(value: Any) -> str:
+            return value.strip() if isinstance(value, str) else ""
+
+        province = scalar(component.get("province"))
+        city = scalar(component.get("city")) or province
+        if not city:
+            raise MapProviderError("地图服务没有返回城市")
+        # Keep names compact and compatible with the existing city tabs.
+        compact_city = city[:-1] if city.endswith("市") else city
+        return ReverseLocation(
+            city=compact_city,
+            province=province,
+            district=scalar(component.get("district")),
+            adcode=scalar(component.get("adcode")),
+            citycode=scalar(component.get("citycode")),
+        )
 
     async def search_around(
         self,

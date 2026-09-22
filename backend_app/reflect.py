@@ -35,6 +35,7 @@ logger = logging.getLogger("current.reflect")
 
 REFLECT_TIMEOUT_SECONDS = 14
 REFLECT_ATTEMPTS = 3
+REFLECT_MAX_TOKENS = 240
 MAX_ACK_CHARS = 46
 MAX_ACK_CHARS_EN = 110
 
@@ -127,6 +128,7 @@ async def reflect(
     body: dict[str, Any] = {
         "model": model,
         "temperature": 0.4,
+        "max_tokens": REFLECT_MAX_TOKENS,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT + (ENGLISH_SUFFIX if lang == "en" else "")},
             {"role": "user", "content": user_prompt},

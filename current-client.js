@@ -353,6 +353,33 @@
     });
   }
 
+  function submitCommunityContribution(contribution) {
+    return api('/community/contributions', {
+      method: 'POST',
+      body: JSON.stringify({
+        place_name: contribution.place,
+        city: contribution.city,
+        reason: contribution.reason,
+        kind: contribution.kind,
+        mood_id: contribution.mood || null,
+        source_place_id: contribution.placeId || null,
+        media_count: Array.isArray(contribution.media) ? contribution.media.length : 0
+      })
+    });
+  }
+
+  function listCommunityContributions(city) {
+    var query = city ? '?city=' + encodeURIComponent(city) : '';
+    return api('/community/contributions' + query, { method: 'GET' });
+  }
+
+  function deleteCommunityContribution(contributionId, receiptToken) {
+    return api('/community/contributions/delete', {
+      method: 'POST',
+      body: JSON.stringify({ contribution_id: contributionId, receipt_token: receiptToken })
+    });
+  }
+
   function interpretAndRecommend(text) {
     // 把位置一起送过去：模型读这句话要几秒，服务端可以在同一段时间里
     // 先把周边搜好，等用户点到推荐那一步就不用再等。
@@ -378,25 +405,25 @@
       navigator.geolocation.getCurrentPosition(function (position) {
         var latitude = position.coords.latitude;
         var longitude = position.coords.longitude;
-        var city = PILOT_BOUNDS.find(function (item) {
+        var fallbackCity = PILOT_BOUNDS.find(function (item) {
           return latitude >= item.minLat && latitude <= item.maxLat &&
             longitude >= item.minLng && longitude <= item.maxLng;
         });
-        if (!city) {
-          activeLocation = null;
-          activeLocationMode = null;
-          activeLocationCity = null;
-          reject(new Error(voiceCopy('当前位置暂未开放；目前支持北京、上海、广州和深圳。',
-            'Your city is not open yet. Beijing, Shanghai, Guangzhou and Shenzhen are supported.')));
-          return;
-        }
         // Kept only in page memory. The backend uses it for this route request and
         // deliberately excludes it from logs and persistence.
         // 浏览器给 WGS-84，高德路线接口收 GCJ-02，所以只在内存中转换一次。
         activeLocation = wgs2gcj(latitude, longitude);
         activeLocationMode = 'real';
-        activeLocationCity = city.name;
-        resolve(activeLocation);
+        activeLocationCity = fallbackCity ? fallbackCity.name : null;
+        api('/location/reverse', {
+          method: 'POST',
+          body: JSON.stringify(activeLocation)
+        }).then(function (result) {
+          if (result && result.city) activeLocationCity = result.city;
+        }).catch(function () {
+          // Exact city is useful context, not permission to use location. Nearby
+          // search still works from the in-memory coordinate when geocoding is down.
+        }).finally(function () { resolve(activeLocation); });
       }, function () {
         reject(new Error(voiceCopy('没有获得位置权限，仍可以继续推荐。', 'Location is off. Recommendations still work.')));
       }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
@@ -1054,6 +1081,9 @@
     recommendFor: recommendFor,
     reflectOn: reflectOn,
     deleteOutcome: deleteOutcome,
+    submitCommunityContribution: submitCommunityContribution,
+    listCommunityContributions: listCommunityContributions,
+    deleteCommunityContribution: deleteCommunityContribution,
     hasLocation: function () { return Boolean(activeLocation); },
     getLocationMode: function () { return activeLocationMode; },
     getLocationCity: function () { return activeLocationCity; },

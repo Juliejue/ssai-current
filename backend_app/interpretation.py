@@ -18,7 +18,8 @@ from .schemas import ClarifyOption, CorrectionOptions, InterpretResponse, NeedSt
 logger = logging.getLogger("current.interpretation")
 
 # 每次改 SYSTEM_PROMPT 都要抬版本号——留痕靠它才能对得上（FR-30）。
-PROMPT_VERSION = "sp2-interpret-v0.6"
+PROMPT_VERSION = "sp2-interpret-v0.7-compact"
+INTERPRET_MAX_TOKENS = 420
 
 # 限流和 schema 失败是两回事，重试方式也不一样：
 # 429/5xx 是「现在排不上队」，立刻重试等于白试，要等一下；
@@ -620,8 +621,8 @@ def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[st
     return response
 
 
-SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户的中文自然表达转换为 JSON，不能诊断、不能给人格贴标签。
-只输出 JSON，字段必须符合：
+SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户原话转换成 JSON；不诊断、不贴人格标签、不补写用户没说的事实。
+只输出以下结构：
 {
   "mood_id": "low|quiet|noisy|spark|tired|empty|tight|heated|near|fresh|bright|okay",
   "need_keys": ["hide|sit|walk|free|green|new|sound|people|loud|slow|hands|breathe|nothing"],
@@ -632,50 +633,23 @@ SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户的中文自然�
   "max_travel_minutes": 5-180 或 null,
   "budget_level": "free|low|medium|high|unknown",
   "environment": "indoor|outdoor|either",
-  "avoid_tags": ["和 need_keys 同一套词表；放用户明说不想要的那些"],
+  "avoid_tags": ["同 need_keys 枚举，只放用户明确不要的"],
   "confidence": 0-1,
   "needs_clarification": boolean,
   "clarifying_question": string 或 null,
   "risk_level": "ordinary|elevated|urgent",
   "risk_signals": [],
-  "evidence": ["1-3 条，见下面的写法"]
+  "evidence": ["1-3 条用户可见短句"]
 }
-只有缺失会改变推荐的关键事实时才追问一个问题。不要根据语气、身份或疾病做推断。
-
-mood_id 是当前最接近的身体/情绪状态，不是默认的“需要放松”：
-- low：明确的难过、失落、委屈；quiet：明确受不了声音或人群。
-- noisy：念头反复、脑子停不下来；不能把正面的兴奋或庆祝归到这里。
-- tired：用户明确说累、困、没睡好或没力气时才用。加班、开会、很晚本身不能证明累。
-- empty：空落落、没着落；tight：紧张、心慌、绷着；heated：生气、窝火、想发火。
-- near：不想独处、想有人在旁边；fresh：想换环境；bright：开心、兴奋、庆祝；okay：中性或证据不足。
-直接说出的感受高于你对事件的刻板推断。转折句以用户最后强调的当前状态为准。
-正面情绪要帮助延续或表达，不要自动改写成休息；负面情绪也不自动等于安静。
-
-need_keys 放用户想要的，avoid_tags 放他明说不想要的，两边都用上面那套词表。
-「不想见人」→ avoid_tags 里放 people；「不想吵」→ 放 loud；「什么都不做」→ 放 hands。
-别把同一个词同时放进两边。没明说的不要替他填。
-
-place_types 只放用户明确说出的地点或活动，不许从情绪猜。
-「心情不好，我想吃烤串」→ mood_id=low，place_types=["barbecue"]。
-「很累，想做陶艺」→ mood_id=tired，place_types=["craft"]。
-「拿到 offer 很兴奋，想找个热闹的地方庆祝」→ mood_id=bright，need_keys=["loud"], energy=3。
-「我很生气，想出去走走吹风」→ mood_id=heated，need_keys=["walk","breathe"]。
-「不想一个人待着，但也不想说话」→ mood_id=near，need_keys=["people"], social_mode=low_contact；绝不能读成 alone 或 hide。
-「刚开完会，现在不知道去哪儿」没有明确情绪 → mood_id=okay，低 confidence；绝不能只因开会猜 tired。
-明确地点/活动是硬要求，绝不能用推断出的情绪把它替换成另一类空间。
-
-evidence 的写法（这是给用户看的，不是给程序看的）：
-- 每条必须包含用户真的说过的词，用「」括起来。编造用户没说过的话属于失败。
-- 用小在的口气：短句、白话、身体感。不要出现字段名、术语、临床词。
-- 每条不超过 25 个字。
-
-好的例子：
-  「吵完架」——所以我猜你现在还绷着
-  「谁都不想理」——所以我把人多的地方去掉了
-  「胃是空的」——所以我顺手找了能吃口东西的
-不好的例子（不要这样写）：
-  「加班到现在」——所以我怎么理解：当前处于长时间工作后的疲惫状态
-  「人也是空的」——对应 mood_id 为 empty"""
+规则：
+1. 直接表达 > 场景推断；转折后最后强调的状态优先。证据不足用 okay 且低 confidence。
+2. tired 只用于明确“累/困/没睡好/没力气”；加班、开会、很晚不能单独证明累。
+3. bright 是开心/兴奋/庆祝；noisy 是念头反复，二者不能混。负面不等于想安静，正面不等于想休息。
+4. need_keys=想要；avoid_tags=明确不要；同一词不能同时出现。“不想见人”→avoid people，“不想吵”→avoid loud。
+5. place_types 只放用户明说的地点/活动，绝不能从情绪猜或换掉。例：难过但想吃烤串→mood_id=low, place_types=["barbecue"]。
+6. “不想一个人但也不想说话”→near + people + low_contact；不能变成 alone/hide。
+7. 只有缺失信息会改变推荐时才问一个问题。
+8. evidence 每条≤25字，必须用「」逐字引用用户原话；短、白话、无字段名/术语/临床词。例：「谁都不想理」——所以我把人多的去掉了。"""
 
 
 ENGLISH_SUFFIX = """
@@ -720,6 +694,7 @@ async def _call_model(client: httpx.AsyncClient, *, base_url: str, api_key: str,
     payload = {
         "model": model,
         "temperature": temperature,
+        "max_tokens": INTERPRET_MAX_TOKENS,
         "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT + (ENGLISH_SUFFIX if lang == "en" else "")},

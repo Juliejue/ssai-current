@@ -1808,6 +1808,9 @@ const state = {
   momentNote: "",
   momentDraft: null,
   pendingMedia: [],
+  communityApproved: [],
+  communityLoadedCity: null,
+  communityLoading: false,
   relayEvents: [],
   relayNote: null
 };
@@ -3343,21 +3346,28 @@ function renderMoments(){
 
 function communityItem(item){
   return '<article class="moment-card"><span class="moment-badge">' +
-    (item.published ? uiCopy('已发布', 'Published') : uiCopy('只存在这台设备 · 草稿', 'On this device · draft')) +
+    (item.published ? uiCopy('已发布', 'Published') : item.serverStatus === 'pending' ? uiCopy('已提交 · 等待审核', 'Submitted · pending review') : uiCopy('只存在这台设备 · 草稿', 'On this device · draft')) +
     '</span><h3>' + escapeHTML(item.place) + '</h3><p>“' + escapeHTML(item.reason) + '”</p>' +
     ((item.media || []).length ? '<div class="community-media" data-media-owner="' + escapeHTML(item.id) + '"></div>' : '') +
     '<div class="moment-meta"><span>' + uiCopy('匿名', 'Anonymous') + '</span><span>' + escapeHTML(item.city) + '</span></div></article>';
 }
+function approvedCommunityItem(item){
+  return '<article class="moment-card"><span class="moment-badge">' + uiCopy('审核通过的空间线索', 'Reviewed place signal') +
+    '</span><h3>' + escapeHTML(item.place_name) + '</h3><p>“' + escapeHTML(item.reason) + '”</p>' +
+    '<div class="moment-meta"><span>' + uiCopy('匿名', 'Anonymous') + '</span><span>' + escapeHTML(item.city) + '</span></div></article>';
+}
 function renderCommunity(){
   const draft = state.momentDraft || {};
+  const currentCity = CurrentAI.getLocationCity();
+  const communityCities = Array.from(new Set([currentCity].concat(CurrentMoments.CITIES).filter(Boolean)));
   let h = topbar(uiCopy('把好地方递下去', 'Pass a place along'), uiCopy('接力社群', 'Community relay'), '#/moments');
   h += '<div class="screen"><div class="pad moment-wrap">';
-  h += '<p class="lead">' + uiCopy('不建主页、不显示昵称、不能私信。你留下的是一条匿名空间线索；审核与汇总机制接好之前，它只存在这台设备上。',
-    'No profiles, handles, or DMs. You leave an anonymous place signal; until moderation and aggregation are ready, it stays on this device.') + '</p>';
+  h += '<p class="lead">' + uiCopy('不建主页、不显示昵称、不能私信。你可以只存在本机，也可以主动提交一条匿名空间线索；提交后先审核，不会直接公开。',
+    'No profiles, handles, or DMs. Keep it only on this device, or explicitly submit an anonymous place signal for review. Nothing is published automatically.') + '</p>';
   h += '<form class="moment-form" id="moment-form"><label>' + uiCopy('地方', 'Place') +
     '<input name="place" maxlength="80" required value="' + escapeHTML(draft.place || '') + '" placeholder="' + uiCopy('例如：楼下那棵桂花树', 'e.g. the tree downstairs') + '"></label>' +
     '<label>' + uiCopy('城市', 'City') + '<select name="city">' +
-    CurrentMoments.CITIES.map(city => '<option value="' + city + '"' + (city === (draft.city || state.momentCity) ? ' selected' : '') + '>' + city + '</option>').join('') +
+    communityCities.map(city => '<option value="' + city + '"' + (city === (draft.city || currentCity || state.momentCity) ? ' selected' : '') + '>' + city + '</option>').join('') +
     '</select></label>' +
     '<label>' + uiCopy('它在此刻帮到了什么', 'What helped') +
     '<textarea name="reason" maxlength="160" required placeholder="' + uiCopy('一句具体的理由', 'One concrete reason') + '">' + escapeHTML(draft.reason || '') + '</textarea></label>' +
@@ -3372,12 +3382,17 @@ function renderCommunity(){
     '<small>' + uiCopy('最多 3 张照片，或 1 段不超过 1 分钟的视频。先保存在这台设备上。', 'Up to 3 photos, or one video under 1 minute. Saved on this device.') + '</small></label>' +
     '<div id="moment-media-preview" class="media-preview"></div>' +
     '<div class="sample-note">' + uiCopy('始终匿名；这不是交友资料，也不会生成个人主页。', 'Always anonymous. This is not a social profile.') + '</div>' +
-    '<button class="btn sm" type="submit">' + uiCopy('存为本机草稿', 'Save local draft') + '</button></form>';
+    '<div class="share-row"><button class="btn ghost sm" type="submit" data-submit-mode="local">' + uiCopy('只存本机', 'Keep on device') + '</button>' +
+    '<button class="btn sm" type="submit" data-submit-mode="review">' + uiCopy('提交审核', 'Submit for review') + '</button></div></form>';
   if (state.momentNote) h += '<p class="moment-status">' + escapeHTML(state.momentNote) + '</p>';
   const mine = state.momentData.contributions.slice().reverse();
   h += '<h2 style="margin-top:26px">' + uiCopy('我的草稿', 'My drafts') + '</h2>' +
     (mine.length ? mine.map(communityItem).join('') : '<div class="moment-card"><p>' +
       uiCopy('还没有草稿。完成一次到访反馈后，小在也会替你预填一份。', 'No drafts yet. After a visit, Xiaozai can prepare one for you.') + '</p></div>');
+  h += '<h2 style="margin-top:26px">' + uiCopy('审核通过的线索', 'Reviewed signals') + '</h2>' +
+    (state.communityLoading ? '<div class="moment-card"><p>' + uiCopy('正在取回…', 'Loading…') + '</p></div>' :
+      state.communityApproved.length ? state.communityApproved.map(approvedCommunityItem).join('') :
+      '<div class="moment-card"><p>' + uiCopy('这个城市暂时还没有审核通过的线索。', 'No reviewed signals for this city yet.') + '</p></div>');
   h += '</div></div>';
   return h;
 }
@@ -4205,6 +4220,20 @@ window.addEventListener("resize", () => { if (state.route === "#/compare") scale
 function bind(){
   const root = document.getElementById("root");
 
+  if (state.route === "#/community" && state.communityLoadedCity !== state.momentCity && !state.communityLoading) {
+    state.communityLoading = true;
+    CurrentAI.listCommunityContributions(state.momentCity).then(result => {
+      state.communityApproved = Array.isArray(result.contributions) ? result.contributions : [];
+      state.communityLoadedCity = state.momentCity;
+    }).catch(() => {
+      state.communityApproved = [];
+      state.communityLoadedCity = state.momentCity;
+    }).finally(() => {
+      state.communityLoading = false;
+      if (state.route === "#/community") render();
+    });
+  }
+
   if (state.route === "#/pick") {
     const list = rankedPlaces();
     const visible = list[((state.cardIndex % list.length) + list.length) % list.length];
@@ -4319,6 +4348,7 @@ function bind(){
     };
     momentForm.onsubmit = async event => {
       event.preventDefault();
+      const submitMode = event.submitter && event.submitter.dataset.submitMode === "review" ? "review" : "local";
       const values = Object.fromEntries(new FormData(momentForm).entries());
       const now = Date.now();
       const contributionId = "local_" + now.toString(36);
@@ -4364,9 +4394,26 @@ function bind(){
       state.momentData.contributions.push(item);
       CurrentMoments.write(localStorage, state.momentData);
       CurrentAI.publishRelay("collector_saved", {place_name:item.place, kind:item.kind}).catch(() => {});
+      if (submitMode === "review") {
+        try {
+          const submitted = await CurrentAI.submitCommunityContribution(item);
+          if (submitted && submitted.persisted) {
+            item.serverStatus = "pending";
+            item.serverContributionId = submitted.contribution_id;
+            item.serverReceiptToken = submitted.receipt_token;
+            CurrentMoments.write(localStorage, state.momentData);
+            state.momentNote = uiCopy("已匿名提交，正在等待审核；在审核前不会公开。", "Submitted anonymously for review. It is not public while pending.");
+          } else {
+            state.momentNote = uiCopy("线上提交暂时没有保存，草稿仍安全地留在这台设备上。", "Online submission was not saved. The draft remains safely on this device.");
+          }
+        } catch (_) {
+          state.momentNote = uiCopy("线上提交暂时没有连上，草稿仍安全地留在这台设备上。", "Online submission could not connect. The draft remains safely on this device.");
+        }
+      } else {
+        state.momentNote = uiCopy("已存为本机草稿。还没有对外提交。", "Saved locally. It has not been submitted.");
+      }
       state.pendingMedia = [];
       state.momentDraft = null;
-      state.momentNote = uiCopy("已存为本机草稿。还没有对外发布。", "Saved locally. It has not been published.");
       render();
     };
   }

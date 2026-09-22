@@ -62,6 +62,29 @@ def test_walking_route_parses_distance_and_duration():
     assert route.duration_seconds == 900
 
 
+def test_reverse_geocode_uses_exact_administrative_city_without_nearby_pois():
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/v3/geocode/regeo"
+        assert request.url.params["location"] == "104.070000,30.570000"
+        assert request.url.params["extensions"] == "base"
+        return httpx.Response(
+            200,
+            json={
+                "status": "1",
+                "infocode": "10000",
+                "regeocode": {"addressComponent": {
+                    "province": "四川省", "city": "成都市", "district": "武侯区",
+                    "adcode": "510107", "citycode": "028",
+                }},
+            },
+        )
+
+    client = AmapClient(api_key="server-secret", transport=httpx.MockTransport(handler))
+    result = asyncio.run(client.reverse_geocode(longitude=104.07, latitude=30.57))
+    assert result.city == "成都"
+    assert result.adcode == "510107"
+
+
 def test_provider_error_and_coordinate_validation():
     def handler(_: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"status": "0", "infocode": "10001", "info": "INVALID_USER_KEY"})
