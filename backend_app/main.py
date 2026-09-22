@@ -15,6 +15,7 @@ from .i18n import ui
 from .map_provider import MapProviderError, static_map_png
 from .realtime_asr import build_asr_connect_url, is_configured as realtime_asr_is_configured
 from .presence import verify as verify_presence
+from .relay import append_event, create_session, normalize_code, read_events, safe_payload, valid_code
 from .reflect import reflect_quietly
 from .recommender import load_catalog, recommend_with_live_context, warm_discovery
 from .schemas import (
@@ -23,6 +24,9 @@ from .schemas import (
     OutcomeDeleteRequest,
     OutcomeRequest,
     ProductEvent,
+    RelayEventRequest,
+    RelayReadResponse,
+    RelaySessionResponse,
     RecommendRequest,
     ReflectRequest,
     ReflectResponse,
@@ -62,6 +66,40 @@ async def structured_logging(request: Request, call_next):
 @app.get("/api/v1/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.post("/api/v1/relay/sessions", response_model=RelaySessionResponse)
+async def relay_session_create() -> RelaySessionResponse:
+    code, expires_at, durable = await create_session()
+    return RelaySessionResponse(code=code, expires_at=expires_at.isoformat(), durable=durable)
+
+
+@app.get("/api/v1/relay/{code}", response_model=RelayReadResponse)
+async def relay_events(code: str, after: int = 0) -> RelayReadResponse:
+    clean_code = normalize_code(code)
+    if not valid_code(clean_code):
+        raise HTTPException(status_code=404, detail="会话不存在或已经结束")
+    events, expires_at, durable = await read_events(clean_code, max(0, after))
+    if events is None or expires_at is None:
+        raise HTTPException(status_code=404, detail="会话不存在或已经结束")
+    return RelayReadResponse(
+        code=clean_code,
+        expires_at=expires_at.isoformat(),
+        durable=durable,
+        events=events,
+    )
+
+
+@app.post("/api/v1/relay/{code}/events", status_code=202)
+async def relay_event(code: str, payload: RelayEventRequest) -> dict[str, bool | int]:
+    try:
+        safe_payload(payload.event_type, payload.payload)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    sequence, durable = await append_event(code, payload.event_type, payload.payload)
+    if sequence is None:
+        raise HTTPException(status_code=404, detail="会话不存在或已经结束")
+    return {"accepted": True, "sequence": sequence, "durable": durable}
 
 
 @app.get("/api/v1/asr/signature")

@@ -59,17 +59,12 @@
     if (["low", "tired", "tight", "heated"].includes(mood)) return "heavy";
     return "calm";
   }
-  function canReveal(match, now) {
-    return Boolean(match && match.isDemo && match.intent === "meet" &&
-      match.mine === true && match.theirs === true && !match.blocked &&
-      Number.isFinite(match.expiresAt) && now < match.expiresAt);
-  }
-  function empty() { return {contributions: [], cards: [], match: null}; }
+  function empty() { return {contributions: [], cards: []}; }
   function read(storage) {
     try {
       const data = JSON.parse(storage.getItem(KEY));
       if (!data || !Array.isArray(data.contributions) || !Array.isArray(data.cards)) return empty();
-      return {contributions: data.contributions.slice(-100), cards: data.cards.slice(-100), match: null};
+      return {contributions: data.contributions.slice(-100), cards: data.cards.slice(-100)};
     } catch (_) { return empty(); }
   }
   function write(storage, data) {
@@ -91,14 +86,13 @@
     const place = String(input.place || "").trim().slice(0, 80);
     const reason = String(input.reason || "").trim().slice(0, 160);
     const mood = MOODS.includes(input.mood) ? input.mood : null;
-    const visibility = input.visibility === "named" ? "named" : "anonymous";
-    const nickname = visibility === "named" ? String(input.nickname || "").trim().slice(0, 24) : "";
-    if (!place || !reason || !mood || (visibility === "named" && !nickname)) return null;
+    const visibility = "anonymous";
+    if (!place || !reason || !mood) return null;
     const kind = KINDS.includes(input.kind) ? input.kind : "lasting_place";
     const expiry = {timed_beauty: 60, sensory: 180, seasonal: 10080}[kind] || null;
     const city = CITIES.includes(input.city) ? input.city : "北京";
     const media = Array.isArray(input.media) ? input.media.slice(0, 4) : [];
-    return {id, place, reason, mood, visibility, nickname, kind, city,
+    return {id, place, reason, mood, visibility, kind, city,
       createdAt: now, expiresAt: expiry ? now + expiry * 60000 : null, media,
       source: "local_draft", published: false, visits: 0};
   }
@@ -138,6 +132,6 @@
     db.close();
     return blob ? URL.createObjectURL(blob) : null;
   }
-  return {KEY, SCENARIO_KEY, MOODS, CITIES, KINDS, demoMoments, active, select, cloudTone, canReveal,
+  return {KEY, SCENARIO_KEY, MOODS, CITIES, KINDS, demoMoments, active, select, cloudTone,
     read, write, scenario, contribution, collect, saveMedia, mediaURL};
 });

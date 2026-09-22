@@ -6,6 +6,9 @@
     : '/api/v1';
   var API_BASE = (window.CURRENT_API_BASE || localApi).replace(/\/$/, '');
   var SESSION_KEY = 'current.session.v1';
+  var RELAY_KEY = 'current.relay.v1';
+  var RELAY_ROLE_KEY = 'current.role.v1';
+  var relayPollTimer = null;
   var activeVoice = null;
   var tencentVoiceConfigured = null;
   var preferredVoiceProvider = null;
@@ -154,6 +157,128 @@
     } catch (_) {
       return 'ses_' + Date.now() + '_private';
     }
+  }
+
+  function deviceRole() {
+    try {
+      var requested = new URLSearchParams(location.search || '').get('role');
+      if (requested === 'phone' || requested === 'desk') return requested;
+    } catch (_) {}
+    try {
+      var forced = localStorage.getItem(RELAY_ROLE_KEY);
+      if (forced === 'phone' || forced === 'desk') return forced;
+    } catch (_) {}
+    var touch = Boolean((navigator && navigator.maxTouchPoints > 0) || ('ontouchstart' in window));
+    var narrow = typeof window.innerWidth === 'number' ? window.innerWidth <= 820 : false;
+    return touch && narrow ? 'phone' : 'desk';
+  }
+
+  function setDeviceRole(role) {
+    if (role !== 'phone' && role !== 'desk') return deviceRole();
+    try { localStorage.setItem(RELAY_ROLE_KEY, role); } catch (_) {}
+    return role;
+  }
+
+  function loadRelay() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(RELAY_KEY) || 'null');
+      if (!saved || !/^[2-9A-HJ-NP-Z]{6}$/.test(saved.code || '')) return null;
+      if (saved.expiresAt && Date.parse(saved.expiresAt) <= Date.now()) {
+        localStorage.removeItem(RELAY_KEY);
+        return null;
+      }
+      return { code: saved.code, expiresAt: saved.expiresAt || null,
+        lastSequence: Math.max(0, Number(saved.lastSequence) || 0), durable: Boolean(saved.durable) };
+    } catch (_) { return null; }
+  }
+
+  function saveRelay(relay) {
+    try {
+      if (relay) localStorage.setItem(RELAY_KEY, JSON.stringify(relay));
+      else localStorage.removeItem(RELAY_KEY);
+    } catch (_) {}
+    return relay;
+  }
+
+  function relayCode(value) {
+    return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  }
+
+  function relayPendingCode() {
+    try { return relayCode(new URLSearchParams(location.search || '').get('relay')); }
+    catch (_) { return ''; }
+  }
+
+  function dispatchRelayEvent(event) {
+    if (!window.dispatchEvent || typeof window.CustomEvent !== 'function') return;
+    window.dispatchEvent(new window.CustomEvent('current-relay-event', { detail: event }));
+  }
+
+  async function readRelay(relay) {
+    var result = await api('/relay/' + encodeURIComponent(relay.code) + '?after=' + relay.lastSequence);
+    var events = Array.isArray(result.events) ? result.events : [];
+    events.forEach(function (event) {
+      relay.lastSequence = Math.max(relay.lastSequence, Number(event.sequence) || 0);
+      dispatchRelayEvent(event);
+    });
+    relay.expiresAt = result.expires_at || relay.expiresAt;
+    relay.durable = Boolean(result.durable);
+    saveRelay(relay);
+    return events;
+  }
+
+  function scheduleRelayPoll(delay) {
+    if (relayPollTimer !== null) clearTimeout(relayPollTimer);
+    relayPollTimer = setTimeout(function poll() {
+      var relay = loadRelay();
+      if (!relay) { relayPollTimer = null; return; }
+      readRelay(relay).catch(function (error) {
+        if (/不存在|结束/.test(error && error.message || '')) saveRelay(null);
+      }).finally(function () {
+        if (loadRelay()) scheduleRelayPoll(2500);
+      });
+    }, typeof delay === 'number' ? delay : 2500);
+  }
+
+  async function createRelaySession() {
+    var result = await api('/relay/sessions', { method: 'POST', body: '{}' });
+    var relay = saveRelay({ code: relayCode(result.code), expiresAt: result.expires_at,
+      lastSequence: 0, durable: Boolean(result.durable) });
+    scheduleRelayPoll(0);
+    return relay;
+  }
+
+  async function joinRelaySession(code) {
+    var clean = relayCode(code);
+    if (clean.length !== 6) throw new Error(voiceCopy('请输入 6 位会话码。', 'Enter the 6-character code.'));
+    var result = await api('/relay/' + encodeURIComponent(clean) + '?after=0');
+    var events = Array.isArray(result.events) ? result.events : [];
+    var relay = saveRelay({ code: clean, expiresAt: result.expires_at,
+      lastSequence: events.reduce(function (latest, event) { return Math.max(latest, Number(event.sequence) || 0); }, 0),
+      durable: Boolean(result.durable) });
+    events.forEach(dispatchRelayEvent);
+    scheduleRelayPoll(2500);
+    return relay;
+  }
+
+  function leaveRelaySession() {
+    if (relayPollTimer !== null) clearTimeout(relayPollTimer);
+    relayPollTimer = null;
+    saveRelay(null);
+  }
+
+  async function publishRelay(eventType, payload) {
+    var relay = loadRelay();
+    if (!relay) return { accepted: false, disconnected: true };
+    return api('/relay/' + encodeURIComponent(relay.code) + '/events', {
+      method: 'POST', body: JSON.stringify({ event_type: eventType, payload: payload || {} })
+    });
+  }
+
+  function relayShareUrl() {
+    var relay = loadRelay();
+    if (!relay) return '';
+    return location.origin + location.pathname + '?relay=' + encodeURIComponent(relay.code) + '#/connect';
   }
 
   async function api(path, options) {
@@ -939,6 +1064,16 @@
     stopPresence: stopPresence,
     toggleVoice: toggleVoice,
     mapLaunchTarget: mapLaunchTarget,
-    launchMap: launchMap
+    launchMap: launchMap,
+    deviceRole: deviceRole,
+    setDeviceRole: setDeviceRole,
+    relayState: loadRelay,
+    relayPendingCode: relayPendingCode,
+    createRelaySession: createRelaySession,
+    joinRelaySession: joinRelaySession,
+    leaveRelaySession: leaveRelaySession,
+    publishRelay: publishRelay,
+    relayShareUrl: relayShareUrl
   };
+  if (loadRelay()) scheduleRelayPoll(0);
 })();

@@ -19,11 +19,11 @@ test("demo moments are visibly synthetic and expire", () => {
   assert.equal(Moments.select(seeds, {city:"深圳", mood:"low", now:start + 4 * 3600000}).length, 0);
 });
 
-test("a named contribution requires a nickname and stays a local draft", () => {
-  const input = {place:"楼下", reason:"桂花开了", mood:"low", city:"深圳", visibility:"named", kind:"timed_beauty"};
-  assert.equal(Moments.contribution(input, 1, "x"), null);
-  const item = Moments.contribution({...input, nickname:"小叶"}, 1, "x");
-  assert.equal(item.nickname, "小叶");
+test("a contribution is always anonymous and stays a local draft", () => {
+  const input = {place:"楼下", reason:"桂花开了", mood:"low", city:"深圳", visibility:"named", nickname:"小叶", kind:"timed_beauty"};
+  const item = Moments.contribution(input, 1, "x");
+  assert.equal(item.visibility, "anonymous");
+  assert.equal(Object.hasOwn(item, "nickname"), false);
   assert.equal(item.published, false);
   assert.equal(item.source, "local_draft");
   assert.equal(item.kind, "timed_beauty");
@@ -44,17 +44,10 @@ test("contribution types have intentional expiry windows", () => {
   assert.equal(Moments.contribution({...base, kind:"seasonal"}, 100, "c").expiresAt, 100 + 10080 * 60000);
 });
 
-test("consent is mutual, temporary, and never persisted", () => {
-  const now = Date.now();
-  const match = {isDemo:true, intent:"meet", mine:true, theirs:false, blocked:false, expiresAt:now + 1000};
-  assert.equal(Moments.canReveal(match, now), false);
-  match.theirs = true;
-  assert.equal(Moments.canReveal(match, now), true);
-  assert.equal(Moments.canReveal(match, now + 1001), false);
-
+test("local storage never persists identity or matching state", () => {
   const store = memory();
-  Moments.write(store, {contributions:[], cards:[], match});
-  assert.equal(Moments.read(store).match, null);
+  Moments.write(store, {contributions:[], cards:[], match:{mine:true}, nickname:"小叶"});
+  assert.deepEqual(Moments.read(store), {contributions:[], cards:[]});
 });
 
 test("cloud state reflects a shadow, while user self-report wins", () => {

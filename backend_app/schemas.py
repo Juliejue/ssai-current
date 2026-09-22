@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -244,3 +244,33 @@ class OutcomeRequest(BaseModel):
     # 在场证明（FR-08）。浏览器只报结论，服务端会往下降级，绝不采信更高的声明。
     presence_level: Literal["geofence_dwell", "dwell_only", "self_reported"] = "self_reported"
     dwell_minutes: int = Field(default=0, ge=0, le=1440)
+
+
+RelayEventType = Literal[
+    "interpreted", "recommended", "departed", "arrived", "feedback", "collector_saved"
+]
+
+
+class RelayEventRequest(BaseModel):
+    event_type: RelayEventType
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class RelayEvent(BaseModel):
+    sequence: int = Field(ge=1)
+    event_type: RelayEventType
+    payload: dict[str, Any] = Field(default_factory=dict)
+    created_at: str
+
+
+class RelaySessionResponse(BaseModel):
+    code: str = Field(min_length=6, max_length=6)
+    expires_at: str
+    durable: bool
+
+
+class RelayReadResponse(BaseModel):
+    code: str = Field(min_length=6, max_length=6)
+    expires_at: str
+    durable: bool
+    events: list[RelayEvent] = Field(default_factory=list)

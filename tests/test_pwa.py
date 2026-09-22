@@ -56,9 +56,12 @@ def test_iteration_ui_has_four_cities_media_and_no_removed_home_copy():
     assert "video/mp4" in html
     assert "想安静，想吃烤串" not in html
     assert "换成这个了。前一个我记下来" not in html
-    assert 'id="social-name"' in html
-    assert 'id="match-chat"' in html
-    assert "演示私信 · 只在本次会话" in html
+    assert 'id="social-name"' not in html
+    assert 'id="match-chat"' not in html
+    assert "演示私信 · 只在本次会话" not in html
+    assert "不建主页、不显示昵称、不能私信" in html
+    assert 'id="relay-join"' in html
+    assert 'data-contribute="' in html
     assert "空间类型示意图" in html
 
 
