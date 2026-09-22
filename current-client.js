@@ -228,12 +228,45 @@
     });
   }
 
+  // 设置里的地点偏好是长期的软信号，只在用户这句话没有给出更具体条件时补位。
+  // 用户当下说的内容始终优先，避免“偏好安静”把一次明确想去热闹场所的请求改掉。
+  function applyStoredPreferences(needState) {
+    var preferences = [];
+    try {
+      var saved = JSON.parse(localStorage.getItem('current.app.settings.v1') || '{}');
+      preferences = Array.isArray(saved.preferences) ? saved.preferences : [];
+    } catch (_) {}
+    if (!preferences.length) return needState;
+    var state = Object.assign({}, needState, {
+      need_keys: (needState.need_keys || []).slice(),
+      place_types: (needState.place_types || []).slice(),
+      avoid_tags: (needState.avoid_tags || []).slice()
+    });
+    var needMap = {quiet:'slow', still:'slow', lively:'people', water:'breathe', mountain:'green',
+      park:'green', outdoor:'breathe', street:'walk', active:'walk'};
+    preferences.forEach(function (key) {
+      var need = needMap[key];
+      if (need && state.need_keys.indexOf(need) < 0 && state.need_keys.length < 6) state.need_keys.push(need);
+    });
+    if (!state.place_types.length) {
+      var typeMap = {water:'river', park:'park', street:'lane', culture:'books', sport:'sports'};
+      preferences.some(function (key) {
+        if (!typeMap[key]) return false;
+        state.place_types.push(typeMap[key]);
+        return true;
+      });
+    }
+    if (state.environment === 'either' && preferences.indexOf('outdoor') >= 0) state.environment = 'outdoor';
+    return state;
+  }
+
   function interpretAndRecommend(text) {
     // 把位置一起送过去：模型读这句话要几秒，服务端可以在同一段时间里
     // 先把周边搜好，等用户点到推荐那一步就不用再等。
     return api('/interpret', { method: 'POST', body: JSON.stringify({
         text: text, lang: lang(), location: activeLocation }) })
       .then(function (interpretation) {
+        interpretation.state = applyStoredPreferences(interpretation.state);
         track('natural_language_interpreted', {
           source: interpretation.source,
           mood_id: interpretation.state.mood_id,
@@ -860,54 +893,24 @@
     return beginTencentVoice(callbacks).then(function () { return 'recording'; });
   }
 
-  function mapLaunchTarget(method, links, userAgent) {
+  function mapLaunchTarget(method, links) {
     links = links || {};
     if (method !== 'amap') return { url: links[method] || '', fallback: '' };
 
-    var fallback = links.amap || '';
-    var ua = String(userAgent || (navigator && navigator.userAgent) || '');
-    if (/iPad|iPhone|iPod/i.test(ua) && links.amap_ios) {
-      return { url: links.amap_ios, fallback: fallback };
-    }
-    if (/Android/i.test(ua) && links.amap_android) {
-      return { url: links.amap_android, fallback: fallback };
-    }
-    return { url: fallback, fallback: '' };
+    // One universal URL is intentionally used for every browser. A previous
+    // custom-scheme + delayed fallback flow could open the installed map and
+    // then open a second web page as well.
+    return { url: links.amap || links.amap_ios || links.amap_android || '', fallback: '' };
   }
 
-  /* Open Amap from the original tap so Safari may hand the request to the
-     installed app. In-app browsers can block custom schemes; if the document
-     stays visible, continue to Amap's universal web route instead of leaving
-     the user on a dead button. */
+  /* Exactly one navigation per tap. Universal links may hand off to the
+     installed app, but the page never schedules a second destination. */
   function launchMap(method, links) {
-    var target = mapLaunchTarget(method, links, navigator.userAgent || '');
+    var target = mapLaunchTarget(method, links);
     if (!target.url) return false;
-
-    var timer = null;
-    function cleanup() {
-      if (timer !== null) clearTimeout(timer);
-      timer = null;
-      if (window.removeEventListener) window.removeEventListener('pagehide', cleanup);
-      if (document.removeEventListener) document.removeEventListener('visibilitychange', onVisibility);
-    }
-    function onVisibility() {
-      if (document.hidden) cleanup();
-    }
-    function openFallback() {
-      cleanup();
-      if (!document.hidden && target.fallback) location.href = target.fallback;
-    }
-
-    if (target.fallback) {
-      timer = setTimeout(openFallback, 1500);
-      if (window.addEventListener) window.addEventListener('pagehide', cleanup, { once: true });
-      if (document.addEventListener) document.addEventListener('visibilitychange', onVisibility);
-    }
     try {
       location.href = target.url;
-    } catch (_) {
-      openFallback();
-    }
+    } catch (_) { return false; }
     return true;
   }
 
