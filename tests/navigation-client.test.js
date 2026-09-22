@@ -52,28 +52,18 @@ const links = {
   amap_android: 'amapuri://route/plan/?dlat=39.9&dlon=116.4&t=2',
 };
 
-test('iPhone launches Amap directly and falls back to the web if the page stays visible', () => {
+test('Amap uses one universal navigation on iPhone', () => {
   const app = runtime('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)');
   assert.equal(app.current.launchMap('amap', links), true);
-  assert.equal(app.location.href, links.amap_ios);
-  assert.equal(app.timers.length, 1);
-
-  app.timers[0].fn();
   assert.equal(app.location.href, links.amap);
+  assert.equal(app.timers.length, 0);
 });
 
-test('leaving for the installed iPhone app cancels the web fallback', () => {
-  const app = runtime('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)');
-  app.current.launchMap('amap', links);
-  app.document.hidden = true;
-  app.documentListeners.get('visibilitychange')();
-  assert.equal(app.timers[0].cleared, true);
-});
-
-test('Android gets its native route while desktop uses the universal web URL', () => {
+test('Android and desktop also use the same single universal route', () => {
   const android = runtime('Mozilla/5.0 (Linux; Android 15)');
   android.current.launchMap('amap', links);
-  assert.equal(android.location.href, links.amap_android);
+  assert.equal(android.location.href, links.amap);
+  assert.equal(android.timers.length, 0);
 
   const desktop = runtime('Mozilla/5.0 (Macintosh; Intel Mac OS X)');
   desktop.current.launchMap('amap', links);

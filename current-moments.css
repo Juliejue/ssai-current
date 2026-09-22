@@ -21,6 +21,11 @@
 .moment-form .moment-nickname[hidden]{display:none}
 .moment-form input,.moment-form textarea,.moment-form select{box-sizing:border-box;width:100%;font:14px/1.6 var(--sans,sans-serif);padding:10px;border:1px solid #b9ceca;border-radius:8px;background:#f8faf6;color:#19353a}
 .moment-form small{color:#71898a}
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.media-picker{min-width:0;margin:0;padding:0;border:0;font:12px/1.8 var(--sans,sans-serif)}
+.media-picker legend{padding:0;margin:0 0 5px}
+.media-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.media-actions button{min-height:44px;padding:8px;border:1px solid #b9ceca;border-radius:10px;background:#f8faf6;color:#19353a;font:12px/1.2 var(--sans,sans-serif)}
 .media-preview,.community-media{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .media-preview:empty{display:none}
 .media-preview img,.media-preview video,.community-media img,.community-media video{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:9px;background:#dfe8e5}
@@ -32,9 +37,15 @@
 .private-chat{margin:16px 0;padding-top:12px;border-top:1px solid #cbd8d4}
 .private-chat p{max-width:84%;padding:9px 11px;margin:8px 0;border-radius:11px;background:#e4ece8}
 .private-chat p.mine{margin-left:auto;background:#24474a;color:#f4f7f5}
+.private-chat p.agent{max-width:92%;border:1px solid #b9ceca;background:transparent;color:#28555a}
 .private-chat p b{display:block;font:10px/1.5 var(--sans,sans-serif);opacity:.72}
 .private-chat form{display:flex;gap:7px;margin-top:14px}
 .private-chat form button{flex:none;padding:0 13px;border-radius:9px;background:#24474a;color:#fff}
+.private-chat form .match-voice{width:44px;padding:10px;border:1px solid #b9ceca;background:transparent;color:#28555a}
+.private-chat form .match-voice svg{width:20px;height:20px}
+.private-chat form .match-voice.listening{background:#dfe9e6}
+.match-voice-status{display:block;min-height:18px;margin-top:5px;color:#71898a}
+.agent-invite{display:block;margin:12px 0;padding:8px 11px;border:1px solid #b9ceca;border-radius:999px;color:#28555a;font:11px/1.3 var(--sans,sans-serif)}
 .moment-controls{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
 .moment-status{font:12px/1.7 var(--sans,sans-serif);min-height:24px;color:#28555a}
 .cloud-body{fill:transparent;transition:fill .7s ease,stroke .7s ease}
