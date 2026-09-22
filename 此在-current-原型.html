@@ -3330,7 +3330,7 @@ function renderMoments(){
   h += '<div class="moment-tabs">' + CurrentMoments.CITIES.map(city =>
     '<button class="' + (state.momentCity === city ? 'on' : '') + '" data-city="' + city + '">' + city + '</button>'
   ).join('') +
-    '<button data-go="#/community">' + uiCopy('贡献一个此刻', 'Contribute a moment') + '</button></div>';
+    '<button data-go="#/community">' + uiCopy('接力社群', 'Community relay') + '</button></div>';
   h += '<p class="lead">' + uiCopy('不是“推荐一个公园”，是告诉你：此刻那里有什么值得赶上。',
     'A place, a reason, and a moment that will pass.') + '</p>';
   if (state.momentNote) h += '<p class="moment-status">' + escapeHTML(state.momentNote) + '</p>';
@@ -3350,7 +3350,7 @@ function communityItem(item){
 }
 function renderCommunity(){
   const draft = state.momentDraft || {};
-  let h = topbar(uiCopy('把这个此刻递下去', 'Pass this moment along'), uiCopy('匿名美好接力', 'Anonymous relay'), '#/moments');
+  let h = topbar(uiCopy('把好地方递下去', 'Pass a place along'), uiCopy('接力社群', 'Community relay'), '#/moments');
   h += '<div class="screen"><div class="pad moment-wrap">';
   h += '<p class="lead">' + uiCopy('不建主页、不显示昵称、不能私信。你留下的是一条匿名空间线索；审核与汇总机制接好之前，它只存在这台设备上。',
     'No profiles, handles, or DMs. You leave an anonymous place signal; until moderation and aggregation are ready, it stays on this device.') + '</p>';
@@ -3375,7 +3375,7 @@ function renderCommunity(){
     '<button class="btn sm" type="submit">' + uiCopy('存为本机草稿', 'Save local draft') + '</button></form>';
   if (state.momentNote) h += '<p class="moment-status">' + escapeHTML(state.momentNote) + '</p>';
   const mine = state.momentData.contributions.slice().reverse();
-  h += '<h2 style="margin-top:26px">' + uiCopy('我的匿名草稿', 'My anonymous drafts') + '</h2>' +
+  h += '<h2 style="margin-top:26px">' + uiCopy('我的草稿', 'My drafts') + '</h2>' +
     (mine.length ? mine.map(communityItem).join('') : '<div class="moment-card"><p>' +
       uiCopy('还没有草稿。完成一次到访反馈后，小在也会替你预填一份。', 'No drafts yet. After a visit, Xiaozai can prepare one for you.') + '</p></div>');
   h += '</div></div>';
