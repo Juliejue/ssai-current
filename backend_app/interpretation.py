@@ -542,7 +542,12 @@ def _restatement(state: NeedState, lang: str = "zh") -> str:
 
 # 模型会把 prompt 里的字段名、占位符原样吐给用户。这些一出现就整条丢掉。
 EVIDENCE_LEAKS = ("mood_id", "need_keys", "social_mode", "budget_level", "risk_level",
-                  "所以我怎么理解", "json", "字段", "对应")
+                  "所以我怎么理解", "json", "字段", "对应", "识别为", "提取", "需求及", "场景")
+EVIDENCE_ENUMS = {
+    "low", "quiet", "noisy", "spark", "tired", "empty", "tight", "heated", "near", "fresh", "bright", "okay",
+    "hide", "sit", "walk", "free", "green", "new", "sound", "people", "loud", "slow", "hands", "breathe", "nothing",
+    "alone", "low_contact", "with_people", "either", "indoor", "outdoor",
+}
 
 
 def _quotes_the_user(line: str, text: str) -> bool:
@@ -555,7 +560,15 @@ def _quotes_the_user(line: str, text: str) -> bool:
     # of the Chinese character limit or nearly every honest line is discarded.
     has_cjk = bool(re.search(r"[\u3400-\u9fff]", line.replace("「", "").replace("」", "")))
     too_long = len(line) > 40 if has_cjk else len(line.split()) > 25
-    if too_long or any(leak in line.lower() for leak in EVIDENCE_LEAKS):
+    lowered = line.lower()
+    # A quoted word belongs to the user; the same word outside the quote may be
+    # one of our internal enum labels. Remove quotes before looking for leaks.
+    unquoted = re.sub(r"「[^」]*」", "", lowered)
+    enum_leak = bool(re.search(r"[\u3400-\u9fff]", unquoted)) and any(
+        re.search(rf"(?<![a-z_]){re.escape(token)}(?![a-z_])", unquoted)
+        for token in EVIDENCE_ENUMS
+    )
+    if too_long or any(leak in lowered for leak in EVIDENCE_LEAKS) or enum_leak:
         return False
     quoted = re.findall(r"「([^」]{1,60})」", line)
     return bool(quoted) and all(q.casefold() in text.casefold() for q in quoted)

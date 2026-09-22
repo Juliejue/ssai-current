@@ -98,6 +98,21 @@ def test_model_cannot_default_an_ambiguous_work_context_to_tired(monkeypatch):
     assert all("累" not in line for line in result.evidence)
 
 
+def test_internal_enum_words_never_reach_user_visible_evidence():
+    text = "刚开完会有点紧绷，想去外面走走吹吹风"
+    result = _decorate(
+        interpret_with_rules(text),
+        text,
+        model_evidence=[
+            "「刚开完会有点紧绷」——识别为 tight 情绪。",
+            "「想去外面走走吹吹风」——提取 walk/free 需求及户外场景。",
+        ],
+    )
+
+    assert result.evidence
+    assert all("tight" not in line and "walk/free" not in line for line in result.evidence)
+
+
 def test_english_rule_fallback_keeps_the_whole_response_in_english():
     text = "I'm exhausted and don't want to see anyone. I need fresh air and a breeze."
     result = _decorate(interpret_with_rules(text), text, lang="en")
