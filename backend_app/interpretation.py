@@ -254,8 +254,8 @@ def _contains_any(text: str, patterns: tuple[str, ...]) -> bool:
 
 
 _NEGATED_PREFIX = re.compile(
-    r"(?:并不想|并不愿|不想|不愿|不要|没想|没有|不是|并不|并没有|谈不上|算不上|不|没)"
-    r"[^，。！？,.!?；;]{0,3}$|"
+    r"(?:并不想|并不愿|不想|不愿|不要|没想|没有|不是|并不|并没有|谈不上|算不上|(?<![特区分])别|不|没)"
+    r"[^，。！？,.!?；;]{0,6}$|"
     r"(?:\b(?:do not|don't|doesn't|didn't|can't|cannot|won't|wouldn't|shouldn't|not|never|no)\b)"
     r"(?:\s+[A-Za-z'-]+){0,4}\s*$",
     flags=re.IGNORECASE,
@@ -578,6 +578,11 @@ def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[st
     state = response.state
     # These controls are filled by the user after interpretation, never by the LLM.
     state.self_report = SelfReport()
+    # A place/activity is a hard user instruction, never a model inference. Run
+    # the negation-aware deterministic matcher again at the final boundary so a
+    # model cannot turn “别推荐公园” into place_types=["park"]. This also removes
+    # categories invented from mood alone.
+    state.place_types = interpret_with_rules(text).state.place_types
     # 代码侧护栏：avoid_tags 现在真的会压分，所以它必须和 need_keys 用同一套词表，
     # 且不能自相矛盾。模型编出来的词直接丢掉，两边都出现时「想要」压过「不想要」。
     state.avoid_tags = [

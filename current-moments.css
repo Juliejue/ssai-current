@@ -20,6 +20,11 @@
 .moment-form label{font:12px/1.8 var(--sans,sans-serif);display:grid;gap:5px}
 .moment-form input,.moment-form textarea,.moment-form select{box-sizing:border-box;width:100%;font:14px/1.6 var(--sans,sans-serif);padding:10px;border:1px solid #b9ceca;border-radius:8px;background:#f8faf6;color:#19353a}
 .moment-form small{color:#71898a}
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.media-picker{min-width:0;margin:0;padding:0;border:0;font:12px/1.8 var(--sans,sans-serif)}
+.media-picker legend{padding:0;margin:0 0 5px}
+.media-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.media-actions button{min-height:44px;padding:8px;border:1px solid #b9ceca;border-radius:10px;background:#f8faf6;color:#19353a;font:12px/1.2 var(--sans,sans-serif)}
 .media-preview,.community-media{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .media-preview:empty{display:none}
 .media-preview img,.media-preview video,.community-media img,.community-media video{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:9px;background:#dfe8e5}

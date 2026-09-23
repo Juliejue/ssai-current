@@ -449,8 +449,9 @@ def test_amap_uses_a_same_page_native_launch_with_a_web_fallback():
     assert 'CurrentAI.launchMap("amap", t.links || {})' in handler
     assert "links.amap_ios" in client
     assert "links.amap_android" in client
-    assert "setTimeout(openFallback, 1500)" in client
-    assert "document.hidden" in client
+    assert "setTimeout(openFallback, 1500)" not in client
+    assert "document.hidden" not in client
+    assert "One universal URL is intentionally used" in client
     assert "function openMapNavigation(" not in source
 
 
@@ -509,7 +510,7 @@ def test_primary_voice_screen_keeps_operational_copy_out_of_the_way():
     assert "本产品不保存录音" not in talk
     assert "想吃烤串" not in talk
     assert 'id="type-toggle"' in talk
-    assert "'打字输入', 'Type instead'" in talk
+    assert "'打字', 'Type'" in talk
     assert ".talk .type-toggle{margin-top:18px;min-height:44px" in prototype
     assert 'id="natural-submit"' in talk
     assert "uiCopy('发送', 'Send')" in talk
@@ -751,7 +752,7 @@ def test_primary_bilingual_copy_is_written_as_app_english():
         "Share only what you choose",
         "Your private note won't appear in the image.",
         "Only the combined result is shown. Individual entries stay private.",
-        "A couple more visits will make patterns easier to see.",
+        "A few more visits will make the pattern clearer.",
     ):
         assert english in source
 

@@ -398,15 +398,15 @@ test('the regional capability can start browser dictation on the first tap', asy
   assert.equal(runtime.sockets.length, 0);
 });
 
-test('Tencent remains the fallback when browser dictation is unavailable overseas', async () => {
+test('overseas embedded browsers fail fast to typing instead of retrying Tencent', async () => {
   const runtime = makeVoiceRuntime({
     tencentConfigured: true,
     preferredProvider: 'browser',
   });
   await runtime.settleCapabilities();
 
-  await runtime.current.toggleVoice(runtime.callbacks);
+  await assert.rejects(runtime.current.toggleVoice(runtime.callbacks), /直接打字/);
 
-  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), true);
-  assert.equal(runtime.sockets.length, 1);
+  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), false);
+  assert.equal(runtime.sockets.length, 0);
 });

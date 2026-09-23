@@ -63,8 +63,8 @@ def test_generic_sports_searches_for_visible_sports_infrastructure():
     from backend_app.discovery import keywords_for, to_place
 
     state = NeedState(place_types=["sports"])
-    assert keywords_for(state)[:6] == [
-        "跑步道", "骑行道", "轮滑场", "羽毛球场", "小区运动场", "公共游泳馆",
+    assert keywords_for(state) == [
+        "跑步道", "骑行道", "轮滑场", "羽毛球场",
     ]
 
     poi = {
@@ -94,6 +94,20 @@ def test_gym_request_stays_a_gym_request():
     assert place is not None
     assert place["placeTypes"] == ["gym", "sports"]
     assert place["category"].startswith("健身房")
+
+
+def test_beijing_editorial_catalogue_never_leaks_into_other_cities():
+    shenzhen = RecommendRequest(
+        state=NeedState(mood_id="tired"),
+        location=Location(latitude=22.5431, longitude=114.0579),
+    )
+    assert recommender._rank(shenzhen, discovered=[]) == []
+
+    beijing = RecommendRequest(
+        state=NeedState(mood_id="tired"),
+        location=Location(latitude=39.9042, longitude=116.4074),
+    )
+    assert recommender._rank(beijing, discovered=[])
 
 
 def test_live_search_has_authored_english_even_when_narration_is_offline():

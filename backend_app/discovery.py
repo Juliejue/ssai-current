@@ -116,7 +116,7 @@ PLACE_TYPE_SEARCHES: dict[str, tuple[tuple[str, str], ...]] = {
 BASELINE_KEYWORDS = ("书店", "咖啡", "公园")
 
 # 一次最多发几个关键词请求。每个都是一次跨境往返，多了就慢。
-MAX_KEYWORD_SEARCHES = 6
+MAX_KEYWORD_SEARCHES = 4
 
 # 搜多远。太小了在郊区搜不到东西，太大了会推荐到跨城的地方。
 DISCOVERY_RADIUS_M = 5000
@@ -132,6 +132,11 @@ def keywords_for(state: NeedState) -> list[str]:
         for keyword, _category in PLACE_TYPE_SEARCHES.get(place_type, ()):
             if keyword not in chosen:
                 chosen.append(keyword)
+    # Explicit activities outrank generic mood discovery. Searching for
+    # bookstores/cafes/parks after “I need a gym” wastes three network trips and
+    # is how an unrelated fallback used to leak into the third card.
+    if state.place_types:
+        return chosen[:MAX_KEYWORD_SEARCHES]
     scored: list[tuple[int, str]] = []
     for keyword, _category, need_keys, moods in KEYWORD_PROFILES:
         # 用户明说不想要的，对应的关键词直接不搜——搜了也是白搜。

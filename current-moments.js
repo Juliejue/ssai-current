@@ -15,25 +15,29 @@
     leaf: "/assets/moments/leaf.jpg",
     cloud: "/assets/moments/cloud.jpg",
     dew: "/assets/moments/dew.jpg",
-    book: "/assets/moments/book.jpg"
+    book: "/assets/moments/book.jpg",
+    cafe: "/assets/moments/cafe.jpg",
+    food: "/assets/moments/food.jpg",
+    bar: "/assets/moments/bar.jpg",
+    city: "/assets/moments/city.jpg"
   };
   const SEEDS = [
-    ["bj-light", "北京", "liangmahe", "亮马河", "Liangma River", "light", "水面上，一小片粉色", "A pink reflection on the water", ["low", "tight", "bright"], 25, STOCK.sunset],
-    ["bj-leaf", "北京", "tiantan", "天坛公园", "Temple of Heaven", "leaf", "一片叶子，慢慢落下来", "A leaf taking its time", ["tired", "quiet", "noisy"], 40, STOCK.leaf],
-    ["bj-sky", "北京", "shichahai", "什刹海", "Shichahai", "cloud", "有人也正在抬头看云", "Someone else looking up", ["near", "empty", "okay"], 30, STOCK.cloud],
-    ["bj-dew", "北京", "beihai", "北海公园", "Beihai Park", "dew", "叶尖上，还留着一滴露珠", "A drop still on the leaf", ["low", "quiet", "fresh"], 20, STOCK.dew],
-    ["sh-sunset", "上海", null, "徐汇滨江", "West Bund", "light", "江面正把晚霞揉开", "Sunset spreading over the river", ["bright", "low", "tight"], 25, STOCK.sunset],
-    ["sh-leaf", "上海", null, "世纪公园", "Century Park", "leaf", "风把树影推过草地", "Tree shadows crossing the grass", ["tired", "quiet", "heated"], 45, STOCK.leaf],
-    ["sh-sky", "上海", null, "外滩源", "Rockbund", "cloud", "两栋旧楼之间露出一片云", "A cloud between old buildings", ["near", "empty", "fresh"], 30, STOCK.cloud],
-    ["sh-book", "上海", null, "思南书局", "Sinan Books", "light", "窗边的一页被照亮了", "A page lit by the window", ["spark", "noisy", "okay"], 35, STOCK.book],
-    ["gz-sunset", "广州", null, "二沙岛", "Ersha Island", "light", "江边的天正变成橙粉色", "The riverside sky turning coral", ["bright", "low", "tight"], 25, STOCK.sunset],
-    ["gz-leaf", "广州", null, "海珠湿地", "Haizhu Wetland", "leaf", "一片新叶在水边晃", "A new leaf moving by the water", ["tired", "quiet", "heated"], 45, STOCK.leaf],
-    ["gz-sky", "广州", null, "沙面", "Shamian", "cloud", "骑楼上方有一朵慢云", "A slow cloud above the arcades", ["near", "empty", "fresh"], 30, STOCK.cloud],
-    ["gz-dew", "广州", null, "云溪植物园", "Yunxi Botanical Garden", "dew", "叶尖的水珠还没落下", "A drop still holding on", ["low", "quiet", "fresh"], 20, STOCK.dew],
-    ["sz-sunset", "深圳", null, "深圳湾公园", "Shenzhen Bay Park", "light", "海边，天色慢慢变粉", "The sky turning pink by the bay", ["bright", "low", "tight"], 25, STOCK.sunset],
-    ["sz-leaf", "深圳", null, "莲花山公园", "Lianhuashan Park", "leaf", "树影在长椅旁晃了晃", "A shadow beside a bench", ["tired", "quiet", "heated"], 45, STOCK.leaf],
-    ["sz-sky", "深圳", null, "中心公园", "Central Park", "cloud", "另一双眼睛看见的天空", "The sky through another pair of eyes", ["near", "empty", "fresh"], 30, STOCK.cloud],
-    ["sz-book", "深圳", null, "深圳湾公园白鹭坡书吧", "Bailupo Book Bar", "light", "书页上停了一束光", "A little light on a page", ["spark", "noisy", "okay"], 35, STOCK.book]
+    ["bj-cafe", "北京", "soloist", "soloist coffee", "soloist coffee", "quiet_corner", "玻璃房里有一张空桌", "An empty table in the glass room", ["low", "quiet", "tired"], 180, STOCK.cafe],
+    ["bj-book", "北京", "sanlian", "三联韬奋书店", "Sanlian Bookstore", "quiet_corner", "整面书架可以慢慢看", "A whole wall of books to browse", ["spark", "noisy", "okay"], 180, STOCK.book],
+    ["bj-sky", "北京", "shichahai", "什刹海", "Shichahai", "timed_beauty", "厚云把天空压低了", "Heavy clouds lowered the sky", ["near", "empty", "fresh"], 180, STOCK.cloud],
+    ["bj-sunset", "北京", "liangmahe", "亮马河", "Liangma River", "timed_beauty", "橙色太阳正贴近水面", "The orange sun is nearing the water", ["bright", "low", "tight"], 180, STOCK.sunset],
+    ["sh-sunset", "上海", null, "徐汇滨江", "West Bund", "timed_beauty", "橙色夕阳落在静水上", "Orange sunset over still water", ["bright", "low", "tight"], 180, STOCK.sunset],
+    ["sh-city", "上海", null, "北外滩", "North Bund", "timed_beauty", "高楼被晚光染成粉金色", "Towers turning rose-gold", ["spark", "near", "fresh"], 180, STOCK.city],
+    ["sh-food", "上海", null, "巨鹿路", "Julu Road", "sensory", "一盘刚端上桌的热食", "A warm plate just arrived", ["empty", "tired", "okay"], 180, STOCK.food],
+    ["sh-book", "上海", null, "思南书局", "Sinan Books", "quiet_corner", "旅行书排满了一整面墙", "Travel books fill the wall", ["spark", "noisy", "quiet"], 180, STOCK.book],
+    ["gz-food", "广州", null, "东山口", "Dongshankou", "sensory", "晚餐刚刚端到桌上", "Dinner just reached the table", ["empty", "tired", "okay"], 180, STOCK.food],
+    ["gz-cafe", "广州", null, "沙面", "Shamian", "quiet_corner", "绿植边的咖啡桌空着", "A café table beside the plants", ["low", "quiet", "tired"], 180, STOCK.cafe],
+    ["gz-bar", "广州", null, "海心沙", "Haixinsha", "timed_beauty", "蓝绿色舞台灯刚亮起来", "Blue-green stage lights just came on", ["bright", "near", "spark"], 180, STOCK.bar],
+    ["gz-lake", "广州", null, "海珠湖", "Haizhu Lake", "lasting_place", "碧绿湖面一直延伸到山脚", "Turquoise water reaches the mountains", ["quiet", "fresh", "tight"], 180, STOCK.leaf],
+    ["sz-sunset", "深圳", null, "深圳湾公园", "Shenzhen Bay Park", "timed_beauty", "橙色夕阳正落向水面", "Orange sunset descending toward the water", ["bright", "low", "tight"], 180, STOCK.sunset],
+    ["sz-cloud", "深圳", null, "中心公园", "Central Park", "timed_beauty", "厚云之间透出一小片亮处", "A bright patch between heavy clouds", ["near", "empty", "fresh"], 180, STOCK.cloud],
+    ["sz-book", "深圳", null, "深圳湾公园白鹭坡书吧", "Bailupo Book Bar", "quiet_corner", "书架上全是旅行与城市", "Shelves full of travel and cities", ["spark", "noisy", "okay"], 180, STOCK.book],
+    ["sz-work", "深圳", null, "南头古城", "Nantou Ancient Town", "quiet_corner", "窗边有人安静地打开电脑", "Someone working quietly by the window", ["tired", "quiet", "heated"], 180, STOCK.dew]
   ];
   function demoMoments(start) {
     return SEEDS.map(([id, city, placeId, place, placeEn, kind, title, titleEn, moods, minutes, image]) => ({

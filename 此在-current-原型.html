@@ -441,6 +441,13 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .profile .hero .av{position:absolute;right:18px;bottom:14px;width:62px;height:62px;border-radius:50%;
   border:1.5px solid var(--line-2);display:grid;place-items:center;background:var(--card)}
 .profile .hero .av span{width:32px;height:32px;display:block}
+.trail-profile .hero{height:188px}
+.trail-profile .hero .who{right:18px;bottom:18px}
+.trail-profile .hero .who h1{font-size:32px}
+.trail-profile .hero .scrim{background:linear-gradient(transparent 42%,rgba(240,243,242,.72) 68%,rgba(240,243,242,.98) 100%)}
+.trail-profile.empty-profile .hero{height:112px}
+.trail-profile.empty-profile .hero .scrim{background:linear-gradient(transparent,rgba(240,243,242,.92))}
+.trail-empty{margin:18px;border:1px solid var(--line);border-radius:18px;background:var(--card)}
 .eye{margin:14px 18px 0;border:1px solid var(--line);border-radius:15px;background:var(--card);overflow:hidden}
 .eye .head{padding:11px 14px;display:flex;gap:8px;align-items:baseline;font:11.5px var(--sans);color:var(--ink-faint);border-bottom:1px solid var(--line)}
 .eye .head b{color:var(--ink);font-weight:400;font-family:var(--serif);font-size:13.5px}
@@ -538,6 +545,13 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .talk .foot button.on{color:var(--ink-dim)}
 .talk .foot button.quiet{font-size:11.5px;color:var(--ink-faint)}
 .talk .privacy{margin:18px 0 0;font:10.5px/1.8 var(--mono);color:var(--ink-faint);letter-spacing:.02em;max-width:34ch;text-wrap:balance}
+.talk-actions{display:grid;grid-template-columns:repeat(2,76px);gap:12px;margin-top:4px}
+.talk-action{width:76px;height:76px;border-radius:24px;border:1px solid var(--line-2);background:var(--card);color:var(--water);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;box-shadow:0 5px 16px rgba(18,42,46,.05);transition:transform .15s,background .15s,color .15s}
+.talk-action svg{width:25px;height:25px}
+.talk-action span{font:10.5px/1 var(--sans);letter-spacing:.04em}
+.talk-action.voice{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.talk-action.on{background:var(--water-wash);border-color:var(--water);color:var(--ink)}
+.talk-action:active{transform:scale(.97)}
 
 /* 小在说的话 */
 .say{display:flex;gap:11px;align-items:flex-start;margin-bottom:16px}
@@ -744,6 +758,30 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .guard .row button{flex:1;height:42px;border-radius:21px;font:13px var(--sans);
   border:1px solid var(--line-2);color:var(--ink-dim)}
 .guard .row button.keep{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* 设置页沿用系统设置的分组层级：标题短，控制项本身说明状态。 */
+.settings-page{padding-top:12px}
+.settings-section{margin:0 0 24px}
+.settings-section>h3{margin:0 0 8px;padding:0 5px;font:11px/1.4 var(--sans);color:var(--ink-faint)}
+.settings-group{overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+.settings-row{min-height:54px;padding:11px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+.settings-row:last-child{border-bottom:0}
+.settings-row .txt{min-width:0;flex:1}
+.settings-row .txt b{display:block;font:500 13px/1.45 var(--sans)}
+.settings-row .txt small{display:block;margin-top:2px;font:11px/1.4 var(--sans);color:var(--ink-faint)}
+.settings-value{flex:none;color:var(--ink-dim);font:12px/1.4 var(--sans)}
+.settings-chevron{color:var(--ink-faint);font-size:17px}
+.settings-segment{display:flex;gap:4px;padding:3px;border-radius:10px;background:var(--sunk)}
+.settings-segment button{min-width:43px;padding:6px 8px;border-radius:8px;font:11px/1 var(--sans);color:var(--ink-dim)}
+.settings-segment button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(18,42,46,.12)}
+.preference-grid{display:flex;flex-wrap:wrap;gap:8px;padding:14px}
+.preference-grid button{padding:8px 12px;border:1px solid var(--line-2);border-radius:999px;font:12px/1.2 var(--sans);color:var(--ink-dim)}
+.preference-grid button.on{background:var(--water);border-color:var(--water);color:#fff}
+.permission-button{width:100%;text-align:left}
+html[data-font="large"]{font-size:18px}
+html[data-font="extra"]{font-size:20px}
+html[data-theme="dark"]{--paper:#101718;--card:#182224;--sunk:#202C2E;--ink:#EDF4F2;--ink-dim:#B8C7C5;--ink-faint:#819492;--line:rgba(237,244,242,.11);--line-2:rgba(237,244,242,.22);--water:#65AEB0;--water-wash:#233C3D;--sun:#D68A59;--sun-wash:#3B2A20}
+@media(prefers-color-scheme:dark){html[data-theme="system"]{--paper:#101718;--card:#182224;--sunk:#202C2E;--ink:#EDF4F2;--ink-dim:#B8C7C5;--ink-faint:#819492;--line:rgba(237,244,242,.11);--line-2:rgba(237,244,242,.22);--water:#65AEB0;--water-wash:#233C3D;--sun:#D68A59;--sun-wash:#3B2A20}}
 </style>
 </head>
 <body>
@@ -1584,12 +1622,7 @@ function selfSigil(recs){
 --------------------------------- */
 function selfRead(recs){
   if (recs.length < 2){
-    return {line:uiCopy("还需要一两次记录，我才敢说。", "A couple more visits will make patterns easier to see."), rows:[
-      {t:uiCopy("记录还不够", "Not enough visits yet"),
-       d:uiCopy("我只用你自己打过的分和勾过的因素说话。现在这些还太少，凑不出一条站得住的观察。",
-                "This view only uses the changes and factors you recorded."),
-       e:uiCopy("当前 " + recs.length + " 条记录", recs.length + (recs.length === 1 ? " visit" : " visits"))}
-    ]};
+    return {line:recs.length ? uiCopy("第一条轨迹已经留下。", "Your first visit is here.") : "", rows:[]};
   }
   // 身份行：偏好的空间类型 + 平均变化
   const outdoor = recs.filter(r => !placeById(r.placeId).indoor).length;
@@ -1761,6 +1794,33 @@ function dock(line, opts){
 }
 
 /* ---------- 状态 ---------- */
+const APP_SETTINGS_KEY = "current.app.settings.v1";
+const APP_SETTINGS_DEFAULTS = {
+  theme:"system", fontSize:"standard",
+  permissions:{camera:"ask", notifications:"ask", microphone:"ask", location:"ask"},
+  preferences:[]
+};
+function loadAppSettings(){
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(APP_SETTINGS_KEY) || "{}"); } catch(e){}
+  return Object.assign({}, APP_SETTINGS_DEFAULTS, saved, {
+    permissions:Object.assign({}, APP_SETTINGS_DEFAULTS.permissions, saved.permissions || {}),
+    preferences:Array.isArray(saved.preferences) ? saved.preferences.slice(0, 20) : []
+  });
+}
+function saveAppSettings(patch){
+  const next = Object.assign({}, state.appSettings, patch || {});
+  if (patch && patch.permissions) next.permissions = Object.assign({}, state.appSettings.permissions, patch.permissions);
+  state.appSettings = next;
+  try { localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(next)); } catch(e){}
+  applyVisualSettings();
+}
+function applyVisualSettings(){
+  const settings = state && state.appSettings ? state.appSettings : loadAppSettings();
+  document.documentElement.dataset.theme = settings.theme;
+  document.documentElement.dataset.font = settings.fontSize;
+  document.documentElement.style.colorScheme = settings.theme === "dark" ? "dark" : settings.theme === "light" ? "light" : "light dark";
+}
 const state = {
   route: "#/talk",
   mood: "low",
@@ -1801,7 +1861,7 @@ const state = {
   aiPlaceOrder: [],
   aiRecommendations: {},
   shownRecommendationId: null,
-  momentCity: "深圳",
+  momentCity: "北京",
   momentFilter: "all",
   momentData: CurrentMoments.read(localStorage),
   momentScenarioAt: CurrentMoments.scenario(localStorage, Date.now()),
@@ -1812,7 +1872,8 @@ const state = {
   communityLoadedCity: null,
   communityLoading: false,
   relayEvents: [],
-  relayNote: null
+  relayNote: null,
+  appSettings: loadAppSettings()
 };
 
 const DEMO_MODE = (() => {
@@ -2917,21 +2978,20 @@ function renderRecords(){
   let h = topbar(uiCopy("情绪空间轨迹", "Mood trail"), uiCopy("长期记录", "Your visits"), "#/talk");
   h += '<div class="screen">';
   h += '<div style="padding:14px 18px 0"><button class="btn sm" data-go="#/talk">' + uiCopy('重新找一个地方', 'Find another place') + ' <span>→</span></button></div>';
-  // 封面 + 身份：Tara 个人页的结构，对象换成「你自己的记录」
   const read = selfRead(all);
-  h += '<div class="profile"><div class="hero">' +
+  h += '<div class="profile trail-profile' + (!all.length ? ' empty-profile' : '') + '"><div class="hero">' +
        '<div class="grad" style="background:radial-gradient(120% 100% at 50% 40%, rgba(30,110,114,.12), rgba(30,110,114,.05) 55%, rgba(234,240,239,.92) 100%),linear-gradient(160deg,#EAF0EF,#DDE6E4)"></div>' +
-       '<div class="grain"></div>' + selfSigil(all) + '<div class="scrim"></div>' +
-       '<div class="who"><h1>' + uiCopy('你的轨迹', 'Your trail') + '</h1><p>' + read.line + '</p></div>' +
-       '<div class="av"><span>' + catSVG() + '</span></div></div>';
-  h += '<div class="eye"><div class="head"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
-       '</span><b>' + uiCopy('从记录里看到的', 'Patterns in your visits') + '</b></div>';
-  read.rows.forEach(r => {
-    h += '<div class="row"><span class="dot">' + catDot(placeById(all.length ? all[0].placeId : "liangmahe")) +
-         '</span><div><strong>' + r.t + '</strong><em>' + uiCopy('依据 · ', 'Based on · ') + r.e + '</em></div></div>';
-  });
+       '<div class="grain"></div>' + (all.length ? selfSigil(all) : '') + '<div class="scrim"></div>' +
+       '<div class="who"><h1>' + uiCopy('你的轨迹', 'Your trail') + '</h1>' + (read.line ? '<p>' + read.line + '</p>' : '') + '</div></div>';
+  if (read.rows.length){
+    h += '<div class="eye"><div class="head"><b>' + uiCopy('从记录里看到的', 'Patterns in your visits') + '</b></div>';
+    read.rows.forEach(r => {
+      h += '<div class="row"><span class="dot">' + catDot(placeById(all[0].placeId)) +
+           '</span><div><strong>' + r.t + '</strong><em>' + uiCopy('依据 · ', 'Based on · ') + r.e + '</em></div></div>';
+    });
+    h += '</div>';
+  }
   h += '</div>';
-  h += '<div style="padding:13px 18px 16px"><button class="btn ghost sm" data-go="#/nearby">' + uiCopy('匿名汇总是怎么算的 →', 'How anonymous summaries work →') + '</button></div></div>';
 
   if (state.deleteWarning){
     h += '<div class="pad" style="padding-bottom:0"><div class="sample-note" style="margin:0">' +
@@ -2939,7 +2999,7 @@ function renderRecords(){
   }
 
   // 小在从这些记录里学到的：说清楚下一次推荐会怎么变，而不是给用户贴标签（FR-12 / FR-17）
-  const learned = learnedPatterns();
+  const learned = all.length ? learnedPatterns() : null;
   if (learned){
     h += '<div class="pad" style="padding-bottom:0"><div class="learned">';
     h += '<div class="lh"><span>' + catSVG() + '</span>' + uiCopy('下次推荐我会怎么改', 'How your next picks will change') + '</div>';
@@ -2952,19 +3012,23 @@ function renderRecords(){
          '<small>' + uiCopy('本机计算，没有上传', 'Calculated on this device') + '</small></div>';
     h += '</div></div>';
   }
-  h += '<div class="rec-head" style="padding-top:18px"><p class="eyebrow">' + uiCopy('你去过的地方', 'Places you’ve been') + '</p>' +
+  if (all.length) h += '<div class="rec-head" style="padding-top:18px"><p class="eyebrow">' + uiCopy('你去过的地方', 'Places you’ve been') + '</p>' +
        '<h1 class="title sm">' + uiCopy(all.length + ' 次到访，<br>攒成了一片。',
                                         all.length + (all.length === 1 ? ' visit' : ' visits') + '<br>in your trail.') + '</h1></div>';
-  h += '<div class="rec-stat"><div><b class="num">' + (avg >= 0 ? "+" : "") + avg.toFixed(1) + '</b><small>' + uiCopy('平均变化', 'Average change') + '</small></div>' +
+  if (all.length) h += '<div class="rec-stat"><div><b class="num">' + (avg >= 0 ? "+" : "") + avg.toFixed(1) + '</b><small>' + uiCopy('平均变化', 'Average change') + '</small></div>' +
        '<div><b class="num">' + anon + '</b><small>' + uiCopy('匿名贡献', 'Anonymous') + '</small></div>' +
        '<div><b class="num">' + (all.length - anon) + '</b><small>' + uiCopy('只有你能看到', 'Private') + '</small></div></div>';
-  h += '<div class="filterbar" style="margin-top:14px">';
-  REC_FILTERS.forEach(f => {
-    h += '<button class="chip' + (state.recFilter === f.id ? " on" : "") + '" data-recf="' + f.id + '">' + uiCopy(f.label, f.en) + '</button>';
-  });
-  h += '</div>';
-  if (!list.length){
-    h += '<div class="empty">' + uiCopy('这个筛选下还没有记录。<br>换一个看看。', 'No visits match this filter yet.') + '</div>';
+  if (all.length){
+    h += '<div class="filterbar" style="margin-top:14px">';
+    REC_FILTERS.forEach(f => {
+      h += '<button class="chip' + (state.recFilter === f.id ? " on" : "") + '" data-recf="' + f.id + '">' + uiCopy(f.label, f.en) + '</button>';
+    });
+    h += '</div>';
+  }
+  if (!all.length){
+    h += '<div class="empty trail-empty">' + uiCopy('完成一次到访后，轨迹会出现在这里。', 'Your trail will appear after your first visit.') + '</div>';
+  } else if (!list.length){
+    h += '<div class="empty">' + uiCopy('这个分类里暂时没有记录。', 'No visits in this category yet.') + '</div>';
   } else {
     h += '<div class="falls">';
     list.forEach(r => {
@@ -3009,23 +3073,11 @@ function renderNearby(placeFilter){
                     .sort((a, b) => b.agg.count - a.agg.count);
   const total = rows.reduce((n, r) => n + r.agg.count, 0);
 
-  let h = topbar(p ? p.placeName : uiCopy("匿名汇总", "Anonymous summary"), p ? uiCopy("这个空间的样本", "This place") : uiCopy("样本怎么算", "How it works"), p ? "#/place/" + p.placeId : "#/records");
+  let h = topbar(p ? p.placeName : uiCopy("匿名记录", "Anonymous visits"), "", p ? "#/place/" + p.placeId : "#/records");
   h += '<div class="screen"><div class="pad">';
-  h += '<p class="eyebrow">' + uiCopy('匿名汇总', 'Anonymous summary') + '</p>';
-  h += '<h1 class="title sm">' + uiCopy('这里对去过的人<br>有没有帮助？', 'Did this place help<br>the people who went?') + '</h1>';
-  h += '<p class="lead">' + uiCopy('只显示汇总，不展示任何人的单条记录。', 'Only the combined result is shown. Individual entries stay private.') + '</p>';
-
-  h += '<div class="learned" style="margin-bottom:20px">';
-  h += '<div class="lh"><span>' + catSVG() + '</span>' + uiCopy('统计方式', 'How it works') + '</div>';
-  h += '<div class="lr"><strong>' + uiCopy('仅计入已确认且主动匿名贡献的到访', 'Only confirmed visits you choose to contribute are counted') + '</strong></div>';
-  h += '<div class="lr"><strong>' + uiCopy('满 ' + AGGREGATE_MIN + ' 条后显示汇总', 'A summary appears after ' + AGGREGATE_MIN + ' visits') + '</strong></div>';
-  h += '</div>';
-
-  h += '<p class="eyebrow">' + uiCopy('现在攒到哪一步', 'Current sample') + '</p>';
   if (!rows.length){
     h += '<div class="empty" style="margin:0">' +
-         uiCopy(p ? "这个空间还没有足够的匿名到访记录。" : "还没有足够的匿名到访记录。",
-                p ? "Not enough anonymous visits here yet." : "Not enough anonymous visits yet.") + '</div>';
+         uiCopy("还没有足够的匿名到访记录。", "Not enough anonymous visits yet.") + '</div>';
   } else {
     h += '<div class="here" style="margin-top:0">';
     h += '<div class="h"><span style="width:14px;height:14px;display:inline-block">' + catSVG() +
@@ -3039,7 +3091,6 @@ function renderNearby(placeFilter){
     h += '</div>';
   }
   h += '</div></div>';
-  h += dock('宁可空着，也不给你一个刷得出来的分数。');
   return h;
 }
 
@@ -3180,6 +3231,18 @@ function micSVG(){
     '<rect x="9" y="2.5" width="6" height="11" rx="3"/>' +
     '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3.2"/></svg>';
 }
+function keyboardSVG(){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">' +
+    '<rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M10 13h.01M14 13h.01M18 13h.01M7 16h10"/></svg>';
+}
+function locationSVG(){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">' +
+    '<path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></svg>';
+}
+function chooseSVG(){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">' +
+    '<path d="M5 7h14M5 12h9M5 17h6"/><path d="m16 15 2 2 3-4"/></svg>';
+}
 
 /* --- ⓪ 主动触达确认页（§6.3 路径 A）---
    带着「为什么是现在」出现，用户一步确认。三个出口都在同一屏：
@@ -3215,45 +3278,41 @@ function tierCard(o){
 }
 
 function renderSettings(){
+  const s = state.appSettings;
   const r = state.reach;
-  const allowed = reachAllowed();
-  let h = topbar("设置", "权限与提醒", "#/talk");
-  h += '<div class="screen"><div class="pad">';
+  const status = value => ({granted:uiCopy('已允许','Allowed'), denied:uiCopy('未允许','Not allowed'), ask:uiCopy('使用时询问','Ask when used')})[value] || value;
+  const segment = (key, value, options) => '<div class="settings-segment">' + options.map(option =>
+    '<button data-setting="' + key + '" data-value="' + option[0] + '" class="' + (value === option[0] ? 'on' : '') + '">' + option[1] + '</button>'
+  ).join('') + '</div>';
+  const permissionRow = (key, title) => '<button class="settings-row permission-button" data-permission="' + key + '"><span class="txt"><b>' + title +
+    '</b></span><span class="settings-value">' + status(s.permissions[key]) + '</span><span class="settings-chevron">›</span></button>';
+  let h = topbar(uiCopy('设置','Settings'), '', '#/talk');
+  h += '<div class="screen"><div class="pad settings-page">';
 
-  h += '<p class="eyebrow">权限</p>';
-  h += '<h1 class="title sm">只打开你愿意给的</h1>';
-  h += '<p class="lead">定位和主动提醒都可以随时关闭。</p>';
+  h += '<section class="settings-section"><h3>' + uiCopy('通用与外观','General & appearance') + '</h3><div class="settings-group">';
+  h += '<div class="settings-row"><div class="txt"><b>' + uiCopy('语言','Language') + '</b></div>' +
+    segment('language', currentLang(), [['zh','中文'],['en','English']]) + '</div>';
+  h += '<div class="settings-row"><div class="txt"><b>' + uiCopy('字体大小','Text size') + '</b></div>' +
+    segment('fontSize', s.fontSize, [['standard',uiCopy('标准','Default')],['large',uiCopy('较大','Large')],['extra',uiCopy('最大','Largest')]]) + '</div>';
+  h += '<div class="settings-row"><div class="txt"><b>' + uiCopy('外观','Appearance') + '</b></div>' +
+    segment('theme', s.theme, [['system',uiCopy('自动','Auto')],['light',uiCopy('浅色','Light')],['dark',uiCopy('深色','Dark')]]) + '</div></div></section>';
 
-  // 这一页的全部意义就是「存什么、不存什么」，所以只留这两行。
-  // 原来每层还有一段解释，那段是把标题再说一遍。
-  h += tierCard({
-    level:"输入", key:"base", locked:true, on:true,
-    title:"你主动输入的内容",
-    keep:"存：结构化之后的需求",
-    drop:"不存：原话、语音"
-  });
-  h += tierCard({
-    level:"位置", key:"location", on:r.grants.location,
-    title:"当前位置",
-    keep:"存：到访结论",
-    drop:"不存：你的坐标"
-  });
+  h += '<section class="settings-section"><h3>' + uiCopy('权限管理','Permissions') + '</h3><div class="settings-group">' +
+    permissionRow('camera', uiCopy('相机与相册','Camera & photos')) +
+    permissionRow('notifications', uiCopy('通知','Notifications')) +
+    permissionRow('microphone', uiCopy('麦克风','Microphone')) +
+    permissionRow('location', uiCopy('位置','Location')) +
+    '<div class="settings-row"><div class="txt"><b>' + uiCopy('通讯录','Contacts') + '</b></div><span class="settings-value">' + uiCopy('未使用','Not used') + '</span></div>' +
+    '<div class="settings-row"><div class="txt"><b>' + uiCopy('剪贴板','Clipboard') + '</b></div><span class="settings-value">' + uiCopy('未使用','Not used') + '</span></div>' +
+    '</div></section>';
 
-  h += '<p class="eyebrow" style="margin-top:26px">提醒</p>';
-  h += '<div class="setrow"><div class="txt"><b>主动提醒我</b>' +
-       (r.stopped ? '<small>' + uiCopy('已经停了：你连着拒绝过几次，我不再自己回来。', 'Paused after several declines.') + '</small>' :
-        allowed.ok ? "" : '<small>' + reachBlockedText(allowed.reason) + '</small>') + '</div>' +
-       '<button class="switch' + (r.enabled ? " on" : "") + '" data-reachtoggle="1" aria-label="' + uiCopy('主动提醒', 'Reminders') + '" aria-pressed="' + r.enabled + '"><i></i></button></div>';
-  h += '<div class="setrow"><div class="txt"><b>一天最多几次</b></div>' +
-       '<div class="pick">' + [1,2,3].map(n =>
-         '<button class="' + (r.dailyCap === n ? "on" : "") + '" data-cap="' + n + '">' + n + '</button>').join("") + '</div></div>';
-  h += '<div class="setrow"><div class="txt"><b>静默时段</b>' +
-       '<small>' + uiCopy(r.silentFrom + ':00 到次日 ' + r.silentTo + ':00 不说话',
-                          r.silentFrom + ':00–' + r.silentTo + ':00 · no reminders') + '</small></div>' +
-       '<div class="pick">' + [[22,8],[21,9],[20,10]].map(w =>
-         '<button class="' + (r.silentFrom === w[0] ? "on" : "") + '" data-silent="' + w[0] + ':' + w[1] + '">' +
-         w[0] + '–' + w[1] + '点</button>').join("") + '</div></div>';
+  const preferences = [['outdoor','户外开阔'],['lively','热闹'],['quiet','安静'],['water','靠水'],['mountain','靠山'],['park','公园'],['street','街道'],['culture','文艺场所'],['sport','户外运动'],['still','喜静'],['active','喜动']];
+  h += '<section class="settings-section"><h3>' + uiCopy('地点偏好','Place preferences') + '</h3><div class="settings-group"><div class="preference-grid">' +
+    preferences.map(item => '<button data-preference="' + item[0] + '" class="' + (s.preferences.includes(item[0]) ? 'on' : '') + '">' + item[1] + '</button>').join('') +
+    '</div></div></section>';
 
+  h += '<section class="settings-section"><h3>' + uiCopy('提醒','Reminders') + '</h3><div class="settings-group"><div class="settings-row"><div class="txt"><b>' +
+    uiCopy('主动提醒','Proactive reminders') + '</b></div><button class="switch' + (r.enabled ? ' on' : '') + '" data-reachtoggle="1" aria-pressed="' + r.enabled + '"><i></i></button></div></div></section>';
 
   h += '<details class="fold" style="margin-top:26px"><summary>' + uiCopy('本机数据', 'On this device') + '</summary>';
   h += '<div class="tier"><div class="tb" style="padding-top:13px">' +
@@ -3274,7 +3333,6 @@ function renderSettings(){
        '<li>不评判：情绪变差不叫失败，只叫这次没接住</li>' +
        '<li>不侵入社交：没有昵称、人脸、主页、匹配或私信；只保留匿名空间线索</li></ul></div></details>';
   h += '</div></div>';
-  h += dock('这一页上的每一项，关了就是关了。', {records:false});
   return h;
 }
 
@@ -3296,9 +3354,6 @@ function momentSeeds(){
 function momentById(id){
   return momentSeeds().find(item => item.id === id);
 }
-function momentMinutes(moment){
-  return Math.max(0, Math.ceil((moment.expiresAt - Date.now()) / 60000));
-}
 function momentTitle(moment){
   return currentLang() === "en" ? moment.titleEn : moment.title;
 }
@@ -3306,23 +3361,17 @@ function momentPlace(moment){
   return currentLang() === "en" ? moment.placeEn : moment.place;
 }
 function momentCard(moment){
-  const left = momentMinutes(moment);
   return '<article class="moment-card"><span class="moment-badge">' +
-    uiCopy('演示 · 非实时信息', 'DEMO · not live') + '</span>' +
+    uiCopy('场景示意', 'Scene preview') + '</span>' +
     '<div class="moment-scene ' + escapeHTML(moment.kind) + '">' +
     (moment.image ? '<img src="' + escapeHTML(moment.image) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '') +
     '</div>' +
     '<h3>' + escapeHTML(momentTitle(moment)) + '</h3>' +
-    '<p>' + uiCopy('小在按你此刻选择的状态带回这一幕。数据来自演示种子，出发前请看真实天气和开放时间。',
-      'Xiaozai brought this back for the mood you chose. This is demo seed data; check live weather and opening hours before leaving.') + '</p>' +
-    '<div class="moment-meta"><span>' + escapeHTML(momentPlace(moment)) + '</span><span>' +
-    uiCopy('还剩约 ' + left + ' 分钟', 'about ' + left + ' min left') + '</span></div>' +
-    (moment.imageLicenseUrl ? '<a class="moment-credit" href="' + escapeHTML(moment.imageLicenseUrl) +
-      '" target="_blank" rel="noreferrer">' + escapeHTML(moment.imageLicense) + '</a>' : '') +
+    '<div class="moment-meta"><span>' + escapeHTML(momentPlace(moment)) + '</span></div>' +
     '<div style="margin-top:12px"><button class="btn sm" data-collect="' + escapeHTML(moment.id) + '">' +
-    uiCopy('我赶上了', 'I caught it') + '</button> <button class="btn ghost sm" data-go="' +
+    uiCopy('收下这一刻', 'Save this moment') + '</button> <button class="btn ghost sm" data-go="' +
     (moment.placeId ? '#/place/' + escapeHTML(moment.placeId) : '#/talk') + '">' +
-    uiCopy(moment.placeId ? '去这里' : '从附近找起', moment.placeId ? 'Go here' : 'Find nearby') +
+    uiCopy(moment.placeId ? '看看地点' : '按这个感觉找', moment.placeId ? 'See the place' : 'Find this feeling') +
     '</button></div></article>';
 }
 function renderMoments(){
@@ -3377,9 +3426,14 @@ function renderCommunity(){
     '<option value="seasonal">' + uiCopy('这一季才有的变化', 'Something seasonal') + '</option>' +
     '<option value="sensory">' + uiCopy('刚刚闻到或听到的瞬间', 'A sound or scent just noticed') + '</option>' +
     '<option value="quiet_corner">' + uiCopy('一个不必说话的角落', 'A corner that asks nothing') + '</option></select></label>' +
-    '<label>' + uiCopy('照片或视频', 'Photos or video') +
-    '<input id="moment-media" name="media" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple>' +
-    '<small>' + uiCopy('最多 3 张照片，或 1 段不超过 1 分钟的视频。先保存在这台设备上。', 'Up to 3 photos, or one video under 1 minute. Saved on this device.') + '</small></label>' +
+    '<fieldset class="media-picker"><legend>' + uiCopy('照片或视频', 'Photos or video') + '</legend><div class="media-actions">' +
+    '<button type="button" data-media-open="moment-media-library">' + uiCopy('相册','Photo library') + '</button>' +
+    '<button type="button" data-media-open="moment-media-camera">' + uiCopy('拍摄','Camera') + '</button>' +
+    '<button type="button" data-media-open="moment-media-files">' + uiCopy('选取文件','Choose files') + '</button></div>' +
+    '<input class="visually-hidden" id="moment-media-library" data-moment-media type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple tabindex="-1" aria-hidden="true">' +
+    '<input class="visually-hidden" id="moment-media-camera" data-moment-media type="file" accept="image/*,video/*" capture="environment" tabindex="-1" aria-hidden="true">' +
+    '<input class="visually-hidden" id="moment-media-files" data-moment-media type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple tabindex="-1" aria-hidden="true">' +
+    '<small>' + uiCopy('最多 3 张照片，或 1 段不超过 1 分钟的视频。', 'Up to 3 photos, or one video under 1 minute.') + '</small></fieldset>' +
     '<div id="moment-media-preview" class="media-preview"></div>' +
     '<div class="sample-note">' + uiCopy('始终匿名；这不是交友资料，也不会生成个人主页。', 'Always anonymous. This is not a social profile.') + '</div>' +
     '<div class="share-row"><button class="btn ghost sm" type="submit" data-submit-mode="local">' + uiCopy('只存本机', 'Keep on device') + '</button>' +
@@ -3487,13 +3541,13 @@ function renderTalk(){
           '<button class="k" data-go="#/records" style="letter-spacing:.14em">' + uiCopy('记录', 'Records') + '</button></div></div>';
   h += '<div class="talk">';
   h += '<div class="zai" style="margin-bottom:26px">' + cloudSVG("withyou") + '</div>';
-  // 打字时麦克风退成小圆钮：一屏一个主动作，语音的优先级靠体量表达
-  h += '<button class="mic' + (state.talkTyping ? ' small' : '') + '" id="mic-button" aria-label="' + uiCopy('用语音说', 'Speak') + '">' + micSVG() + '</button>';
-  h += '<p class="mic-cap" id="mic-cap">' +
-       (state.reachNote ? escapeHTML(state.reachNote) : '') + '</p>';
-  if (!state.talkTyping){
-    h += '<button class="type-toggle" id="type-toggle" aria-label="' + uiCopy('打字输入', 'Type instead') + '">⌨ ' + uiCopy('打字输入', 'Type instead') + '</button>';
-  } else {
+  h += '<div class="talk-actions">' +
+       '<button class="talk-action' + (state.talkTyping ? ' on' : '') + '" id="type-toggle" aria-label="' + uiCopy('打字', 'Type') + '">' + keyboardSVG() + '<span>' + uiCopy('打字', 'Type') + '</span></button>' +
+       '<button class="talk-action voice" id="mic-button" aria-label="' + uiCopy('说话', 'Speak') + '">' + micSVG() + '<span>' + uiCopy('说话', 'Speak') + '</span></button>' +
+       '<button class="talk-action' + (locationMode === 'real' ? ' on' : '') + '" id="location-input" aria-label="' + uiCopy('位置', 'Location') + '">' + locationSVG() + '<span>' + uiCopy(locationMode === 'real' ? '位置已开' : '位置', locationMode === 'real' ? 'Location on' : 'Location') + '</span></button>' +
+       '<button class="talk-action" data-go="#/mood" aria-label="' + uiCopy('自己选', 'Choose') + '">' + chooseSVG() + '<span>' + uiCopy('自己选', 'Choose') + '</span></button></div>';
+  h += '<p class="mic-cap" id="mic-cap">' + (state.reachNote ? escapeHTML(state.reachNote) : '') + '</p>';
+  if (state.talkTyping){
     h += '<div class="typing"><textarea id="natural-input" maxlength="2000" ' +
          'placeholder="' + uiCopy('比如：好累，想找个人少、能吹风的地方', 'For example: I’m exhausted and want somewhere quiet outside') + '">' + escapeHTML(state.talkText) + '</textarea>' +
          '<button class="send" id="natural-submit">' + uiCopy('发送', 'Send') + '</button></div>';
@@ -3504,11 +3558,9 @@ function renderTalk(){
          '今天你回来好几次了。真难受的时候，找个人说说比找个地方管用。</p>';
   }
   h += '<div class="foot">' +
-       '<button id="location-input"' + (locationMode === "real" ? ' class="on"' : '') + '>' +
-       uiCopy(locationMode === "real" ? '✓ 已使用当前位置' : '⌖ 使用当前位置', locationMode === "real" ? '✓ Location on' : '⌖ Use my location') + '</button>' +
        (DEMO_MODE ? '<button id="demo-location"' + (locationMode === "demo" || locationMode === "trip-demo" ? ' class="on"' : '') + '>' +
        uiCopy(locationMode === "trip-demo" ? '✓ 演示定位' : locationMode === "demo" ? '✓ 体验北京路线' : '体验北京路线', locationMode === "trip-demo" ? '✓ Demo location' : locationMode === "demo" ? '✓ Beijing demo' : 'Try Beijing demo') + '</button>' : '') +
-       '<button class="quiet" data-go="#/mood">' + uiCopy('我不想说，自己挑', 'Choose instead') + '</button></div>';
+       '</div>';
   h += '<div class="moment-entry"><button data-go="#/moments">☁ ' +
        uiCopy('看看小在带回了什么', 'See what Xiaozai found') + '</button>' +
        '<button data-go="#/community">' + uiCopy('接力一个地方', 'Pass a place along') + '</button></div>';
@@ -3724,7 +3776,7 @@ function mapSheet(){
       h += '<button type="button" class="map-choice" data-mapapp="amap"><span>' + uiCopy(app.name, app.enName) +
            '</span><i>' + uiCopy(app.note, app.enNote) + '</i></button>';
     } else {
-      h += '<a class="map-choice" href="' + escapeHTML(links[app.key]) + '" target="_blank" rel="noopener" data-mapapp="' + app.key + '">' +
+      h += '<a class="map-choice" href="' + escapeHTML(links[app.key]) + '" data-mapapp="' + app.key + '">' +
            '<span>' + uiCopy(app.name, app.enName) + '</span><i>' + uiCopy(app.note, app.enNote) + '</i></a>';
     }
   });
@@ -4254,6 +4306,48 @@ function bind(){
     render();
   });
 
+  root.querySelectorAll("[data-setting]").forEach(el => el.onclick = () => {
+    const key = el.dataset.setting;
+    const value = el.dataset.value;
+    if (key === "language") {
+      setLang(value);
+      if (state.read && state.read.state) runRecommend(state.read.state, null);
+    } else {
+      saveAppSettings({[key]:value});
+    }
+    render();
+  });
+  root.querySelectorAll("[data-preference]").forEach(el => el.onclick = () => {
+    const key = el.dataset.preference;
+    const preferences = state.appSettings.preferences.slice();
+    const index = preferences.indexOf(key);
+    if (index >= 0) preferences.splice(index, 1); else preferences.push(key);
+    saveAppSettings({preferences:preferences});
+    render();
+  });
+  root.querySelectorAll("[data-permission]").forEach(el => el.onclick = async () => {
+    const key = el.dataset.permission;
+    let granted = false;
+    try {
+      if (key === "location") {
+        await CurrentAI.requestLocation();
+        granted = true;
+        saveReach({grants:Object.assign({}, state.reach.grants, {location:true})});
+      } else if (key === "notifications") {
+        granted = typeof Notification !== "undefined" && await Notification.requestPermission() === "granted";
+      } else if (key === "microphone" || key === "camera") {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("unavailable");
+        const stream = await navigator.mediaDevices.getUserMedia(key === "microphone" ? {audio:true} : {video:true});
+        stream.getTracks().forEach(track => track.stop());
+        granted = true;
+      }
+    } catch (_) {
+      granted = false;
+    }
+    saveAppSettings({permissions:{[key]:granted ? "granted" : "denied"}});
+    render();
+  });
+
   root.querySelectorAll("[data-go]").forEach(el => el.onclick = e => {
     e.preventDefault();
     if (el.dataset.go.indexOf("#/place/") === 0) {
@@ -4320,9 +4414,12 @@ function bind(){
   });
   const momentForm = root.querySelector("#moment-form");
   if (momentForm) {
-    const mediaInput = momentForm.querySelector("#moment-media");
     const mediaPreview = momentForm.querySelector("#moment-media-preview");
-    if (mediaInput) mediaInput.onchange = () => {
+    momentForm.querySelectorAll("[data-media-open]").forEach(button => button.onclick = () => {
+      const input = document.getElementById(button.dataset.mediaOpen);
+      if (input) input.click();
+    });
+    momentForm.querySelectorAll("[data-moment-media]").forEach(mediaInput => mediaInput.onchange = () => {
       const files = Array.from(mediaInput.files || []);
       const videos = files.filter(file => file.type.startsWith("video/"));
       const photos = files.filter(file => file.type.startsWith("image/"));
@@ -4345,7 +4442,7 @@ function bind(){
       mediaPreview.innerHTML = files.map(file => file.type.startsWith("video/")
         ? '<video controls muted playsinline src="' + URL.createObjectURL(file) + '"></video>'
         : '<img alt="" src="' + URL.createObjectURL(file) + '">').join("");
-    };
+    });
     momentForm.onsubmit = async event => {
       event.preventDefault();
       const submitMode = event.submitter && event.submitter.dataset.submitMode === "review" ? "review" : "local";
@@ -4587,10 +4684,8 @@ function bind(){
     locationInput.disabled = true;
     setNaturalStatus(uiCopy("正在获取位置…", "Getting your location…"));
     CurrentAI.requestLocation().then(() => {
-      locationInput.classList.add("on");
-      locationInput.textContent = uiCopy("✓ 已使用当前位置", "✓ Location on");
-      locationInput.disabled = false;
-      setNaturalStatus("");
+      state.reachNote = "";
+      render();
     }).catch(error => {
       locationInput.disabled = false;
       setNaturalStatus(error.message, true);
@@ -5249,6 +5344,8 @@ function save(placeId){
 }
 
 /* ---------- 启动 ---------- */
+setLang(currentLang());
+applyVisualSettings();
 state.route = location.hash || "#/talk";
 if (CurrentAI.relayPendingCode() && !CurrentAI.relayState()) state.route = "#/connect";
 // FR-31：说过会回来一次，就得真的回来——打开页面时到点了直接接住。

@@ -98,6 +98,21 @@ def test_model_cannot_default_an_ambiguous_work_context_to_tired(monkeypatch):
     assert all("累" not in line for line in result.evidence)
 
 
+def test_model_cannot_restore_a_negated_place_type(monkeypatch):
+    async def fake_call(*_args, **_kwargs):
+        return NeedState(
+            mood_id="low",
+            place_types=["barbecue", "park"],
+            confidence=0.9,
+        ), ["「想吃烤串」——先找一顿具体的饭。"]
+
+    monkeypatch.setenv("LLM_API_KEY", "test")
+    monkeypatch.setattr(interpretation, "_call_model_with_backoff", fake_call)
+
+    result = asyncio.run(interpret("心情不好，但我现在就想吃烤串，别给我推荐公园"))
+    assert result.state.place_types == ["barbecue"]
+
+
 def test_internal_enum_words_never_reach_user_visible_evidence():
     text = "刚开完会有点紧绷，想去外面走走吹吹风"
     result = _decorate(

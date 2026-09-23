@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import math
 import time
 import uuid
 from datetime import datetime
@@ -174,6 +175,28 @@ AVOID_WEIGHT = 0.25
 # 现场搜出来的地点要让人工核对过的一个身位。差距要小到「附近真的更合适」时
 # 它仍然能赢，又要大到同分时不会把人写的那份内容挤掉。
 CURATION_PREFERENCE = 0.06
+
+# The editorial catalogue is currently Beijing-only. Its historical
+# `distanceKm` values were measured from a prototype origin, not the live user.
+# A verified POI farther than this is outside the user's metro and must never be
+# used as a fallback for Shanghai/Shenzhen/Guangzhou.
+CURATED_LIVE_RADIUS_KM = 80.0
+
+
+def _live_distance_km(location: Location, place: dict) -> float | None:
+    amap = place.get("amap") or {}
+    if amap.get("verification_status") not in TRUSTWORTHY_COORDINATES:
+        return None
+    try:
+        lat2 = math.radians(float(amap["latitude"]))
+        lon2 = math.radians(float(amap["longitude"]))
+    except (KeyError, TypeError, ValueError):
+        return None
+    lat1 = math.radians(location.latitude)
+    lon1 = math.radians(location.longitude)
+    dlat, dlon = lat2 - lat1, lon2 - lon1
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    return 6371.0088 * 2 * math.atan2(math.sqrt(a), math.sqrt(max(0.0, 1 - a)))
 
 # 「避开某个需求」到底该避开哪个维度，必须一条条写出来，不能拿 NEEDS 的 target 反推。
 # 反推过一版：need「想手上有事做」的 target 是 {创作刺激, 可久待}，于是用户说「什么都不做」
@@ -411,6 +434,16 @@ def _rank(
 
     # 人工核对过的和现场搜出来的走同一套打分——差别在数据可信度，不在算法。
     for original in list(catalog["PLACES"]) + list(discovered or []):
+        original = dict(original)
+        if request.location and original.get("source") != "discovered":
+            live_distance = _live_distance_km(request.location, original)
+            # No reviewed coordinate means there is no defensible way to claim
+            # this Beijing record is near a live location. Prefer an honest
+            # empty/fallback state over a confidently wrong city.
+            if live_distance is None or live_distance > CURATED_LIVE_RADIUS_KM:
+                continue
+            original["distanceKm"] = round(live_distance, 2)
+            original["distance_source"] = "amap_straight_line"
         place = apply_profile(
             original,
             (profile_overlays or {}).get(str(original.get("placeId") or "")),
@@ -472,6 +505,12 @@ def _rank(
             breakdown = {**breakdown, "open_penalty": OPEN_PENALTY[status]}
         ranked.append((score, place, breakdown))
 
+    if request.state.place_types and any(item[2].get("specific_fit") == 1.0 for item in ranked):
+        # A family fallback (restaurant for barbecue, sports venue for gym) is
+        # useful only when no exact result exists. Once an exact venue exists,
+        # keep the user's words authoritative even if the generic venue is open
+        # later or has a slightly stronger mood score.
+        ranked = [item for item in ranked if item[2].get("specific_fit") == 1.0]
     ranked.sort(key=lambda item: item[0], reverse=True)
     return ranked
 
@@ -545,7 +584,9 @@ def _to_recommendation(
         distance_source=(
             "amap" if route
             # 现场搜到的地点，距离是高德周边搜索一起返回的，是真的直线距离。
-            else "amap_straight_line" if place.get("source") == "discovered" and distance_km is not None
+            else "amap_straight_line" if (
+                place.get("source") == "discovered" or place.get("distance_source") == "amap_straight_line"
+            ) and distance_km is not None
             else "prototype_estimate"
         ),
         map_verified=(place.get("amap") or {}).get("verification_status") == "verified",
