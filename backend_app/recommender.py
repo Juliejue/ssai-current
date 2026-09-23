@@ -13,7 +13,6 @@ from pathlib import Path
 from .discovery import discover, warm as warm_search
 from .i18n import (AVOID_LABELS_EN, LOW_TAG_LABELS_EN, NEED_LABELS_EN, PLACE_TYPE_LABELS_EN,
                    RELIEF_LABELS_EN, STATE_LABELS_EN, TAG_LABELS_EN, ui)
-from .narrate import narrate_quietly
 from .map_provider import (AmapClient, MapProviderError, TRUSTWORTHY_COORDINATES, WalkingRoute,
                             map_links, navigation_url)
 from .opening_hours import open_state
@@ -730,24 +729,11 @@ async def recommend_with_live_context(
         except (KeyError, TypeError, ValueError, MapProviderError):
             return None
 
-    # 文案和路线一起发，不排队——多花的是并发，不是用户的时间。
-    # 只给现场搜出来的写：人工那 26 个已经有真人写的理由链了，模型不该去改它。
-    to_narrate = [place for _, place, _ in shortlist[: request.limit * 2] if place.get("source") == "discovered"]
-    routes, written = await asyncio.gather(
-        asyncio.gather(*(route_for(place) for _, place, _ in shortlist)),
-        narrate_quietly(to_narrate, request.state, lang=request.lang),
-    )
-    for place in to_narrate:
-        line = written.get(place["placeId"])
-        if line:
-            # 模板那句是保底；模型这句是这个产品的意义所在。
-            if request.lang == "en":
-                place["action_en"] = line["action"]
-                place["matchReason_en"] = {"_": line["why_now"]}
-            else:
-                place["action"] = line["action"]
-                place["matchReason"] = {"_": line["why_now"]}
-            place["narrated"] = True
+    # Recommendation is intentionally deterministic after /interpret. The
+    # discovered category profiles already carry authored action/reason copy;
+    # a second LLM call here added 3–6 seconds and extra tokens without changing
+    # which place wins. One user turn now performs one LLM call total.
+    routes = await asyncio.gather(*(route_for(place) for _, place, _ in shortlist))
     enriched: list[tuple[float, dict, dict[str, float], WalkingRoute | None]] = []
     # 只因为「实测太远」被拿掉的。全军覆没时还得把它们请回来——
     # 给一个远的并说清楚它远，好过给空屏（US-03）。
