@@ -90,7 +90,7 @@ PLACE_TYPE_SEARCHES: dict[str, tuple[tuple[str, str], ...]] = {
         ("公共游泳馆", "swimming"),
     ),
     "gym": (("健身房", "gym"),),
-    "climbing": (("攀岩馆", "climbing"),),
+    "climbing": (("攀岩馆", "climbing"), ("抱石馆", "climbing")),
     "swimming": (("游泳馆", "swimming"),),
     "badminton": (("羽毛球馆", "badminton"),),
     "basketball": (("篮球馆", "basketball"), ("篮球场", "basketball")),
@@ -121,6 +121,7 @@ MAX_KEYWORD_SEARCHES = 4
 
 # 搜多远。太小了在郊区搜不到东西，太大了会推荐到跨城的地方。
 DISCOVERY_RADIUS_M = 5000
+EXPLICIT_ACTIVITY_RADIUS_M = 20000
 DISCOVERY_PAGE_SIZE = 10
 
 
@@ -164,12 +165,18 @@ KEYWORD_CATEGORY.update({keyword: category for pairs in PLACE_TYPE_SEARCHES.valu
 # 这样 /interpret 期间预热的「书店/咖啡/公园」，在 /recommendations 里能直接命中，
 # 哪怕那时的状态又多点亮了几个别的关键词。
 _SEARCH_TTL_SECONDS = 300
-_search_cache: dict[tuple[float, float, str], tuple[float, list[dict[str, Any]]]] = {}
+_search_cache: dict[tuple[float, float, str, int], tuple[float, list[dict[str, Any]]]] = {}
 
 
-async def cached_search(client: AmapClient, location: Location, keyword: str) -> list[dict[str, Any]]:
+async def cached_search(
+    client: AmapClient,
+    location: Location,
+    keyword: str,
+    *,
+    radius: int = DISCOVERY_RADIUS_M,
+) -> list[dict[str, Any]]:
     # 位置取到小数点后三位（约 100 米）。只在内存里，不写盘、不入库。
-    key = (round(location.latitude, 3), round(location.longitude, 3), keyword)
+    key = (round(location.latitude, 3), round(location.longitude, 3), keyword, radius)
     hit = _search_cache.get(key)
     if hit and (time.monotonic() - hit[0]) < _SEARCH_TTL_SECONDS:
         return hit[1]
@@ -178,7 +185,7 @@ async def cached_search(client: AmapClient, location: Location, keyword: str) ->
             longitude=location.longitude,
             latitude=location.latitude,
             keywords=keyword,
-            radius=DISCOVERY_RADIUS_M,
+            radius=radius,
             page_size=DISCOVERY_PAGE_SIZE,
         )
     except MapProviderError:
@@ -556,13 +563,10 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
     if not profile:
         return None
     photos = _photo_urls(poi)
-    if not photos and category not in {
-        "sports", "gym", "running", "cycling", "skating", "swimming", "badminton",
-        "books", "library",
-    }:
-        # 没有照片的现场结果不要。#2 的整个意义就是让人看见真实的地方，
-        # 一张没有的话，它在卡片上还是一个抽象符号。
-        return None
+    # A real nearby place without a provider photo is still more useful than
+    # claiming there is no climbing gym, park, or café at all. The card renders
+    # a category sigil in that case and never substitutes an unrelated stock
+    # photograph.
 
     provider_id = str(poi.get("id") or "")
     distance_m = float(poi.get("distance") or 0)
@@ -630,9 +634,10 @@ async def discover(
         return []
 
     chosen = keywords_for(state)
+    search_radius = EXPLICIT_ACTIVITY_RADIUS_M if state.place_types else DISCOVERY_RADIUS_M
 
     async def search(keyword: str) -> tuple[str, list[dict[str, Any]]]:
-        return keyword, await cached_search(client, location, keyword)
+        return keyword, await cached_search(client, location, keyword, radius=search_radius)
 
     groups = await asyncio.gather(*(search(keyword) for keyword in chosen))
 

@@ -451,7 +451,8 @@ def test_amap_uses_a_same_page_native_launch_with_a_web_fallback():
     assert "links.amap_android" in client
     assert "setTimeout(openFallback, 1500)" not in client
     assert "document.hidden" not in client
-    assert "One universal URL is intentionally used" in client
+    assert "links.amap_ios || links.amap" in client
+    assert "links.amap_android || links.amap" in client
     assert "function openMapNavigation(" not in source
 
 

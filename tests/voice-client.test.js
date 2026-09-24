@@ -398,15 +398,15 @@ test('the regional capability can start browser dictation on the first tap', asy
   assert.equal(runtime.sockets.length, 0);
 });
 
-test('overseas embedded browsers fail fast to typing instead of retrying Tencent', async () => {
+test('embedded browsers without Web Speech still try the configured realtime microphone', async () => {
   const runtime = makeVoiceRuntime({
     tencentConfigured: true,
     preferredProvider: 'browser',
   });
   await runtime.settleCapabilities();
 
-  await assert.rejects(runtime.current.toggleVoice(runtime.callbacks), /直接打字/);
+  await runtime.current.toggleVoice(runtime.callbacks);
 
-  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), false);
-  assert.equal(runtime.sockets.length, 0);
+  assert.equal(runtime.fetchUrls.some(url => url.endsWith('/asr/signature')), true);
+  assert.equal(runtime.sockets.length, 1);
 });

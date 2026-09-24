@@ -3472,8 +3472,8 @@ function renderCommunity(){
     '<button type="button" data-media-open="moment-media-camera">' + uiCopy('拍摄','Camera') + '</button>' +
     '<button type="button" data-media-open="moment-media-files">' + uiCopy('选取文件','Choose files') + '</button></div>' +
     '<input class="visually-hidden" id="moment-media-library" data-moment-media type="file" accept="image/*" multiple tabindex="-1" aria-hidden="true">' +
-    '<input class="visually-hidden" id="moment-media-camera" data-moment-media type="file" accept="image/*,video/*" capture="environment" tabindex="-1" aria-hidden="true">' +
-    '<input class="visually-hidden" id="moment-media-files" data-moment-media type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple tabindex="-1" aria-hidden="true">' +
+    '<input class="visually-hidden" id="moment-media-camera" data-moment-media type="file" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">' +
+    '<input class="visually-hidden" id="moment-media-files" data-moment-media type="file" multiple tabindex="-1" aria-hidden="true">' +
     '<small>' + uiCopy('最多 3 张照片，或 1 段不超过 1 分钟的视频。', 'Up to 3 photos, or one video under 1 minute.') + '</small></fieldset>' +
     '<div id="moment-media-preview" class="media-preview"></div>' +
     '<div class="share-row"><button class="btn ghost sm" type="button" id="community-back">' + uiCopy('上一步','Back') + '</button>' +
@@ -4560,34 +4560,80 @@ function bind(){
   const momentForm = root.querySelector("#moment-form");
   if (momentForm) {
     const mediaPreview = momentForm.querySelector("#moment-media-preview");
-    momentForm.querySelectorAll("[data-media-open]").forEach(button => button.onclick = () => {
-      const input = document.getElementById(button.dataset.mediaOpen);
-      if (input) input.click();
-    });
-    momentForm.querySelectorAll("[data-moment-media]").forEach(mediaInput => mediaInput.onchange = () => {
-      const files = Array.from(mediaInput.files || []);
+    const useMomentMedia = (files, mediaInput) => {
+      files = Array.from(files || []);
+      const clearInput = () => { if (mediaInput) mediaInput.value = ""; };
+      const unsupported = files.find(file => !file.type.startsWith("image/") && !file.type.startsWith("video/"));
+      if (unsupported) {
+        state.pendingMedia = [];
+        state.momentNote = uiCopy("这里只能添加照片或视频。", "Only photos or videos can be added here.");
+        clearInput();
+        render();
+        return;
+      }
       const videos = files.filter(file => file.type.startsWith("video/"));
       const photos = files.filter(file => file.type.startsWith("image/"));
       const tooLarge = files.find(file => file.size > (file.type.startsWith("video/") ? 80 : 12) * 1024 * 1024);
       if (tooLarge) {
         state.pendingMedia = [];
         state.momentNote = uiCopy("照片请小于 12 MB，视频请小于 80 MB。", "Photos must be under 12 MB and video under 80 MB.");
-        mediaInput.value = "";
+        clearInput();
         render();
         return;
       }
       if (videos.length > 1 || (videos.length && photos.length) || photos.length > 3) {
         state.pendingMedia = [];
         state.momentNote = uiCopy("请选择最多 3 张照片，或单独选择 1 段视频。", "Choose up to 3 photos, or one video by itself.");
-        mediaInput.value = "";
+        clearInput();
         render();
         return;
       }
       state.pendingMedia = files;
+      state.momentNote = "";
       mediaPreview.innerHTML = files.map(file => file.type.startsWith("video/")
         ? '<video controls muted playsinline src="' + URL.createObjectURL(file) + '"></video>'
         : '<img alt="" src="' + URL.createObjectURL(file) + '">').join("");
+    };
+    momentForm.querySelectorAll("[data-media-open]").forEach(button => button.onclick = async () => {
+      const input = document.getElementById(button.dataset.mediaOpen);
+      if (!input) return;
+      if (button.dataset.mediaOpen === "moment-media-files" && window.showOpenFilePicker) {
+        try {
+          const handles = await window.showOpenFilePicker({multiple:true, types:[{
+            description:uiCopy("照片或视频", "Photos or videos"),
+            accept:{"image/*":[".jpg",".jpeg",".png",".webp",".heic"], "video/*":[".mp4",".mov",".webm"]}
+          }]});
+          useMomentMedia(await Promise.all(handles.map(handle => handle.getFile())), input);
+        } catch (error) {
+          if (error && error.name !== "AbortError") {
+            state.momentNote = uiCopy("没有打开系统文件。可以再试一次。", "The system file picker did not open. Try again.");
+            render();
+          }
+        }
+        return;
+      }
+      if (button.dataset.mediaOpen !== "moment-media-camera") {
+        input.click();
+        return;
+      }
+      // Ask for the camera explicitly before opening capture. The system owns
+      // the Allow/Don't Allow dialog; we only request it from this user tap.
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          state.momentNote = uiCopy("正在请求相机权限…", "Requesting camera access…");
+          const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}, audio:false});
+          stream.getTracks().forEach(track => track.stop());
+          state.momentNote = "";
+        } catch (error) {
+          state.momentNote = uiCopy("没有获得相机权限。请在系统设置中允许后再试。", "Camera access is blocked. Allow it in system settings and try again.");
+          render();
+          return;
+        }
+      }
+      input.click();
     });
+    momentForm.querySelectorAll("[data-moment-media]").forEach(mediaInput =>
+      mediaInput.onchange = () => useMomentMedia(mediaInput.files, mediaInput));
     momentForm.onsubmit = async event => {
       event.preventDefault();
       const submitMode = event.submitter && event.submitter.dataset.submitMode === "review" ? "review" : "local";
@@ -4816,6 +4862,7 @@ function bind(){
   }
   if (naturalSubmit) naturalSubmit.onclick = () => submitNatural();
   if (voiceInput) voiceInput.onclick = () => {
+    setNaturalStatus(uiCopy("正在请求麦克风权限…", "Requesting microphone access…"));
     CurrentAI.toggleVoice({
       onStatus: message => { voiceInput.classList.add("listening"); setNaturalStatus(message); },
       onPartial: text => { state.talkText = text; if (naturalInput) naturalInput.value = text; setNaturalStatus("「" + text + "」"); },
@@ -4893,7 +4940,10 @@ function bind(){
     if (link === "state"){
       // 状态被否掉了，从同一句话推出的诉求也跟着作废，否则新状态和旧诉求打架。
       // 只保留用户明确说过的硬约束：钱和路程。
-      Object.assign(next, {mood_id:value, confidence:0.9, need_keys:[], social_mode:"either", environment:"either"});
+      // Choosing a new mood after an empty activity search means “stop forcing
+      // that activity and help me another way”. Keeping the old place_types
+      // made every mood chip silently search for the same missing climbing gym.
+      Object.assign(next, {mood_id:value, confidence:0.9, need_keys:[], place_types:[], social_mode:"either", environment:"either"});
       state.read.state_label = label;
       state.read.acknowledgement = uiCopy("好，是「" + label + "」。我按这个重新找了一遍。", "Got it: “" + label + ".” I searched again.");
       state.read.evidence = [uiCopy("这一条是你自己改的，不是我猜的", "You corrected this yourself")];
@@ -4901,6 +4951,7 @@ function bind(){
     } else if (link === "need"){
       // 状态没错，只是需要的环境找偏了：换掉诉求，状态保持不动。
       next.need_keys = [value];
+      next.place_types = [];
       state.read.acknowledgement = uiCopy("状态我没听错，是需要的东西找偏了。改成「" + label + "」再找一遍。", "I got the mood, but not the need. I’ll search again for “" + label + ".”");
       state.read.evidence = [uiCopy("「" + label + "」是你自己指定的", "You chose “" + label + ".”")];
       note = uiCopy("按「" + label + "」重新排了一遍，状态还是原来那个。", "I reranked the places for “" + label + ".”");

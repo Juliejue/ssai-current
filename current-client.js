@@ -1031,12 +1031,16 @@
       return beginBrowserVoice(callbacks).then(function () { return 'recording'; });
     }
     if (preferredVoiceProvider === 'browser' && !browserSpeechClass()) {
-      // Outside mainland China the Tencent realtime service may reject the
-      // socket before audio starts. In embedded browsers without Web Speech,
-      // do not send the user into that known-broken retry loop.
+      // Hong Kong and many in-app browsers do not expose Web Speech at all.
+      // If the signed realtime provider exists, it is the only path that can
+      // actually request microphone permission and must be tried instead of
+      // making the primary button appear inert.
+      if (tencentVoiceConfigured !== false) {
+        return beginTencentVoice(callbacks).then(function () { return 'recording'; });
+      }
       return Promise.reject(new Error(voiceCopy(
-        '当前浏览器不支持这里的语音输入，请直接打字，或改用系统浏览器打开。',
-        'This browser cannot use voice input here. Please type, or open the link in your system browser.'
+        '这台设备暂时无法使用语音输入，请先直接打字。',
+        'Voice input is unavailable on this device. Please type instead.'
       )));
     }
     if (tencentVoiceConfigured === false) {
@@ -1058,14 +1062,22 @@
     links = links || {};
     if (method !== 'amap') return { url: links[method] || '', fallback: '' };
 
-    // One universal URL is intentionally used for every browser. A previous
-    // custom-scheme + delayed fallback flow could open the installed map and
-    // then open a second web page as well.
-    return { url: links.amap || links.amap_ios || links.amap_android || '', fallback: '' };
+    // Open the installed app directly on phones. Do not schedule a web
+    // fallback: that old pattern could launch Amap and then open a duplicate
+    // browser page. Desktop keeps the universal route because custom schemes
+    // are not useful there.
+    var ua = String((navigator && navigator.userAgent) || '');
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      return { url: links.amap_ios || links.amap || '', fallback: '' };
+    }
+    if (/Android/i.test(ua)) {
+      return { url: links.amap_android || links.amap || '', fallback: '' };
+    }
+    return { url: links.amap || '', fallback: '' };
   }
 
-  /* Exactly one navigation per tap. Universal links may hand off to the
-     installed app, but the page never schedules a second destination. */
+  /* Exactly one navigation per tap. Phones use the installed-app route;
+     desktop uses the web route. The page never schedules a second target. */
   function launchMap(method, links) {
     var target = mapLaunchTarget(method, links);
     if (!target.url) return false;
