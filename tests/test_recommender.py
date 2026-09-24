@@ -96,6 +96,36 @@ def test_gym_request_stays_a_gym_request():
     assert place["category"].startswith("健身房")
 
 
+def test_explicit_city_search_never_falls_back_to_beijing_catalogue():
+    class FakeMapClient:
+        configured = True
+
+        def __init__(self):
+            self.regions = []
+
+        async def search_places(self, keywords, *, region, page_size):
+            self.regions.append((keywords, region))
+            return [{
+                "id": "B0SHLIBRARY", "name": "上海图书馆东馆",
+                "longitude": 121.55, "latitude": 31.23,
+                "adname": "浦东新区", "cityname": "上海市",
+                "address": "合欢路 300 号", "citycode": "021", "photos": [],
+            }]
+
+    client = FakeMapClient()
+    request = RecommendRequest(
+        state=NeedState(mood_id="quiet", place_types=["library"], requested_city="上海"),
+        location=Location(latitude=22.32, longitude=114.17),
+    )
+    results = asyncio.run(recommender.recommend_with_live_context(request, map_client=client))
+
+    assert client.regions == [("图书馆", "上海"), ("library", "上海")]
+    assert results
+    assert {item.place_name for item in results} == {"上海图书馆东馆"}
+    assert all(item.distance_source == "city_search" for item in results)
+    assert all(item.search_scope == "上海" and item.reach_minutes is None for item in results)
+
+
 def test_beijing_editorial_catalogue_never_leaks_into_other_cities():
     shenzhen = RecommendRequest(
         state=NeedState(mood_id="tired"),

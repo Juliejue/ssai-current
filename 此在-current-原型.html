@@ -545,11 +545,13 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .talk .foot button.on{color:var(--ink-dim)}
 .talk .foot button.quiet{font-size:11.5px;color:var(--ink-faint)}
 .talk .privacy{margin:18px 0 0;font:10.5px/1.8 var(--mono);color:var(--ink-faint);letter-spacing:.02em;max-width:34ch;text-wrap:balance}
-.talk-actions{display:grid;grid-template-columns:repeat(2,76px);gap:12px;margin-top:4px}
-.talk-action{width:76px;height:76px;border-radius:24px;border:1px solid var(--line-2);background:var(--card);color:var(--water);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;box-shadow:0 5px 16px rgba(18,42,46,.05);transition:transform .15s,background .15s,color .15s}
+.talk-actions{width:min(290px,86vw);display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+.talk-action{width:100%;height:72px;border-radius:22px;border:1px solid var(--line-2);background:var(--card);color:var(--water);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;box-shadow:0 5px 16px rgba(18,42,46,.05);transition:transform .15s,background .15s,color .15s}
 .talk-action svg{width:25px;height:25px}
 .talk-action span{font:10.5px/1 var(--sans);letter-spacing:.04em}
-.talk-action.voice{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.talk-action.voice{grid-column:1/-1;grid-row:1;height:64px;flex-direction:row;border-color:var(--water);background:var(--water-wash);color:var(--ink)}
+.talk-action.voice svg{width:28px;height:28px}
+.talk-action.voice span{font-size:13px}
 .talk-action.on{background:var(--water-wash);border-color:var(--water);color:var(--ink)}
 .talk-action:active{transform:scale(.97)}
 
@@ -778,8 +780,28 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .preference-grid button{padding:8px 12px;border:1px solid var(--line-2);border-radius:999px;font:12px/1.2 var(--sans);color:var(--ink-dim)}
 .preference-grid button.on{background:var(--water);border-color:var(--water);color:#fff}
 .permission-button{width:100%;text-align:left}
-html[data-font="large"]{font-size:18px}
-html[data-font="extra"]{font-size:20px}
+.font-slider{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.font-slider input{width:100%;accent-color:var(--water)}
+.font-slider output{min-width:38px;text-align:right;font:11px var(--mono);color:var(--ink-dim)}
+.preference-voice{padding:0 14px 14px;display:flex;gap:8px}
+.preference-voice input{min-width:0;flex:1;padding:10px 12px;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);color:var(--ink);font:12px var(--sans)}
+.preference-voice button{flex:none;padding:0 13px;border-radius:12px;background:var(--water-wash);color:var(--ink);font:12px var(--sans)}
+.community-turn{display:grid;grid-template-columns:1fr 42px 58px;gap:8px;align-items:stretch;margin:12px 0 10px}
+.community-turn input,.community-turn textarea{min-width:0;width:100%;border:1px solid var(--line-2);border-radius:14px;background:var(--card);padding:11px 12px;outline:none;font:13px/1.6 var(--sans)}
+.community-turn textarea{min-height:86px;resize:none}
+.community-turn>button{border-radius:14px;background:var(--water-wash);color:var(--water);display:grid;place-items:center}
+.community-turn>button svg{width:21px;height:21px}
+.community-turn>button.send{background:var(--ink);color:var(--paper);font:12px var(--sans)}
+.relay-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}
+.relay-step{padding:10px 8px;border:1px solid var(--line);border-radius:13px;background:var(--card);font:11px/1.45 var(--sans);color:var(--ink-dim);text-align:center}
+.relay-step b{display:block;margin-bottom:4px;color:var(--water);font:600 11px var(--mono)}
+.launch{height:100%;display:grid;place-items:center;background:linear-gradient(180deg,#DDECE6 0%,#EEF4F0 62%,#F4F6F3 100%);position:relative;overflow:hidden}
+.launch-cloud{width:138px;height:86px;animation:launch-float 2.2s ease-in-out infinite,launch-arrive 1.15s cubic-bezier(.2,.75,.25,1) both}
+.launch-name{position:absolute;bottom:13%;font:500 15px/1.4 var(--serif);letter-spacing:.22em;color:var(--ink-dim);animation:launch-fade .8s .35s both}
+.launch-skip{position:absolute;inset:0;width:100%;height:100%;color:transparent}
+@keyframes launch-float{50%{transform:translateY(-7px)}}
+@keyframes launch-arrive{from{opacity:0;scale:.72}to{opacity:1;scale:1}}
+@keyframes launch-fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 html[data-theme="dark"]{--paper:#101718;--card:#182224;--sunk:#202C2E;--ink:#EDF4F2;--ink-dim:#B8C7C5;--ink-faint:#819492;--line:rgba(237,244,242,.11);--line-2:rgba(237,244,242,.22);--water:#65AEB0;--water-wash:#233C3D;--sun:#D68A59;--sun-wash:#3B2A20}
 @media(prefers-color-scheme:dark){html[data-theme="system"]{--paper:#101718;--card:#182224;--sunk:#202C2E;--ink:#EDF4F2;--ink-dim:#B8C7C5;--ink-faint:#819492;--line:rgba(237,244,242,.11);--line-2:rgba(237,244,242,.22);--water:#65AEB0;--water-wash:#233C3D;--sun:#D68A59;--sun-wash:#3B2A20}}
 </style>
@@ -1796,16 +1818,18 @@ function dock(line, opts){
 /* ---------- 状态 ---------- */
 const APP_SETTINGS_KEY = "current.app.settings.v1";
 const APP_SETTINGS_DEFAULTS = {
-  theme:"system", fontSize:"standard",
-  permissions:{camera:"ask", notifications:"ask", microphone:"ask", location:"ask"},
-  preferences:[]
+  theme:"system", fontScale:100,
+  permissions:{camera:"ask", photos:"ask", notifications:"ask", microphone:"ask", location:"ask"},
+  preferences:[], customPreferences:[]
 };
 function loadAppSettings(){
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(APP_SETTINGS_KEY) || "{}"); } catch(e){}
   return Object.assign({}, APP_SETTINGS_DEFAULTS, saved, {
     permissions:Object.assign({}, APP_SETTINGS_DEFAULTS.permissions, saved.permissions || {}),
-    preferences:Array.isArray(saved.preferences) ? saved.preferences.slice(0, 20) : []
+    preferences:Array.isArray(saved.preferences) ? saved.preferences.slice(0, 20) : [],
+    customPreferences:Array.isArray(saved.customPreferences) ? saved.customPreferences.slice(0, 8) : [],
+    fontScale:Number(saved.fontScale) || ({large:112,extra:125}[saved.fontSize] || 100)
   });
 }
 function saveAppSettings(patch){
@@ -1818,8 +1842,27 @@ function saveAppSettings(patch){
 function applyVisualSettings(){
   const settings = state && state.appSettings ? state.appSettings : loadAppSettings();
   document.documentElement.dataset.theme = settings.theme;
-  document.documentElement.dataset.font = settings.fontSize;
+  const scale = Math.max(85, Math.min(130, Number(settings.fontScale) || 100));
+  document.documentElement.style.setProperty("text-size-adjust", scale + "%");
+  document.documentElement.style.setProperty("-webkit-text-size-adjust", scale + "%");
   document.documentElement.style.colorScheme = settings.theme === "dark" ? "dark" : settings.theme === "light" ? "light" : "light dark";
+  applyTextScale(document.getElementById("root"));
+}
+function applyTextScale(root){
+  if (!root) return;
+  const settings = state && state.appSettings ? state.appSettings : loadAppSettings();
+  const scale = Math.max(85, Math.min(130, Number(settings.fontScale) || 100)) / 100;
+  const entries = Array.from(root.querySelectorAll(".phone *")).map(element => {
+    let base = Number(element.dataset.baseFontSize);
+    if (!base) {
+      base = parseFloat(getComputedStyle(element).fontSize);
+      if (Number.isFinite(base) && base > 0) element.dataset.baseFontSize = String(base);
+    }
+    return {element, base};
+  });
+  entries.forEach(({element, base}) => {
+    if (Number.isFinite(base) && base > 0) element.style.fontSize = (base * scale).toFixed(2) + "px";
+  });
 }
 const state = {
   route: "#/talk",
@@ -1867,12 +1910,14 @@ const state = {
   momentScenarioAt: CurrentMoments.scenario(localStorage, Date.now()),
   momentNote: "",
   momentDraft: null,
+  communityStep: 0,
   pendingMedia: [],
   communityApproved: [],
   communityLoadedCity: null,
   communityLoading: false,
   relayEvents: [],
   relayNote: null,
+  showSplash:(() => { try { return sessionStorage.getItem("current.launch.v2") !== "seen"; } catch(e){ return true; } })(),
   appSettings: loadAppSettings()
 };
 
@@ -2047,12 +2092,28 @@ function guardianState(){
    存在 localStorage，因为「带我去」会把人送去地图 App。回来时闭环不能断。
    只存 placeId / recommendationId / 时间戳——没有坐标，没有原话。 */
 const TRIP_KEY = "current.trip.v1";
+const TRIP_TAB_KEY = "current.trip.tab.v1";
 function loadTrip(){
-  try { return JSON.parse(localStorage.getItem(TRIP_KEY) || "null"); } catch(e){ return null; }
+  try {
+    const trip = JSON.parse(localStorage.getItem(TRIP_KEY) || "null");
+    const tabToken = sessionStorage.getItem(TRIP_TAB_KEY);
+    if (!trip || !trip.startedAt || tabToken !== trip.startedAt) return null;
+    const age = Date.now() - Date.parse(trip.startedAt);
+    if (!Number.isFinite(age) || age > 6 * 60 * 60 * 1000) return null;
+    return trip;
+  } catch(e){ return null; }
 }
 function saveTrip(trip){
   state.trip = trip;
-  try { trip ? localStorage.setItem(TRIP_KEY, JSON.stringify(trip)) : localStorage.removeItem(TRIP_KEY); } catch(e){}
+  try {
+    if (trip){
+      localStorage.setItem(TRIP_KEY, JSON.stringify(trip));
+      sessionStorage.setItem(TRIP_TAB_KEY, trip.startedAt);
+    } else {
+      localStorage.removeItem(TRIP_KEY);
+      sessionStorage.removeItem(TRIP_TAB_KEY);
+    }
+  } catch(e){}
 }
 function startTrip(id, rec){
   const locationMode = CurrentAI.getLocationMode();
@@ -2341,7 +2402,7 @@ function topbar(title, kicker, backTo){
     (backTo ? '<button class="back" data-go="' + backTo + '" aria-label="' + uiCopy("返回", "Back") + '">←</button>' : '') +
     '<div><div class="k">' + kicker + '</div></div><h2>' + title + '</h2></div>' +
     '<div class="topright">' + langToggle() +
-    '<button class="topnav" data-go="#/connect">' + (relay ? escapeHTML(relay.code) : uiCopy("连接", "Connect")) + '</button>' +
+    '<button class="topnav" data-go="#/connect">' + (relay ? uiCopy("已连接", "Connected") : uiCopy("连接", "Connect")) + '</button>' +
     '<button class="topnav" data-go="#/talk">' + uiCopy("首页", "Home") + '</button>' +
     '<button class="topnav" data-go="#/records">' + uiCopy("轨迹", "Trail") + '</button></div></div>';
 }
@@ -3293,12 +3354,13 @@ function renderSettings(){
   h += '<div class="settings-row"><div class="txt"><b>' + uiCopy('语言','Language') + '</b></div>' +
     segment('language', currentLang(), [['zh','中文'],['en','English']]) + '</div>';
   h += '<div class="settings-row"><div class="txt"><b>' + uiCopy('字体大小','Text size') + '</b></div>' +
-    segment('fontSize', s.fontSize, [['standard',uiCopy('标准','Default')],['large',uiCopy('较大','Large')],['extra',uiCopy('最大','Largest')]]) + '</div>';
+    '<div class="font-slider"><span aria-hidden="true">A</span><input id="font-scale" type="range" min="85" max="130" step="5" value="' + (s.fontScale || 100) + '" aria-label="' + uiCopy('字体大小','Text size') + '"><span aria-hidden="true" style="font-size:18px">A</span><output>' + (s.fontScale || 100) + '%</output></div></div>';
   h += '<div class="settings-row"><div class="txt"><b>' + uiCopy('外观','Appearance') + '</b></div>' +
     segment('theme', s.theme, [['system',uiCopy('自动','Auto')],['light',uiCopy('浅色','Light')],['dark',uiCopy('深色','Dark')]]) + '</div></div></section>';
 
   h += '<section class="settings-section"><h3>' + uiCopy('权限管理','Permissions') + '</h3><div class="settings-group">' +
-    permissionRow('camera', uiCopy('相机与相册','Camera & photos')) +
+    permissionRow('camera', uiCopy('相机','Camera')) +
+    permissionRow('photos', uiCopy('照片','Photos')) +
     permissionRow('notifications', uiCopy('通知','Notifications')) +
     permissionRow('microphone', uiCopy('麦克风','Microphone')) +
     permissionRow('location', uiCopy('位置','Location')) +
@@ -3309,29 +3371,12 @@ function renderSettings(){
   const preferences = [['outdoor','户外开阔'],['lively','热闹'],['quiet','安静'],['water','靠水'],['mountain','靠山'],['park','公园'],['street','街道'],['culture','文艺场所'],['sport','户外运动'],['still','喜静'],['active','喜动']];
   h += '<section class="settings-section"><h3>' + uiCopy('地点偏好','Place preferences') + '</h3><div class="settings-group"><div class="preference-grid">' +
     preferences.map(item => '<button data-preference="' + item[0] + '" class="' + (s.preferences.includes(item[0]) ? 'on' : '') + '">' + item[1] + '</button>').join('') +
-    '</div></div></section>';
+    s.customPreferences.map((item,index) => '<button class="on" data-custom-preference="' + index + '">' + escapeHTML(item) + ' ×</button>').join('') +
+    '</div><div class="preference-voice"><input id="preference-input" maxlength="40" placeholder="' + uiCopy('也可以告诉小在你喜欢什么','Or tell Xiaozai what you like') + '"><button id="preference-mic">' + micSVG() + '</button><button id="preference-add">' + uiCopy('记住','Save') + '</button></div></div></section>';
 
   h += '<section class="settings-section"><h3>' + uiCopy('提醒','Reminders') + '</h3><div class="settings-group"><div class="settings-row"><div class="txt"><b>' +
     uiCopy('主动提醒','Proactive reminders') + '</b></div><button class="switch' + (r.enabled ? ' on' : '') + '" data-reachtoggle="1" aria-pressed="' + r.enabled + '"><i></i></button></div></div></section>';
 
-  h += '<details class="fold" style="margin-top:26px"><summary>' + uiCopy('本机数据', 'On this device') + '</summary>';
-  h += '<div class="tier"><div class="tb" style="padding-top:13px">' +
-       uiCopy('到访记录 ' + state.records.length + ' 条', state.records.length + (state.records.length === 1 ? ' visit' : ' visits')) +
-       '<b>' + uiCopy('行程状态 ' + (state.trip ? "1 条进行中" : "无"), state.trip ? 'One trip in progress' : 'No trip in progress') + '</b>' +
-       '</div></div></details>';
-  h += '<button class="danger" data-wipe="1">清空这台设备上的全部记录</button>';
-  if (state.pendingWipe){
-    h += '<div class="confirm"><p>' + uiCopy('清空之后，你的到访记录、行程和打扰设置都会消失。已经匿名贡献出去的那几条留在地点汇总里（它们已经不属于你了，也找不回是谁写的）。',
-                                                  'This removes your visits, trip and reminder settings from this device. Anonymous contributions already added to combined results cannot be linked back or removed.') + '<b>' + uiCopy('撤不回来。', 'This cannot be undone.') + '</b></p>' +
-         '<div class="row"><button class="no" data-wipecancel="1">' + uiCopy('算了', 'Cancel') + '</button>' +
-         '<button class="yes" data-wipeyes="1">' + uiCopy('清空', 'Erase') + '</button></div></div>';
-  }
-
-  h += '<details class="fold" style="margin-top:26px"><summary>我们的边界</summary>';
-  h += '<div class="boundary"><ul style="margin:0;padding-left:18px">' +
-       '<li>不诊断：不给情绪贴临床标签</li>' +
-       '<li>不评判：情绪变差不叫失败，只叫这次没接住</li>' +
-       '<li>不侵入社交：没有昵称、人脸、主页、匹配或私信；只保留匿名空间线索</li></ul></div></details>';
   h += '</div></div>';
   return h;
 }
@@ -3361,9 +3406,7 @@ function momentPlace(moment){
   return currentLang() === "en" ? moment.placeEn : moment.place;
 }
 function momentCard(moment){
-  return '<article class="moment-card"><span class="moment-badge">' +
-    uiCopy('场景示意', 'Scene preview') + '</span>' +
-    '<div class="moment-scene ' + escapeHTML(moment.kind) + '">' +
+  return '<article class="moment-card"><div class="moment-scene ' + escapeHTML(moment.kind) + '">' +
     (moment.image ? '<img src="' + escapeHTML(moment.image) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '') +
     '</div>' +
     '<h3>' + escapeHTML(momentTitle(moment)) + '</h3>' +
@@ -3377,25 +3420,19 @@ function momentCard(moment){
 function renderMoments(){
   let h = topbar(uiCopy('小在带回的此刻', 'Moments Xiaozai found'), uiCopy('美的采集者', 'Collector of beauty'), '#/talk');
   const now = Date.now();
-  const list = CurrentMoments.select(momentSeeds(), {city:state.momentCity, mood:state.mood, now:now});
+  const list = CurrentMoments.daily(momentSeeds(), {mood:state.mood, now:now, limit:5});
   h += '<div class="screen"><div class="pad moment-wrap">';
-  h += '<div class="moment-tabs">' + CurrentMoments.CITIES.map(city =>
-    '<button class="' + (state.momentCity === city ? 'on' : '') + '" data-city="' + city + '">' + city + '</button>'
-  ).join('') +
-    '<button data-go="#/community">' + uiCopy('接力社群', 'Community relay') + '</button></div>';
-  h += '<p class="lead">' + uiCopy('不是“推荐一个公园”，是告诉你：此刻那里有什么值得赶上。',
-    'A place, a reason, and a moment that will pass.') + '</p>';
+  h += '<div class="moment-tabs"><button data-go="#/community">' + uiCopy('我也想递一个地方', 'Pass a place along') + '</button></div>';
   if (state.momentNote) h += '<p class="moment-status">' + escapeHTML(state.momentNote) + '</p>';
   h += list.length ? list.map(momentCard).join('') :
-    '<div class="moment-card"><p>' + uiCopy('这批演示此刻已经过去。刷新体验会从新的演示时刻开始。',
-      'These demo moments have passed. Reload to begin a fresh demo window.') + '</p></div>';
+    '<div class="moment-card"><p>' + uiCopy('今天的五个时刻已经收好了。', 'Today’s five moments are saved.') + '</p></div>';
   h += '</div></div>';
   return h;
 }
 
 function communityItem(item){
   return '<article class="moment-card"><span class="moment-badge">' +
-    (item.published ? uiCopy('已发布', 'Published') : item.serverStatus === 'pending' ? uiCopy('已提交 · 等待审核', 'Submitted · pending review') : uiCopy('只存在这台设备 · 草稿', 'On this device · draft')) +
+    (item.published ? uiCopy('已收下', 'Saved') : item.serverStatus === 'pending' ? uiCopy('等待审核', 'Pending review') : uiCopy('草稿', 'Draft')) +
     '</span><h3>' + escapeHTML(item.place) + '</h3><p>“' + escapeHTML(item.reason) + '”</p>' +
     ((item.media || []).length ? '<div class="community-media" data-media-owner="' + escapeHTML(item.id) + '"></div>' : '') +
     '<div class="moment-meta"><span>' + uiCopy('匿名', 'Anonymous') + '</span><span>' + escapeHTML(item.city) + '</span></div></article>';
@@ -3408,19 +3445,23 @@ function approvedCommunityItem(item){
 function renderCommunity(){
   const draft = state.momentDraft || {};
   const currentCity = CurrentAI.getLocationCity();
-  const communityCities = Array.from(new Set([currentCity].concat(CurrentMoments.CITIES).filter(Boolean)));
+  const city = draft.city || currentCity || "北京";
   let h = topbar(uiCopy('把好地方递下去', 'Pass a place along'), uiCopy('接力社群', 'Community relay'), '#/moments');
   h += '<div class="screen"><div class="pad moment-wrap">';
-  h += '<p class="lead">' + uiCopy('不建主页、不显示昵称、不能私信。你可以只存在本机，也可以主动提交一条匿名空间线索；提交后先审核，不会直接公开。',
-    'No profiles, handles, or DMs. Keep it only on this device, or explicitly submit an anonymous place signal for review. Nothing is published automatically.') + '</p>';
-  h += '<form class="moment-form" id="moment-form"><label>' + uiCopy('地方', 'Place') +
-    '<input name="place" maxlength="80" required value="' + escapeHTML(draft.place || '') + '" placeholder="' + uiCopy('例如：楼下那棵桂花树', 'e.g. the tree downstairs') + '"></label>' +
-    '<label>' + uiCopy('城市', 'City') + '<select name="city">' +
-    communityCities.map(city => '<option value="' + city + '"' + (city === (draft.city || currentCity || state.momentCity) ? ' selected' : '') + '>' + city + '</option>').join('') +
-    '</select></label>' +
-    '<label>' + uiCopy('它在此刻帮到了什么', 'What helped') +
-    '<textarea name="reason" maxlength="160" required placeholder="' + uiCopy('一句具体的理由', 'One concrete reason') + '">' + escapeHTML(draft.reason || '') + '</textarea></label>' +
-    '<label>' + uiCopy('贡献类型', 'Contribution type') + '<select name="kind">' +
+  const prompt = state.communityStep === 0
+    ? uiCopy('想把哪个地方递给别人？说名字就好。', 'Which place do you want to pass along? Just tell me its name.')
+    : state.communityStep === 1
+      ? uiCopy('它在什么时刻接住了你？', 'What did this place give you in that moment?')
+      : uiCopy('收到了。要不要带上一张照片？', 'Got it. Want to add a photo?');
+  h += '<div class="say"><span class="zai">' + cloudSVG('look') + '</span><div class="bubble"><span class="tag">' + uiCopy('小在','Xiaozai') + '</span><p>' + prompt + '</p></div></div>';
+  if (state.communityStep === 0){
+    h += '<div class="typing community-turn"><input id="community-place" maxlength="80" value="' + escapeHTML(draft.place || '') + '" placeholder="' + uiCopy('例如：楼下那棵桂花树','e.g. the tree downstairs') + '"><button id="community-voice">' + micSVG() + '</button><button class="send" id="community-next">' + uiCopy('继续','Next') + '</button></div>';
+  } else if (state.communityStep === 1){
+    h += '<div class="typing community-turn"><textarea id="community-reason" maxlength="160" placeholder="' + uiCopy('比如：傍晚坐在这里，风刚好','e.g. At dusk, the breeze was just right') + '">' + escapeHTML(draft.reason || '') + '</textarea><button id="community-voice">' + micSVG() + '</button><button class="send" id="community-next">' + uiCopy('继续','Next') + '</button></div>' +
+      '<div class="chips"><button data-community-reason="' + uiCopy('这里能安静坐一会儿','I could sit quietly here') + '">' + uiCopy('能安静坐一会儿','Quiet place to sit') + '</button><button data-community-reason="' + uiCopy('这一刻的光很快会消失','The light would disappear soon') + '">' + uiCopy('这一刻很短','A fleeting moment') + '</button><button data-community-reason="' + uiCopy('走到这里，身体慢慢松下来了','My body relaxed when I got here') + '">' + uiCopy('让我松下来','Helped me unwind') + '</button></div>';
+  } else {
+    h += '<form class="moment-form" id="moment-form"><input type="hidden" name="place" value="' + escapeHTML(draft.place || '') + '"><input type="hidden" name="reason" value="' + escapeHTML(draft.reason || '') + '"><input type="hidden" name="city" value="' + escapeHTML(city) + '">' +
+    '<label>' + uiCopy('这一条更像', 'This feels like') + '<select name="kind">' +
     '<option value="lasting_place">' + uiCopy('一个能反复去的空间', 'A place to return to') + '</option>' +
     '<option value="timed_beauty">' + uiCopy('一小时内会消失的美好', 'Beauty that fades within an hour') + '</option>' +
     '<option value="seasonal">' + uiCopy('这一季才有的变化', 'Something seasonal') + '</option>' +
@@ -3430,19 +3471,19 @@ function renderCommunity(){
     '<button type="button" data-media-open="moment-media-library">' + uiCopy('相册','Photo library') + '</button>' +
     '<button type="button" data-media-open="moment-media-camera">' + uiCopy('拍摄','Camera') + '</button>' +
     '<button type="button" data-media-open="moment-media-files">' + uiCopy('选取文件','Choose files') + '</button></div>' +
-    '<input class="visually-hidden" id="moment-media-library" data-moment-media type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple tabindex="-1" aria-hidden="true">' +
+    '<input class="visually-hidden" id="moment-media-library" data-moment-media type="file" accept="image/*" multiple tabindex="-1" aria-hidden="true">' +
     '<input class="visually-hidden" id="moment-media-camera" data-moment-media type="file" accept="image/*,video/*" capture="environment" tabindex="-1" aria-hidden="true">' +
     '<input class="visually-hidden" id="moment-media-files" data-moment-media type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple tabindex="-1" aria-hidden="true">' +
     '<small>' + uiCopy('最多 3 张照片，或 1 段不超过 1 分钟的视频。', 'Up to 3 photos, or one video under 1 minute.') + '</small></fieldset>' +
     '<div id="moment-media-preview" class="media-preview"></div>' +
-    '<div class="sample-note">' + uiCopy('始终匿名；这不是交友资料，也不会生成个人主页。', 'Always anonymous. This is not a social profile.') + '</div>' +
-    '<div class="share-row"><button class="btn ghost sm" type="submit" data-submit-mode="local">' + uiCopy('只存本机', 'Keep on device') + '</button>' +
-    '<button class="btn sm" type="submit" data-submit-mode="review">' + uiCopy('提交审核', 'Submit for review') + '</button></div></form>';
+    '<div class="share-row"><button class="btn ghost sm" type="button" id="community-back">' + uiCopy('上一步','Back') + '</button>' +
+    '<button class="btn sm" type="submit" data-submit-mode="review">' + uiCopy('匿名递出去', 'Pass it on anonymously') + '</button></div></form>';
+  }
   if (state.momentNote) h += '<p class="moment-status">' + escapeHTML(state.momentNote) + '</p>';
   const mine = state.momentData.contributions.slice().reverse();
-  h += '<h2 style="margin-top:26px">' + uiCopy('我的草稿', 'My drafts') + '</h2>' +
+  h += '<h2 style="margin-top:26px">' + uiCopy('我递过的地方', 'Places I passed along') + '</h2>' +
     (mine.length ? mine.map(communityItem).join('') : '<div class="moment-card"><p>' +
-      uiCopy('还没有草稿。完成一次到访反馈后，小在也会替你预填一份。', 'No drafts yet. After a visit, Xiaozai can prepare one for you.') + '</p></div>');
+      uiCopy('还没有。想到一个时再告诉小在。', 'Nothing yet. Tell Xiaozai when one comes to mind.') + '</p></div>');
   h += '<h2 style="margin-top:26px">' + uiCopy('审核通过的线索', 'Reviewed signals') + '</h2>' +
     (state.communityLoading ? '<div class="moment-card"><p>' + uiCopy('正在取回…', 'Loading…') + '</p></div>' :
       state.communityApproved.length ? state.communityApproved.map(approvedCommunityItem).join('') :
@@ -3497,34 +3538,36 @@ function renderConnect(){
   const relay = CurrentAI.relayState();
   const role = CurrentAI.deviceRole();
   const pending = CurrentAI.relayPendingCode();
-  let h = topbar(uiCopy('接住同一趟', 'Continue the outing'), uiCopy('跨设备接续', 'Cross-device'), '#/talk');
+  let h = topbar(uiCopy('把这一趟带到电脑', 'Continue on another device'), uiCopy('跨设备接续', 'Cross-device'), '#/talk');
   h += '<div class="screen"><div class="pad moment-wrap">';
-  h += '<p class="lead">' + uiCopy('没有账号。手机和电脑只靠一个 6 位临时会话码连接；12 小时后自动失效。原始倾诉、位置和私密笔记不会跨设备。',
-    'No account. Phone and desktop share a six-character temporary code that expires after 12 hours. Raw speech, location, and private notes never cross devices.') + '</p>';
-  h += '<div class="relay-role"><button class="btn ghost sm' + (role === 'phone' ? ' on' : '') + '" data-role="phone">' + uiCopy('这是手机', 'This is phone') + '</button>' +
-    '<button class="btn ghost sm' + (role === 'desk' ? ' on' : '') + '" data-role="desk">' + uiCopy('这是电脑', 'This is desktop') + '</button></div>';
+  h += '<p class="lead">' + uiCopy('手机负责说话和定位，电脑同步显示小在的理解、推荐和行动进度。无需账号，连接 12 小时后自动结束。',
+    'Speak and share location on the phone while the desktop follows Xiaozai’s understanding, recommendation, and progress. No account; the link ends after 12 hours.') + '</p>';
+  h += '<div class="relay-steps"><div class="relay-step"><b>1</b>' + uiCopy('手机生成码','Create on phone') + '</div><div class="relay-step"><b>2</b>' + uiCopy('电脑输入码','Enter on desktop') + '</div><div class="relay-step"><b>3</b>' + uiCopy('两端同步推进','Continue together') + '</div></div>';
+  h += '<div class="relay-role"><button class="btn ghost sm' + (role === 'phone' ? ' on' : '') + '" data-role="phone">' + uiCopy('从这台手机发起', 'Start on this phone') + '</button>' +
+    '<button class="btn ghost sm' + (role === 'desk' ? ' on' : '') + '" data-role="desk">' + uiCopy('在这台电脑接收', 'Receive on this desktop') + '</button></div>';
   if (!relay && role === 'phone') {
-    h += '<div class="relay-panel"><h3>' + uiCopy('先从手机发起', 'Start on the phone') + '</h3><p>' +
-      uiCopy('生成会话码后，在电脑上输入。之后推荐、出发、抵达和反馈会自己接过去。', 'Create a code, then enter it on the desktop. Picks, departure, arrival, and feedback will continue there.') +
-      '</p><button class="btn sm" id="relay-create">' + uiCopy('生成会话码', 'Create code') + '</button></div>';
+    h += '<div class="relay-panel"><h3>' + uiCopy('连接一台电脑', 'Connect a desktop') + '</h3><p>' +
+      uiCopy('生成一个临时配对码，再去电脑输入。', 'Create a temporary pairing code, then enter it on the desktop.') +
+      '</p><button class="btn sm" id="relay-create">' + uiCopy('生成配对码', 'Create pairing code') + '</button></div>';
   } else if (!relay) {
-    h += '<div class="relay-panel"><h3>' + uiCopy('输入手机上的会话码', 'Enter the phone code') + '</h3>' +
+    h += '<div class="relay-panel"><h3>' + uiCopy('输入手机显示的 6 位码', 'Enter the six-character phone code') + '</h3>' +
       '<form class="relay-join" id="relay-join"><input name="code" maxlength="6" autocomplete="one-time-code" value="' + escapeHTML(pending) + '" placeholder="ABC234" required>' +
-      '<button class="btn sm" type="submit">' + uiCopy('接住', 'Join') + '</button></form></div>';
+      '<button class="btn sm" type="submit">' + uiCopy('连接', 'Connect') + '</button></form></div>';
   } else {
-    h += '<div class="relay-panel"><span class="moment-badge">' + uiCopy(role === 'phone' ? '手机端' : '电脑端', role === 'phone' ? 'PHONE' : 'DESKTOP') + '</span>' +
+    h += '<div class="relay-panel"><span class="moment-badge">' + uiCopy(role === 'phone' ? '手机已准备好' : '电脑已连接', role === 'phone' ? 'PHONE READY' : 'DESKTOP CONNECTED') + '</span>' +
+      '<p>' + uiCopy('临时配对码', 'Temporary pairing code') + '</p>' +
       '<div class="relay-code">' + escapeHTML(relay.code) + '</div><p>' +
-      uiCopy(relay.durable ? '两端已连接。会话只同步结构化进度。' : '本地联调模式：重启服务后会话会失效。', relay.durable ? 'Connected. Only structured progress is shared.' : 'Local test mode: the session ends when the server restarts.') + '</p>' +
-      (role === 'phone' ? '<button class="btn ghost sm" id="relay-copy">' + uiCopy('复制电脑加入链接', 'Copy desktop link') + '</button>' : '') +
+      uiCopy(relay.durable ? '两台设备只同步小在的理解、推荐与行动状态。' : '当前是本地测试连接，服务重启后会结束。', relay.durable ? 'The devices share only Xiaozai’s understanding, recommendation, and action state.' : 'This is a local test link and ends when the service restarts.') + '</p>' +
+      (role === 'phone' ? '<button class="btn ghost sm" id="relay-copy">' + uiCopy('复制电脑连接链接', 'Copy desktop link') + '</button>' : '') +
       '<button class="btn-text" id="relay-leave">' + uiCopy('断开这次接续', 'Disconnect') + '</button></div>';
   }
   if (state.relayNote) h += '<p class="moment-status">' + escapeHTML(state.relayNote) + '</p>';
   if (relay && role === 'desk') {
-    h += '<h2 style="margin-top:26px">' + uiCopy('这一趟正在发生', 'This outing, live') + '</h2>';
+    h += '<h2 style="margin-top:26px">' + uiCopy('手机上的进度', 'Progress from the phone') + '</h2>';
     h += state.relayEvents.length ? state.relayEvents.slice().reverse().map(event => {
       const copy = relayEventCopy(event);
       return '<div class="relay-event"><b>' + escapeHTML(copy.title) + '</b><p>' + escapeHTML(copy.line) + '</p></div>';
-    }).join('') : '<div class="moment-card"><p>' + uiCopy('已经连上。等手机说一句，小在会从这里接住。', 'Connected. When the phone begins, Xiaozai will continue here.') + '</p></div>';
+    }).join('') : '<div class="moment-card"><p>' + uiCopy('连接成功。现在请在手机上说出需求；小在的理解、推荐、出发与抵达进度会自动出现在这里。', 'Connected. Speak on the phone now; Xiaozai’s understanding, recommendation, departure, and arrival will appear here.') + '</p></div>';
   }
   h += '</div></div>';
   return h;
@@ -3536,7 +3579,7 @@ function renderTalk(){
   const relay = CurrentAI.relayState();
   let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div>' +
           '<div style="display:flex;gap:10px;align-items:center">' + langToggle() +
-          '<button class="k" data-go="#/connect" style="letter-spacing:.08em">' + (relay ? escapeHTML(relay.code) : uiCopy('连接设备', 'Connect')) + '</button>' +
+          '<button class="k" data-go="#/connect" style="letter-spacing:.08em">' + (relay ? uiCopy('已连接', 'Connected') : uiCopy('连接设备', 'Connect')) + '</button>' +
           '<button class="k" data-go="#/settings" style="letter-spacing:.14em">' + uiCopy('设置', 'Settings') + '</button>' +
           '<button class="k" data-go="#/records" style="letter-spacing:.14em">' + uiCopy('记录', 'Records') + '</button></div></div>';
   h += '<div class="talk">';
@@ -3578,7 +3621,7 @@ function renderEcho(){
   const hasLocation = mode === "real" || mode === "demo" || mode === "trip-demo";
   const types = (r.state && r.state.place_types) || [];
   const sports = types.some(type => ["sports","gym","climbing","swimming","badminton","basketball","tennis","yoga"].includes(type));
-  const needsLocation = !asking && !hasLocation && !(state.offer || []).length && types.length;
+  const needsLocation = !asking && !hasLocation && !(state.offer || []).length && types.length && !(r.state && r.state.requested_city);
   let h = topbar(uiCopy(asking ? "再确认一个条件" : "还差一步", asking ? "One detail" : "One more step"), "", "#/talk");
   h += '<div class="screen mid"><div class="pad">';
   if (asking){
@@ -3805,6 +3848,11 @@ function shorten(text, max){
 /* 卡片顶部的 pill 已经说过 time-to-relief，这行不要再说第二遍。 */
 function reachLine(rec, p){
   const locationMode = CurrentAI.getLocationMode();
+  if (rec.distance_source === "city_search"){
+    const city = rec.search_scope || (state.read && state.read.state && state.read.state.requested_city) || "";
+    return uiCopy('已按' + city + '检索 · 距离以出发位置为准',
+                  'Found in ' + city + ' · distance depends on your starting point');
+  }
   if (rec.distance_source === "amap" && rec.walking_minutes){
     // 8 公里说「步行 108 分钟」不是贴心，是吓人。远的地方按骑行/公交算。
     const how = {walk:"步行", ride:"骑行", transit:"公交"}[rec.travel_mode] || "步行";
@@ -4207,6 +4255,12 @@ function applyLang(root){
 
 function render(){
   const root = document.getElementById("root");
+  if (state.showSplash){
+    root.innerHTML = '<div class="stage"><div class="phone"><div class="launch"><div class="launch-cloud">' + cloudSVG("withyou") + '</div><div class="launch-name">此在 · Current</div><button class="launch-skip" id="launch-skip" aria-label="' + uiCopy('进入','Enter') + '">' + uiCopy('进入','Enter') + '</button></div></div></div>';
+    const skip = root.querySelector("#launch-skip");
+    if (skip) skip.onclick = () => finishSplash();
+    return;
+  }
   const r = state.route;
   let inner = "", isCompare = false;
 
@@ -4253,6 +4307,7 @@ function render(){
   root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + arrivedToast() + mapSheet() + '</div></div>';
 
   if (isCompare) scaleMinis();
+  applyTextScale(root);
   applyLang(root);
   syncPresenceWatch();
   bind();
@@ -4317,6 +4372,13 @@ function bind(){
     }
     render();
   });
+  const fontScale = root.querySelector("#font-scale");
+  if (fontScale) fontScale.oninput = () => {
+    const value = Math.max(85, Math.min(130, Number(fontScale.value) || 100));
+    const output = fontScale.parentElement.querySelector("output");
+    if (output) output.textContent = value + "%";
+    saveAppSettings({fontScale:value});
+  };
   root.querySelectorAll("[data-preference]").forEach(el => el.onclick = () => {
     const key = el.dataset.preference;
     const preferences = state.appSettings.preferences.slice();
@@ -4325,6 +4387,32 @@ function bind(){
     saveAppSettings({preferences:preferences});
     render();
   });
+  root.querySelectorAll("[data-custom-preference]").forEach(el => el.onclick = () => {
+    const customPreferences = state.appSettings.customPreferences.slice();
+    customPreferences.splice(Number(el.dataset.customPreference), 1);
+    saveAppSettings({customPreferences:customPreferences});
+    render();
+  });
+  const preferenceInput = root.querySelector("#preference-input");
+  const savePreference = text => {
+    const value = String(text || "").trim().slice(0, 40);
+    if (!value) return;
+    const customPreferences = state.appSettings.customPreferences.filter(item => item !== value);
+    customPreferences.push(value);
+    saveAppSettings({customPreferences:customPreferences.slice(-8)});
+    render();
+  };
+  const preferenceAdd = root.querySelector("#preference-add");
+  if (preferenceAdd) preferenceAdd.onclick = () => savePreference(preferenceInput && preferenceInput.value);
+  const preferenceMic = root.querySelector("#preference-mic");
+  if (preferenceMic) preferenceMic.onclick = () => {
+    CurrentAI.toggleVoice({
+      onStatus:message => { if (preferenceInput) preferenceInput.placeholder = message; },
+      onPartial:text => { if (preferenceInput) preferenceInput.value = text; },
+      onText:text => savePreference(text),
+      onError:() => { if (preferenceInput) preferenceInput.focus(); }
+    }).catch(() => { if (preferenceInput) preferenceInput.focus(); });
+  };
   root.querySelectorAll("[data-permission]").forEach(el => el.onclick = async () => {
     const key = el.dataset.permission;
     let granted = false;
@@ -4335,6 +4423,17 @@ function bind(){
         saveReach({grants:Object.assign({}, state.reach.grants, {location:true})});
       } else if (key === "notifications") {
         granted = typeof Notification !== "undefined" && await Notification.requestPermission() === "granted";
+      } else if (key === "photos") {
+        const picker = document.createElement("input");
+        picker.type = "file";
+        picker.accept = "image/*";
+        picker.multiple = true;
+        picker.onchange = () => {
+          saveAppSettings({permissions:{photos:(picker.files || []).length ? "granted" : "ask"}});
+          render();
+        };
+        picker.click();
+        return;
       } else if (key === "microphone" || key === "camera") {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("unavailable");
         const stream = await navigator.mediaDevices.getUserMedia(key === "microphone" ? {audio:true} : {video:true});
@@ -4412,6 +4511,52 @@ function bind(){
     state.momentNote = uiCopy("收好了：我赶上的这一场。", "Saved: a moment I caught.");
     render();
   });
+  const communityNext = root.querySelector("#community-next");
+  const communityPlace = root.querySelector("#community-place");
+  const communityReason = root.querySelector("#community-reason");
+  const rememberCommunityValue = value => {
+    state.momentDraft = Object.assign({}, state.momentDraft || {},
+      state.communityStep === 0 ? {place:String(value || "").trim()} : {reason:String(value || "").trim()});
+  };
+  if (communityPlace) communityPlace.oninput = () => rememberCommunityValue(communityPlace.value);
+  if (communityReason) communityReason.oninput = () => rememberCommunityValue(communityReason.value);
+  if (communityNext) communityNext.onclick = () => {
+    const input = state.communityStep === 0 ? communityPlace : communityReason;
+    const value = String(input && input.value || "").trim();
+    if (!value) {
+      state.momentNote = state.communityStep === 0
+        ? uiCopy("先告诉我地点名字。", "Tell me the place name first.")
+        : uiCopy("说一句它为什么值得递下去。", "Tell me why it is worth passing along.");
+      if (input) input.focus();
+      return;
+    }
+    rememberCommunityValue(value);
+    state.momentNote = "";
+    state.communityStep = Math.min(2, state.communityStep + 1);
+    render();
+  };
+  root.querySelectorAll("[data-community-reason]").forEach(el => el.onclick = () => {
+    state.momentDraft = Object.assign({}, state.momentDraft || {}, {reason:el.dataset.communityReason});
+    state.momentNote = "";
+    state.communityStep = 2;
+    render();
+  });
+  const communityVoice = root.querySelector("#community-voice");
+  if (communityVoice) communityVoice.onclick = () => {
+    const input = state.communityStep === 0 ? communityPlace : communityReason;
+    CurrentAI.toggleVoice({
+      onStatus:message => { state.momentNote = message; },
+      onPartial:text => { if (input) input.value = text; rememberCommunityValue(text); },
+      onText:text => { rememberCommunityValue(text); state.momentNote = ""; if (state.route === "#/community") render(); },
+      onError:message => { state.momentNote = message; if (state.route === "#/community") render(); }
+    }).catch(error => { state.momentNote = error.message; render(); });
+  };
+  const communityBack = root.querySelector("#community-back");
+  if (communityBack) communityBack.onclick = () => {
+    state.communityStep = Math.max(0, state.communityStep - 1);
+    state.momentNote = "";
+    render();
+  };
   const momentForm = root.querySelector("#moment-form");
   if (momentForm) {
     const mediaPreview = momentForm.querySelector("#moment-media-preview");
@@ -4511,6 +4656,7 @@ function bind(){
       }
       state.pendingMedia = [];
       state.momentDraft = null;
+      state.communityStep = 0;
       render();
     };
   }
@@ -5358,6 +5504,13 @@ if (dueForRecheck() && state.route === "#/talk"){
              lastPromptAt:Date.now()});
 }
 render();
+function finishSplash(){
+  if (!state.showSplash) return;
+  state.showSplash = false;
+  try { sessionStorage.setItem("current.launch.v2", "seen"); } catch(e){}
+  render();
+}
+if (state.showSplash) setTimeout(finishSplash, 1700);
 </script>
 
 </body>

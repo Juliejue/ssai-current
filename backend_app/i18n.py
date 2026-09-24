@@ -39,7 +39,7 @@ PLACE_TYPE_LABELS_EN: dict[str, str] = {
     "sports": "work out", "gym": "go to a gym", "climbing": "go climbing", "swimming": "go swimming",
     "badminton": "play badminton", "basketball": "play basketball", "tennis": "play tennis",
     "yoga": "do yoga or Pilates", "music": "hear live music", "bar": "go to a bar",
-    "club": "go dancing", "karaoke": "sing karaoke", "books": "browse books",
+    "club": "go dancing", "karaoke": "sing karaoke", "books": "browse books", "library": "go to a library",
     "records": "browse records", "cafe": "sit in a cafe", "tea": "have tea",
     "park": "go to a park", "gallery": "see an exhibition", "cinema": "watch a film",
     "river": "walk by the water", "vintage": "browse vintage shops", "lane": "walk the lanes",

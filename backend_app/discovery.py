@@ -101,6 +101,7 @@ PLACE_TYPE_SEARCHES: dict[str, tuple[tuple[str, str], ...]] = {
     "club": (("夜店", "club"),),
     "karaoke": (("KTV", "karaoke"),),
     "books": (("书店", "books"),),
+    "library": (("图书馆", "library"),),
     "records": (("黑胶", "records"),),
     "cafe": (("咖啡", "cafe"),),
     "tea": (("茶室", "tea"),),
@@ -219,6 +220,16 @@ CATEGORY_PROFILE: dict[str, dict[str, Any]] = {
         "see": "一屋子书，和允许你待着的椅子",
         "tags": {"q": 0.85, "g": 0.1, "c": 0.3, "s": 0.9, "co": 0.35, "e": 0.6,
                  "r": 0.75, "cr": 0.7, "l": 0.15, "st": 0.85, "cp": 0.3, "w": 0.1},
+    },
+    "library": {
+        "label": "图书馆 · 室内", "label_en": "library · indoors",
+        "action": "找一层慢慢坐下，不用买任何东西",
+        "indoor": True, "free": True, "crowd": "low",
+        "suggested_duration": "40–120 分钟", "cost": "通常免费",
+        "see": "书、座位和一段不被催促的时间",
+        "place_types": ["library", "books"],
+        "tags": {"q": .9, "g": .05, "c": .35, "s": .95, "co": .25, "e": .5,
+                 "r": .8, "cr": .55, "l": .1, "st": .95, "cp": .02, "w": .05},
     },
     "gallery": {
         "label": "展馆 · 室内", "label_en": "gallery · indoors",
@@ -384,6 +395,7 @@ CATEGORY_PROFILE.update({
 DISCOVERY_ACTION_EN: dict[str, str] = {
     "park": "Sit on a bench or take a walk",
     "books": "Pick a book and sit down",
+    "library": "Find a floor and sit down with a book",
     "gallery": "Walk through one room at your own pace",
     "cafe": "Order one drink and take a table",
     "cinema": "Pick the next screening and put your phone away",
@@ -419,6 +431,7 @@ DISCOVERY_ACTION_EN: dict[str, str] = {
 DISCOVERY_SEE_EN: dict[str, str] = {
     "park": "Open space, paths, and somewhere to sit",
     "books": "Books and somewhere you can pause",
+    "library": "Books, seats, and time without pressure",
     "gallery": "Exhibitions and room to move slowly",
     "cafe": "A table and a drink",
     "cinema": "A screen and a fixed stretch of time",
@@ -543,7 +556,10 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
     if not profile:
         return None
     photos = _photo_urls(poi)
-    if not photos and category not in {"sports", "gym", "running", "cycling", "skating", "swimming", "badminton"}:
+    if not photos and category not in {
+        "sports", "gym", "running", "cycling", "skating", "swimming", "badminton",
+        "books", "library",
+    }:
         # 没有照片的现场结果不要。#2 的整个意义就是让人看见真实的地方，
         # 一张没有的话，它在卡片上还是一个抽象符号。
         return None
@@ -652,4 +668,58 @@ async def discover(
         places.append(place)
         if len(places) >= limit:
             break
+    return places
+
+
+async def discover_city(
+    client: AmapClient,
+    city: str,
+    state: NeedState,
+    *,
+    limit: int = 12,
+) -> list[dict[str, Any]]:
+    """Search a named city without pretending it is the device location."""
+    if not client.configured or not city.strip():
+        return []
+    chosen = keywords_for(state)
+
+    async def search(keyword: str) -> tuple[str, list[dict[str, Any]]]:
+        try:
+            return keyword, await client.search_places(keyword, region=city, page_size=10)
+        except MapProviderError:
+            return keyword, []
+
+    groups = await asyncio.gather(*(search(keyword) for keyword in chosen))
+    rows = zip_longest(*[[(keyword, poi) for poi in found] for keyword, found in groups])
+    places: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    seen_brands: set[str] = set()
+    per_category: dict[str, int] = {}
+    for row in rows:
+        for item in row:
+            if not item:
+                continue
+            keyword, poi = item
+            place = to_place(poi, KEYWORD_CATEGORY.get(keyword, ""))
+            if not place or place["placeId"] in seen_ids:
+                continue
+            if state.environment == "indoor" and not place["indoor"]:
+                continue
+            if state.environment == "outdoor" and place["indoor"]:
+                continue
+            brand = _brand_of(place["placeName"])
+            category = place["category"]
+            if brand in seen_brands or per_category.get(category, 0) >= PER_CATEGORY_CAP:
+                continue
+            # City text search has no honest origin distance. Keep the address,
+            # but never turn a city-centre guess into “17 minutes away”.
+            place["distanceKm"] = None
+            place["city"] = city
+            place["found_by"] = keyword
+            seen_ids.add(place["placeId"])
+            seen_brands.add(brand)
+            per_category[category] = per_category.get(category, 0) + 1
+            places.append(place)
+            if len(places) >= limit:
+                return places
     return places

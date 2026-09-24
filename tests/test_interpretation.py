@@ -41,6 +41,12 @@ def test_gym_is_not_diluted_into_generic_sports():
     assert interpret_with_rules("我想去健身房").state.place_types == ["gym"]
 
 
+def test_explicit_city_and_library_survive_interpretation():
+    state = interpret_with_rules("请推荐上海的图书馆，我想安静坐一会儿").state
+    assert state.requested_city == "上海"
+    assert state.place_types == ["library"]
+
+
 def test_positive_excitement_is_not_mistaken_for_racing_thoughts():
     state = interpret_with_rules("拿到 offer 以后特别兴奋，坐不住，想庆祝").state
     assert state.mood_id == "bright"
@@ -111,6 +117,31 @@ def test_model_cannot_restore_a_negated_place_type(monkeypatch):
 
     result = asyncio.run(interpret("心情不好，但我现在就想吃烤串，别给我推荐公园"))
     assert result.state.place_types == ["barbecue"]
+
+
+def test_model_can_extract_an_explicit_city_outside_the_rule_aliases(monkeypatch):
+    async def fake_call(*_args, **_kwargs):
+        return NeedState(
+            mood_id="okay",
+            requested_city="泉州市",
+            place_types=["library"],
+            confidence=0.9,
+        ), ["「泉州的图书馆」——按你点名的城市来找。"]
+
+    monkeypatch.setenv("LLM_API_KEY", "test")
+    monkeypatch.setattr(interpretation, "_call_model_with_backoff", fake_call)
+
+    result = asyncio.run(interpret("帮我找泉州的图书馆"))
+    assert result.state.requested_city == "泉州"
+    assert result.state.place_types == ["library"]
+
+
+def test_model_cannot_invent_a_city_that_the_user_never_named():
+    text = "帮我找一个安静的图书馆"
+    response = interpret_with_rules(text)
+    response.state.requested_city = "北京"
+    result = _decorate(response, text)
+    assert result.state.requested_city is None
 
 
 def test_internal_enum_words_never_reach_user_visible_evidence():

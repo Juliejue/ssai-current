@@ -76,6 +76,7 @@ PLACE_TYPE_RULES: dict[str, tuple[str, ...]] = {
     "club": ("夜店", "蹦迪", "跳舞", "club"),
     "karaoke": ("ktv", "KTV", "唱歌", "卡拉ok", "karaoke"),
     "books": ("书店", "看书", "逛书", "bookstore"),
+    "library": ("图书馆", "library"),
     "records": ("唱片店", "黑胶", "唱片", "records"),
     "cafe": ("咖啡馆", "咖啡店", "喝咖啡", "cafe", "coffee"),
     "tea": ("茶馆", "茶室", "喝茶", "tea house"),
@@ -92,10 +93,29 @@ PLACE_TYPE_LABELS: dict[str, str] = {
     "craft": "做手作", "flower": "插花", "sports": "运动", "gym": "去健身房", "climbing": "攀岩",
     "swimming": "游泳", "badminton": "打羽毛球", "basketball": "打篮球",
     "tennis": "打网球", "yoga": "做瑜伽或普拉提", "music": "听现场音乐", "bar": "去酒吧",
-    "club": "跳舞", "karaoke": "唱歌", "books": "逛书店", "records": "逛唱片店",
+    "club": "跳舞", "karaoke": "唱歌", "books": "逛书店", "library": "去图书馆", "records": "逛唱片店",
     "cafe": "去咖啡馆", "tea": "喝茶", "park": "去公园", "gallery": "看展",
     "cinema": "看电影", "river": "去水边", "vintage": "逛中古店", "lane": "逛街巷",
 }
+
+# 口头指定城市是硬约束。先覆盖比赛最可能出现的国内城市和港澳；当前位置本身
+# 仍由高德逆地理编码处理，因此这里不是“开放城市白名单”。
+CITY_ALIASES: tuple[str, ...] = (
+    "北京", "上海", "广州", "深圳", "香港", "澳门", "天津", "重庆",
+    "成都", "杭州", "南京", "苏州", "武汉", "西安", "长沙", "厦门",
+    "青岛", "大连", "昆明", "大理", "三亚", "海口", "郑州", "济南",
+    "福州", "合肥", "南昌", "宁波", "无锡", "佛山", "东莞", "珠海",
+    "南宁", "贵阳", "哈尔滨", "长春", "沈阳", "石家庄", "太原", "兰州",
+    "乌鲁木齐", "拉萨", "呼和浩特", "银川", "西宁",
+)
+
+
+def requested_city_from(text: str) -> str | None:
+    compact = re.sub(r"\s+", "", text)
+    for city in sorted(CITY_ALIASES, key=len, reverse=True):
+        if city in compact:
+            return city
+    return None
 
 NEED_RULES: dict[str, tuple[str, ...]] = {
     "hide": ("不想见人", "不想被看见", "不被看见", "没人看见我", "想一个人", "自己待着", "躲一躲", "躲",
@@ -399,6 +419,7 @@ def interpret_with_rules(text: str) -> InterpretResponse:
         mood_id=mood_id,
         need_keys=needs[:6],
         place_types=place_types[:3],
+        requested_city=requested_city_from(text),
         avoid_tags=avoid[:8],
         energy=energy,
         social_mode=social,
@@ -576,13 +597,23 @@ def _quotes_the_user(line: str, text: str) -> bool:
 
 def _decorate(response: InterpretResponse, text: str, *, model_evidence: list[str] | None = None, lang: str = "zh") -> InterpretResponse:
     state = response.state
+    model_city = re.sub(r"(?:市|特别行政区)$", "", (state.requested_city or "").strip())
     # These controls are filled by the user after interpretation, never by the LLM.
     state.self_report = SelfReport()
     # A place/activity is a hard user instruction, never a model inference. Run
     # the negation-aware deterministic matcher again at the final boundary so a
     # model cannot turn “别推荐公园” into place_types=["park"]. This also removes
     # categories invented from mood alone.
-    state.place_types = interpret_with_rules(text).state.place_types
+    rule_state = interpret_with_rules(text).state
+    state.place_types = rule_state.place_types
+    # Rules cover the common demo cities. For any other named city, keep the
+    # model extraction only when the normalized name is literally present in
+    # the user's sentence; this expands coverage without accepting a guessed
+    # city or letting current location overwrite an explicit destination.
+    compact_text = re.sub(r"\s+", "", text)
+    state.requested_city = rule_state.requested_city or (
+        model_city if model_city and model_city in compact_text else None
+    )
     # 代码侧护栏：avoid_tags 现在真的会压分，所以它必须和 need_keys 用同一套词表，
     # 且不能自相矛盾。模型编出来的词直接丢掉，两边都出现时「想要」压过「不想要」。
     state.avoid_tags = [
@@ -644,7 +675,8 @@ SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户原话转换成 
 {
   "mood_id": "low|quiet|noisy|spark|tired|empty|tight|heated|near|fresh|bright|okay",
   "need_keys": ["hide|sit|walk|free|green|new|sound|people|loud|slow|hands|breathe|nothing"],
-  "place_types": ["barbecue|restaurant|hotpot|dessert|craft|flower|sports|gym|climbing|swimming|badminton|basketball|tennis|yoga|music|bar|club|karaoke|books|records|cafe|tea|park|gallery|cinema|river|vintage|lane"],
+  "place_types": ["barbecue|restaurant|hotpot|dessert|craft|flower|sports|gym|climbing|swimming|badminton|basketball|tennis|yoga|music|bar|club|karaoke|books|library|records|cafe|tea|park|gallery|cinema|river|vintage|lane"],
+  "requested_city": "用户明确点名的城市" 或 null,
   "energy": 0-4,
   "social_mode": "alone|low_contact|with_people|either",
   "time_minutes": 10-720 或 null,
@@ -665,6 +697,7 @@ SYSTEM_PROMPT = """你是 Current 的需求解释器。把用户原话转换成 
 3. bright 是开心/兴奋/庆祝；noisy 是念头反复，二者不能混。负面不等于想安静，正面不等于想休息。
 4. need_keys=想要；avoid_tags=明确不要；同一词不能同时出现。“不想见人”→avoid people，“不想吵”→avoid loud。
 5. place_types 只放用户明说的地点/活动，绝不能从情绪猜或换掉。例：难过但想吃烤串→mood_id=low, place_types=["barbecue"]。
+5a. “推荐上海的图书馆”→requested_city="上海", place_types=["library"]；城市不能被当前位置覆盖。
 6. “不想一个人但也不想说话”→near + people + low_contact；不能变成 alone/hide。
 7. 只有缺失信息会改变推荐时才问一个问题。
 8. evidence 每条≤25字，必须用「」逐字引用用户原话；短、白话、无字段名/术语/临床词。例：「谁都不想理」——所以我把人多的去掉了。"""

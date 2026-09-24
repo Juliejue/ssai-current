@@ -7,7 +7,7 @@
   "use strict";
   const KEY = "current.moments.v1";
   const SCENARIO_KEY = "current.moments.scenario.v1";
-  const CITIES = ["北京", "上海", "广州", "深圳"];
+  const CITIES = ["北京", "上海", "广州", "深圳", "香港", "成都", "杭州", "南京", "武汉", "厦门", "青岛", "重庆", "昆明", "大理"];
   const KINDS = ["lasting_place", "timed_beauty", "seasonal", "sensory", "quiet_corner"];
   const MOODS = ["low", "quiet", "noisy", "spark", "tired", "empty", "tight", "heated", "near", "fresh", "bright", "okay"];
   const STOCK = {
@@ -37,12 +37,22 @@
     ["sz-sunset", "深圳", null, "深圳湾公园", "Shenzhen Bay Park", "timed_beauty", "橙色夕阳正落向水面", "Orange sunset descending toward the water", ["bright", "low", "tight"], 180, STOCK.sunset],
     ["sz-cloud", "深圳", null, "中心公园", "Central Park", "timed_beauty", "厚云之间透出一小片亮处", "A bright patch between heavy clouds", ["near", "empty", "fresh"], 180, STOCK.cloud],
     ["sz-book", "深圳", null, "深圳湾公园白鹭坡书吧", "Bailupo Book Bar", "quiet_corner", "书架上全是旅行与城市", "Shelves full of travel and cities", ["spark", "noisy", "okay"], 180, STOCK.book],
-    ["sz-work", "深圳", null, "南头古城", "Nantou Ancient Town", "quiet_corner", "窗边有人安静地打开电脑", "Someone working quietly by the window", ["tired", "quiet", "heated"], 180, STOCK.dew]
+    ["sz-work", "深圳", null, "南头古城", "Nantou Ancient Town", "quiet_corner", "窗边有人安静地打开电脑", "Someone working quietly by the window", ["tired", "quiet", "heated"], 180, STOCK.dew],
+    ["hk-water", "香港", null, "城门河", "Shing Mun River", "lasting_place", "河面把云影慢慢接住", "Clouds drifting across the river", ["tight", "fresh", "quiet"], 180, STOCK.cloud],
+    ["cd-cafe", "成都", null, "玉林", "Yulin", "quiet_corner", "靠窗的一张桌子刚空下来", "A window table just opened up", ["tired", "low", "quiet"], 180, STOCK.cafe],
+    ["hz-sunset", "杭州", null, "西湖", "West Lake", "timed_beauty", "橙色夕阳贴近了水面", "Orange light settling on the lake", ["bright", "tight", "fresh"], 180, STOCK.sunset],
+    ["nj-book", "南京", null, "金陵图书馆", "Jinling Library", "quiet_corner", "一整面书架等着慢慢看", "A whole wall of books to browse", ["noisy", "spark", "quiet"], 180, STOCK.book],
+    ["wh-cloud", "武汉", null, "汉口江滩", "Hankou Riverfront", "timed_beauty", "厚云正从江面上移过去", "Heavy clouds moving over the river", ["empty", "tight", "fresh"], 180, STOCK.cloud],
+    ["xm-leaf", "厦门", null, "五缘湾", "Wuyuan Bay", "lasting_place", "树影落在水边的步道上", "Tree shadows along the waterfront path", ["heated", "fresh", "quiet"], 180, STOCK.leaf],
+    ["qd-sunset", "青岛", null, "小麦岛", "Xiaomai Island", "timed_beauty", "海面接住了最后一段橙光", "The sea catching the last orange light", ["bright", "low", "tight"], 180, STOCK.sunset],
+    ["cq-city", "重庆", null, "南滨路", "Nanbin Road", "timed_beauty", "楼群在晚光里慢慢亮起来", "Buildings lighting up at dusk", ["spark", "near", "bright"], 180, STOCK.city],
+    ["km-food", "昆明", null, "篆新农贸市场", "Zhuanxin Market", "sensory", "一份热食刚刚端上桌", "A warm plate just arrived", ["empty", "tired", "okay"], 180, STOCK.food],
+    ["dl-water", "大理", null, "洱海生态廊道", "Erhai Ecological Corridor", "lasting_place", "水面一直铺到远山脚下", "Water stretching toward the mountains", ["quiet", "fresh", "tight"], 180, STOCK.leaf]
   ];
   function demoMoments(start) {
     return SEEDS.map(([id, city, placeId, place, placeEn, kind, title, titleEn, moods, minutes, image]) => ({
       id, city, placeId, place, placeEn, kind, title, titleEn, moods,
-      startsAt: start, expiresAt: start + minutes * 60000,
+      startsAt: start, expiresAt: start + 24 * 60 * 60000,
       source: "demo_seed", isDemo: true, distanceM: null, image,
       imageLicense: "Unsplash License", imageLicenseUrl: "https://unsplash.com/license"
     }));
@@ -54,6 +64,26 @@
   function select(moments, {city, mood, now}) {
     return moments.filter(m => m.city === city && active(m, now))
       .sort((a, b) => Number(b.moods.includes(mood)) - Number(a.moods.includes(mood)) || a.expiresAt - b.expiresAt);
+  }
+  function daily(moments, {mood, now, limit = 5}) {
+    const day = Math.floor(now / 86400000);
+    const live = moments.filter(moment => active(moment, now));
+    const score = item => {
+      let hash = day;
+      for (const char of item.id) hash = (hash * 33 + char.charCodeAt(0)) >>> 0;
+      return hash;
+    };
+    const ordered = live.slice().sort((a, b) =>
+      Number(b.moods.includes(mood)) - Number(a.moods.includes(mood)) || score(a) - score(b));
+    const picked = [];
+    const cities = new Set();
+    for (const item of ordered) {
+      if (cities.has(item.city)) continue;
+      picked.push(item);
+      cities.add(item.city);
+      if (picked.length >= limit) return picked;
+    }
+    return picked.concat(ordered.filter(item => !picked.includes(item))).slice(0, limit);
   }
   function cloudTone(mood, report = {}) {
     if (report.valence === "pleasant") return "rainbow";
@@ -81,7 +111,7 @@
   function scenario(storage, now) {
     try {
       const saved = Number(storage.getItem(SCENARIO_KEY));
-      if (Number.isFinite(saved) && saved > 0 && saved <= now) return saved;
+      if (Number.isFinite(saved) && saved > 0 && saved <= now && now - saved < 24 * 60 * 60000) return saved;
       storage.setItem(SCENARIO_KEY, String(now));
     } catch (_) {}
     return now;
@@ -139,6 +169,6 @@
     db.close();
     return blob ? URL.createObjectURL(blob) : null;
   }
-  return {KEY, SCENARIO_KEY, MOODS, CITIES, KINDS, demoMoments, active, select, cloudTone,
+  return {KEY, SCENARIO_KEY, MOODS, CITIES, KINDS, demoMoments, active, select, daily, cloudTone,
     read, write, scenario, contribution, collect, saveMedia, mediaURL};
 });

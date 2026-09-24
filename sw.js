@@ -1,4 +1,4 @@
-const CACHE_NAME = 'current-shell-v5';
+const CACHE_NAME = 'current-shell-v6';
 const SHELL = [
   '/current/',
   '/current-client.js',
