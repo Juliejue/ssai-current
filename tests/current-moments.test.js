@@ -16,7 +16,8 @@ test("demo moments are visibly synthetic and expire", () => {
   assert.ok(seeds.length >= 8);
   assert.ok(seeds.every(item => item.isDemo && item.source === "demo_seed"));
   assert.ok(Moments.select(seeds, {city:"深圳", mood:"low", now:start + 1000}).length);
-  assert.equal(Moments.select(seeds, {city:"深圳", mood:"low", now:start + 4 * 3600000}).length, 0);
+  assert.ok(Moments.select(seeds, {city:"深圳", mood:"low", now:start + 4 * 3600000}).length);
+  assert.equal(Moments.select(seeds, {city:"深圳", mood:"low", now:start + 25 * 3600000}).length, 0);
 });
 
 test("a contribution is always anonymous and stays a local draft", () => {
@@ -30,11 +31,33 @@ test("a contribution is always anonymous and stays a local draft", () => {
   assert.equal(item.expiresAt, 60 * 60000 + 1);
 });
 
-test("moments cover all four pilot cities and carry licensed images", () => {
+test("moments cover a nationwide set of cities and carry licensed images", () => {
   const seeds = Moments.demoMoments(1);
-  assert.deepEqual([...new Set(seeds.map(item => item.city))].sort(), ["上海", "北京", "广州", "深圳"].sort());
+  const cities = new Set(seeds.map(item => item.city));
+  assert.ok(cities.size >= 12);
+  for (const city of ["北京", "上海", "广州", "深圳", "香港", "成都", "杭州", "南京"]) assert.ok(cities.has(city));
   assert.ok(seeds.every(item => item.image.startsWith("/assets/moments/") && item.image.endsWith(".jpg")));
   assert.ok(seeds.every(item => item.imageLicenseUrl === "https://unsplash.com/license"));
+});
+
+test("daily moments are deterministic and use five different cities", () => {
+  const start = Date.UTC(2026, 8, 21, 10);
+  const seeds = Moments.demoMoments(start);
+  const options = {mood:"quiet", now:start + 1000, limit:5};
+  const first = Moments.daily(seeds, options);
+  const second = Moments.daily(seeds, options);
+  assert.deepEqual(first.map(item => item.id), second.map(item => item.id));
+  assert.equal(first.length, 5);
+  assert.equal(new Set(first.map(item => item.city)).size, 5);
+});
+
+test("a new daily scenario replaces yesterday's expired set", () => {
+  const store = memory();
+  const first = Date.UTC(2026, 8, 21, 10);
+  assert.equal(Moments.scenario(store, first), first);
+  assert.equal(Moments.scenario(store, first + 2 * 3600000), first);
+  const next = first + 25 * 3600000;
+  assert.equal(Moments.scenario(store, next), next);
 });
 
 test("contribution types have intentional expiry windows", () => {

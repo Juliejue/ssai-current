@@ -47,10 +47,10 @@ def test_service_worker_caches_the_shell_but_never_intercepts_api_calls():
     assert "url.pathname.startsWith('/api/')" in worker
 
 
-def test_iteration_ui_has_four_cities_media_and_no_removed_home_copy():
+def test_iteration_ui_has_nationwide_moments_media_and_no_removed_home_copy():
     html = (ROOT / "此在-current-原型.html").read_text(encoding="utf-8")
     moments = (ROOT / "current-moments.js").read_text(encoding="utf-8")
-    for city in ("北京", "上海", "广州", "深圳"):
+    for city in ("北京", "上海", "广州", "深圳", "香港", "成都", "杭州", "南京"):
         assert city in moments
     for control in ("moment-media-library", "moment-media-camera", "moment-media-files"):
         assert f'id="{control}"' in html
@@ -62,7 +62,6 @@ def test_iteration_ui_has_four_cities_media_and_no_removed_home_copy():
     assert 'id="social-name"' not in html
     assert 'id="match-chat"' not in html
     assert "演示私信 · 只在本次会话" not in html
-    assert "不建主页、不显示昵称、不能私信" in html
     assert 'id="relay-join"' in html
     assert 'data-contribute="' in html
     assert "空间类型示意图" in html
@@ -76,8 +75,10 @@ def test_screenshot_regressions_keep_copy_and_controls_clean():
 
     for removed in ("只打开你愿意给的", "存：结构化之后的需求", "不存：原话、语音", "向我推荐可能认识的人", "私信权限"):
         assert removed not in settings
-    assert "本机数据" in settings
-    assert "我们的边界" in settings
+    for removed in ("本机数据", "我们的边界", "清空这台设备上的全部记录"):
+        assert removed not in settings
+    assert 'id="font-scale"' in settings
+    assert 'id="preference-mic"' in settings
     for removed in ("还剩约", "演示种子", "Unsplash License"):
         assert removed not in moments
     for removed in ("这里对去过的人有没有帮助", "只显示汇总", "现在攒到哪一步", "匿名汇总是怎么算的"):

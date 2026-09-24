@@ -116,7 +116,7 @@ class AmapClient:
                 "keywords": keywords,
                 "region": region,
                 "city_limit": "true",
-                "show_fields": "business,navi",
+                "show_fields": "business,photos,navi",
                 "page_size": max(1, min(page_size, 10)),
             },
         )
@@ -129,12 +129,17 @@ class AmapClient:
             business = poi.get("business") if isinstance(poi.get("business"), dict) else {}
             candidates.append(
                 {
+                    "id": str(poi.get("id") or ""),
                     "provider_place_id": str(poi.get("id") or ""),
                     "name": str(poi.get("name") or ""),
                     "longitude": longitude,
                     "latitude": latitude,
                     "address": str(poi.get("address") or ""),
                     "district": str(poi.get("adname") or ""),
+                    "adname": str(poi.get("adname") or ""),
+                    "cityname": str(poi.get("cityname") or region),
+                    "citycode": str(poi.get("citycode") or ""),
+                    "photos": poi.get("photos") if isinstance(poi.get("photos"), list) else [],
                     "type": str(poi.get("type") or ""),
                     "typecode": str(poi.get("typecode") or ""),
                     "rating": business.get("rating"),

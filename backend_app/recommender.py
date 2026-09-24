@@ -10,7 +10,7 @@ from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 
-from .discovery import discover, warm as warm_search
+from .discovery import discover, discover_city, warm as warm_search
 from .i18n import (AVOID_LABELS_EN, LOW_TAG_LABELS_EN, NEED_LABELS_EN, PLACE_TYPE_LABELS_EN,
                    RELIEF_LABELS_EN, STATE_LABELS_EN, TAG_LABELS_EN, ui)
 from .map_provider import (AmapClient, MapProviderError, TRUSTWORTHY_COORDINATES, WalkingRoute,
@@ -109,6 +109,7 @@ PLACE_TYPE_TERMS: dict[str, tuple[str, ...]] = {
     "club": ("club", "夜店", "蹦迪", "跳舞"),
     "karaoke": ("ktv", "卡拉ok", "karaoke", "唱歌"),
     "books": ("书店", "书园", "独立出版", "bookshop", "bookstore"),
+    "library": ("图书馆", "library"),
     "records": ("唱片", "黑胶", "records"),
     "cafe": ("咖啡", "cafe", "coffee"),
     "tea": ("茶馆", "茶室", "喝茶", "tea house"),
@@ -125,7 +126,7 @@ PLACE_TYPE_FAMILIES: tuple[frozenset[str], ...] = (
     frozenset({"craft", "flower"}),
     frozenset({"sports", "gym", "climbing", "swimming", "badminton", "basketball", "tennis", "yoga"}),
     frozenset({"music", "bar", "club", "karaoke"}),
-    frozenset({"books", "records", "cafe", "tea", "gallery", "cinema", "vintage"}),
+    frozenset({"books", "library", "records", "cafe", "tea", "gallery", "cinema", "vintage"}),
     frozenset({"park", "river", "lane"}),
 )
 
@@ -425,6 +426,7 @@ def _rank(
     now: datetime | None = None,
     discovered: list[dict] | None = None,
     profile_overlays: dict[str, dict] | None = None,
+    include_curated: bool = True,
 ) -> list[tuple[float, dict, dict[str, float]]]:
     catalog = load_catalog()
     rejected = set(request.rejected_place_ids)
@@ -432,7 +434,8 @@ def _rank(
     ranked: list[tuple[float, dict, dict[str, float]]] = []
 
     # 人工核对过的和现场搜出来的走同一套打分——差别在数据可信度，不在算法。
-    for original in list(catalog["PLACES"]) + list(discovered or []):
+    base_places = list(catalog["PLACES"]) if include_curated else []
+    for original in base_places + list(discovered or []):
         original = dict(original)
         if request.location and original.get("source") != "discovered":
             live_distance = _live_distance_km(request.location, original)
@@ -524,6 +527,7 @@ def _to_recommendation(
     role: str = "alternate",
     now: datetime | None = None,
     lang: str = "zh",
+    search_scope: str | None = None,
 ) -> Recommendation:
     reasons = place.get("matchReason", {})
     name = place["placeName"]
@@ -555,9 +559,11 @@ def _to_recommendation(
         "It's close to what you just described." if lang == "en" else "它和你刚才说的需要比较接近。")
     distance_km = round(route.distance_meters / 1000, 2) if route else place.get("distanceKm")
     walking_minutes = max(1, round(route.duration_seconds / 60)) if route else None
-    reach_minutes = walking_minutes or _estimate_reach_minutes(place)
-    tier, relief_label = _relief_tier(reach_minutes)
-    if lang == "en":
+    reach_minutes = None if search_scope and not route else (walking_minutes or _estimate_reach_minutes(place))
+    tier, relief_label = _relief_tier(reach_minutes or 999)
+    if search_scope and not route:
+        relief_label = f"Found in {search_scope}" if lang == "en" else f"已按{search_scope}检索"
+    elif lang == "en":
         relief_label = RELIEF_LABELS_EN.get(tier, relief_label)
     status, open_label, hours_source = open_state(place, now, lang)
     amap = place.get("amap") or {}
@@ -582,12 +588,14 @@ def _to_recommendation(
         travel_mode=route.mode if route else "walk",
         distance_source=(
             "amap" if route
+            else "city_search" if search_scope
             # 现场搜到的地点，距离是高德周边搜索一起返回的，是真的直线距离。
             else "amap_straight_line" if (
                 place.get("source") == "discovered" or place.get("distance_source") == "amap_straight_line"
             ) and distance_km is not None
             else "prototype_estimate"
         ),
+        search_scope=search_scope,
         map_verified=(place.get("amap") or {}).get("verification_status") == "verified",
         source=place.get("source") or "curated",
         attribute_source=(
@@ -678,21 +686,57 @@ async def recommend_with_live_context(
     # Feedback profiles come from verified dwell visits only. Load them beside
     # map discovery so a slow database cannot turn into serial user latency.
     profile_task = asyncio.create_task(load_space_profiles(curated_ids))
-    # 现场从地图上搜候选。搜不到就退回人工那 26 个——少给选项，但绝不编。
-    discovered = await discover(client, request.location, request.state) if request.location else []
+    # 点名城市和“我附近”是两个不同意图。前者按城市文本检索，绝不能拿设备
+    # 当前坐标覆盖；后者才使用一次性的内存定位。
+    requested_city = (request.state.requested_city or "").strip()
+    discovered = (
+        await discover_city(client, requested_city, request.state)
+        if requested_city else
+        await discover(client, request.location, request.state) if request.location else []
+    )
     try:
         profile_overlays = await asyncio.wait_for(profile_task, timeout=0.75)
     except (TimeoutError, asyncio.CancelledError):
         profile_overlays = {}
     try:
-        ranked = _rank(request, now, discovered=discovered, profile_overlays=profile_overlays)
+        ranked = _rank(
+            request,
+            now,
+            discovered=discovered,
+            profile_overlays=profile_overlays,
+            include_curated=not bool(requested_city),
+        )
     except TypeError as error:
         # A few integrators replace the ranking function with a narrow test or
         # experiment hook. Preserve that public seam while the built-in ranker
         # accepts verified profile overlays.
-        if "profile_overlays" not in str(error):
+        if "profile_overlays" not in str(error) and "include_curated" not in str(error):
             raise
-        ranked = _rank(request, now, discovered=discovered)
+        try:
+            ranked = _rank(request, now, discovered=discovered, include_curated=not bool(requested_city))
+        except TypeError as compatibility_error:
+            if "include_curated" not in str(compatibility_error):
+                raise
+            # Keep older test/experiment hooks usable. An explicit-city request
+            # still cannot leak curated Beijing places into the result.
+            ranked = _rank(request, now, discovered=discovered)
+            if requested_city:
+                discovered_ids = {str(place.get("placeId")) for place in discovered}
+                ranked = [item for item in ranked if str(item[1].get("placeId")) in discovered_ids]
+    if requested_city:
+        return [
+            _to_recommendation(
+                score,
+                place,
+                breakdown,
+                request.state,
+                role="primary" if index == 0 else "alternate",
+                now=now,
+                lang=request.lang,
+                search_scope=requested_city,
+            )
+            for index, (score, place, breakdown) in enumerate(_spread(ranked, request.limit))
+        ]
     if not request.location or not client.configured:
         return [
             _to_recommendation(score, place, breakdown, request.state, role="primary" if index == 0 else "alternate", now=now, lang=request.lang)

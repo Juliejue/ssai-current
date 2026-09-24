@@ -11,7 +11,7 @@ PlaceType = Literal[
     "craft", "flower", "sports", "gym", "climbing", "swimming", "badminton",
     "basketball", "tennis", "yoga",
     "music", "bar", "club", "karaoke",
-    "books", "records", "cafe", "tea", "park", "gallery", "cinema",
+    "books", "library", "records", "cafe", "tea", "park", "gallery", "cinema",
     "river", "vintage", "lane",
 ]
 
@@ -37,6 +37,9 @@ class NeedState(BaseModel):
     # 用户明确说出的地点/活动是硬信号。只存受限枚举，不存原话。
     # 例如「心情不好，我想吃烤串」不能被情绪推断改写成“去公园”。
     place_types: list[PlaceType] = Field(default_factory=list, max_length=3)
+    # 用户可以说“帮我找上海的图书馆”。这是目标城市，不等于设备当前位置。
+    # 只保存行政区名称，不保存原句或坐标。
+    requested_city: str | None = Field(default=None, max_length=40)
     energy: int = Field(default=2, ge=0, le=4)
     social_mode: Literal["alone", "low_contact", "with_people", "either"] = "either"
     time_minutes: int | None = Field(default=None, ge=10, le=720)
@@ -217,8 +220,11 @@ class Recommendation(BaseModel):
     # amap                = 高德实测步行路线
     # amap_straight_line  = 高德周边搜索给的直线距离（现场搜到的地点，还没算路线）
     # prototype_estimate  = 原型里写死的估算值，跟用户从哪儿出发无关
-    # 这三件事必须分得开：把第二种说成第三种，是在自己抹黑自己的数据。
-    distance_source: Literal["amap", "amap_straight_line", "prototype_estimate"] = "prototype_estimate"
+    # 这些来源必须分得开：把真实路线、直线距离、异地检索或原型估算混为一谈，
+    # 会让用户误以为系统掌握了并不存在的实时路程。
+    distance_source: Literal["amap", "amap_straight_line", "city_search", "prototype_estimate"] = "prototype_estimate"
+    # 用户点名另一个城市时，明确标出检索范围，避免把城市中心距离冒充为当前位置距离。
+    search_scope: str | None = Field(default=None, max_length=40)
     map_verified: bool = False
     navigation_url: str | None = None
     transport: str | None = None
