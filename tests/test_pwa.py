@@ -56,7 +56,12 @@ def test_iteration_ui_has_nationwide_moments_media_and_no_removed_home_copy():
         assert f'id="{control}"' in html
     for label in ("相册", "拍摄", "选取文件"):
         assert label in html
-    assert "video/mp4" in html
+    files_input = html[html.index('id="moment-media-files"'):][:180]
+    assert "accept=" not in files_input
+    assert "getUserMedia({video:" in html
+    assert "window.showOpenFilePicker" in html
+    assert "next.place_types = []" in html
+    assert 'file.type.startsWith("video/")' in html
     assert "想安静，想吃烤串" not in html
     assert "换成这个了。前一个我记下来" not in html
     assert 'id="social-name"' not in html

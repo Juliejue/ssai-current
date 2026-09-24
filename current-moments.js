@@ -77,8 +77,18 @@
       Number(b.moods.includes(mood)) - Number(a.moods.includes(mood)) || score(a) - score(b));
     const picked = [];
     const cities = new Set();
+    const images = new Set();
     for (const item of ordered) {
-      if (cities.has(item.city)) continue;
+      if (cities.has(item.city) || images.has(item.image)) continue;
+      picked.push(item);
+      cities.add(item.city);
+      images.add(item.image);
+      if (picked.length >= limit) return picked;
+    }
+    // If the asset pool is ever smaller than the requested count, preserve
+    // different cities before allowing a repeated image.
+    for (const item of ordered) {
+      if (picked.includes(item) || cities.has(item.city)) continue;
       picked.push(item);
       cities.add(item.city);
       if (picked.length >= limit) return picked;

@@ -96,6 +96,40 @@ def test_gym_request_stays_a_gym_request():
     assert place["category"].startswith("健身房")
 
 
+def test_climbing_search_keeps_real_places_without_photos_and_searches_wider():
+    from backend_app.discovery import discover, keywords_for, to_place
+
+    state = interpret_with_rules("我想去攀岩").state
+    assert keywords_for(state) == ["攀岩馆", "抱石馆"]
+    place = to_place({
+        "id": "B0TESTCLIMB", "name": "石壁抱石馆", "longitude": 114.16,
+        "latitude": 22.31, "distance": "6300", "adname": "九龙",
+        "cityname": "香港", "address": "测试道 8 号", "photos": [],
+    }, "climbing")
+    assert place is not None
+    assert place["coverImage"] == "sigil:climbing"
+
+    class FakeMapClient:
+        configured = True
+
+        def __init__(self):
+            self.calls = []
+
+        async def search_around(self, **kwargs):
+            self.calls.append(kwargs)
+            return [{
+                "id": "B0TESTCLIMB", "name": "石壁抱石馆", "longitude": 114.16,
+                "latitude": 22.31, "distance": "6300", "adname": "九龙",
+                "cityname": "香港", "address": "测试道 8 号", "photos": [],
+            }]
+
+    client = FakeMapClient()
+    found = asyncio.run(discover(client, Location(latitude=22.32, longitude=114.17), state))
+    assert found
+    assert {call["keywords"] for call in client.calls} == {"攀岩馆", "抱石馆"}
+    assert all(call["radius"] == 20000 for call in client.calls)
+
+
 def test_explicit_city_search_never_falls_back_to_beijing_catalogue():
     class FakeMapClient:
         configured = True

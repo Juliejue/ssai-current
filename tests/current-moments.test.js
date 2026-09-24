@@ -49,6 +49,7 @@ test("daily moments are deterministic and use five different cities", () => {
   assert.deepEqual(first.map(item => item.id), second.map(item => item.id));
   assert.equal(first.length, 5);
   assert.equal(new Set(first.map(item => item.city)).size, 5);
+  assert.equal(new Set(first.map(item => item.image)).size, 5);
 });
 
 test("a new daily scenario replaces yesterday's expired set", () => {

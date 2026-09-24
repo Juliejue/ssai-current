@@ -52,17 +52,17 @@ const links = {
   amap_android: 'amapuri://route/plan/?dlat=39.9&dlon=116.4&t=2',
 };
 
-test('Amap uses one universal navigation on iPhone', () => {
+test('Amap opens the installed iPhone app without a second web fallback', () => {
   const app = runtime('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)');
   assert.equal(app.current.launchMap('amap', links), true);
-  assert.equal(app.location.href, links.amap);
+  assert.equal(app.location.href, links.amap_ios);
   assert.equal(app.timers.length, 0);
 });
 
-test('Android and desktop also use the same single universal route', () => {
+test('Android uses its native route while desktop keeps the universal route', () => {
   const android = runtime('Mozilla/5.0 (Linux; Android 15)');
   android.current.launchMap('amap', links);
-  assert.equal(android.location.href, links.amap);
+  assert.equal(android.location.href, links.amap_android);
   assert.equal(android.timers.length, 0);
 
   const desktop = runtime('Mozilla/5.0 (Macintosh; Intel Mac OS X)');
