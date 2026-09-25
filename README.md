@@ -271,3 +271,7 @@ CurrentHRVDemo/            Swift / HealthKit HRV demo（Phase 2 入口）
   若当事人希望撤下，改成转述即可（搜索 `quote:` 定位）。
 - 界面上不会读取 `places.json` 里的原型 `averageChange` / `feedbackCount`。只有数据库中达到 5 次围栏停留核验的真实反馈才可显示样本量并修正画像；不足门槛仍显示「样本还少」。
 - 物料里的二维码是占位图形，扫不出东西。
+
+## 项目成员
+- **组长**：Estelle Ma
+- **核心组员**：Jue Chen, Camille Yu, PuffyFish Yang
