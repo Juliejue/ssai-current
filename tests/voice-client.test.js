@@ -222,6 +222,17 @@ test('voice capture starts after provider code 0 and flushes before end', async 
   assert.deepEqual(runtime.errors, []);
 });
 
+test('leaving the voice screen releases the microphone without submitting speech', async () => {
+  const runtime = makeVoiceRuntime();
+  await runtime.current.toggleVoice(runtime.callbacks);
+  runtime.sockets[0].open();
+  runtime.sockets[0].receive({ code: 0, message: 'success' });
+  runtime.current.cancelVoice();
+  assert.equal(runtime.tracks[0].stopped, true);
+  assert.equal(runtime.current.voiceIsActive(), false);
+  assert.equal(runtime.transcripts.some(text => text.startsWith('final:')), false);
+});
+
 test('Tencent keeps and punctuates every finalized sentence slice', async () => {
   const runtime = makeVoiceRuntime();
   await runtime.current.toggleVoice(runtime.callbacks);

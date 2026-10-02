@@ -585,7 +585,7 @@ def _to_recommendation(
         score=round(max(0.0, min(1.0, score)), 4),
         distance_km=distance_km,
         walking_minutes=walking_minutes,
-        travel_mode=route.mode if route else "walk",
+        travel_mode=route.mode if route else AmapClient.mode_for(distance_km),
         distance_source=(
             "amap" if route
             else "city_search" if search_scope
@@ -628,7 +628,7 @@ def _to_recommendation(
         open_label=open_label,
         hours_source=hours_source,  # type: ignore[arg-type]
         geofence=fence,
-        map_links=map_links(place),
+        map_links=map_links(place, route.mode if route else AmapClient.mode_for(distance_km)),
     )
 
 

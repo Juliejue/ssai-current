@@ -355,7 +355,7 @@ def navigation_url(place: dict[str, Any]) -> str | None:
     return f"https://uri.amap.com/navigation?{query}"
 
 
-def map_links(place: dict[str, Any]) -> dict[str, str]:
+def map_links(place: dict[str, Any], mode: str = "walk") -> dict[str, str]:
     """US-06：给用户选地图，而不是替他决定用哪家。
 
     我们存的坐标来自高德，是 GCJ-02。Apple 和 Google 用 WGS-84，
@@ -374,10 +374,11 @@ def map_links(place: dict[str, Any]) -> dict[str, str]:
     name = amap.get("verified_name") or place["placeName"]
     wgs_latitude, wgs_longitude = (round(v, 6) for v in gcj_to_wgs(gcj_latitude, gcj_longitude))
 
+    mode = mode if mode in {"walk", "ride", "transit"} else "walk"
     amap_query = urlencode(
         {
             "to": f"{gcj_longitude},{gcj_latitude},{name}",
-            "mode": "walk",
+            "mode": {"walk": "walk", "ride": "ride", "transit": "bus"}[mode],
             "policy": 1,
             "src": "current",
             "coordinate": "gaode",
@@ -395,17 +396,22 @@ def map_links(place: dict[str, Any]) -> dict[str, str]:
         "dlon": gcj_longitude,
         "dname": name,
         "dev": 0,
-        "t": 2,
+        "t": {"walk": 2, "ride": 3, "transit": 1}[mode],
     }
     if amap.get("provider_place_id"):
         native_route["did"] = amap["provider_place_id"]
     native_query = urlencode(native_route)
-    apple_query = urlencode({"daddr": f"{wgs_latitude},{wgs_longitude}", "q": name, "dirflg": "w"})
+    apple_params = {"daddr": f"{wgs_latitude},{wgs_longitude}", "q": name}
+    # Apple map links have no bicycle flag; let Maps choose rather than
+    # presenting a 90-minute walk as the recommended cycling route.
+    if mode != "ride":
+        apple_params["dirflg"] = "r" if mode == "transit" else "w"
+    apple_query = urlencode(apple_params)
     google_query = urlencode(
         {
             "api": 1,
             "destination": f"{wgs_latitude},{wgs_longitude}",
-            "travelmode": "walking",
+            "travelmode": {"walk": "walking", "ride": "bicycling", "transit": "transit"}[mode],
         }
     )
     return {

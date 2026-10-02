@@ -419,21 +419,31 @@ def test_first_hand_quotes_are_labelled_as_profile_source_not_as_feedback():
 
 
 def test_cancelling_map_choice_does_not_start_a_trip():
-    """「先不去」必须真的是取消，不能留下虚假的进行中行程。"""
+    """打开地图不是出发；只有显式「现在出发」才能建立行程。"""
     source = PROTOTYPE.read_text(encoding="utf-8")
     depart_handler = source.split('root.querySelectorAll("[data-depart]")', 1)[1].split(
         'root.querySelectorAll("[data-mapapp]")', 1
     )[0]
     map_handler = source.split('root.querySelectorAll("[data-mapapp]")', 1)[1].split(
-        'const mapCancel', 1
+        'root.querySelectorAll("[data-start-trip]")', 1
     )[0]
-    cancel_handler = source.split('const mapCancel', 1)[1].split(
-        'root.querySelectorAll("[data-trip]")', 1
+    start_handler = source.split('root.querySelectorAll("[data-start-trip]")', 1)[1].split(
+        'const skipOffer', 1
     )[0]
 
-    assert "startTrip(t.placeId, rec)" in map_handler
-    assert "startTrip(id, rec)" in depart_handler  # 无地图链接时按钮本身就是确认
-    assert "saveTrip" not in cancel_handler
+    assert "startTrip(" not in depart_handler
+    assert "startTrip(" not in map_handler
+    assert "startTrip(id, rec)" in start_handler
+
+
+def test_reflection_can_continue_and_only_recommends_again_after_a_tap():
+    source = PROTOTYPE.read_text(encoding="utf-8")
+    assert 'id="reflect-input"' in source
+    assert 'id="reflect-retry"' in source
+    assert 'const reflectRetry = root.querySelector("#reflect-retry")' in source
+    assert 'state.rejected.push(currentPlace)' in source
+    assert 'revised.max_travel_minutes = Math.min' in source
+    assert 'runRecommend(revised,' in source
 
 
 def test_amap_uses_a_same_page_native_launch_with_a_web_fallback():

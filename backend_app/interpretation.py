@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from .i18n import (AVOID_LABELS_EN, CLARIFY_EN, CONSTRAINT_CORRECTIONS_EN, CORRECTION_CHIPS_EN,
                     NEED_LABELS_EN, PLACE_TYPE_LABELS_EN, state_label, ui)
 from .schemas import ClarifyOption, CorrectionOptions, InterpretResponse, NeedState, RiskLevel, SelfReport
+from .security import checked_model_base_url
 
 
 logger = logging.getLogger("current.interpretation")
@@ -63,7 +64,7 @@ PLACE_TYPE_RULES: dict[str, tuple[str, ...]] = {
     "dessert": ("甜品", "蛋糕", "冰淇淋", "面包店", "糖水", "dessert"),
     "craft": ("手作", "手工", "陶艺", "做陶", "木工", "编织", "银饰", "craft"),
     "flower": ("插花", "花艺", "花店", "鲜花", "flower"),
-    "sports": ("运动馆", "体育馆", "体育中心", "锻炼", "想运动", "运动一下", "work out"),
+    "sports": ("运动馆", "体育馆", "体育中心", "锻炼", "想运动", "运动一下", "跑步", "跑一跑", "慢跑", "running", "jogging", "work out"),
     "gym": ("健身房", "健身", "fitness center", "gym", "workout"),
     "climbing": ("攀岩", "抱石", "climbing", "bouldering"),
     "swimming": ("游泳", "泳池", "swimming"),
@@ -83,7 +84,7 @@ PLACE_TYPE_RULES: dict[str, tuple[str, ...]] = {
     "park": ("公园", "park"),
     "gallery": ("美术馆", "画廊", "展览", "看展", "gallery"),
     "cinema": ("电影院", "影院", "看电影", "电影资料馆", "cinema"),
-    "river": ("河边", "江边", "水边", "湖边", "river", "waterfront"),
+    "river": ("河边", "江边", "水边", "湖边", "河流", "沿河", "river", "waterfront"),
     "vintage": ("中古店", "古着", "二手店", "vintage"),
     "lane": ("胡同", "小巷", "街区", "lane", "alley"),
 }
@@ -114,6 +115,12 @@ def requested_city_from(text: str) -> str | None:
     compact = re.sub(r"\s+", "", text)
     for city in sorted(CITY_ALIASES, key=len, reverse=True):
         if city in compact:
+            # “我在香港，想去附近跑步” describes the origin, not a request to
+            # search all of Hong Kong. Preserve explicit destinations such as
+            # “推荐上海的图书馆”.
+            if re.search(rf"(?:我|人|目前|现在|此刻)(?:就)?在{re.escape(city)}(?:的|附近|这边)?", compact):
+                if not re.search(rf"(?:推荐|找|去|看看|想去){re.escape(city)}", compact):
+                    continue
             return city
     return None
 
@@ -400,7 +407,7 @@ def interpret_with_rules(text: str) -> InterpretResponse:
     wants_outdoor = bool(_affirmed_matches(text, (
         "想去户外", "想在户外", "想去外面", "露天", "晒太阳", "开阔视野", "视野开阔",
         "看远一点", "看夕阳", "夕阳", "能吹风", "吹吹风", "吹风", "微风", "有风",
-        "河边", "江边", "水边", "湖边", "outside", "outdoors", "fresh air", "a breeze",
+        "河边", "江边", "水边", "湖边", "河流", "沿河", "树荫", "outside", "outdoors", "fresh air", "a breeze",
         "by the river", "by the water", "in the sun",
     )))
     wants_indoor = bool(_affirmed_matches(
@@ -807,7 +814,10 @@ async def interpret(text: str, lang: str = "zh") -> InterpretResponse:
         _trace(outcome="rules_no_model_configured", text=text, attempt=0, model="none")
         return _decorate(rule_result, text, lang=lang)
 
-    base_url = (os.getenv("LLM_BASE_URL") or os.getenv("base_url") or "https://api.openai.com/v1").rstrip("/")
+    base_url = checked_model_base_url(os.getenv("LLM_BASE_URL") or os.getenv("base_url"))
+    if not base_url:
+        _trace(outcome="rules_model_endpoint_blocked", text=text, attempt=0, model="none")
+        return _decorate(rule_result, text, lang=lang)
     model = os.getenv("LLM_MODEL") or os.getenv("model") or "glm-4.7-flash"
 
     # 输出契约（FR-26）：校验失败以 temperature=0 重试一次，再失败走规则兜底，绝不空屏。

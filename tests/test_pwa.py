@@ -69,7 +69,7 @@ def test_iteration_ui_has_nationwide_moments_media_and_no_removed_home_copy():
     assert "演示私信 · 只在本次会话" not in html
     assert 'id="relay-join"' in html
     assert 'data-contribute="' in html
-    assert "空间类型示意图" in html
+    assert "暂无地点实景图" in html
 
 
 def test_screenshot_regressions_keep_copy_and_controls_clean():
