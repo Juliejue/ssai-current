@@ -127,3 +127,20 @@ def test_map_links_publish_native_amap_routes_with_a_web_fallback():
         assert "dlon=116.4" in links[key]
         assert "dev=0" in links[key]
         assert "t=2" in links[key]
+
+
+def test_map_links_respect_recommended_travel_mode():
+    place = {
+        "placeName": "远一点的河边",
+        "amap": {"longitude": 114.1, "latitude": 22.3, "verification_status": "provider_exact"},
+    }
+    transit = map_links(place, "transit")
+    assert "mode=bus" in transit["amap"]
+    assert "t=1" in transit["amap_ios"]
+    assert "dirflg=r" in transit["apple"]
+    assert "travelmode=transit" in transit["google"]
+    ride = map_links(place, "ride")
+    assert "mode=ride" in ride["amap"]
+    assert "t=3" in ride["amap_android"]
+    assert "dirflg=" not in ride["apple"]
+    assert "travelmode=bicycling" in ride["google"]

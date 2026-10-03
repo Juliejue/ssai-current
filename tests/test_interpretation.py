@@ -47,6 +47,14 @@ def test_explicit_city_and_library_survive_interpretation():
     assert state.place_types == ["library"]
 
 
+def test_current_city_is_origin_not_citywide_destination():
+    state = interpret_with_rules("我在香港，想去附近有树荫、经过河流的地方跑步").state
+    assert state.requested_city is None
+    assert "sports" in state.place_types
+    assert "river" in state.place_types
+    assert state.environment == "outdoor"
+
+
 def test_positive_excitement_is_not_mistaken_for_racing_thoughts():
     state = interpret_with_rules("拿到 offer 以后特别兴奋，坐不住，想庆祝").state
     assert state.mood_id == "bright"

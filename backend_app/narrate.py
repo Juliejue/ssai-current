@@ -26,6 +26,7 @@ from typing import Any
 import httpx
 
 from .schemas import NeedState
+from .security import checked_model_base_url
 
 
 logger = logging.getLogger("current.narrate")
@@ -107,7 +108,9 @@ async def narrate(places: list[dict], state: NeedState, lang: str = "zh") -> dic
     if not api_key or not places:
         return {}
 
-    base_url = (os.getenv("LLM_BASE_URL") or os.getenv("base_url") or "https://api.openai.com/v1").rstrip("/")
+    base_url = checked_model_base_url(os.getenv("LLM_BASE_URL") or os.getenv("base_url"))
+    if not base_url:
+        return {}
     model = os.getenv("LLM_MODEL") or os.getenv("model") or "glm-4.7-flash"
     listing = "\n".join(
         (

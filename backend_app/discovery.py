@@ -101,7 +101,7 @@ PLACE_TYPE_SEARCHES: dict[str, tuple[tuple[str, str], ...]] = {
     "club": (("夜店", "club"),),
     "karaoke": (("KTV", "karaoke"),),
     "books": (("书店", "books"),),
-    "library": (("图书馆", "library"),),
+    "library": (("图书馆", "library"), ("library", "library")),
     "records": (("黑胶", "records"),),
     "cafe": (("咖啡", "cafe"),),
     "tea": (("茶室", "tea"),),
@@ -138,6 +138,11 @@ def keywords_for(state: NeedState) -> list[str]:
     # bookstores/cafes/parks after “I need a gym” wastes three network trips and
     # is how an unrelated fallback used to leak into the third card.
     if state.place_types:
+        # A mixed request (run beside a river) must search both dimensions.
+        # Previously four generic sports searches crowded the river out.
+        if "river" in state.place_types and len(state.place_types) > 1:
+            first = [PLACE_TYPE_SEARCHES[t][0][0] for t in state.place_types if PLACE_TYPE_SEARCHES.get(t)]
+            chosen = list(dict.fromkeys(first + chosen))
         return chosen[:MAX_KEYWORD_SEARCHES]
     scored: list[tuple[int, str]] = []
     for keyword, _category, need_keys, moods in KEYWORD_PROFILES:
@@ -539,7 +544,22 @@ def _looks_like_noise(name: str) -> bool:
         return True
     if any(brand in name for brand in CHAIN_BRANDS):
         return True
+    if re.search(r"\b(?:company|co\.?|ltd\.?|limited)\b", name, re.I):
+        return True
     return any(pattern in name for pattern in NOISE_PATTERNS)
+
+
+def _matches_category(poi: dict[str, Any], category: str) -> bool:
+    """Keyword search is recall, not proof that a POI is a usable space."""
+    name = str(poi.get("name") or "").casefold()
+    provider_type = str(poi.get("type") or "").casefold()
+    if category == "river":
+        return any(term in name for term in ("河", "江", "溪", "水道", "海滨", "海旁", "湖", "river", "waterfront", "promenade"))
+    if category in {"running", "cycling", "skating", "sports"}:
+        return any(term in name + " " + provider_type for term in (
+            "跑步", "跑道", "运动场", "运动馆", "体育", "骑行", "单车径", "轮滑", "溜冰", "羽毛球", "球场",
+            "running", "track", "sports", "cycle", "skating", "court"))
+    return True
 
 
 def _photo_urls(poi: dict[str, Any]) -> list[str]:
@@ -557,7 +577,7 @@ def _photo_urls(poi: dict[str, Any]) -> list[str]:
 def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
     """把一个高德 POI 变成和人工地点同一个形状。类别由搜它的那个关键词决定。"""
     name = str(poi.get("name") or "").strip()
-    if _looks_like_noise(name):
+    if _looks_like_noise(name) or not _matches_category(poi, category):
         return None
     profile = CATEGORY_PROFILE.get(category)
     if not profile:

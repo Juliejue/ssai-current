@@ -130,6 +130,21 @@ def test_climbing_search_keeps_real_places_without_photos_and_searches_wider():
     assert all(call["radius"] == 20000 for call in client.calls)
 
 
+def test_running_by_river_searches_both_and_rejects_unrelated_pois():
+    from backend_app.discovery import keywords_for, to_place
+
+    state = interpret_with_rules("我在香港，想在树荫下沿着河流跑步").state
+    assert "跑步道" in keywords_for(state)
+    assert "河" in keywords_for(state)
+    unrelated = {
+        "id": "B0SHOP", "name": "土壤文创PMQ元创方店", "longitude": 114.15,
+        "latitude": 22.31, "distance": "300", "photos": [],
+    }
+    assert to_place(unrelated, "river") is None
+    assert to_place(unrelated, "running") is None
+    assert to_place({**unrelated, "name": "香港日月星文创礼品有限公司"}, "river") is None
+
+
 def test_explicit_city_search_never_falls_back_to_beijing_catalogue():
     class FakeMapClient:
         configured = True

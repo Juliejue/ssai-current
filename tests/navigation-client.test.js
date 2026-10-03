@@ -70,3 +70,9 @@ test('Android uses its native route while desktop keeps the universal route', ()
   assert.equal(desktop.location.href, links.amap);
   assert.equal(desktop.timers.length, 0);
 });
+
+test('WeChat uses a visible web route instead of a blocked custom scheme', () => {
+  const wechat = runtime('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) MicroMessenger/8.0');
+  wechat.current.launchMap('amap', links);
+  assert.equal(wechat.location.href, links.amap);
+});

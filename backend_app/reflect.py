@@ -29,6 +29,7 @@ from typing import Any
 import httpx
 
 from .narrate import BANNED_WORDS, PROMISE_WORDS
+from .security import checked_model_base_url
 
 
 logger = logging.getLogger("current.reflect")
@@ -116,7 +117,9 @@ async def reflect(
     if not api_key or not text.strip():
         return _fallback(options)
 
-    base_url = (os.getenv("LLM_BASE_URL") or os.getenv("base_url") or "https://api.openai.com/v1").rstrip("/")
+    base_url = checked_model_base_url(os.getenv("LLM_BASE_URL") or os.getenv("base_url"))
+    if not base_url:
+        return _fallback(options)
     model = os.getenv("LLM_MODEL") or os.getenv("model") or "glm-4.7-flash"
 
     user_prompt = (

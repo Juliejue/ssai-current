@@ -412,20 +412,40 @@
     return state;
   }
 
-  function interpretAndRecommend(text) {
+  function interpretAndRecommend(text, callbacks) {
     // 把位置一起送过去：模型读这句话要几秒，服务端可以在同一段时间里
     // 先把周边搜好，等用户点到推荐那一步就不用再等。
     return api('/interpret', { method: 'POST', body: JSON.stringify({
         text: text, lang: lang(), location: activeLocation }) })
       .then(function (interpretation) {
         interpretation.state = applyStoredPreferences(interpretation.state);
+        // “我在香港” is origin context, not a request to search the whole city.
+        var city = interpretation.state.requested_city;
+        var originMentions = city && ['我在', '我就在', '目前在', '目前就在', '现在在', '现在就在']
+          .some(function (prefix) { return text.indexOf(prefix + city) >= 0; });
+        var targetMentions = city && ['推荐', '找', '去', '想去']
+          .some(function (prefix) { return text.indexOf(prefix + city) >= 0; });
+        if (originMentions && !targetMentions) {
+          interpretation.state.requested_city = null;
+        }
         track('natural_language_interpreted', {
           source: interpretation.source,
           mood_id: interpretation.state.mood_id,
           need_count: interpretation.state.need_keys.length,
           risk_level: interpretation.state.risk_level
         });
-        return recommendFor(interpretation.state).then(function (recommendations) {
+        var needOrigin = !activeLocation && !interpretation.state.requested_city &&
+          interpretation.state.risk_level !== 'urgent';
+        if (needOrigin && callbacks && callbacks.onLocationPrompt) callbacks.onLocationPrompt();
+        var origin = needOrigin ? requestLocation().catch(function () { return null; }) : Promise.resolve(activeLocation);
+        return origin.then(function (coordinate) {
+          if (!coordinate && !interpretation.state.requested_city) {
+            return { recommendations: [], fallback_note: voiceCopy(
+              '先开启位置，我才能找你附近的地方。也可以明确告诉我想找哪座城市。',
+              'Turn on location so I can find nearby places, or tell me a destination city.') };
+          }
+          return recommendFor(interpretation.state);
+        }).then(function (recommendations) {
           return { interpretation: interpretation, recommendations: recommendations };
         });
       });
@@ -457,8 +477,13 @@
           // Exact city is useful context, not permission to use location. Nearby
           // search still works from the in-memory coordinate when geocoding is down.
         }).finally(function () { resolve(activeLocation); });
-      }, function () {
-        reject(new Error(voiceCopy('没有获得位置权限，仍可以继续推荐。', 'Location is off. Recommendations still work.')));
+      }, function (error) {
+        var denied = error && error.code === 1;
+        reject(new Error(denied
+          ? voiceCopy('定位被拒绝了。请在浏览器的站点设置中允许定位，或告诉我想找哪座城市。',
+            'Location was denied. Allow it in site settings, or tell me a city to search.')
+          : voiceCopy('暂时拿不到位置。可以再试一次，或告诉我想找哪座城市。',
+            'I could not get your location. Try again, or tell me a city to search.')));
       }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
     });
   }
@@ -727,10 +752,14 @@
     var stopRequested = false;
     var started = false;
     var startTimer = null;
+    var silenceTimer = null;
+    var maxTimer = null;
     var controller = null;
 
     function cleanup() {
       if (startTimer) clearTimeout(startTimer);
+      if (silenceTimer) clearTimeout(silenceTimer);
+      if (maxTimer) clearTimeout(maxTimer);
       recognition.onstart = null;
       recognition.onresult = null;
       recognition.onerror = null;
@@ -756,18 +785,23 @@
       catch (_) { finish(); }
     }
 
-    controller = { provider: 'browser', stop: stop };
+    controller = { provider: 'browser', stop: stop, cancel: function () {
+      if (finished) return;
+      finished = true;
+      try { recognition.abort(); } catch (_) {}
+      cleanup();
+    } };
     activeVoice = controller;
     recognition.lang = lang() === 'en' ? 'en-US' : 'zh-CN';
-    // A short pause is not consent to send. Keep listening until the user taps
-    // the microphone again; some iOS browsers otherwise finalize one phrase
-    // and end the session at the first natural pause.
+    // A final phrase is kept open briefly for a natural pause; a second tap
+    // ends immediately, while a longer pause or the hard limit ends safely.
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
     recognition.onstart = function () {
       started = true;
       if (startTimer) clearTimeout(startTimer);
+      maxTimer = setTimeout(stop, 60000);
       callbacks.onStatus(stopRequested
         ? voiceCopy('正在整理你刚才说的…', 'Finishing what you just said…')
         : voiceCopy('我在听，再按一次结束', 'Listening · tap again to stop'));
@@ -784,8 +818,10 @@
       }
       latestText = joinSpeechParts(parts);
       if (latestText) callbacks.onPartial(speechPreview(parts));
-      // `isFinal` means this phrase is stable, not that the user has finished
-      // speaking. Only the explicit second tap may end the capture.
+      if (silenceTimer) clearTimeout(silenceTimer);
+      if (hasFinal && !stopRequested) silenceTimer = setTimeout(stop, 4000);
+      // `isFinal` means the phrase is stable, not that the user is done.
+      // The timer allows another phrase before auto-finishing.
       if (hasFinal && !stopRequested) {
         callbacks.onStatus(voiceCopy('我还在听，再按一次结束', 'Still listening · tap again to stop'));
       }
@@ -829,7 +865,7 @@
     // Prevent a fast double-tap from opening two microphones while permissions
     // and the ASR signature are still being requested.
     var stopDuringSetup = false;
-    activeVoice = { stop: function () { stopDuringSetup = true; } };
+    activeVoice = { stop: function () { stopDuringSetup = true; }, cancel: function () { stopDuringSetup = true; } };
     callbacks.onStatus(voiceCopy('正在请求麦克风…', 'Requesting microphone access…'));
     track('natural_language_started', { method: 'voice_tencent' });
     var stream = null;
@@ -877,6 +913,10 @@
 
       socket = new WebSocket(signature.url);
       socket.binaryType = 'arraybuffer';
+      if (stopDuringSetup) {
+        cleanupSetup();
+        return;
+      }
     } catch (error) {
       cleanupSetup();
       var friendly = voiceSetupError(error);
@@ -893,10 +933,14 @@
     var endSent = false;
     var finishTimer = null;
     var connectTimer = null;
+    var silenceTimer = null;
+    var maxTimer = null;
 
     function cleanup() {
       if (finishTimer) clearTimeout(finishTimer);
       if (connectTimer) clearTimeout(connectTimer);
+      if (silenceTimer) clearTimeout(silenceTimer);
+      if (maxTimer) clearTimeout(maxTimer);
       try { processor.port.onmessage = null; processor.disconnect(); } catch (_) {}
       try { sink.disconnect(); } catch (_) {}
       try { source.disconnect(); } catch (_) {}
@@ -955,7 +999,11 @@
       finishTimer = setTimeout(finish, 8000);
     }
 
-    activeVoice = { stop: stop };
+    activeVoice = { stop: stop, cancel: function () {
+      if (finished) return;
+      finished = true;
+      cleanup();
+    } };
     processor.port.onmessage = function (event) {
       var data = event.data || {};
       if (data.type === 'audio') sendAudio(data.buffer);
@@ -975,6 +1023,7 @@
         if (!providerReady && Number(message.code) === 0) {
           providerReady = true;
           if (connectTimer) clearTimeout(connectTimer);
+          maxTimer = setTimeout(stop, 60000);
           if (!stopRequested) {
             source.connect(processor);
           }
@@ -998,6 +1047,8 @@
             partialParts = [{ text: latestText, final: Number(result.slice_type) === 2 }];
           }
           callbacks.onPartial(speechPreview(partialParts));
+          if (silenceTimer) clearTimeout(silenceTimer);
+          if (Number(result.slice_type) === 2 && !stopRequested) silenceTimer = setTimeout(stop, 4000);
         }
         // slice_type=2 only stabilizes one sentence. The stream is complete
         // exclusively when Tencent returns final=1 after our end message.
@@ -1058,6 +1109,18 @@
     return beginTencentVoice(callbacks).then(function () { return 'recording'; });
   }
 
+  function cancelVoice() {
+    if (activeVoice) (activeVoice.cancel || activeVoice.stop)();
+  }
+  if (window.addEventListener) {
+    window.addEventListener('pagehide', cancelVoice);
+  }
+  if (document.addEventListener) {
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') cancelVoice();
+    });
+  }
+
   function mapLaunchTarget(method, links) {
     links = links || {};
     if (method !== 'amap') return { url: links[method] || '', fallback: '' };
@@ -1067,6 +1130,11 @@
     // browser page. Desktop keeps the universal route because custom schemes
     // are not useful there.
     var ua = String((navigator && navigator.userAgent) || '');
+    // WeChat commonly blocks custom-scheme app launches. Keep directions
+    // usable in its webview and explain the limitation in the map chooser.
+    if (/MicroMessenger/i.test(ua)) {
+      return { url: links.amap || '', fallback: '' };
+    }
     if (/iPhone|iPad|iPod/i.test(ua)) {
       return { url: links.amap_ios || links.amap || '', fallback: '' };
     }
@@ -1117,6 +1185,8 @@
     demoPresence: demoPresence,
     stopPresence: stopPresence,
     toggleVoice: toggleVoice,
+    cancelVoice: cancelVoice,
+    voiceIsActive: function () { return Boolean(activeVoice); },
     mapLaunchTarget: mapLaunchTarget,
     launchMap: launchMap,
     deviceRole: deviceRole,
