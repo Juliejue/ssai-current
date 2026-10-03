@@ -149,6 +149,36 @@ class AmapClient:
             )
         return candidates
 
+    async def forward_geocode(self, *, address: str, city: str | None = None) -> dict[str, Any]:
+        """Offer concrete origins for the user to confirm, never a city-centre guess."""
+        params: dict[str, str | int] = {"address": address}
+        if city:
+            params["city"] = city
+        payload = await self._get("/v3/geocode/geo", params)
+        candidates = []
+        for result in (payload.get("geocodes") or [])[:5]:
+            if result.get("level") in {"国家", "省", "市", "区县", "乡镇", "开发区", "未知"}:
+                continue
+            try:
+                longitude, latitude = parse_location(result.get("location", ""))
+            except MapProviderError:
+                continue
+            resolved_city = result.get("city") or result.get("province") or city
+            if not isinstance(resolved_city, str) or not resolved_city:
+                continue
+            district = result.get("district")
+            candidates.append({"latitude": latitude, "longitude": longitude,
+                               "label": str(result.get("formatted_address") or address)[:200],
+                               "city": resolved_city.removesuffix("市"),
+                               "district": district if isinstance(district, str) else ""})
+        if not candidates and city:
+            places = await self.search_places(address, region=city, page_size=5)
+            candidates = [{"latitude": p["latitude"], "longitude": p["longitude"],
+                           "label": (p["name"] + " · " + p["address"])[:200],
+                           "city": p["cityname"] or city, "district": p["district"]}
+                          for p in places]
+        return {"candidates": candidates}
+
     async def reverse_geocode(self, *, longitude: float, latitude: float) -> ReverseLocation:
         """Resolve an exact administrative city instead of guessing with rectangles.
 

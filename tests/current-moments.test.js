@@ -86,3 +86,10 @@ test("cloud state reflects a shadow, while user self-report wins", () => {
   assert.equal(Moments.cloudTone("low", {valence:"pleasant"}), "rainbow");
   assert.equal(Moments.cloudTone("okay", {valence:"mixed"}), "calm");
 });
+
+test("find this feeling turns a moment into a nearby place request, not a home-page draft", () => {
+  assert.match(Moments.feelingQuery({title:"书架上全是旅行与城市"}), /附近.*看书/);
+  assert.match(Moments.feelingQuery({title:"厚云正从江面上移过去"}), /附近.*水/);
+  assert.match(Moments.feelingQuery({title:"晚餐刚刚端到桌上"}), /附近.*吃/);
+  assert.equal(Moments.feelingQuery(null), "");
+});

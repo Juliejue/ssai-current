@@ -83,10 +83,11 @@ button{background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highligh
   overflow:hidden;display:flex;flex-direction:column;position:relative;
 }
 .stage-note{display:none}
-@media (max-width:430px){
+@media (max-width:600px){
   .stage{padding:0;gap:0}
   .phone{width:100%;height:100dvh;border-radius:0;border:none;box-shadow:none}
   .stage-note{display:none}
+  input,textarea,select{font-size:16px!important}
 }
 
 /* ---------- chrome ---------- */
@@ -545,17 +546,16 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .talk .foot button.on{color:var(--ink-dim)}
 .talk .foot button.quiet{font-size:11.5px;color:var(--ink-faint)}
 .talk .privacy{margin:18px 0 0;font:10.5px/1.8 var(--mono);color:var(--ink-faint);letter-spacing:.02em;max-width:34ch;text-wrap:balance}
-.talk-actions{width:min(290px,86vw);display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
-.talk-action{width:100%;height:72px;border-radius:22px;border:1px solid var(--line-2);background:var(--card);color:var(--water);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;box-shadow:0 5px 16px rgba(18,42,46,.05);transition:transform .15s,background .15s,color .15s}
-.talk-action svg{width:25px;height:25px}
-.talk-action span{font:10.5px/1 var(--sans);letter-spacing:.04em}
-.talk-action.voice{grid-column:1/-1;grid-row:1;height:64px;flex-direction:row;border-color:var(--water);background:var(--water-wash);color:var(--ink)}
-.talk-action.voice svg{width:28px;height:28px}
-.talk-action.voice span{font-size:13px}
-.talk-action.voice.listening{position:relative;background:var(--water);color:var(--paper);box-shadow:0 0 0 4px var(--water-wash)}
-.talk-action.voice.listening:before{content:"";position:absolute;inset:-5px;border:2px solid var(--water);border-radius:26px;animation:mic-ring 1.5s ease-out infinite;pointer-events:none}
-.reflect-mic{margin:18px auto 4px;width:64px!important;height:64px!important;background:var(--water-wash)!important;color:var(--ink)!important;border-color:var(--water)!important}
-.reflect-mic svg{width:24px!important;height:24px!important}
+.talk-actions{width:min(310px,88vw);display:flex;align-items:center;gap:6px;padding:6px;border:1px solid var(--line-2);border-radius:999px;background:var(--card);box-shadow:0 14px 36px rgba(18,42,46,.08);margin-top:4px}
+.talk-action{position:relative;flex:1;min-width:0;min-height:52px;padding:0 12px;border-radius:999px;color:var(--ink-dim);display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .15s,background .15s,color .15s}
+.talk-action svg{width:21px;height:21px;flex:none}
+.talk-action span{font:500 13px/1 var(--sans)}
+.talk-action.voice{background:var(--ink);color:var(--paper)}
+.talk-action.voice.listening{background:var(--water);color:var(--paper)}
+.talk-action.voice.listening:before{content:"";position:absolute;width:42px;height:42px;border:1px solid currentColor;border-radius:50%;opacity:.45;animation:mic-ring 1.5s ease-out infinite;pointer-events:none}
+.talk-action.voice.listening svg{animation:zai-drift .75s ease-in-out infinite}
+.reflect-mic{margin:0!important;width:52px!important;height:52px!important;background:var(--ink)!important;color:var(--paper)!important;border:0!important;box-shadow:none!important}
+.reflect-mic svg{width:21px!important;height:21px!important}
 .reflect-mic.listening{background:var(--water)!important;color:var(--paper)!important}
 .reflect-user-turn{max-width:82%;margin:14px 0 14px auto;padding:11px 14px;border-radius:15px 15px 4px 15px;background:var(--water-wash);color:var(--ink);font:13px/1.65 var(--sans)}
 .reflect-compose{margin:18px 0 8px}
@@ -563,6 +563,58 @@ blockquote{margin:14px 0 0;padding:12px 14px;border-left:2px solid var(--terraco
 .reflect-compose-actions{display:flex;align-items:center;gap:12px;margin-top:8px}
 .reflect-compose-actions .reflect-mic{margin:0;flex:none}
 .reflect-compose-actions .btn{flex:1}
+.reflect-guide{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;margin:0 auto 20px;max-width:320px}
+.reflect-guide .spirit{width:144px;height:112px;display:grid;place-items:center;position:relative;animation:zai-drift 3.8s ease-in-out infinite}
+.reflect-guide .spirit svg{width:136px;height:91px;filter:drop-shadow(0 14px 16px rgba(18,42,46,.12))}
+.reflect-guide .spirit:after{content:"";width:12px;height:12px;border-radius:50%;background:var(--sun);position:absolute;right:2px;bottom:22px;animation:zai-orbit 3.8s ease-in-out infinite}
+.reflect-guide .prompt{position:relative;padding:13px 18px;border-radius:20px;background:var(--card);border:1px solid var(--line-2);font:400 19px/1.5 var(--serif);color:var(--ink);text-wrap:balance}
+.reflect-guide .prompt:before{content:"";position:absolute;top:-8px;left:calc(50% - 8px);width:14px;height:14px;background:var(--card);border-left:1px solid var(--line-2);border-top:1px solid var(--line-2);transform:rotate(45deg)}
+.reflect-guide .hint{font:12px/1.6 var(--sans);color:var(--ink-dim)}
+.reflect-guide .spirit .cloud-body{fill:var(--water-wash)}
+.reflect-guide .spirit .zai-eyes{transform-origin:100px 80px;animation:zai-blink 5s infinite}
+.reflect-guide.is-listening .spirit{animation:zai-listen 1.1s ease-in-out infinite}
+.reflect-guide.is-thinking .spirit{animation:zai-think 2s ease-in-out infinite}
+.reflect-guide.is-speaking .spirit{animation:zai-listen .65s ease-in-out infinite}
+.pet-speech{display:flex;align-items:center;gap:10px}
+.pet-play{display:block;margin:9px auto 0;padding:4px 10px;border-radius:20px;color:var(--water);font:11px var(--sans)}
+.reflect-history{margin:0 0 18px;font:12px/1.6 var(--sans);color:var(--ink-dim)}
+.reflect-history summary{cursor:pointer;min-height:36px;padding:8px 0}
+.voice-wave{display:none;align-items:center;gap:3px;height:22px}
+.voice-wave i{width:3px;height:8px;border-radius:4px;background:currentColor;animation:voice-wave .85s ease-in-out infinite}
+.voice-wave i:nth-child(2){animation-delay:-.2s}.voice-wave i:nth-child(3){animation-delay:-.4s}.voice-wave i:nth-child(4){animation-delay:-.1s}
+.listening .voice-wave{display:flex}.listening .voice-icon{display:none}
+.voice-icon{display:flex;align-items:center;justify-content:center}
+@keyframes voice-wave{50%{height:22px}}
+@keyframes zai-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.12)}}
+@keyframes zai-listen{50%{transform:translateY(-5px) rotate(3deg) scale(1.025)}}
+@keyframes zai-think{25%{transform:translateY(-5px) rotate(-6deg)}75%{transform:translateY(-5px) rotate(6deg)}}
+.reflect-start{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 auto 18px;padding:6px;width:max-content;max-width:100%;border:1px solid var(--line-2);border-radius:99px;background:var(--card);box-shadow:0 12px 32px rgba(18,42,46,.07)}
+.reflect-start .reflect-mic{margin:0!important}
+.reflect-start .type-toggle{min-height:44px;padding:0 18px;border:0;border-radius:99px;background:transparent;color:var(--ink);font:500 13px var(--sans)}
+.reflect-typing{width:100%;max-width:360px;margin:0 auto 14px;padding:14px;background:var(--card);border:1px solid var(--line-2);border-radius:18px}
+.reflect-typing textarea{width:100%;min-height:100px;resize:vertical;background:transparent;border:0;color:var(--ink);font:14px/1.7 var(--sans);outline:0}
+.reflect-typing .send{width:100%;min-height:44px;border-radius:99px;background:var(--ink);color:var(--paper);font:500 13px var(--sans)}
+.reflect-reply{max-width:86%;margin:0 auto 16px 0;padding:12px 16px;color:var(--ink);background:var(--card);border:1px solid var(--line-2);border-radius:18px 18px 18px 4px;font:13px/1.7 var(--sans)}
+.reflect-next-prompt{position:relative;width:max-content;max-width:95%;margin:20px auto 12px;padding:11px 16px;border-radius:19px;background:var(--card);border:1px solid var(--line-2);text-align:center;font:400 16px/1.55 var(--serif);color:var(--ink);text-wrap:balance}
+@keyframes zai-drift{50%{transform:translateY(-8px) rotate(-3deg)}}
+@keyframes zai-orbit{50%{transform:translate(4px,-8px)}}
+@media (prefers-reduced-motion:reduce){.reflect-guide .spirit,.reflect-guide .spirit:after{animation:none}}
+.location-help{width:100%;max-width:360px;margin:14px auto;padding:16px;border:1px solid var(--line-2);border-radius:18px;background:var(--card);color:var(--ink);text-align:left;font:12px/1.7 var(--sans)}
+.location-help strong{display:block;font-size:13px;margin-bottom:6px}.location-help ol{margin:8px 0;padding-left:20px}.location-help button{width:100%;min-height:42px;border-radius:99px;background:var(--water-wash);color:var(--ink);border:1px solid var(--water);font:500 13px var(--sans)}
+.manual-location{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.manual-location label{display:block;font:500 12px/1.5 var(--sans);margin-bottom:6px}
+.manual-location input{width:100%;min-height:44px;margin-bottom:8px;padding:9px 12px;background:var(--paper);border:1px solid var(--line-2);border-radius:12px;color:var(--ink)}
+.manual-location p{font:11px/1.6 var(--sans);color:var(--ink-dim)}
+.manual-results button{margin-top:8px;padding:10px 12px;border-radius:12px;text-align:left;line-height:1.5;background:var(--card)}
+.manual-results:empty{display:none}
+.top .choose-link{padding:6px 9px;border-radius:99px;border:1px solid var(--line-2);font:11px var(--sans);color:var(--ink-dim)}
+.saved-moment{margin:14px 18px;padding:16px;border:1px solid var(--line-2);border-radius:16px;background:var(--card);color:var(--ink)}
+.saved-moment h3{font:500 15px var(--sans);margin:0 0 5px}.saved-moment p{margin:0;color:var(--ink-dim);font:12px/1.6 var(--sans)}
+.saved-moment{display:flex;gap:12px;align-items:center}.saved-moment img{width:64px;height:64px;object-fit:cover;border-radius:10px;flex:none}
+.moment-saved-note{margin:8px 0 0;font:12px/1.5 var(--sans);color:var(--ink-dim)}
+.route-return{position:absolute;inset:0;z-index:19;display:flex;align-items:flex-end;background:rgba(4,19,21,.56)}
+.route-return-inner{width:100%;padding:22px 18px calc(20px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;background:var(--card);color:var(--ink)}
+.route-return-inner h3{font:500 19px var(--serif);margin:0 0 8px}.route-return-inner p{font:12px/1.6 var(--sans);color:var(--ink-dim);margin:0 0 18px}.route-return-inner .btn-row{display:flex;gap:10px}.route-return-inner .btn-row button{flex:1}
 .talk-action.on{background:var(--water-wash);border-color:var(--water);color:var(--ink)}
 .talk-action:active{transform:scale(.97)}
 
@@ -1802,9 +1854,9 @@ function cloudSVG(mood){
     ? '<circle cx="170" cy="104" r="8" fill="#C4703C"/>' : '';
   return '<svg class="cloud-' + tone + '" viewBox="0 22 200 100" width="100%" height="100%" aria-hidden="true">' +
     '<defs><linearGradient id="current-rainbow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#91BFC4"/><stop offset=".52" stop-color="#E7D3B7"/><stop offset="1" stop-color="#B996A5"/></linearGradient></defs>' +
-    '<path class="cloud-body" d="' + D + '" fill="none" stroke="#122A2E" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<path class="cloud-body" d="' + D + '" fill="none" stroke="var(--ink)" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>' +
     '<path class="cloud-colour" d="' + D + '" fill="url(#current-rainbow)" stroke="none"/>' +
-    eyes + you + '</svg>';
+    '<g class="zai-eyes" fill="var(--ink)">' + eyes.replaceAll('#122A2E', 'currentColor') + '</g>' + you + '</svg>';
 }
 function catSVG(mood){ return cloudSVG(mood); }
 function dock(line, opts){
@@ -1879,6 +1931,8 @@ const state = {
   askAnswered: false,
   fixLink: "state",
   mapSheet: null,
+  navigationReturn: null,
+  locationHelp: false,
   arrivedToast: null, arrivedTimer: null,
   reflect: null, reflectTyping: false, reflectText: "", reflectNote: null, reflectHistory: [],
   pendingDelete: null,
@@ -2088,16 +2142,25 @@ function guardianState(){
 
 /* ---------- 行程（出发 → 到达 → 离开）----------
    存在 localStorage，因为「带我去」会把人送去地图 App。回来时闭环不能断。
-   只存 placeId / recommendationId / 时间戳——没有坐标，没有原话。 */
+   只存地点名称、placeId / recommendationId / 时间戳和在场状态；没有用户坐标或原话。 */
 const TRIP_KEY = "current.trip.v2";
 const TRIP_TAB_KEY = "current.trip.tab.v2";
+function tripPlaceName(trip){
+  if (!trip || typeof trip.placeId !== "string") return "";
+  const saved = typeof trip.placeName === "string" ? trip.placeName.trim() : "";
+  if (saved) return saved;
+  const known = PLACES.find(place => place.placeId === trip.placeId);
+  return known ? known.placeName : "";
+}
 function loadTrip(){
   try {
     const trip = JSON.parse(localStorage.getItem(TRIP_KEY) || "null");
     const tabToken = sessionStorage.getItem(TRIP_TAB_KEY);
     if (!trip || !trip.startedAt || tabToken !== trip.startedAt) return null;
     const age = Date.now() - Date.parse(trip.startedAt);
-    if (!Number.isFinite(age) || age > 6 * 60 * 60 * 1000) return null;
+    if (!Number.isFinite(age) || age < -5 * 60 * 1000 || age > 6 * 60 * 60 * 1000) return null;
+    // 老版的实时地图地点没有保存名字；不能拿 PLACES[0] 冒充它。
+    if (!tripPlaceName(trip)) return null;
     return trip;
   } catch(e){ return null; }
 }
@@ -2124,7 +2187,8 @@ function startTrip(id, rec){
     return;
   }
   const experienceMode = locationMode === "trip-demo";
-  saveTrip({placeId:id, recommendationId:rec.recommendation_id || ("local_" + id),
+  saveTrip({placeId:id, placeName:rec.place_name || place.placeName,
+            recommendationId:rec.recommendation_id || ("local_" + id),
             startedAt:new Date().toISOString(), status:"departed",
             geofence:rec.geofence || null, dwellMinutes:0, inside:false,
             presenceLevel:"self_reported", presenceAvailable:experienceMode,
@@ -2222,8 +2286,7 @@ function arrivedToast(){
 function tripStrip(){
   const t = state.trip;
   if (!t) return "";
-  const p = placeById(t.placeId);
-  const short = shortPlaceName(p.placeName, 8);
+  const short = escapeHTML(shortPlaceName(tripPlaceName(t), 8));
   const fenced = Boolean(t.geofence);
   const demo = Boolean(t.experienceMode);
   const confirmedInside = demo || (fenced && t.presenceAvailable && t.inside);
@@ -2350,6 +2413,11 @@ function renderSafe(){
 /* ---------- 路由 ---------- */
 function go(hash){
   if (hash !== state.route) CurrentAI.cancelVoice();
+  if (hash !== state.route && window.speechSynthesis) window.speechSynthesis.cancel();
+  if (hash === "#/talk" && state.route !== "#/talk") {
+    state.talkText = "";
+    state.talkTyping = false;
+  }
   state.route = hash;
   try { location.hash = hash; } catch(e){}
   render();
@@ -2367,8 +2435,28 @@ window.addEventListener("current-relay-event", event => {
 });
 window.addEventListener("hashchange", () => {
   const h = location.hash || "#/talk";
-  if (h !== state.route){ CurrentAI.cancelVoice(); state.route = h; render(); }
+  if (h !== state.route){
+    CurrentAI.cancelVoice();
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (h === "#/talk") { state.talkText = ""; state.talkTyping = false; }
+    state.route = h; render();
+  }
 });
+function resumeAfterMap(){
+  const pending = state.navigationReturn;
+  if (!pending || !pending.left || pending.prompt || Date.now() - pending.launchedAt < 500) return;
+  pending.prompt = true;
+  if (state.route === "#/offer" || state.route.indexOf("#/place/") === 0) render();
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && state.navigationReturn) state.navigationReturn.left = true;
+  else if (!document.hidden) resumeAfterMap();
+});
+window.addEventListener("pagehide", () => {
+  if (state.navigationReturn) state.navigationReturn.left = true;
+});
+window.addEventListener("pageshow", resumeAfterMap);
+window.addEventListener("focus", resumeAfterMap);
 
 /* ============================================================
    屏幕渲染：每个 render* 返回 phone 内部完整 HTML
@@ -2644,58 +2732,41 @@ function renderPlace(id){
    「自己选」那条路没有删：语音会坏、有人就是不想说话、模型也会失败。 */
 function renderReflect(id){
   const p = placeById(id);
-  const d = state.draft;
-  const short = shortPlaceName(p.placeName, 6);
+  const short = p.placeName;
   const r = state.reflect;
   let h = topbar(uiCopy("说说刚才", "How was it?"), uiCopy("离开后", "After your visit"), "#/visit/" + id);
-  h += '<div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i></div>';
   h += '<div class="screen mid"><div class="pad">';
 
   if (!r){
-    h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
-         '<div class="bubble"><span class="tag">' + uiCopy('小在', 'Xiaozai') + '</span><p>' +
-         uiCopy('刚才在' + escapeHTML(short) + '怎么样？', 'How was ' + escapeHTML(short) + '?') + '</p></div></div>';
-    h += '<button class="mic small reflect-mic' + (CurrentAI.voiceIsActive() ? ' listening' : '') + '" id="reflect-mic" aria-label="' + uiCopy('用语音说', 'Speak') + '" aria-pressed="' + CurrentAI.voiceIsActive() + '">' + micSVG() + '</button>';
-    h += '<p class="mic-cap" id="reflect-cap">' +
-         (state.reflectNote ? escapeHTML(state.reflectNote) : '') + '</p>';
-    if (!state.reflectTyping){
-      h += '<button class="type-toggle" id="reflect-type">' + uiCopy('改用文字', 'Type instead') + '</button>';
-    } else {
-      h += '<div class="typing"><textarea id="reflect-input" maxlength="500" ' +
-           'placeholder="' + uiCopy('比如：坐了半小时，风挺舒服的，就是人有点多', 'For example: the breeze felt good, but it was crowded') + '">' + escapeHTML(state.reflectText || "") + '</textarea>' +
-           '<button class="send" id="reflect-submit">' + uiCopy('发送', 'Send') + '</button></div>';
-    }
-    h += '<button class="btn-text" data-step="1" style="margin-top:18px">' + uiCopy('不想说，自己选', 'Choose instead') + '</button>';
+    h += zaiGuide(uiCopy('刚才在' + short + '怎么样？', 'How was ' + short + '?'));
   } else {
-    (state.reflectHistory || []).forEach(turn => {
-      h += '<p class="reflect-user-turn">' + escapeHTML(turn.text) + '</p>';
-      h += '<div class="say"><span class="zai">' + cloudSVG("look") + '</span>' +
-        '<div class="bubble"><span class="tag">' + uiCopy('小在', 'Xiaozai') + '</span><p>' +
-        escapeHTML(turn.reply) + '</p></div></div>';
-    });
-    h += '<div class="beforeafter" style="margin-top:4px"><div><small>' + uiCopy('出发前', 'Before') + '</small><strong>' +
-         moodById(state.mood).name + '</strong></div><span class="arrow">→</span>' +
-         '<div><small>' + uiCopy('现在', 'Now') + '</small><strong class="hit">' + escapeHTML(scoreLabel(r.change_score)) + '</strong></div>' +
-         '<div style="margin-left:auto"><b class="num">' + signed(r.change_score) + '</b></div></div>';
-    if (r.factors && r.factors.length){
-      h += '<div class="tags" style="margin-top:14px">' +
-           r.factors.map(f => '<span class="tag">' + escapeHTML(factorCopy(f)) + '</span>').join("") + '</div>';
+    const history = state.reflectHistory || [];
+    if (history.length > 1){
+      h += '<details class="reflect-history"><summary>' + uiCopy('前面聊的', 'Earlier in our chat') + '</summary>';
+      history.slice(0, -1).forEach(turn => {
+        h += '<p class="reflect-user-turn">' + escapeHTML(turn.text) + '</p><p class="reflect-reply">' + escapeHTML(turn.reply) + '</p>';
+      });
+      h += '</details>';
     }
-    h += '<div class="say" style="margin-top:16px"><span class="zai">' + cloudSVG() + '</span>' +
-         '<div class="bubble"><p>' + escapeHTML(reflectFollowup(r)) + '</p></div></div>';
-    h += '<div class="reflect-compose"><textarea id="reflect-input" maxlength="500" placeholder="' +
-      uiCopy('还想说什么，接着说', 'Keep talking if you like') + '">' + escapeHTML(state.reflectText || "") +
-      '</textarea><div class="reflect-compose-actions"><button class="mic small reflect-mic' +
-      (CurrentAI.voiceIsActive() ? ' listening' : '') + '" id="reflect-mic" aria-label="' + uiCopy('用语音说', 'Speak') + '">' +
-      micSVG() + '</button><button class="btn ghost sm" id="reflect-submit">' + uiCopy('继续说', 'Continue') + '</button></div></div>';
-    if (state.reflectNote) h += '<p class="mic-cap" id="reflect-cap">' + escapeHTML(state.reflectNote) + '</p>';
-    if (r.change_score < 0 && state.read) h += '<button class="btn ghost sm" id="reflect-retry" style="margin-top:12px">' +
-      uiCopy('避开这个地方，再找一个', 'Leave this place out and look again') + '</button>';
-    h += '<div class="actions"><button class="btn" id="reflect-save">' + uiCopy('生成心情轨迹卡', 'Create mood trail card') + ' <span>→</span></button>' +
-         '<button class="btn-text" data-step="1">' + uiCopy('我说错了，自己改', 'Edit it myself') + '</button></div>';
+    if (history.length) h += '<p class="reflect-user-turn">' + escapeHTML(history[history.length - 1].text) + '</p>';
+    h += zaiGuide(r.acknowledgement + ' ' + reflectFollowup(r), r.change_score < 0 ? 'closed' : 'look');
   }
+  h += '<div class="reflect-start"><button class="mic small reflect-mic' + (CurrentAI.voiceIsActive() ? ' listening' : '') +
+    '" id="reflect-mic" aria-label="' + uiCopy('用语音说', 'Speak') + '" aria-pressed="' + CurrentAI.voiceIsActive() + '">' + voiceGlyph() + '</button>' +
+    '<button class="type-toggle" id="reflect-type">' + uiCopy('打字聊聊', 'Type instead') + '</button></div>';
+  h += '<p class="mic-cap" id="reflect-cap" role="status" aria-live="polite">' + escapeHTML(state.reflectNote || '') + '</p>';
+  if (state.reflectTyping){
+    h += '<div class="reflect-typing"><textarea id="reflect-input" maxlength="500" aria-label="' + uiCopy('想和小在说的话', 'Your message') +
+      '" placeholder="' + uiCopy('想到什么就说什么…', 'What’s on your mind?') + '">' + escapeHTML(state.reflectText || '') + '</textarea>' +
+      '<button class="send" id="reflect-submit">' + uiCopy('发送', 'Send') + '</button></div>';
+  }
+  if (r){
+    if (r.change_score < 0 && state.read) h += '<button class="btn ghost sm" id="reflect-retry" style="margin-top:12px">' +
+      uiCopy('换个地方，我重新找', 'Find somewhere else') + '</button>';
+    h += '<div class="actions"><button class="btn" id="reflect-save">' + uiCopy('记下这次', 'Save this visit') + ' <span>→</span></button>' +
+      '<button class="btn-text" data-step="1">' + uiCopy('调整这次的变化', 'Adjust how I felt') + '</button></div>';
+  } else h += '<button class="btn-text" data-step="1" style="margin-top:18px">' + uiCopy('自己选', 'Choose instead') + '</button>';
   h += '</div></div>';
-  h += dock('这是同一个人前后的差，不是这个地方的星级。');
   return h;
 }
 
@@ -3048,6 +3119,20 @@ function renderRecords(){
   let h = topbar(uiCopy("情绪空间轨迹", "Mood trail"), uiCopy("长期记录", "Your visits"), "#/talk");
   h += '<div class="screen">';
   h += '<div style="padding:14px 18px 0"><button class="btn sm" data-go="#/talk">' + uiCopy('重新找一个地方', 'Find another place') + ' <span>→</span></button></div>';
+  const savedMoments = state.momentData.cards.slice().reverse();
+  if (savedMoments.length){
+    h += '<section aria-label="' + uiCopy('收下的时刻', 'Saved moments') + '"><div class="rec-head"><p class="eyebrow">' +
+      uiCopy('只存在这台设备', 'Only on this device') + '</p><h2 class="title sm">' +
+      uiCopy('收下的时刻', 'Saved moments') + '</h2></div>';
+    savedMoments.slice(0, 10).forEach(moment => {
+      const savedImage = moment.image || (momentById(moment.id) || {}).image;
+      h += '<article class="saved-moment">' + (savedImage ? '<img src="' + escapeHTML(savedImage) + '" alt="" loading="lazy">' : '') +
+        '<div><h3>' + escapeHTML(currentLang() === 'en' ? moment.titleEn || moment.title : moment.title) +
+        '</h3><p>' + escapeHTML(currentLang() === 'en' ? moment.placeEn || moment.place : moment.place) +
+        ' · ' + escapeHTML(fmtDate(moment.savedAt)) + (moment.isDemo ? uiCopy(' · 演示时刻', ' · Demo moment') : '') + '</p></div></article>';
+    });
+    h += '</section>';
+  }
   const read = selfRead(all);
   h += '<div class="profile trail-profile' + (!all.length ? ' empty-profile' : '') + '"><div class="hero">' +
        '<div class="grad" style="background:radial-gradient(120% 100% at 50% 40%, rgba(30,110,114,.12), rgba(30,110,114,.05) 55%, rgba(234,240,239,.92) 100%),linear-gradient(160deg,#EAF0EF,#DDE6E4)"></div>' +
@@ -3301,6 +3386,16 @@ function micSVG(){
     '<rect x="9" y="2.5" width="6" height="11" rx="3"/>' +
     '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3.2"/></svg>';
 }
+function voiceGlyph(){
+  return '<span class="voice-icon">' + micSVG() + '</span><span class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>';
+}
+
+function zaiGuide(prompt, mood){
+  return '<div class="reflect-guide"><span class="spirit" aria-hidden="true">' + cloudSVG(mood || 'look') + '</span>' +
+    '<div class="prompt">' + escapeHTML(prompt) +
+    (window.speechSynthesis ? '<button class="pet-play" data-zai-speak="' + escapeHTML(prompt) + '">' + uiCopy('听小在说', 'Listen to Xiaozai') + '</button>' : '') +
+    '</div></div>';
+}
 function keyboardSVG(){
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">' +
     '<rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M10 13h.01M14 13h.01M18 13h.01M7 16h10"/></svg>';
@@ -3415,6 +3510,7 @@ function momentPlace(moment){
   return currentLang() === "en" ? moment.placeEn : moment.place;
 }
 function momentCard(moment){
+  const saved = state.momentData.cards.some(item => item.id === moment.id);
   return '<article class="moment-card"><span class="moment-badge">' + uiCopy('演示时刻', 'Demo moment') +
     '</span><div class="moment-scene ' + escapeHTML(moment.kind) + '">' +
     (moment.image ? '<img src="' + escapeHTML(moment.image) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '') +
@@ -3422,11 +3518,12 @@ function momentCard(moment){
     '</div>' +
     '<h3>' + escapeHTML(momentTitle(moment)) + '</h3>' +
     '<div class="moment-meta"><span>' + escapeHTML(momentPlace(moment)) + '</span></div>' +
-    '<div style="margin-top:12px"><button class="btn sm" data-collect="' + escapeHTML(moment.id) + '">' +
-    uiCopy('收下这一刻', 'Save this moment') + '</button> <button class="btn ghost sm" data-go="' +
-    (moment.placeId ? '#/place/' + escapeHTML(moment.placeId) : '#/talk') + '">' +
-    uiCopy(moment.placeId ? '看看地点' : '按这个感觉找', moment.placeId ? 'See the place' : 'Find this feeling') +
-    '</button></div></article>';
+    '<div style="margin-top:12px"><button class="btn sm" data-collect="' + escapeHTML(moment.id) + '"' + (saved ? ' disabled' : '') + '>' +
+    uiCopy(saved ? '✓ 已收下' : '收下这一刻', saved ? '✓ Saved' : 'Save this moment') + '</button> ' +
+    (moment.placeId ? '<button class="btn ghost sm" data-go="#/place/' + escapeHTML(moment.placeId) + '">' + uiCopy('看看地点', 'See the place') + '</button>' :
+      '<button class="btn ghost sm" data-moment-feeling="' + escapeHTML(moment.id) + '">' + uiCopy('按这个感觉找', 'Find this feeling') + '</button>') +
+    (saved ? '<p class="moment-saved-note" role="status">' + uiCopy('已保存在这台设备的记录里。', 'Saved in Records on this device.') +
+      ' <button data-go="#/records" style="color:var(--water);text-decoration:underline">' + uiCopy('去看看', 'View saved') + '</button></p>' : '') + '</div></article>';
 }
 function renderMoments(){
   let h = topbar(uiCopy('小在带回的此刻', 'Moments Xiaozai found'), uiCopy('美的采集者', 'Collector of beauty'), '#/talk');
@@ -3553,7 +3650,11 @@ function renderConnect(){
   h += '<div class="screen"><div class="pad moment-wrap">';
   h += '<p class="lead">' + uiCopy('手机负责说话和定位，电脑同步显示小在的理解、推荐和行动进度。无需账号，连接 12 小时后自动结束。',
     'Speak and share location on the phone while the desktop follows Xiaozai’s understanding, recommendation, and progress. No account; the link ends after 12 hours.') + '</p>';
-  h += '<div class="relay-steps"><div class="relay-step"><b>1</b>' + uiCopy('手机生成码','Create on phone') + '</div><div class="relay-step"><b>2</b>' + uiCopy('电脑输入码','Enter on desktop') + '</div><div class="relay-step"><b>3</b>' + uiCopy('两端同步推进','Continue together') + '</div></div>';
+  h += '<div class="location-help" style="margin:0 0 18px;max-width:none"><strong>' + uiCopy('什么时候有用？', 'When is this useful?') + '</strong><p>' +
+    uiCopy('在电脑前想看清路线和推荐、又要拿手机出门时使用。现在电脑端只能同步查看进度，不能替手机修改推荐；不连接也能完整使用 App。',
+      'Use it to review the recommendation on a larger screen while your phone stays ready for the trip. The desktop currently follows progress only; it cannot change the phone’s recommendation. The app works without connecting.') +
+    '</p></div>';
+  h += '<div class="relay-steps"><div class="relay-step"><b>1</b>' + uiCopy('手机生成码','Create on phone') + '</div><div class="relay-step"><b>2</b>' + uiCopy('电脑输入码','Enter on desktop') + '</div><div class="relay-step"><b>3</b>' + uiCopy('电脑看，手机走','Review on desktop') + '</div></div>';
   h += '<div class="relay-role"><button class="btn ghost sm' + (role === 'phone' ? ' on' : '') + '" data-role="phone">' + uiCopy('从这台手机发起', 'Start on this phone') + '</button>' +
     '<button class="btn ghost sm' + (role === 'desk' ? ' on' : '') + '" data-role="desk">' + uiCopy('在这台电脑接收', 'Receive on this desktop') + '</button></div>';
   if (!relay && role === 'phone') {
@@ -3584,40 +3685,54 @@ function renderConnect(){
   return h;
 }
 
+function locationRecovery(){
+  if (!state.locationHelp) return "";
+  return '<div class="location-help" role="alert"><strong>' + uiCopy('还不知道你从哪里出发', 'I still need your starting point') + '</strong>' +
+    '<p>' + uiCopy('网页不能可靠地替你打开 iPhone 设置；Chrome 和这个网站都要允许定位。',
+      'A website cannot reliably open iPhone Settings for you. Both Chrome and this site need location permission.') + '</p>' +
+    '<ol><li>' + uiCopy('在 iPhone「设置 → 隐私与安全性 → 定位服务」打开定位；再到「设置 → Chrome → 位置」允许使用。',
+      'On iPhone, turn on Settings → Privacy & Security → Location Services, then allow location for Chrome.') + '</li>' +
+    '<li>' + uiCopy('回到 Chrome，在本站地址栏的站点设置中允许「位置」，然后回到这里重试。',
+      'Back in Chrome, allow Location for this site in site settings, then retry here.') + '</li></ol>' +
+    '<button id="retry-location">' + uiCopy('我已开启，重新检测', 'I enabled it — retry') + '</button>' +
+    manualLocationForm() + '</div>';
+}
+
+function manualLocationForm(){
+  return '<div class="manual-location"><label for="manual-city">' + uiCopy('或者手动填写出发位置', 'Or enter a starting point') + '</label>' +
+    '<input id="manual-city" maxlength="40" autocomplete="address-level2" placeholder="' + uiCopy('城市，例如：香港', 'City, e.g. Hong Kong') + '">' +
+    '<input id="manual-address" maxlength="100" autocomplete="street-address" placeholder="' + uiCopy('街道、屋苑或附近地标', 'Street, building or nearby landmark') + '">' +
+    '<button id="manual-location-submit">' + uiCopy('搜索出发位置', 'Find starting point') + '</button>' +
+    '<div class="manual-results" id="manual-location-results" role="status" aria-live="polite"></div>' +
+    '<p>' + uiCopy('只用于本次寻找；若地址无法确认，请补充更具体的地标。', 'Used only for this search. Add a more precise landmark if needed.') + '</p></div>';
+}
+
 /* --- ① 说 --- */
 function renderTalk(){
-  const locationMode = CurrentAI.getLocationMode();
-  const relay = CurrentAI.relayState();
   let h = '<div class="top"><div class="lead"><h2 style="font-size:15px;letter-spacing:.12em">此在 · Current</h2></div>' +
           '<div style="display:flex;gap:10px;align-items:center">' + langToggle() +
-          '<button class="k" data-go="#/connect" style="letter-spacing:.08em">' + (relay ? uiCopy('已连接', 'Connected') : uiCopy('连接设备', 'Connect')) + '</button>' +
+          '<button class="choose-link" data-go="#/mood">' + uiCopy('自己选', 'Browse') + '</button>' +
           '<button class="k" data-go="#/settings" style="letter-spacing:.14em">' + uiCopy('设置', 'Settings') + '</button>' +
           '<button class="k" data-go="#/records" style="letter-spacing:.14em">' + uiCopy('记录', 'Records') + '</button></div></div>';
   h += '<div class="talk">';
   h += '<div class="zai" style="margin-bottom:26px">' + cloudSVG("withyou") + '</div>';
   h += '<div class="talk-actions">' +
        '<button class="talk-action' + (state.talkTyping ? ' on' : '') + '" id="type-toggle" aria-label="' + uiCopy('打字', 'Type') + '">' + keyboardSVG() + '<span>' + uiCopy('打字', 'Type') + '</span></button>' +
-       '<button class="talk-action voice' + (CurrentAI.voiceIsActive() ? ' listening' : '') + '" id="mic-button" aria-label="' + uiCopy('说话', 'Speak') + '" aria-pressed="' + CurrentAI.voiceIsActive() + '">' + micSVG() + '<span>' + uiCopy(CurrentAI.voiceIsActive() ? '停止录音' : '说话', CurrentAI.voiceIsActive() ? 'Stop recording' : 'Speak') + '</span></button>' +
-       '<button class="talk-action' + (locationMode === 'real' ? ' on' : '') + '" id="location-input" aria-label="' + uiCopy('位置', 'Location') + '">' + locationSVG() + '<span>' + uiCopy(locationMode === 'real' ? '位置已开' : '位置', locationMode === 'real' ? 'Location on' : 'Location') + '</span></button>' +
-       '<button class="talk-action" data-go="#/mood" aria-label="' + uiCopy('自己选', 'Choose') + '">' + chooseSVG() + '<span>' + uiCopy('自己选', 'Choose') + '</span></button></div>';
+       '<button class="talk-action voice' + (CurrentAI.voiceIsActive() ? ' listening' : '') + '" id="mic-button" aria-label="' + uiCopy('说话', 'Speak') + '" aria-pressed="' + CurrentAI.voiceIsActive() + '">' + voiceGlyph() + '<span class="voice-label">' + uiCopy(CurrentAI.voiceIsActive() ? '停止录音' : '说话', CurrentAI.voiceIsActive() ? 'Stop recording' : 'Speak') + '</span></button>' +
+       '</div>';
   h += '<p class="mic-cap" id="mic-cap">' + (state.reachNote ? escapeHTML(state.reachNote) : '') + '</p>';
+  h += locationRecovery();
   if (state.talkTyping){
     h += '<div class="typing"><textarea id="natural-input" maxlength="2000" ' +
          'placeholder="' + uiCopy('比如：好累，想找个人少、能吹风的地方', 'For example: I’m exhausted and want somewhere quiet outside') + '">' + escapeHTML(state.talkText) + '</textarea>' +
          '<button class="send" id="natural-submit">' + uiCopy('发送', 'Send') + '</button></div>';
   }
-  if (guardianState() === "leaning"){
-    // 守则 12 防依赖：不劝阻，只提一句「我不是唯一的出口」
-    h += '<p class="privacy" style="color:var(--ink-dim);max-width:30ch">' +
-         '今天你回来好几次了。真难受的时候，找个人说说比找个地方管用。</p>';
-  }
   h += '<div class="foot">' +
-       (DEMO_MODE ? '<button id="demo-location"' + (locationMode === "demo" || locationMode === "trip-demo" ? ' class="on"' : '') + '>' +
-       uiCopy(locationMode === "trip-demo" ? '✓ 演示定位' : locationMode === "demo" ? '✓ 体验北京路线' : '体验北京路线', locationMode === "trip-demo" ? '✓ Demo location' : locationMode === "demo" ? '✓ Beijing demo' : 'Try Beijing demo') + '</button>' : '') +
+       (DEMO_MODE ? '<button id="demo-location"' + (CurrentAI.getLocationMode() === "trip-demo" ? ' class="on"' : '') + '>' +
+       uiCopy('体验北京路线', 'Try Beijing demo') + '</button>' : '') +
        '</div>';
   h += '<div class="moment-entry"><button data-go="#/moments">☁ ' +
-       uiCopy('看看小在带回了什么', 'See what Xiaozai found') + '</button>' +
-       '<button data-go="#/community">' + uiCopy('接力一个地方', 'Pass a place along') + '</button></div>';
+       uiCopy('看看小在带回了什么', 'See what Xiaozai found') + '</button></div>';
   h += '</div>';
   h += tripStrip();
   return h;
@@ -3627,12 +3742,11 @@ function renderTalk(){
 function renderEcho(){
   const r = state.read;
   if (!r) return renderTalk();
-  const asking = r.clarify_field && !state.askAnswered;
-  const mode = CurrentAI.getLocationMode();
-  const hasLocation = mode === "real" || mode === "demo" || mode === "trip-demo";
+  const hasLocation = CurrentAI.hasLocation();
+  const asking = r.clarify_field && !state.askAnswered && hasLocation;
   const types = (r.state && r.state.place_types) || [];
   const sports = types.some(type => ["sports","gym","climbing","swimming","badminton","basketball","tennis","yoga"].includes(type));
-  const needsLocation = !asking && !hasLocation && !(state.offer || []).length && !(r.state && r.state.requested_city);
+  const needsLocation = !hasLocation && !(state.offer || []).length;
   let h = topbar(uiCopy(asking ? "再确认一个条件" : "还差一步", asking ? "One detail" : "One more step"), "", "#/talk");
   h += '<div class="screen mid"><div class="pad">';
   if (asking){
@@ -3651,6 +3765,7 @@ function renderEcho(){
          '<div class="bubble"><span class="tag">' + uiCopy("小在", "Xiaozai") + '</span><p>' + escapeHTML(prompt) + '</p></div></div>';
     h += '<div class="actions"><button class="btn" id="echo-location">' + uiCopy("开启定位", "Turn on location") + ' <span>→</span></button>' +
          '<button class="btn-text" data-go="#/talk">' + uiCopy("换个说法", "Try another request") + '</button></div>';
+    h += state.locationHelp ? locationRecovery() : '<div class="location-help">' + manualLocationForm() + '</div>';
   } else if ((state.offer || []).length){
     h += '<div class="actions"><button class="btn" id="accept-read">' + uiCopy("查看推荐", "See recommendations") + ' <span>→</span></button>' +
          '<button class="btn-text" data-go="#/fix">' + uiCopy("调整条件", "Adjust") + '</button></div>';
@@ -3845,6 +3960,16 @@ function mapSheet(){
   h += '</div></div>';
   return h;
 }
+function navigationReturnSheet(){
+  const pending = state.navigationReturn;
+  if (!pending || !pending.prompt || !state.aiRecommendations[pending.placeId] ||
+      !(state.route === "#/offer" || state.route.indexOf("#/place/") === 0)) return "";
+  return '<div class="route-return" role="dialog" aria-modal="true" aria-label="' + uiCopy('路线看过了', 'Directions viewed') + '"><div class="route-return-inner">' +
+    '<h3>' + uiCopy('路线看过了，要出发吗？', 'You saw the route. Ready to go?') + '</h3><p>' +
+    uiCopy('查看地图不等于已经出发。你来决定，我再继续跟进。', 'Opening a map does not mean you have departed. You decide when to continue.') +
+    '</p><div class="btn-row"><button class="btn" id="route-start">' + uiCopy('现在出发', 'Start now') +
+    '</button><button class="btn ghost" id="route-later">' + uiCopy('先不去', 'Not now') + '</button></div></div></div>';
+}
 
 /* 推荐一个地方却不给看它在哪，是说不过去的。
    一张以这个地点为中心的地图，服务端代理，key 不露给浏览器。
@@ -4036,12 +4161,9 @@ const EN = {
   "身边一个你信得过的人": "someone you trust",
   "北京心理援助热线 010-82951332": "Beijing crisis line 010-82951332",
   "全国 24 小时 400-161-9995": "National 24h line 400-161-9995",
-  "今天你回来好几次了。真难受的时候，找个人说说比找个地方管用。":
-    "You've been back a few times today. When it's really bad, a person helps more than a place.",
   "我不做诊断，也不替代任何专业帮助。你随时可以回来。":
     "I don't diagnose, and I don't replace professional help. You can come back any time.",
 
-  "今天你回来好几次了。": "You've come back several times today.",
   "要不我先别提这件事？你想起来的时候再回来。": "Want me to drop it for now? Come back when it occurs to you.",
   "最近几次我给你的地方，你都没有去。": "You haven't gone to the last few places I suggested.",
   "可能是我没找对，也可能是现在就是不想出门——两种都没关系，不用解释。":
@@ -4074,8 +4196,6 @@ const EN = {
   "还没有真实到访反馈，这里不打分。": "No real visits logged here yet, so there's no score.",
   "前三条是示例记录。你的记录存在这台设备上，没有账号。":
     "The first three are samples. Your records stay on this device. No account.",
-  "今天你回来好几次了。真难受的时候，找个人说说比找个地方管用。":
-    "You've been back a few times today. When it's really bad, a person helps more than a place.",
   "给不给别人看，每条你自己定。": "You decide, entry by entry, who sees what.",
   "到了不打扰，走了问你 30 秒。": "I won't bother you there. Thirty seconds after you leave.",
   "没有评分，也没有排名。": "No scores. No rankings.",
@@ -4325,7 +4445,7 @@ function render(){
   else if (r === "#/records")            inner = renderRecords();
   else { state.route = "#/talk"; inner = renderTalk(); }
 
-  root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + arrivedToast() + mapSheet() + '</div></div>';
+  root.innerHTML = isCompare ? inner : '<div class="stage"><div class="phone">' + inner + arrivedToast() + mapSheet() + navigationReturnSheet() + '</div></div>';
 
   if (isCompare) scaleMinis();
   applyTextScale(root);
@@ -4524,13 +4644,29 @@ function bind(){
     else { state.relayNote = url; render(); }
   };
   root.querySelectorAll("[data-collect]").forEach(el => el.onclick = () => {
+    const scrollTop = (root.querySelector('.screen') || {}).scrollTop || 0;
     const moment = momentById(el.dataset.collect);
     const card = CurrentMoments.collect(moment, Date.now(), state.mood, "caught");
-    if (!card) return;
-    state.momentData.cards = state.momentData.cards.filter(item => item.id !== card.id).concat(card);
-    CurrentMoments.write(localStorage, state.momentData);
-    state.momentNote = uiCopy("收好了：我赶上的这一场。", "Saved: a moment I caught.");
+    if (!card) { state.momentNote = uiCopy('这一刻已更新，请再试一次。', 'This moment has changed. Please try again.'); render(); return; }
+    const next = Object.assign({}, state.momentData, {cards:state.momentData.cards.filter(item => item.id !== card.id).concat(card)});
+    if (CurrentMoments.write(localStorage, next)) {
+      state.momentData = next;
+      state.momentNote = uiCopy("已收下，在「记录 → 收下的时刻」里可以找到。", "Saved. Find it in Records → Saved moments.");
+    } else {
+      state.momentNote = uiCopy("这台设备暂时无法保存，请检查浏览器存储设置。", "This browser could not save it. Check storage settings.");
+    }
     render();
+    const screen = root.querySelector('.screen');
+    if (screen) screen.scrollTop = scrollTop;
+  });
+  root.querySelectorAll("[data-moment-feeling]").forEach(el => el.onclick = () => {
+    const moment = momentById(el.dataset.momentFeeling);
+    const query = CurrentMoments.feelingQuery(moment);
+    if (!query) return;
+    el.disabled = true;
+    el.textContent = uiCopy("正在找类似的地方…", "Finding places with this feeling…");
+    state.talkText = "";
+    submitNatural(query, {fromMoment:true});
   });
   const communityNext = root.querySelector("#community-next");
   const communityPlace = root.querySelector("#community-place");
@@ -4764,6 +4900,37 @@ function bind(){
     if (cap) cap.textContent = message;
   }
 
+  function showVoiceState(button, phase){
+    const listening = phase === 'listening';
+    if (button){
+      button.classList.toggle('listening', listening);
+      button.setAttribute('aria-pressed', String(phase !== 'idle'));
+      button.setAttribute('aria-label', uiCopy(phase === 'idle' ? '说话' : '结束录音', phase === 'idle' ? 'Speak' : 'Stop recording'));
+      const label = button.querySelector('.voice-label');
+      if (label) label.textContent = uiCopy(listening ? '说完了' : phase === 'idle' ? '说话' : '请稍等', listening ? 'Done' : phase === 'idle' ? 'Speak' : 'One moment');
+    }
+    const guide = root.querySelector('.reflect-guide');
+    if (guide){
+      guide.classList.toggle('is-listening', listening);
+      guide.classList.toggle('is-thinking', phase === 'processing' || phase === 'starting');
+    }
+  }
+
+  root.querySelectorAll('[data-zai-speak]').forEach(button => button.onclick = () => {
+    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+    CurrentAI.cancelVoice();
+    window.speechSynthesis.cancel();
+    const utterance = new window.SpeechSynthesisUtterance(button.dataset.zaiSpeak);
+    utterance.lang = currentLang() === 'en' ? 'en-US' : 'zh-CN';
+    utterance.rate = .94;
+    const guide = button.closest('.reflect-guide');
+    const finished = () => { if (guide) guide.classList.remove('is-speaking'); };
+    utterance.onend = finished;
+    utterance.onerror = finished;
+    if (guide) guide.classList.add('is-speaking');
+    window.speechSynthesis.speak(utterance);
+  });
+
   /* 一句话 → 这次到访的结构化反馈。模型没接住就退回自己选，绝不替他猜一个分数。 */
   function submitReflect(text){
     const said = (text || state.reflectText || "").trim();
@@ -4772,6 +4939,7 @@ function bind(){
     const combined = (previous ? previous + '。' : '') + said;
     const p = placeById(state.draft.placeId);
     setReflectCap(uiCopy("我在听你刚才说的…", "Working on what you said…"));
+    showVoiceState(null, 'processing');
     const submit = document.getElementById("reflect-submit");
     if (submit) submit.disabled = true;
     CurrentAI.reflectOn(combined.slice(-500), {
@@ -4789,10 +4957,12 @@ function bind(){
       }
       // 没听清就直说，然后把选择题给他——不猜。
       state.reflectNote = uiCopy("这句我没听准，你可以再说一次。", "I didn’t catch that. You can try again.");
-      if (state.reflect) render(); else go("#/feedback/" + state.draft.placeId + "?s=1");
+      state.reflectTyping = true;
+      render();
     }).catch(() => {
       state.reflectNote = uiCopy("刚才没接住，可以再说一次。", "That didn’t work. You can try again.");
-      if (state.reflect) render(); else go("#/feedback/" + state.draft.placeId + "?s=1");
+      state.reflectTyping = true;
+      render();
     });
   }
 
@@ -4804,7 +4974,7 @@ function bind(){
 
   /* 从后端理解结果推进到推荐。追问与纠错都走这里，所以只花一次请求。 */
   function runRecommend(needState, note){
-    if (!CurrentAI.hasLocation() && !needState.requested_city){
+    if (!CurrentAI.hasLocation()){
       state.offer = [];
       state.offerNote = uiCopy("先开启位置，我才能找你附近的地方。", "Turn on location so I can find nearby places.");
       go("#/echo");
@@ -4839,10 +5009,12 @@ function bind(){
     });
   }
 
-  function submitNatural(text){
+  function submitNatural(text, options){
+    const fromMoment = Boolean(options && options.fromMoment);
     text = (text || (naturalInput ? naturalInput.value : "")).trim();
     if (!text){ setNaturalStatus(uiCopy("说一句就好，不需要组织完整。", "One sentence is enough."), true); return; }
-    state.talkText = text;
+    state.talkText = fromMoment ? "" : text;
+    state.navigationReturn = null;
     if (state.trip && state.trip.status === "departed") {
       CurrentAI.stopPresence(); state.watchingPlaceId = null; saveTrip(null);
     }
@@ -4852,13 +5024,16 @@ function bind(){
       saveReach({offersWithoutDeparture:(state.reach.offersWithoutDeparture || 0) + 1});
     }
     state.offerDeparted = false;
-    state.guardianDismissed = false;
+    state.guardianDismissed = fromMoment;
     state.reachNote = null;
     if (naturalSubmit) naturalSubmit.disabled = true;
     setNaturalStatus(uiCopy("我在听懂你此刻真正需要什么…", "Finding what fits right now…"));
-    CurrentAI.interpretAndRecommend(text, {onLocationPrompt: () =>
-      setNaturalStatus(uiCopy("先允许定位，我来找你附近的地方…", "Allow location so I can look nearby…"))}).then(result => {
+    CurrentAI.interpretAndRecommend(text, {
+      onLocationPrompt: () => setNaturalStatus(uiCopy("先允许定位，我来找你附近的地方…", "Allow location so I can look nearby…")),
+      onLocationError: () => { state.locationHelp = true; }
+    }).then(result => {
       if (naturalSubmit) naturalSubmit.disabled = false;
+      if (CurrentAI.hasLocation()) state.locationHelp = false;
       const interpretation = result.interpretation;
       if (interpretation.state.risk_level === "urgent" || result.recommendations.blocked_by_safety){
         go("#/safe");
@@ -4866,7 +5041,7 @@ function bind(){
       }
       // 先复述、再推荐：推荐结果已经拿到，但要等用户确认或纠错才展示（守则 4）。
       state.read = interpretation;
-      state.askAnswered = false;
+      state.askAnswered = fromMoment;
       state.rejected = [];
       state.offer = result.recommendations.recommendations || [];
       state.offerNote = result.recommendations.fallback_note || null;
@@ -4877,9 +5052,14 @@ function bind(){
       state.offer.forEach(item => { state.aiRecommendations[item.place_id] = item; });
       publishRelayInterpretation(interpretation);
       if (state.offer.length) publishRelayRecommendation(state.offer[0]);
-      go((interpretation.clarify_field || !state.offer.length) ? "#/echo" : "#/offer");
+      go(((!fromMoment && interpretation.clarify_field) || !state.offer.length) ? "#/echo" : "#/offer");
     }).catch(error => {
       if (naturalSubmit) naturalSubmit.disabled = false;
+      if (state.route === "#/moments") {
+        state.momentNote = error.message || uiCopy("暂时没找到，稍后再试。", "Could not search right now. Try again.");
+        render();
+        return;
+      }
       setNaturalStatus(error.message || uiCopy("刚才没有接住，请再试一次。", "That didn’t work. Please try again."), true);
     });
   }
@@ -4898,9 +5078,11 @@ function bind(){
   }
   if (naturalSubmit) naturalSubmit.onclick = () => submitNatural();
   if (voiceInput) voiceInput.onclick = () => {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
     setNaturalStatus(uiCopy("正在请求麦克风权限…", "Requesting microphone access…"));
     CurrentAI.toggleVoice({
-      onStatus: message => { voiceInput.classList.add("listening"); setNaturalStatus(message); },
+      onStatus: message => setNaturalStatus(message),
+      onState: phase => showVoiceState(voiceInput, phase),
       // Wait for the completed utterance; character-by-character captions
       // made the microphone feel like a broken keyboard, not a listener.
       onPartial: () => setNaturalStatus(uiCopy("正在听…停下来后我会整理成文字。", "Listening… I’ll show the text when you finish.")),
@@ -4915,11 +5097,13 @@ function bind(){
     locationInput.disabled = true;
     setNaturalStatus(uiCopy("正在获取位置…", "Getting your location…"));
     CurrentAI.requestLocation().then(() => {
+      state.locationHelp = false;
       state.reachNote = "";
       render();
     }).catch(error => {
       locationInput.disabled = false;
-      setNaturalStatus(error.message, true);
+      state.locationHelp = true;
+      render();
     });
   };
   if (demoLocation) demoLocation.onclick = () => {
@@ -4942,9 +5126,66 @@ function bind(){
   if (echoLocation) echoLocation.onclick = () => {
     echoLocation.disabled = true;
     setNaturalStatus(uiCopy("正在获取位置…", "Getting your location…"));
-    CurrentAI.requestLocation().then(() => runRecommend(state.read.state)).catch(error => {
+    CurrentAI.requestLocation().then(() => {
+      state.locationHelp = false;
+      return runRecommend(state.read.state);
+    }).catch(error => {
       echoLocation.disabled = false;
-      setNaturalStatus(error.message, true);
+      state.locationHelp = true;
+      render();
+    });
+  };
+  const manualLocationSubmit = root.querySelector("#manual-location-submit");
+  if (manualLocationSubmit) manualLocationSubmit.onclick = () => {
+    const city = (root.querySelector("#manual-city") || {}).value || "";
+    const address = (root.querySelector("#manual-address") || {}).value || "";
+    const fullAddress = [city.trim(), address.trim()].filter(Boolean).join(" ");
+    if (!city.trim() || !address.trim()) {
+      const status = root.querySelector("#natural-status");
+      if (status) status.textContent = uiCopy("请填写城市和附近的街道或地标。", "Enter a city and a nearby street or landmark.");
+      return;
+    }
+    manualLocationSubmit.disabled = true;
+    manualLocationSubmit.textContent = uiCopy("正在确认位置…", "Checking the location…");
+    CurrentAI.searchManualLocations(fullAddress.slice(0, 100), city.trim()).then(result => {
+      if (!manualLocationSubmit.isConnected) return;
+      manualLocationSubmit.disabled = false;
+      manualLocationSubmit.textContent = uiCopy('重新搜索', 'Search again');
+      const results = root.querySelector('#manual-location-results');
+      results.replaceChildren();
+      const candidates = result.candidates || [];
+      results.textContent = candidates.length ? uiCopy('选择你的出发位置：', 'Choose your starting point:') :
+        uiCopy('没有找到。试试更具体的街道或附近地标。', 'No match. Try a street or nearby landmark.');
+      candidates.forEach(candidate => {
+        const choice = document.createElement('button');
+        choice.textContent = candidate.label;
+        choice.onclick = () => {
+          CurrentAI.useManualLocation(candidate);
+          state.locationHelp = false;
+          results.querySelectorAll('button').forEach(button => { button.disabled = true; });
+          if (state.read && state.read.state) runRecommend(state.read.state);
+          else render();
+        };
+        results.appendChild(choice);
+      });
+    }).catch(error => {
+      manualLocationSubmit.disabled = false;
+      manualLocationSubmit.textContent = uiCopy("搜索出发位置", "Find starting point");
+      const status = root.querySelector("#natural-status");
+      if (status) status.textContent = error.message || uiCopy("没有找到这个地址。", "I could not find that address.");
+    });
+  };
+  const retryLocation = root.querySelector("#retry-location");
+  if (retryLocation) retryLocation.onclick = () => {
+    retryLocation.disabled = true;
+    retryLocation.textContent = uiCopy("正在检测…", "Checking…");
+    CurrentAI.requestLocation().then(() => {
+      state.locationHelp = false;
+      if (state.route === "#/echo" && state.read) return runRecommend(state.read.state);
+      render();
+    }).catch(() => {
+      state.locationHelp = true;
+      render();
     });
   };
 
@@ -5065,6 +5306,7 @@ function bind(){
     const t = state.mapSheet || {};
     const method = el.dataset.mapapp;
     CurrentAI.track("navigation_opened", {place_id:t.placeId, recommendation_id:t.recommendationId, method:method});
+    state.navigationReturn = {placeId:t.placeId, launchedAt:Date.now(), left:false, prompt:false};
     state.mapSheet = null;
     if (method === "amap"){
       CurrentAI.launchMap("amap", t.links || {});
@@ -5077,8 +5319,24 @@ function bind(){
     const rec = state.aiRecommendations[id];
     if (!rec) return;
     startTrip(id, rec);
+    state.navigationReturn = null;
     render();
   });
+  const routeStart = root.querySelector("#route-start");
+  if (routeStart) routeStart.onclick = () => {
+    const id = state.navigationReturn && state.navigationReturn.placeId;
+    const rec = id && state.aiRecommendations[id];
+    state.navigationReturn = null;
+    if (!rec) return render();
+    startTrip(id, rec);
+    render();
+  };
+  const routeLater = root.querySelector("#route-later");
+  if (routeLater) routeLater.onclick = () => {
+    state.navigationReturn = null;
+    state.offerDeparted = false;
+    go("#/talk");
+  };
   const skipOffer = root.querySelector("#skip-offer");
   if (skipOffer) skipOffer.onclick = () => {
     if (state.trip && state.trip.status === "departed") {
@@ -5106,8 +5364,8 @@ function bind(){
       saveTrip(Object.assign({}, trip, {status:"arrived", arrivedAt:arrivedAt,
         inside:Boolean(confirmedByFence), arrivalDismissedInside:false}));
       CurrentAI.track("arrival_confirmed", {place_id:trip.placeId, recommendation_id:trip.recommendationId, presence_level:trip.presenceLevel || "self_reported", dwell_minutes:trip.dwellMinutes || 0, experience_mode:Boolean(trip.experienceMode)});
-      CurrentAI.publishRelay("arrived", {place_id:trip.placeId, place_name:placeById(trip.placeId).placeName}).catch(() => {});
-      state.arrivedToast = placeById(trip.placeId).placeName.replace(/ · .*/, "");
+      CurrentAI.publishRelay("arrived", {place_id:trip.placeId, place_name:tripPlaceName(trip)}).catch(() => {});
+      state.arrivedToast = tripPlaceName(trip).replace(/ · .*/, "");
       clearTimeout(state.arrivedTimer);
       state.arrivedTimer = setTimeout(() => { state.arrivedToast = null; render(); }, 6000);
       render();
@@ -5234,8 +5492,10 @@ function bind(){
 
   const reflectMic = root.querySelector("#reflect-mic");
   if (reflectMic) reflectMic.onclick = () => {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
     CurrentAI.toggleVoice({
-      onStatus: m => { reflectMic.classList.add("listening"); state.reflectNote = m; setReflectCap(m); },
+      onStatus: m => { state.reflectNote = m; setReflectCap(m); },
+      onState: phase => showVoiceState(reflectMic, phase),
       onPartial: () => setReflectCap(uiCopy("正在听…", "Listening…")),
       onText: t => { reflectMic.classList.remove("listening"); state.reflectText = t; state.reflectTyping = true; render(); },
       // 语音坏了不能是死路——和第一屏一样，直接把打字框推到他面前。

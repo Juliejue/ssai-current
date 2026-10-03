@@ -147,8 +147,18 @@
     if (!moment || !["caught", "missed"].includes(outcome)) return null;
     return {id: moment.id, title: moment.title, titleEn: moment.titleEn, place: moment.place,
       placeEn: moment.placeEn, city: moment.city, kind: moment.kind, isDemo: Boolean(moment.isDemo),
+      image: moment.image || null,
       source: moment.source, startsAt: moment.startsAt, expiresAt: moment.expiresAt,
       savedAt: now, mood, outcome, presence: "self_reported"};
+  }
+  function feelingQuery(moment) {
+    if (!moment) return "";
+    const title = String(moment.title || "");
+    if (/书|阅读|书架/.test(title)) return "想找附近安静、可以看书和慢慢待一会儿的地方";
+    if (/晚餐|热食|食物|餐/.test(title)) return "想找附近可以好好吃一顿、慢慢坐一会儿的地方";
+    if (/水|江|河|海|湾/.test(title)) return "想找附近能看见水、可以慢慢散步的地方";
+    if (/云|日落|夕阳|天空|晚光/.test(title)) return "想找附近视野开阔、适合看天空和晚光的户外地方";
+    return "想找附近安静、可以慢慢待一会儿的地方";
   }
   function mediaStore() {
     return new Promise((resolve, reject) => {
@@ -179,6 +189,6 @@
     db.close();
     return blob ? URL.createObjectURL(blob) : null;
   }
-  return {KEY, SCENARIO_KEY, MOODS, CITIES, KINDS, demoMoments, active, select, daily, cloudTone,
+  return {KEY, SCENARIO_KEY, MOODS, CITIES, KINDS, demoMoments, active, select, daily, cloudTone, feelingQuery,
     read, write, scenario, contribution, collect, saveMedia, mediaURL};
 });

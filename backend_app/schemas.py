@@ -65,6 +65,29 @@ class Location(BaseModel):
     longitude: float = Field(ge=-180, le=180)
 
 
+class ManualLocationRequest(BaseModel):
+    address: str = Field(min_length=2, max_length=100)
+    city: str | None = Field(default=None, max_length=40)
+
+    @field_validator("address")
+    @classmethod
+    def strip_address(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 2:
+            raise ValueError("address is too short")
+        return value
+
+
+class ManualLocationCandidate(Location):
+    label: str = Field(min_length=1, max_length=200)
+    city: str = Field(min_length=1, max_length=40)
+    district: str = Field(default="", max_length=60)
+
+
+class ManualLocationResponse(BaseModel):
+    candidates: list[ManualLocationCandidate] = Field(default_factory=list, max_length=5)
+
+
 class ReverseLocationResponse(BaseModel):
     city: str = Field(min_length=1, max_length=40)
     province: str = Field(default="", max_length=40)

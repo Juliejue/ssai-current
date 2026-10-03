@@ -27,6 +27,8 @@ from .schemas import (
     InterpretRequest,
     InterpretResponse,
     Location,
+    ManualLocationRequest,
+    ManualLocationResponse,
     OutcomeDeleteRequest,
     OutcomeRequest,
     ProductEvent,
@@ -87,6 +89,16 @@ async def reverse_location(payload: Location) -> ReverseLocationResponse:
     except MapProviderError as error:
         raise HTTPException(status_code=503, detail="城市暂时识别不了") from error
     return ReverseLocationResponse(**result.__dict__)
+
+
+@app.post("/api/v1/location/forward", response_model=ManualLocationResponse)
+async def forward_location(payload: ManualLocationRequest) -> ManualLocationResponse:
+    """A manually entered origin stays in request memory, never in app storage."""
+    try:
+        result = await AmapClient().forward_geocode(address=payload.address, city=payload.city)
+    except MapProviderError as error:
+        raise HTTPException(status_code=503, detail="暂时查不到地址，请稍后重试") from error
+    return ManualLocationResponse(**result)
 
 
 @app.post(
