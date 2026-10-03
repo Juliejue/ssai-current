@@ -8,6 +8,7 @@ const CLIENT_SOURCE = fs.readFileSync(path.join(__dirname, '..', 'current-client
 
 function makeVoiceRuntime(options = {}) {
   const statuses = [];
+  const phases = [];
   const transcripts = [];
   const errors = [];
   const tracks = [{ stopped: false, stop() { this.stopped = true; } }];
@@ -162,11 +163,13 @@ function makeVoiceRuntime(options = {}) {
     current: window.CurrentAI,
     callbacks: {
       onStatus: status => statuses.push(status),
+      onState: phase => phases.push(phase),
       onPartial: text => transcripts.push(text),
       onText: text => transcripts.push(`final:${text}`),
       onError: error => errors.push(error),
     },
     statuses,
+    phases,
     transcripts,
     errors,
     tracks,
@@ -220,6 +223,7 @@ test('voice capture starts after provider code 0 and flushes before end', async 
   assert.ok(runtime.transcripts.includes('final:想去安静一点的地方。'));
   assert.equal(runtime.tracks[0].stopped, true);
   assert.deepEqual(runtime.errors, []);
+  assert.deepEqual(runtime.phases, ['starting', 'listening', 'processing', 'idle']);
 });
 
 test('leaving the voice screen releases the microphone without submitting speech', async () => {
@@ -230,6 +234,7 @@ test('leaving the voice screen releases the microphone without submitting speech
   runtime.current.cancelVoice();
   assert.equal(runtime.tracks[0].stopped, true);
   assert.equal(runtime.current.voiceIsActive(), false);
+  assert.equal(runtime.phases.at(-1), 'idle');
   assert.equal(runtime.transcripts.some(text => text.startsWith('final:')), false);
 });
 

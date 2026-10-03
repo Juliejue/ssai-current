@@ -147,6 +147,7 @@
     if (!moment || !["caught", "missed"].includes(outcome)) return null;
     return {id: moment.id, title: moment.title, titleEn: moment.titleEn, place: moment.place,
       placeEn: moment.placeEn, city: moment.city, kind: moment.kind, isDemo: Boolean(moment.isDemo),
+      image: moment.image || null,
       source: moment.source, startsAt: moment.startsAt, expiresAt: moment.expiresAt,
       savedAt: now, mood, outcome, presence: "self_reported"};
   }

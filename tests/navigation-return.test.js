@@ -12,6 +12,7 @@ test('returning home clears the previous request instead of sending it again', (
   const state = {route:'#/moments', talkText:'上次说的私密内容', talkTyping:true};
   const context = {
     state, location:{hash:''}, CurrentAI:{cancelVoice:() => {}},
+    window:{speechSynthesis:{cancel:() => { context.speechCancelled = true; }}},
     document:{querySelector:() => null}, render:() => {}
   };
   vm.createContext(context);
@@ -19,6 +20,7 @@ test('returning home clears the previous request instead of sending it again', (
   assert.equal(state.talkText, '');
   assert.equal(state.talkTyping, false);
   assert.equal(state.route, '#/talk');
+  assert.equal(context.speechCancelled, true);
 });
 
 test('a map preview prompts for explicit departure only after the user returns', () => {

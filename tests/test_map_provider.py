@@ -96,6 +96,33 @@ def test_provider_error_and_coordinate_validation():
         parse_location("999,39")
 
 
+def test_manual_origin_returns_address_for_confirmation_not_an_implicit_choice():
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/v3/geocode/geo"
+        assert request.url.params["city"] == "香港"
+        return httpx.Response(200, json={"status": "1", "infocode": "10000", "geocodes": [
+            {"location": "114.01,22.39", "formatted_address": "香港屯门河田路",
+             "city": [], "province": "香港特别行政区", "district": [], "level": "道路"}
+        ]})
+
+    client = AmapClient(api_key="test", transport=httpx.MockTransport(handler))
+    result = asyncio.run(client.forward_geocode(address="河田路", city="香港"))
+    assert result["candidates"][0]["label"] == "香港屯门河田路"
+    assert result["candidates"][0]["longitude"] == 114.01
+    assert result["candidates"][0]["district"] == ""
+
+
+def test_manual_origin_never_accepts_a_city_centroid_or_invalid_coordinate():
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"status": "1", "infocode": "10000", "geocodes": [
+            {"location": "114.01,22.39", "city": "香港", "level": "市"},
+            {"location": "999,999", "city": "香港", "level": "道路"}
+        ]})
+
+    client = AmapClient(api_key="test", transport=httpx.MockTransport(handler))
+    assert asyncio.run(client.forward_geocode(address="香港"))["candidates"] == []
+
+
 def test_navigation_requires_human_verified_identity():
     place = {
         "placeName": "测试书店",

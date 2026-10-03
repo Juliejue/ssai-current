@@ -434,7 +434,7 @@
           need_count: interpretation.state.need_keys.length,
           risk_level: interpretation.state.risk_level
         });
-        var needOrigin = !activeLocation && !interpretation.state.requested_city &&
+        var needOrigin = !activeLocation &&
           interpretation.state.risk_level !== 'urgent';
         if (needOrigin && callbacks && callbacks.onLocationPrompt) callbacks.onLocationPrompt();
         var origin = needOrigin ? requestLocation().catch(function (error) {
@@ -442,10 +442,10 @@
           return null;
         }) : Promise.resolve(activeLocation);
         return origin.then(function (coordinate) {
-          if (!coordinate && !interpretation.state.requested_city) {
+          if (!coordinate) {
             return { recommendations: [], fallback_note: voiceCopy(
-              '先开启位置，我才能找你附近的地方。也可以明确告诉我想找哪座城市。',
-              'Turn on location so I can find nearby places, or tell me a destination city.') };
+              '先开启定位，或手动填写出发位置，我来找附近的地方。',
+              'Allow location or enter a starting point so I can search nearby.') };
           }
           return recommendFor(interpretation.state);
         }).then(function (recommendations) {
@@ -492,6 +492,27 @@
         reject(failure);
       }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
     });
+  }
+
+  function searchManualLocations(address, city) {
+    var cleanAddress = String(address || '').trim();
+    var cleanCity = String(city || '').trim();
+    if (cleanAddress.length < 2) return Promise.reject(new Error(voiceCopy('请输入城市和附近的街道或地点。', 'Enter a city and a nearby street or place.')));
+    return api('/location/forward', {
+      method: 'POST',
+      body: JSON.stringify({address: cleanAddress, city: cleanCity || null})
+    });
+  }
+
+  function useManualLocation(candidate) {
+    if (!candidate || !Number.isFinite(candidate.latitude) || !Number.isFinite(candidate.longitude) ||
+        Math.abs(candidate.latitude) > 90 || Math.abs(candidate.longitude) > 180) {
+      throw new Error(voiceCopy('这个位置无效，请重新搜索。', 'Invalid location. Please search again.'));
+    }
+    activeLocation = {latitude: candidate.latitude, longitude: candidate.longitude};
+    activeLocationMode = 'manual';
+    activeLocationCity = candidate.city || null;
+    return activeLocation;
   }
 
   function useBeijingDemo() {
@@ -772,6 +793,7 @@
       recognition.onnomatch = null;
       recognition.onend = null;
       if (activeVoice === controller) activeVoice = null;
+      if (callbacks.onState) callbacks.onState('idle');
     }
 
     function finish(message) {
@@ -786,6 +808,7 @@
     function stop() {
       if (finished || stopRequested) return;
       stopRequested = true;
+      if (callbacks.onState) callbacks.onState('processing');
       callbacks.onStatus(voiceCopy('正在整理你刚才说的…', 'Finishing what you just said…'));
       try { recognition.stop(); }
       catch (_) { finish(); }
@@ -798,6 +821,7 @@
       cleanup();
     } };
     activeVoice = controller;
+    if (callbacks.onState) callbacks.onState('starting');
     recognition.lang = lang() === 'en' ? 'en-US' : 'zh-CN';
     // A final phrase is kept open briefly for a natural pause; a second tap
     // ends immediately, while a longer pause or the hard limit ends safely.
@@ -806,6 +830,7 @@
     recognition.maxAlternatives = 1;
     recognition.onstart = function () {
       started = true;
+      if (callbacks.onState) callbacks.onState(stopRequested ? 'processing' : 'listening');
       if (startTimer) clearTimeout(startTimer);
       maxTimer = setTimeout(stop, 60000);
       callbacks.onStatus(stopRequested
@@ -872,6 +897,7 @@
     // and the ASR signature are still being requested.
     var stopDuringSetup = false;
     activeVoice = { stop: function () { stopDuringSetup = true; }, cancel: function () { stopDuringSetup = true; } };
+    if (callbacks.onState) callbacks.onState('starting');
     callbacks.onStatus(voiceCopy('正在请求麦克风…', 'Requesting microphone access…'));
     track('natural_language_started', { method: 'voice_tencent' });
     var stream = null;
@@ -889,6 +915,7 @@
       if (context) context.close().catch(function () {});
       try { if (socket) socket.close(); } catch (_) {}
       activeVoice = null;
+      if (callbacks.onState) callbacks.onState('idle');
     }
 
     try {
@@ -955,6 +982,7 @@
       socket.onopen = socket.onmessage = socket.onerror = socket.onclose = null;
       try { socket.close(); } catch (_) {}
       activeVoice = null;
+      if (callbacks.onState) callbacks.onState('idle');
     }
 
     function fail(message) {
@@ -997,6 +1025,7 @@
     function stop() {
       if (finished || stopRequested) return;
       stopRequested = true;
+      if (callbacks.onState) callbacks.onState('processing');
       callbacks.onStatus(voiceCopy('正在整理你刚才说的…', 'Finishing what you just said…'));
       // Stop feeding new samples before flushing the resampler. Message order
       // on this port then guarantees that every audio frame precedes `end`.
@@ -1028,6 +1057,7 @@
         if (message.code !== undefined && message.code !== 0) return fail(voiceErrorMessage(message));
         if (!providerReady && Number(message.code) === 0) {
           providerReady = true;
+          if (callbacks.onState) callbacks.onState(stopRequested ? 'processing' : 'listening');
           if (connectTimer) clearTimeout(connectTimer);
           maxTimer = setTimeout(stop, 60000);
           if (!stopRequested) {
@@ -1187,6 +1217,8 @@
     getLocationCity: function () { return activeLocationCity; },
     useBeijingDemo: useBeijingDemo,
     requestLocation: requestLocation,
+    useManualLocation: useManualLocation,
+    searchManualLocations: searchManualLocations,
     watchPresence: watchPresence,
     demoPresence: demoPresence,
     stopPresence: stopPresence,
