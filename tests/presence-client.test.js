@@ -38,8 +38,9 @@ function makePresenceRuntime(search = '', options = {}) {
   if (options.geolocation !== false) {
     navigator.geolocation = {
       watchPosition: success => { watchSuccess = success; return 7; },
-      getCurrentPosition: success => {
+      getCurrentPosition: (success, failure) => {
         getCurrentPositionCalls += 1;
+        if (options.locationError) { failure(options.locationError); return; }
         if (currentPosition) success(currentPosition);
       },
       clearWatch: id => { clearedWatch = id; },
@@ -187,4 +188,14 @@ test('real location outside the four pilots uses exact reverse geocoding', async
   await runtime.current.requestLocation();
   assert.equal(runtime.current.getLocationMode(), 'real');
   assert.equal(runtime.current.getLocationCity(), '成都');
+});
+
+test('denied location reports a recoverable permission error without claiming the site can open iPhone Settings', async () => {
+  const runtime = makePresenceRuntime('', {locationError:{code:1}});
+  await assert.rejects(runtime.current.requestLocation(), error => {
+    assert.equal(error.locationDenied, true);
+    assert.equal(error.locationCode, 1);
+    assert.match(error.message, /Chrome.*站/);
+    return true;
+  });
 });

@@ -437,7 +437,10 @@
         var needOrigin = !activeLocation && !interpretation.state.requested_city &&
           interpretation.state.risk_level !== 'urgent';
         if (needOrigin && callbacks && callbacks.onLocationPrompt) callbacks.onLocationPrompt();
-        var origin = needOrigin ? requestLocation().catch(function () { return null; }) : Promise.resolve(activeLocation);
+        var origin = needOrigin ? requestLocation().catch(function (error) {
+          if (callbacks && callbacks.onLocationError) callbacks.onLocationError(error);
+          return null;
+        }) : Promise.resolve(activeLocation);
         return origin.then(function (coordinate) {
           if (!coordinate && !interpretation.state.requested_city) {
             return { recommendations: [], fallback_note: voiceCopy(
@@ -479,11 +482,14 @@
         }).finally(function () { resolve(activeLocation); });
       }, function (error) {
         var denied = error && error.code === 1;
-        reject(new Error(denied
-          ? voiceCopy('定位被拒绝了。请在浏览器的站点设置中允许定位，或告诉我想找哪座城市。',
-            'Location was denied. Allow it in site settings, or tell me a city to search.')
+        var failure = new Error(denied
+          ? voiceCopy('浏览器无法使用定位。请检查 Chrome 的系统位置权限和本站的位置权限。',
+            'Chrome cannot use location. Check both Chrome’s system permission and this site’s location permission.')
           : voiceCopy('暂时拿不到位置。可以再试一次，或告诉我想找哪座城市。',
-            'I could not get your location. Try again, or tell me a city to search.')));
+            'I could not get your location. Try again, or tell me a city to search.'));
+        failure.locationDenied = denied;
+        failure.locationCode = error && error.code;
+        reject(failure);
       }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
     });
   }
