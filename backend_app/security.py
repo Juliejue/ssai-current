@@ -15,6 +15,8 @@ DEFAULT_MODEL_HOSTS = frozenset({
     "api.openai.com",
     "open.bigmodel.cn",
     "api.deepseek.com",
+    # Current production Model Studio workspace; exact host only, no provider wildcard.
+    "ws-6hporszsrl78pmws.ap-southeast-1.maas.aliyuncs.com",
 })
 
 

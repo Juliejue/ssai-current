@@ -65,3 +65,11 @@ def test_model_failure_is_reported_as_unavailable_not_recognition_failure(monkey
 def test_followup_can_record_explicit_mood_change(monkeypatch):
     configured(monkeypatch,[reply('你现在比出发前放松了一些。',2)])
     assert run()['change_score'] == 2
+
+
+def test_production_workspace_can_reach_model_for_transcribed_feedback(monkeypatch):
+    requests = configured(monkeypatch, [reply()])
+    monkeypatch.setenv("LLM_BASE_URL", "https://ws-6hporszsrl78pmws.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1")
+    monkeypatch.setenv("LLM_MODEL", "qwen3.8-flash")
+    assert run()["status"] == "ok"
+    assert requests[0]["enable_thinking"] is False
