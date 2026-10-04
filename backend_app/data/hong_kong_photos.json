@@ -1,0 +1,965 @@
+{
+  "places": [
+    {
+      "id": "tuen-mun-river",
+      "aliases": [
+        "屯门河道",
+        "屯門河道",
+        "屯门河",
+        "屯門河",
+        "Tuen Mun River",
+        "Tuen Mun River Channel"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/tuen-mun-river-1.webp",
+          "author": "姒姓賢寧",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tuen_Mun_River_part_2_in_July_2022.jpg",
+          "credit_url": "/photo-credits.html#tuen-mun-river"
+        },
+        {
+          "url": "/assets/places/hk/tuen-mun-river-2.webp",
+          "author": "姒姓賢寧",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tuen_Mun_River_near_Lung_Mun_Oasis_in_August_2023.jpg",
+          "credit_url": "/photo-credits.html#tuen-mun-river"
+        },
+        {
+          "url": "/assets/places/hk/tuen-mun-river-3.webp",
+          "author": "姒姓賢寧",
+          "license": "CC BY 4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tuen_Mun_River_near_Ho_Tin_Stop_at_night_in_September_2024.jpg",
+          "credit_url": "/photo-credits.html#tuen-mun-river"
+        }
+      ]
+    },
+    {
+      "id": "tuen-mun-park",
+      "aliases": [
+        "屯门公园",
+        "屯門公園",
+        "屯门市镇公园",
+        "屯門市鎮公園",
+        "Tuen Mun Park",
+        "Tuen Mun Town Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/tuen-mun-park-1.webp",
+          "author": "Wing1990hk",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tuen_Mun_Park_Artificial_Lake_201411.jpg",
+          "credit_url": "/photo-credits.html#tuen-mun-park"
+        },
+        {
+          "url": "/assets/places/hk/tuen-mun-park-2.webp",
+          "author": "WiNG",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tuen_Mun_Park_Overview_201207.jpg",
+          "credit_url": "/photo-credits.html#tuen-mun-park"
+        }
+      ]
+    },
+    {
+      "id": "tuen-mun-riverside-park",
+      "aliases": [
+        "屯门河畔公园",
+        "屯門河畔公園",
+        "Tuen Mun Riverside Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/tuen-mun-riverside-park-1.webp",
+          "author": "姒姓賢寧",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tuen_Mun_River_view_from_Hung_Kiu_in_January_2024.jpg",
+          "credit_url": "/photo-credits.html#tuen-mun-riverside-park"
+        },
+        {
+          "url": "/assets/places/hk/tuen-mun-riverside-park-2.webp",
+          "author": "Wing1990hk",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tuen_Mun_Riverside_Park_Podium_View_2012.jpg",
+          "credit_url": "/photo-credits.html#tuen-mun-riverside-park"
+        }
+      ]
+    },
+    {
+      "id": "castle-peak-beach",
+      "aliases": [
+        "青山湾泳滩",
+        "青山灣泳灘",
+        "青山湾海滩",
+        "青山灣海灘",
+        "青山湾",
+        "青山灣",
+        "Castle Peak Beach"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/castle-peak-beach-1.webp",
+          "author": "Jsimcum Goa",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:HK_%E5%B1%AF%E9%96%80_Tuen_Mun_%E9%9D%92%E5%B1%B1%E5%85%AC%E8%B7%AF_Peak_Castle_Road_%E9%9D%92%E5%B1%B1%E7%81%A3%E6%AE%B5_Peak_Castle_Bay_%E9%9D%92%E5%B1%B1%E7%81%A3%E6%B3%B3%E7%81%98_Castle_Peak_Beach_Nov_2019_SS2_05.jpg",
+          "credit_url": "/photo-credits.html#castle-peak-beach"
+        }
+      ]
+    },
+    {
+      "id": "gold-coast",
+      "aliases": [
+        "香港黄金海岸",
+        "香港黃金海岸",
+        "黄金海岸",
+        "黃金海岸",
+        "Hong Kong Gold Coast"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/gold-coast-1.webp",
+          "author": "Citobun",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Cafeteria_and_Golden_beaches_August_2017.jpg",
+          "credit_url": "/photo-credits.html#gold-coast"
+        }
+      ]
+    },
+    {
+      "id": "golden-beach",
+      "aliases": [
+        "黄金泳滩",
+        "黃金泳灘",
+        "黄金海滩",
+        "黃金海灘",
+        "Golden Beach"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/gold-coast-1.webp",
+          "author": "Citobun",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Cafeteria_and_Golden_beaches_August_2017.jpg",
+          "credit_url": "/photo-credits.html#golden-beach"
+        }
+      ]
+    },
+    {
+      "id": "butterfly-beach",
+      "aliases": [
+        "蝴蝶湾泳滩",
+        "蝴蝶灣泳灘",
+        "蝴蝶湾海滩",
+        "蝴蝶灣海灘",
+        "蝴蝶湾",
+        "蝴蝶灣",
+        "Butterfly Beach",
+        "Butterfly Bay"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/butterfly-beach-1.webp",
+          "author": "Tuentuenminb",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Butterfly_Bay,_Tuen_Mun,_NT,_Hong_Kong_in_2017.jpg",
+          "credit_url": "/photo-credits.html#butterfly-beach"
+        }
+      ]
+    },
+    {
+      "id": "butterfly-beach-park",
+      "aliases": [
+        "蝴蝶湾公园",
+        "蝴蝶灣公園",
+        "Butterfly Beach Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/butterfly-beach-park-1.webp",
+          "author": "LN9267",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Butterfly_Beach_Park_01-10-2023(2).jpg",
+          "credit_url": "/photo-credits.html#butterfly-beach-park"
+        },
+        {
+          "url": "/assets/places/hk/butterfly-beach-park-2.webp",
+          "author": "Wpcpey",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Butterfly_Beach_Park_Maze_201207.jpg",
+          "credit_url": "/photo-credits.html#butterfly-beach-park"
+        }
+      ]
+    },
+    {
+      "id": "cafeteria-new-beach",
+      "aliases": [
+        "新咖啡湾泳滩",
+        "新咖啡灣泳灘",
+        "新咖啡湾",
+        "新咖啡灣",
+        "Cafeteria New Beach"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/cafeteria-new-beach-1.webp",
+          "author": "Prosperity Horizons",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Cafeteria_New_Beach_(blue_sky).jpg",
+          "credit_url": "/photo-credits.html#cafeteria-new-beach"
+        }
+      ]
+    },
+    {
+      "id": "tai-lam-chung-reservoir",
+      "aliases": [
+        "大榄涌水塘",
+        "大欖涌水塘",
+        "大榄水塘",
+        "大欖水塘",
+        "Tai Lam Chung Reservoir"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/tai-lam-chung-reservoir-1.webp",
+          "author": "ystsoi",
+          "license": "CC BY 2.0",
+          "license_url": "https://creativecommons.org/licenses/by/2.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tai_Lam_Chung_Reservoir_201711.jpg",
+          "credit_url": "/photo-credits.html#tai-lam-chung-reservoir"
+        }
+      ]
+    },
+    {
+      "id": "lung-kwu-tan",
+      "aliases": [
+        "龙鼓滩",
+        "龍鼓灘",
+        "Lung Kwu Tan"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/lung-kwu-tan-1.webp",
+          "author": "Chong Fat",
+          "license": "CC BY-SA 3.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:HK_LungKwuTanTinHauTemple.JPG",
+          "credit_url": "/photo-credits.html#lung-kwu-tan"
+        }
+      ]
+    },
+    {
+      "id": "tin-shui-wai-park",
+      "aliases": [
+        "天水围公园",
+        "天水圍公園",
+        "Tin Shui Wai Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/tin-shui-wai-park-1.webp",
+          "author": "WiNG",
+          "license": "CC BY-SA 3.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:HK_Tin_Shui_Wai_Park_Avenue.jpg",
+          "credit_url": "/photo-credits.html#tin-shui-wai-park"
+        }
+      ]
+    },
+    {
+      "id": "wetland-park",
+      "aliases": [
+        "香港湿地公园",
+        "香港濕地公園",
+        "湿地公园",
+        "濕地公園",
+        "Hong Kong Wetland Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/wetland-park-1.webp",
+          "author": "Wpcpey",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Hong_Kong_Wetland_Park_overview1_201612.jpg",
+          "credit_url": "/photo-credits.html#wetland-park"
+        }
+      ]
+    },
+    {
+      "id": "yuen-long-park",
+      "aliases": [
+        "元朗公园",
+        "元朗公園",
+        "Yuen Long Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/yuen-long-park-1.webp",
+          "author": "Baycrest",
+          "license": "CC BY-SA 2.5",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.5",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Yuen_Long_Park_Aviary_Pagoda.jpg",
+          "credit_url": "/photo-credits.html#yuen-long-park"
+        }
+      ]
+    },
+    {
+      "id": "nam-sang-wai",
+      "aliases": [
+        "南生围",
+        "南生圍",
+        "Nam Sang Wai"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/nam-sang-wai-1.webp",
+          "author": "[2]",
+          "license": "CC BY-SA 2.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Nam_Sang_Wai_200808.jpg",
+          "credit_url": "/photo-credits.html#nam-sang-wai"
+        }
+      ]
+    },
+    {
+      "id": "lau-fau-shan",
+      "aliases": [
+        "流浮山",
+        "Lau Fau Shan"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/lau-fau-shan-1.webp",
+          "author": "See-ming Lee from Hong Kong SAR, China",
+          "license": "CC BY 2.0",
+          "license_url": "https://creativecommons.org/licenses/by/2.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Lau_Fau_Shan_201311.jpg",
+          "credit_url": "/photo-credits.html#lau-fau-shan"
+        }
+      ]
+    },
+    {
+      "id": "sha-tin-park",
+      "aliases": [
+        "沙田公园",
+        "沙田公園",
+        "Sha Tin Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/sha-tin-park-1.webp",
+          "author": "Wing1990hk",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Sha_Tin_Park_Plaza_Pool_201504.JPG",
+          "credit_url": "/photo-credits.html#sha-tin-park"
+        }
+      ]
+    },
+    {
+      "id": "shing-mun-river",
+      "aliases": [
+        "城门河",
+        "城門河",
+        "城门河道",
+        "城門河道",
+        "Shing Mun River"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/shing-mun-river-1.webp",
+          "author": "Wing1990hk",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:HK_Shing_Mun_River_view_201305.jpg",
+          "credit_url": "/photo-credits.html#shing-mun-river"
+        }
+      ]
+    },
+    {
+      "id": "tai-po-waterfront-park",
+      "aliases": [
+        "大埔海滨公园",
+        "大埔海濱公園",
+        "Tai Po Waterfront Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/tai-po-waterfront-park-1.webp",
+          "author": "Wpcpey",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tai_Po_Waterfront_Park_Aerial_view_201707.jpg",
+          "credit_url": "/photo-credits.html#tai-po-waterfront-park"
+        }
+      ]
+    },
+    {
+      "id": "lake-egret-nature-park",
+      "aliases": [
+        "白鹭湖自然公园",
+        "白鷺湖自然公園",
+        "嘉里白鹭湖互动中心",
+        "嘉里白鷺湖互動中心",
+        "Lake Egret Nature Park",
+        "Kerry Lake Egret Nature Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/lake-egret-nature-park-1.webp",
+          "author": "Wpcpey",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Kerry_Lake_Egret_Nature_Park_201707.jpg",
+          "credit_url": "/photo-credits.html#lake-egret-nature-park"
+        }
+      ]
+    },
+    {
+      "id": "kowloon-park",
+      "aliases": [
+        "九龙公园",
+        "九龍公園",
+        "Kowloon Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/kowloon-park-1.webp",
+          "author": "Pinktigra TADOU",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:HK_TST_%E5%B0%96%E6%B2%99%E5%92%80_Tsim_Sha_Tsui_Kowloon_%E4%B9%9D%E9%BE%8D%E5%85%AC%E5%9C%92_Kln_Park_Bird_Lake_August_2022_Px3_06.jpg",
+          "credit_url": "/photo-credits.html#kowloon-park"
+        },
+        {
+          "url": "/assets/places/hk/kowloon-park-2.webp",
+          "author": "Pinktigra TADOU",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:HK_TST_%E5%B0%96%E6%B2%99%E5%92%80_Tsim_Sha_Tsui_Kowloon_%E4%B9%9D%E9%BE%8D%E5%85%AC%E5%9C%92_Kln_Park_Bird_Lake_August_2022_Px3_03.jpg",
+          "credit_url": "/photo-credits.html#kowloon-park"
+        }
+      ]
+    },
+    {
+      "id": "hong-kong-park",
+      "aliases": [
+        "香港公园",
+        "香港公園",
+        "Hong Kong Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/hong-kong-park-1.webp",
+          "author": "WiNG",
+          "license": "CC BY-SA 3.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Hong_Kong_Park_Overview_2009.jpg",
+          "credit_url": "/photo-credits.html#hong-kong-park"
+        },
+        {
+          "url": "/assets/places/hk/hong-kong-park-2.webp",
+          "author": "lwtt93",
+          "license": "CC BY 2.0",
+          "license_url": "https://creativecommons.org/licenses/by/2.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:DSC_2687_-_Flickr_-_lwtt93.jpg",
+          "credit_url": "/photo-credits.html#hong-kong-park"
+        }
+      ]
+    },
+    {
+      "id": "victoria-park",
+      "aliases": [
+        "维多利亚公园",
+        "維多利亞公園",
+        "维园",
+        "維園",
+        "Victoria Park",
+        "Victoria Park Hong Kong",
+        "Victoria Park (Hong Kong)"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/victoria-park-1.webp",
+          "author": "Baycrest",
+          "license": "CC BY-SA 2.5",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.5",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Victoria_Park_0606.JPG",
+          "credit_url": "/photo-credits.html#victoria-park"
+        }
+      ]
+    },
+    {
+      "id": "nan-lian-garden",
+      "aliases": [
+        "南莲园池",
+        "南蓮園池",
+        "Nan Lian Garden"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/nan-lian-garden-1.webp",
+          "author": "Wpcpey",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Nan_Lian_Garden_Overview_201807.jpg",
+          "credit_url": "/photo-credits.html#nan-lian-garden"
+        }
+      ]
+    },
+    {
+      "id": "chi-lin-nunnery",
+      "aliases": [
+        "志莲净苑",
+        "志蓮淨苑",
+        "Chi Lin Nunnery"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/chi-lin-nunnery-1.webp",
+          "author": "Rob Young from United Kingdom",
+          "license": "CC BY 2.0",
+          "license_url": "https://creativecommons.org/licenses/by/2.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Chi_Lin_Nunnery_(2037672635).jpg",
+          "credit_url": "/photo-credits.html#chi-lin-nunnery"
+        }
+      ]
+    },
+    {
+      "id": "west-kowloon-art-park",
+      "aliases": [
+        "西九艺术公园",
+        "西九藝術公園",
+        "西九文化区艺术公园",
+        "西九文化區藝術公園",
+        "艺术公园",
+        "藝術公園",
+        "West Kowloon Art Park",
+        "Art Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/west-kowloon-art-park-1.webp",
+          "author": "LN9267",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:West_Kowloon_Cultural_District_Art_Park_19-05-2021(7).jpg",
+          "credit_url": "/photo-credits.html#west-kowloon-art-park"
+        },
+        {
+          "url": "/assets/places/hk/west-kowloon-art-park-2.webp",
+          "author": "與我對坐",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:West_Kowloon_Art_Park_Aerial_view_202012.png",
+          "credit_url": "/photo-credits.html#west-kowloon-art-park"
+        }
+      ]
+    },
+    {
+      "id": "west-kowloon-cultural-district",
+      "aliases": [
+        "西九文化区",
+        "西九文化區",
+        "西九文化地区",
+        "西九文化地區",
+        "West Kowloon Cultural District"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/west-kowloon-art-park-2.webp",
+          "author": "與我對坐",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:West_Kowloon_Art_Park_Aerial_view_202012.png",
+          "credit_url": "/photo-credits.html#west-kowloon-cultural-district"
+        },
+        {
+          "url": "/assets/places/hk/west-kowloon-art-park-1.webp",
+          "author": "LN9267",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:West_Kowloon_Cultural_District_Art_Park_19-05-2021(7).jpg",
+          "credit_url": "/photo-credits.html#west-kowloon-cultural-district"
+        }
+      ]
+    },
+    {
+      "id": "m-plus",
+      "aliases": [
+        "M+",
+        "M+博物馆",
+        "M+博物館",
+        "M+ Museum"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/m-plus-1.webp",
+          "author": "Noshoelaces 99",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:M%2B,_West_Kowloon,_Hong_Kong.jpg",
+          "credit_url": "/photo-credits.html#m-plus"
+        }
+      ]
+    },
+    {
+      "id": "kwun-tong-promenade",
+      "aliases": [
+        "观塘海滨花园",
+        "觀塘海濱花園",
+        "观塘海滨长廊",
+        "觀塘海濱長廊",
+        "Kwun Tong Promenade"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/kwun-tong-promenade-1.webp",
+          "author": "Wpcpey",
+          "license": "CC BY 4.0",
+          "license_url": "https://creativecommons.org/licenses/by/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Kwun_Tong_Promenade_Lawn_overview_2016.jpg",
+          "credit_url": "/photo-credits.html#kwun-tong-promenade"
+        }
+      ]
+    },
+    {
+      "id": "tsuen-wan-park",
+      "aliases": [
+        "荃湾公园",
+        "荃灣公園",
+        "Tsuen Wan Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/tsuen-wan-park-1.webp",
+          "author": "WiNG",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tsuen_Wan_Park_Phase_1_201106.jpg",
+          "credit_url": "/photo-credits.html#tsuen-wan-park"
+        }
+      ]
+    },
+    {
+      "id": "tsuen-wan-riviera-park",
+      "aliases": [
+        "荃湾海滨公园",
+        "荃灣海濱公園",
+        "Tsuen Wan Riviera Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/tsuen-wan-riviera-park-1.webp",
+          "author": "Wing1990hk",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tsuen_Wan_Riviera_Park_201408.jpg",
+          "credit_url": "/photo-credits.html#tsuen-wan-riviera-park"
+        }
+      ]
+    },
+    {
+      "id": "ma-on-shan-park",
+      "aliases": [
+        "马鞍山公园",
+        "馬鞍山公園",
+        "Ma On Shan Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/ma-on-shan-park-1.webp",
+          "author": "Wing1990hk",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Ma_On_Shan_Park_Overview_201408.jpg",
+          "credit_url": "/photo-credits.html#ma-on-shan-park"
+        }
+      ]
+    },
+    {
+      "id": "tamar-park",
+      "aliases": [
+        "添马公园",
+        "添馬公園",
+        "Tamar Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/tamar-park-1.webp",
+          "author": "Tksteven",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:TamarPark_2011_02.JPG",
+          "credit_url": "/photo-credits.html#tamar-park"
+        }
+      ]
+    },
+    {
+      "id": "quarry-bay-park",
+      "aliases": [
+        "鲗鱼涌公园",
+        "鰂魚涌公園",
+        "Quarry Bay Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/quarry-bay-park-1.webp",
+          "author": "HK Arun",
+          "license": "CC BY-SA 3.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Quarry_Bay_Park_1.JPG",
+          "credit_url": "/photo-credits.html#quarry-bay-park"
+        }
+      ]
+    },
+    {
+      "id": "kai-tak-cruise-terminal-park",
+      "aliases": [
+        "启德邮轮码头公园",
+        "啟德郵輪碼頭公園",
+        "Kai Tak Cruise Terminal Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/kai-tak-cruise-terminal-park-1.webp",
+          "author": "Wing1990hk",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Kai_Tak_Cruise_Terminal_Park_View_201407.jpg",
+          "credit_url": "/photo-credits.html#kai-tak-cruise-terminal-park"
+        },
+        {
+          "url": "/assets/places/hk/kai-tak-cruise-terminal-park-2.webp",
+          "author": "Wing1990hk",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:East_Kowloon_Pano_201407.jpg",
+          "credit_url": "/photo-credits.html#kai-tak-cruise-terminal-park"
+        }
+      ]
+    },
+    {
+      "id": "cyberport-waterfront-park",
+      "aliases": [
+        "数码港海滨公园",
+        "數碼港海濱公園",
+        "Cyberport Waterfront Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/cyberport-waterfront-park-1.webp",
+          "author": "Lokcin Samimaid",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:HK_%E5%8D%97%E5%8D%80_Southern_%E9%8B%BC%E7%B6%AB%E7%81%A3_Telegraph_Bay_%E6%95%B8%E7%A2%BC%E6%B8%AF%E5%85%AC%E5%9C%92_Cyberport_Waterfront_Park_January_2019_IX2_04.jpg",
+          "credit_url": "/photo-credits.html#cyberport-waterfront-park"
+        },
+        {
+          "url": "/assets/places/hk/cyberport-waterfront-park-2.webp",
+          "author": "姒姓賢寧",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Cyberport_night_view_part_1_in_October_2022.jpg",
+          "credit_url": "/photo-credits.html#cyberport-waterfront-park"
+        }
+      ]
+    },
+    {
+      "id": "sun-yat-sen-memorial-park",
+      "aliases": [
+        "中山纪念公园",
+        "中山紀念公園",
+        "Sun Yat Sen Memorial Park"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/sun-yat-sen-memorial-park-1.webp",
+          "author": "WiNG",
+          "license": "CC BY-SA 3.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Sun_Yat_Sen_Memorial_Park_Memorial_Lawn_201008.jpg",
+          "credit_url": "/photo-credits.html#sun-yat-sen-memorial-park"
+        }
+      ]
+    },
+    {
+      "id": "stanley-main-beach",
+      "aliases": [
+        "赤柱正滩",
+        "赤柱正灘",
+        "赤柱正湾泳滩",
+        "赤柱正灣泳灘",
+        "Stanley Main Beach"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/stanley-main-beach-1.webp",
+          "author": "Wing1990hk",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Stanley_Main_Beach_201307.jpg",
+          "credit_url": "/photo-credits.html#stanley-main-beach"
+        }
+      ]
+    },
+    {
+      "id": "repulse-bay",
+      "aliases": [
+        "浅水湾",
+        "淺水灣",
+        "浅水湾泳滩",
+        "淺水灣泳灘",
+        "Repulse Bay",
+        "Repulse Bay Beach"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/repulse-bay-1.webp",
+          "author": "Shanghai88",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:View_of_Repulse_Bay_from_Sir_Cecil%27s_Ride.jpg",
+          "credit_url": "/photo-credits.html#repulse-bay"
+        }
+      ]
+    },
+    {
+      "id": "shek-o-beach",
+      "aliases": [
+        "石澳泳滩",
+        "石澳泳灘",
+        "石澳海滩",
+        "石澳海灘",
+        "Shek O Beach"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/shek-o-beach-1.webp",
+          "author": "Exploringlife",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Shek_O_Beach.JPG",
+          "credit_url": "/photo-credits.html#shek-o-beach"
+        }
+      ]
+    },
+    {
+      "id": "clear-water-bay-second-beach",
+      "aliases": [
+        "清水湾第二湾泳滩",
+        "清水灣第二灣泳灘",
+        "清水湾第二滩",
+        "清水灣第二灘",
+        "清水湾二滩",
+        "清水灣二灘",
+        "Clear Water Bay Second Beach"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/clear-water-bay-second-beach-1.webp",
+          "author": "Underwaterbuffalo",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Clear_Water_Bay_(bay)_11.jpg",
+          "credit_url": "/photo-credits.html#clear-water-bay-second-beach"
+        }
+      ]
+    },
+    {
+      "id": "silvermine-bay-beach",
+      "aliases": [
+        "银矿湾泳滩",
+        "銀礦灣泳灘",
+        "银矿湾海滩",
+        "銀礦灣海灘",
+        "银矿湾",
+        "銀礦灣",
+        "Silvermine Bay Beach"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/silvermine-bay-beach-1.webp",
+          "author": "Mintchocicecream at English Wikipedia",
+          "license": "CC BY-SA 3.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Silvermine_Bay_Beach.jpg",
+          "credit_url": "/photo-credits.html#silvermine-bay-beach"
+        }
+      ]
+    },
+    {
+      "id": "kadoorie-farm",
+      "aliases": [
+        "嘉道理农场暨植物园",
+        "嘉道理農場暨植物園",
+        "嘉道理农场",
+        "嘉道理農場",
+        "Kadoorie Farm and Botanic Garden"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/kadoorie-farm-1.webp",
+          "author": "No machine-readable source provided. Own work assumed (based on copyri",
+          "license": "CC BY-SA 2.5",
+          "license_url": "https://creativecommons.org/licenses/by-sa/2.5",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Kadoorie_farm_lower_farm.jpg",
+          "credit_url": "/photo-credits.html#kadoorie-farm"
+        }
+      ]
+    },
+    {
+      "id": "tuen-mun-public-library",
+      "aliases": [
+        "屯门公共图书馆",
+        "屯門公共圖書館",
+        "Tuen Mun Public Library"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/tuen-mun-public-library-1.webp",
+          "author": "WiNG",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tuen_Mun_Public_Library_201207.jpg",
+          "credit_url": "/photo-credits.html#tuen-mun-public-library"
+        }
+      ]
+    },
+    {
+      "id": "wong-nai-chung-reservoir-park",
+      "aliases": [
+        "黄泥涌水塘公园",
+        "黃泥涌水塘公園",
+        "黄泥涌水塘",
+        "黃泥涌水塘",
+        "Wong Nai Chung Reservoir Park",
+        "Wong Nai Chung Reservoir"
+      ],
+      "photos": [
+        {
+          "url": "/assets/places/hk/wong-nai-chung-reservoir-park-1.webp",
+          "author": "Minghong",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Wong_Nai_Chung_Reservoir_Park_2.jpg",
+          "credit_url": "/photo-credits.html#wong-nai-chung-reservoir-park"
+        }
+      ]
+    }
+  ]
+}

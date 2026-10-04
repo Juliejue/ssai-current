@@ -606,6 +606,7 @@ def _to_recommendation(
             else "editorial_estimate"
         ),
         photos=[url for url in (place.get("photos") or []) if isinstance(url, str)][:3],
+        photo_attributions=(place.get("photo_attributions") or [])[:3],
         category=category,
         area=place.get("area"),
         latitude=float(amap["latitude"]) if amap.get("latitude") is not None else None,

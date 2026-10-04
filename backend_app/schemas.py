@@ -283,6 +283,7 @@ class Recommendation(BaseModel):
     source: Literal["curated", "discovered"] = "curated"
     # 高德 POI 自带的真实照片。人工地点也有（按核对过的 POI ID 取的）。
     photos: list[str] = Field(default_factory=list, max_length=3)
+    photo_attributions: list[dict[str, str]] = Field(default_factory=list, max_length=3)
     category: str | None = None
     area: str | None = None
     # 地点坐标是公开信息，可以下发——用来在地图上画点。用户的坐标不上传。

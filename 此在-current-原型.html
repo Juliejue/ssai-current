@@ -25,6 +25,8 @@
 <script src="/xiaozai-voice.js"></script>
 <script src="/mood-card.js"></script>
 <script src="/place-photos.js"></script>
+<script src="/hong-kong-place-photos.js"></script>
+<script src="/place-photo-fallback.js"></script>
 <script src="/current-moments.js"></script>
 <style>
 :root{
@@ -183,6 +185,8 @@ h1.title.sm{font-size:23px}
 .cover svg.sig{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:66%;height:66%}
 /* 实拍图盖在符号之上。图加载失败会把自己删掉，符号自然露出来。 */
 .cover img.shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.cover .photo-credit{position:absolute;right:8px;top:8px;z-index:3;max-width:72%;padding:3px 6px;border-radius:5px;background:rgba(12,26,29,.6);color:#fff;font:10px/1.3 var(--sans);text-decoration:none}
+.cover .photo-credit[hidden]{display:none}
 /* 地图条：地图挂了就整条移除，不留空白框 */
 .mapstrip{position:relative;margin:12px 0 2px;border-radius:12px;overflow:hidden;border:1px solid var(--line);
   background:var(--ground-2);aspect-ratio:8/3}
@@ -1567,7 +1571,9 @@ function placeFromRecommendation(rec){
     action: rec.action,
     area: rec.area || "",
     category: rec.category || "",
-    city: "",
+    city: rec.search_scope || "",
+    latitude: rec.latitude,
+    longitude: rec.longitude,
     photos: rec.photos || [],
     coverImage: (rec.photos && rec.photos[0]) ? "photo:" + rec.photos[0] : "",
     ratio: "4/5",
@@ -1802,14 +1808,16 @@ function sigil(p, opts){
    符号图是当初没有稳定图源时的权宜之计——抽象好过错配。
    现在高德给每个 POI 带回真实照片，能给实景就不该再给符号。
    拿不到照片时仍然退回符号：宁可抽象，也不放一张别处的图冒充这里。 */
-function photoFor(p){
+function photoCandidates(p){
   const rec = state.aiRecommendations[p.placeId];
-  if (rec && rec.photos && rec.photos.length) return rec.photos[0];
-  if (p.photos && p.photos.length) return p.photos[0];
+  const hk = window.CurrentPlacePhotos && window.CurrentPlacePhotos.lookup(p);
   const reviewed = (window.CURRENT_PLACE_PHOTOS || {})[p.placeId];
-  if (reviewed && reviewed.length) return reviewed[0];
-  if (typeof p.coverImage === "string" && p.coverImage.indexOf("photo:") === 0) return p.coverImage.slice(6);
-  return null;
+  const cover = typeof p.coverImage === "string" && p.coverImage.indexOf("photo:") === 0 ? [p.coverImage.slice(6)] : [];
+  return Array.from(new Set([].concat(hk ? hk.photos.map(photo => photo.url) : [], rec ? rec.photos || [] : [], p.photos || [], reviewed || [], cover)))
+    .filter(url => typeof url === 'string' && (/^https:\/\//.test(url) || /^\/assets\/places\//.test(url)));
+}
+function photoFor(p){
+  return photoCandidates(p)[0] || null;
 }
 function coverHTML(p, o){
   o = o || {};
@@ -1818,11 +1826,13 @@ function coverHTML(p, o){
                ' 52%, rgba(234,240,239,.92) 100%), linear-gradient(160deg,#EAF0EF,#DDE6E4)';
   let h = '<div class="cover ' + (o.cls||'') + '"' + style + '>';
   h += '<div class="grad" style="' + grad + '"></div><div class="grain"></div>';
-  const reviewedPhoto = photoFor(p);
+  const candidates = photoCandidates(p);
+  const reviewedPhoto = candidates[0];
   if (reviewedPhoto){
-    // 图挂了就把自己藏起来，露出下面那层符号——不留一个破图图标。
     h += '<img class="shot" src="' + escapeHTML(reviewedPhoto) + '" alt="" loading="lazy" referrerpolicy="no-referrer" ' +
-         'onerror="this.remove()">';
+         'data-photo-candidates="' + escapeHTML(JSON.stringify(candidates)) + '" data-photo-index="0" onerror="CurrentPlacePhotos.onError(this)">';
+    const credit = window.CurrentPlacePhotos && window.CurrentPlacePhotos.credit(reviewedPhoto);
+    h += '<a class="photo-credit"' + (credit ? '' : ' hidden') + ' href="' + escapeHTML(credit ? credit.credit_url : '') + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHTML(credit ? '© ' + credit.author : '') + '</a>';
   }
   if (!reviewedPhoto) h += '<span class="photo-demo-badge">' + uiCopy('暂无地点实景图', 'No place photo yet') + '</span>';
   h += sigil(p, o);

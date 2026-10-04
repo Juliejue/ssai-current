@@ -30,6 +30,7 @@ from itertools import zip_longest
 from typing import Any
 
 from .map_provider import AmapClient, MapProviderError
+from .place_photos import reviewed_photos
 from .schemas import Location, NeedState
 
 
@@ -582,7 +583,8 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
     profile = CATEGORY_PROFILE.get(category)
     if not profile:
         return None
-    photos = _photo_urls(poi)
+    photo_credits = reviewed_photos(poi)
+    photos = list(dict.fromkeys([photo["url"] for photo in photo_credits] + _photo_urls(poi)))[:3]
     # A real nearby place without a provider photo is still more useful than
     # claiming there is no climbing gym, park, or café at all. The card renders
     # a category sigil in that case and never substitutes an unrelated stock
@@ -606,6 +608,7 @@ def to_place(poi: dict[str, Any], category: str) -> dict[str, Any] | None:
         "citycode": str(poi.get("citycode") or ""),
         "coverImage": f"photo:{photos[0]}" if photos else f"sigil:{category}",
         "photos": photos,
+        "photo_attributions": photo_credits[:3],
         "ratio": "4/5",
         "distanceKm": round(distance_m / 1000, 2) if distance_m else None,
         "transport": str(poi.get("address") or ""),
