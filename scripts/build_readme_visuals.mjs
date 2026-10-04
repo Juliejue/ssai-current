@@ -466,3 +466,96 @@ if (fs.existsSync(path.join(out, '12-experience-qr.png'))) {
   s += finish();
   save('12-experience-qr-card.svg', s);
 }
+
+// README refresh · the public README intentionally uses only these three
+// quieter visuals. The fuller submission graphics above remain available for
+// decks and judging materials, but no longer crowd the main project page.
+
+// A · Real product screens, with no editorial headline or explanatory copy.
+{
+  const w = 1500, h = 820;
+  const shots = [
+    { file: '04-input-raw.jpg', label: '表达' },
+    { file: '04-recommendation-raw.jpg', label: '推荐' },
+    { file: '04-feedback-raw.jpg', label: '反馈' },
+  ];
+  let s = svgStart(w, h, '真实产品界面', '当前线上版本的表达、推荐和反馈页面。');
+  s += rect(0, 0, w, h, 0, C.paper);
+  shots.forEach((shot, i) => {
+    const x = 132 + i * 456;
+    const y = 42;
+    const clipId = `simplePhoneClip${i}`;
+    s += `<defs><clipPath id="${clipId}"><rect x="${x + 20}" y="${y + 42}" width="290" height="626" rx="30"/></clipPath></defs>`;
+    s += rect(x, y, 330, 704, 48, '#0B1719', '#233C40', 'filter="url(#softShadow)"');
+    s += rect(x + 12, y + 14, 306, 674, 38, '#F4F6F5');
+    s += `<g clip-path="url(#${clipId})"><image href="${dataUri(shot.file, 'image/jpeg')}" x="${x + 20}" y="${y + 42}" width="580" height="1256" preserveAspectRatio="none"/></g>`;
+    s += `<rect x="${x + 122}" y="${y + 22}" width="86" height="19" rx="10" fill="#0B1719"/>`;
+    s += text(x + 165, 790, shot.label, 'label', 'middle');
+  });
+  s += finish();
+  save('product-flow-simple.svg', s);
+}
+
+// B · Recommendation pipeline. Labels only; the explanation lives in prose.
+{
+  const w = 1500, h = 360;
+  const stages = [
+    ['此刻的表达', '用户'],
+    ['NeedState', '模型'],
+    ['真实 POI', '地图'],
+    ['过滤与排序', '规则'],
+    ['1 + 2 个选择', '用户'],
+  ];
+  let s = svgStart(w, h, '推荐流程', '表达经过结构化理解、地图候选和规则排序，最后回到用户选择。');
+  s += rect(0, 0, w, h, 0, C.paper);
+  stages.forEach((stage, i) => {
+    const x = 54 + i * 292;
+    const fill = i === 4 ? C.ink : C.white;
+    s += rect(x, 82, 238, 156, 28, fill, i === 4 ? 'none' : C.line, 'filter="url(#softShadow)"');
+    s += `<circle cx="${x + 34}" cy="116" r="8" fill="${i === 1 ? C.orange : C.teal}"/>`;
+    s += `<text x="${x + 119}" y="158" font-family="${font}" font-size="25" font-weight="760" text-anchor="middle" fill="${i === 4 ? '#fff' : C.ink}">${esc(stage[0])}</text>`;
+    s += `<text x="${x + 119}" y="199" font-family="${font}" font-size="16" text-anchor="middle" fill="${i === 4 ? C.teal3 : C.muted}">${esc(stage[1])}</text>`;
+    if (i < stages.length - 1) s += arrow(x + 240, 160, x + 290, 160);
+  });
+  s += text(750, 302, '地点由地图提供，最终选择属于用户', 'small', 'middle');
+  s += finish();
+  save('recommendation-simple.svg', s);
+}
+
+// C · Current architecture, stripped to the dependencies a reader needs.
+{
+  const w = 1500, h = 610;
+  let s = svgStart(w, h, 'Current 系统结构', 'Web 客户端、Current API、外部能力与数据存储。');
+  s += rect(0, 0, w, h, 0, C.paper);
+
+  s += rect(70, 205, 270, 170, 30, C.white, C.line, 'filter="url(#softShadow)"');
+  s += text(205, 276, 'Web / PWA', 'cardTitle', 'middle');
+  s += text(205, 322, '输入 · 推荐 · 反馈', 'small', 'middle');
+
+  s += rect(485, 170, 330, 240, 34, C.ink, 'none', 'filter="url(#shadow)"');
+  s += `<text x="650" y="258" font-family="${font}" font-size="30" font-weight="800" text-anchor="middle" fill="#fff">Current API</text>`;
+  s += `<text x="650" y="308" font-family="${font}" font-size="18" text-anchor="middle" fill="${C.teal3}">理解 · 安全 · 排序 · 中继</text>`;
+
+  const services = [
+    ['语言模型', '结构化理解'],
+    ['高德地图', 'POI 与路线'],
+    ['语音服务', 'ASR'],
+  ];
+  services.forEach((service, i) => {
+    const y = 70 + i * 150;
+    s += rect(960, y, 250, 108, 24, C.white, C.line);
+    s += text(1085, y + 47, service[0], 'label', 'middle');
+    s += text(1085, y + 79, service[1], 'tiny', 'middle');
+    s += `<path d="M815 290 C880 290 880 ${y + 54} 960 ${y + 54}" fill="none" stroke="${C.teal2}" stroke-width="4"/>`;
+  });
+
+  s += rect(960, 510, 250, 70, 22, '#E3EFE8', C.line);
+  s += text(1085, 553, 'PostgreSQL / Neon', 'label', 'middle');
+  s += `<path d="M650 410 V545 H960" fill="none" stroke="${C.teal2}" stroke-width="4"/>`;
+  s += arrow(342, 290, 482, 290);
+
+  s += rect(1280, 175, 150, 240, 26, C.orange2, 'none');
+  s += multiline(1355, 242, ['缺少外部服务时', '明确降级', '不伪装成功'], 'small', 40, 'middle');
+  s += finish();
+  save('architecture-simple.svg', s);
+}

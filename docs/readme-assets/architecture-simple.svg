@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="610" viewBox="0 0 1500 610" role="img" aria-labelledby="title desc">
+  <title id="title">Current 系统结构</title>
+  <desc id="desc">Web 客户端、Current API、外部能力与数据存储。</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#102F33" flood-opacity=".10"/></filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#102F33" flood-opacity=".08"/></filter>
+    <linearGradient id="paperGlow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FAFCFB"/><stop offset=".55" stop-color="#F3F6F4"/><stop offset="1" stop-color="#E6F0ED"/></linearGradient>
+    <linearGradient id="tealGlow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#174F53"/><stop offset="1" stop-color="#1E777A"/></linearGradient>
+    <style>
+      text { font-family: -apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans CJK SC','Microsoft YaHei',sans-serif; }
+      .title, .subtitle, .body, .small, .tiny, .label, .cardTitle { fill: #102F33; }
+      .muted { fill: #60777A; }
+      .eyebrow { font-size: 22px; font-weight: 700; letter-spacing: 3px; fill: #1E6E72; }
+      .title { font-size: 66px; font-weight: 800; letter-spacing: -2px; }
+      .subtitle { font-size: 30px; font-weight: 600; }
+      .body { font-size: 24px; }
+      .small { font-size: 18px; }
+      .tiny { font-size: 15px; }
+      .label { font-size: 18px; font-weight: 700; }
+      .cardTitle { font-size: 27px; font-weight: 800; }
+    </style>
+  </defs><rect x="0" y="0" width="1500" height="610" rx="0" fill="#F3F6F4" stroke="none" /><rect x="70" y="205" width="270" height="170" rx="30" fill="#FFFFFF" stroke="#CEDAD8" filter="url(#softShadow)"/><text x="205" y="276" class="cardTitle" text-anchor="middle" >Web / PWA</text><text x="205" y="322" class="small" text-anchor="middle" >输入 · 推荐 · 反馈</text><rect x="485" y="170" width="330" height="240" rx="34" fill="#102F33" stroke="none" filter="url(#shadow)"/><text x="650" y="258" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="30" font-weight="800" text-anchor="middle" fill="#fff">Current API</text><text x="650" y="308" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="18" text-anchor="middle" fill="#DDECE9">理解 · 安全 · 排序 · 中继</text><rect x="960" y="70" width="250" height="108" rx="24" fill="#FFFFFF" stroke="#CEDAD8" /><text x="1085" y="117" class="label" text-anchor="middle" >语言模型</text><text x="1085" y="149" class="tiny" text-anchor="middle" >结构化理解</text><path d="M815 290 C880 290 880 124 960 124" fill="none" stroke="#8FC3C0" stroke-width="4"/><rect x="960" y="220" width="250" height="108" rx="24" fill="#FFFFFF" stroke="#CEDAD8" /><text x="1085" y="267" class="label" text-anchor="middle" >高德地图</text><text x="1085" y="299" class="tiny" text-anchor="middle" >POI 与路线</text><path d="M815 290 C880 290 880 274 960 274" fill="none" stroke="#8FC3C0" stroke-width="4"/><rect x="960" y="370" width="250" height="108" rx="24" fill="#FFFFFF" stroke="#CEDAD8" /><text x="1085" y="417" class="label" text-anchor="middle" >语音服务</text><text x="1085" y="449" class="tiny" text-anchor="middle" >ASR</text><path d="M815 290 C880 290 880 424 960 424" fill="none" stroke="#8FC3C0" stroke-width="4"/><rect x="960" y="510" width="250" height="70" rx="22" fill="#E3EFE8" stroke="#CEDAD8" /><text x="1085" y="553" class="label" text-anchor="middle" >PostgreSQL / Neon</text><path d="M650 410 V545 H960" fill="none" stroke="#8FC3C0" stroke-width="4"/><path d="M342 290 H464" fill="none" stroke="#8FC3C0" stroke-width="5" stroke-linecap="round"/><path d="M454 280 L466 290 L454 300" fill="none" stroke="#8FC3C0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><rect x="1280" y="175" width="150" height="240" rx="26" fill="#F4D8C5" stroke="none" /><text x="1355" y="242" class="small" text-anchor="middle" ><tspan x="1355" dy="0">缺少外部服务时</tspan><tspan x="1355" dy="40">明确降级</tspan><tspan x="1355" dy="40">不伪装成功</tspan></text></svg>
