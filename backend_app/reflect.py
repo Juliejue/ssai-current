@@ -102,9 +102,9 @@ def _clean_ack(line: Any, limit: int) -> str | None:
     return text
 
 
-def _fallback(options: list[str]) -> dict[str, Any]:
+def _fallback(options: list[str], failure_code: str = "provider_error") -> dict[str, Any]:
     """模型没接住的时候。分数留空，让前端退回自己选——绝不替用户猜一个分数。"""
-    return {"change_score": None, "factors": [], "mismatch_stage": "none", "acknowledgement": None, "status": "unavailable"}
+    return {"change_score": None, "factors": [], "mismatch_stage": "none", "acknowledgement": None, "status": "unavailable", "failure_code": failure_code}
 
 
 async def reflect(
@@ -116,12 +116,14 @@ async def reflect(
     lang: str = "zh",
 ) -> dict[str, Any]:
     api_key = os.getenv("LLM_API_KEY") or os.getenv("api_key")
-    if not api_key or not text.strip():
-        return _fallback(options)
+    if not api_key:
+        return _fallback(options, "configuration_missing")
+    if not text.strip():
+        return _fallback(options, "invalid_response")
 
     base_url = checked_model_base_url(os.getenv("LLM_BASE_URL") or os.getenv("base_url"))
     if not base_url:
-        return _fallback(options)
+        return _fallback(options, "configuration_invalid")
     model = os.getenv("LLM_MODEL") or os.getenv("model") or "glm-4.7-flash"
 
     user_prompt = (
@@ -146,6 +148,7 @@ async def reflect(
         body["thinking"] = {"type": "disabled"}
 
     payload: dict[str, Any] | None = None
+    failure_code = "provider_error"
     for attempt in range(1, REFLECT_ATTEMPTS + 1):
         try:
             async with httpx.AsyncClient(timeout=REFLECT_TIMEOUT_SECONDS) as client:
@@ -169,6 +172,7 @@ async def reflect(
             break
         except (httpx.HTTPError, KeyError, IndexError, ValueError, TypeError) as error:
             payload = None
+            failure_code = "provider_error" if isinstance(error, httpx.HTTPError) else "invalid_response"
             logger.info(json.dumps({
                 "event": "reflect", "outcome": "retry" if attempt < REFLECT_ATTEMPTS else "failed",
                 "attempt": attempt, "detail": type(error).__name__,
@@ -178,7 +182,7 @@ async def reflect(
             if attempt < REFLECT_ATTEMPTS:
                 await asyncio.sleep(0.4 * attempt)
     if payload is None:
-        return _fallback(options)
+        return _fallback(options, failure_code)
 
     # 代码侧护栏：模型给什么都得先过这一关。
     try:
