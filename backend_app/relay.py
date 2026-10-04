@@ -8,6 +8,7 @@ import secrets
 import string
 from datetime import datetime, timedelta, timezone
 from typing import Any
+from pathlib import Path
 
 import psycopg
 
@@ -155,6 +156,27 @@ async def _memory_append(code: str, event_type: str, payload: dict[str, Any]) ->
         return sequence
 
 
+async def _ensure_companion_schema(connection: Any) -> None:
+    """Upgrade the old whitelist inside the event transaction, without losing rows.
+
+    Fresh check on each extension write avoids caching schema readiness across a
+    rolled-back transaction or a database configuration change. Normal events do
+    not need this check. The migration runner also applies the same saved SQL.
+    """
+    cursor = await connection.execute(
+        "SELECT pg_get_constraintdef(oid) FROM pg_constraint "
+        "WHERE conrelid = 'relay_events'::regclass "
+        "AND conname = 'relay_events_event_type_check'"
+    )
+    row = await cursor.fetchone()
+    if row and all(name in row[0] for name in ('companion_action', 'companion_ack', 'scene_changed')):
+        return
+    migration = (Path(__file__).parent / 'migrations' / '007_companion_relay_events.sql').read_text()
+    for statement in migration.split(';'):
+        if statement.strip():
+            await connection.execute(statement)
+
+
 async def append_event(code: str, event_type: str, payload: dict[str, Any]) -> tuple[int | None, bool]:
     code = normalize_code(code)
     if not valid_code(code):
@@ -164,6 +186,8 @@ async def append_event(code: str, event_type: str, payload: dict[str, Any]) -> t
     if database_url:
         try:
             async with await psycopg.AsyncConnection.connect(database_url) as connection:
+                if event_type in ('companion_action', 'companion_ack', 'scene_changed'):
+                    await _ensure_companion_schema(connection)
                 cursor = await connection.execute(
                     """
                     INSERT INTO relay_events (session_code, event_type, payload)
