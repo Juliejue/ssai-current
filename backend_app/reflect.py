@@ -25,6 +25,7 @@ import logging
 import os
 import re
 from typing import Any
+from urllib.parse import urlsplit
 
 import httpx
 
@@ -36,7 +37,7 @@ logger = logging.getLogger("current.reflect")
 
 REFLECT_TIMEOUT_SECONDS = 10
 REFLECT_ATTEMPTS = 2
-REFLECT_MAX_TOKENS = 240
+REFLECT_MAX_TOKENS = 480
 MAX_ACK_CHARS = 46
 MAX_ACK_CHARS_EN = 110
 
@@ -57,7 +58,7 @@ SYSTEM_PROMPT = """你是「小在」。用户刚从一个地方离开，说了�
 }
 
 change_score 是「他自己出发前和现在的差」，不是给这个地方打分。
-  明显更难受 −3，差不多 0，明显变好 +3。他没说清楚就给 0，不要猜大。
+  明显更难受 −3，差不多 0，明显变好 +3。他没说清楚前后变化就给 null；喜欢夕阳不代表心情改善。
 
 factors 必须逐字来自我给的选项列表。他提到的事情如果列表里没有，就不要放。
 
@@ -102,9 +103,9 @@ def _clean_ack(line: Any, limit: int) -> str | None:
     return text
 
 
-def _fallback(options: list[str]) -> dict[str, Any]:
+def _fallback(options: list[str], failure_code: str = "provider_error") -> dict[str, Any]:
     """模型没接住的时候。分数留空，让前端退回自己选——绝不替用户猜一个分数。"""
-    return {"change_score": None, "factors": [], "mismatch_stage": "none", "acknowledgement": None}
+    return {"change_score": None, "factors": [], "mismatch_stage": "none", "acknowledgement": None, "status": "unavailable", "failure_code": failure_code}
 
 
 async def reflect(
@@ -116,12 +117,19 @@ async def reflect(
     lang: str = "zh",
 ) -> dict[str, Any]:
     api_key = os.getenv("LLM_API_KEY") or os.getenv("api_key")
-    if not api_key or not text.strip():
-        return _fallback(options)
+    if not api_key:
+        return _fallback(options, "configuration_missing")
+    if not text.strip():
+        return _fallback(options, "invalid_response")
 
     base_url = checked_model_base_url(os.getenv("LLM_BASE_URL") or os.getenv("base_url"))
     if not base_url:
-        return _fallback(options)
+        result = _fallback(options, "configuration_invalid")
+        try:
+            result["failure_host"] = urlsplit(os.getenv("LLM_BASE_URL") or os.getenv("base_url") or "").hostname
+        except ValueError:
+            pass
+        return result
     model = os.getenv("LLM_MODEL") or os.getenv("model") or "glm-4.7-flash"
 
     user_prompt = (
@@ -134,6 +142,7 @@ async def reflect(
         "model": model,
         "temperature": 0.4,
         "max_tokens": REFLECT_MAX_TOKENS,
+        "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT + (ENGLISH_SUFFIX if lang == "en" else "")},
             {"role": "user", "content": user_prompt},
@@ -141,8 +150,11 @@ async def reflect(
     }
     if "qwen3" in model.lower():
         body["enable_thinking"] = False
+    elif model.lower().startswith("glm-4.7"):
+        body["thinking"] = {"type": "disabled"}
 
     payload: dict[str, Any] | None = None
+    failure_code = "provider_error"
     for attempt in range(1, REFLECT_ATTEMPTS + 1):
         try:
             async with httpx.AsyncClient(timeout=REFLECT_TIMEOUT_SECONDS) as client:
@@ -152,18 +164,31 @@ async def reflect(
                     json=body,
                 )
                 response.raise_for_status()
-                content = response.json()["choices"][0]["message"]["content"]
+                choice = response.json()["choices"][0]
+                content = choice["message"].get("content")
+                if choice.get("finish_reason") == "length":
+                    raise ValueError("truncated_response")
+                if not isinstance(content, str) or not content.strip():
+                    raise ValueError("empty_content")
             payload = json.loads(re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip(), flags=re.IGNORECASE))
+            if not isinstance(payload, dict):
+                raise ValueError("invalid_json_shape")
+            if not _clean_ack(payload.get("acknowledgement"), MAX_ACK_CHARS_EN if lang == "en" else MAX_ACK_CHARS):
+                raise ValueError("invalid_acknowledgement")
             break
-        except (httpx.HTTPError, KeyError, IndexError, ValueError) as error:
+        except (httpx.HTTPError, KeyError, IndexError, ValueError, TypeError) as error:
+            payload = None
+            failure_code = "provider_error" if isinstance(error, httpx.HTTPError) else "invalid_response"
             logger.info(json.dumps({
                 "event": "reflect", "outcome": "retry" if attempt < REFLECT_ATTEMPTS else "failed",
                 "attempt": attempt, "detail": type(error).__name__,
+                "model": model,
+                "reason": str(error) if isinstance(error, ValueError) else "provider_request_failed",
             }))
             if attempt < REFLECT_ATTEMPTS:
                 await asyncio.sleep(0.4 * attempt)
     if payload is None:
-        return _fallback(options)
+        return _fallback(options, failure_code)
 
     # 代码侧护栏：模型给什么都得先过这一关。
     try:
@@ -184,7 +209,7 @@ async def reflect(
         "event": "reflect", "outcome": "ok",
         "has_score": score is not None, "factor_count": len(factors), "stage": stage,
     }))
-    return {"change_score": score, "factors": factors, "mismatch_stage": stage, "acknowledgement": ack}
+    return {"change_score": score, "factors": factors, "mismatch_stage": stage, "acknowledgement": ack, "status": "ok"}
 
 
 async def reflect_quietly(text: str, **kwargs: Any) -> dict[str, Any]:

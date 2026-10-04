@@ -2494,7 +2494,7 @@ function topbar(title, kicker, backTo){
   const relay = CurrentAI.relayState();
   return '<div class="top"><div class="lead">' +
     (backTo ? '<button class="back" data-go="' + backTo + '" aria-label="' + uiCopy("返回", "Back") + '">←</button>' : '') +
-    '<div><div class="k">' + kicker + '</div></div><h2>' + title + '</h2></div>' +
+    (kicker ? '<div><div class="k">' + kicker + '</div></div>' : '') + '<h2>' + title + '</h2></div>' +
     '<div class="topright">' + langToggle() +
     '<button class="topnav" data-go="#/connect">' + (relay ? uiCopy("已连接", "Connected") : uiCopy("连接", "Connect")) + '</button>' +
     '<button class="topnav" data-go="#/talk">' + uiCopy("首页", "Home") + '</button>' +
@@ -3814,7 +3814,7 @@ function renderConnect(){
   const relay = CurrentAI.relayState();
   const role = CurrentAI.deviceRole();
   const pending = CurrentAI.relayPendingCode();
-  let h = topbar(uiCopy('手机与智能眼镜，让小在一路陪你', 'Phone + smart glasses'), uiCopy('跨设备（智能眼镜）', 'Smart glasses'), '#/talk');
+  let h = topbar(uiCopy('跨设备', 'Cross-device'), '', '#/talk');
   h += '<div class="screen"><div class="pad moment-wrap">';
   h += '<div class="relay-role"><button class="btn ghost sm' + (role === 'phone' ? ' on' : '') + '" data-role="phone">' + uiCopy('从这台手机发起', 'Start on this phone') + '</button>' +
     '<button class="btn ghost sm' + (role === 'desk' ? ' on' : '') + '" data-role="desk">' + uiCopy('眼镜伴随模式（演示）', 'Glasses companion (demo)') + '</button></div>';
@@ -5144,13 +5144,13 @@ function bind(){
         render();
         return;
       }
-      // 没听清就直说，然后把选择题给他——不猜。
-      state.reflectNote = uiCopy("这句我没听准，你可以再说一次。", "I didn’t catch that. You can try again.");
+      // 转写已完成；回复服务失败不能误报为没听清，也不能清空用户文字。
+      state.reflectNote = uiCopy("文字已收到，但小在暂时没能生成回复。点发送重试，或自己选。", "Your text is ready, but the reply failed. Send again or choose instead.");
       state.reflectTyping = true;
       render();
     }).catch(() => {
       state.reflectSending = false;
-      state.reflectNote = uiCopy("刚才没接住，可以再说一次。", "That didn’t work. You can try again.");
+      state.reflectNote = uiCopy("回复暂时连接不上，文字还在。点发送重试，或自己选。", "The reply service is unavailable. Your text is kept; send again or choose instead.");
       state.reflectTyping = true;
       render();
     });
