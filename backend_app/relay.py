@@ -8,7 +8,6 @@ import secrets
 import string
 from datetime import datetime, timedelta, timezone
 from typing import Any
-from pathlib import Path
 
 import psycopg
 
@@ -160,25 +159,25 @@ async def _memory_append(code: str, event_type: str, payload: dict[str, Any]) ->
         return sequence
 
 
-async def _ensure_companion_schema(connection: Any) -> None:
-    """Upgrade the old whitelist inside the event transaction, without losing rows.
+COMPANION_EVENT_TYPES = frozenset({'companion_action', 'companion_ack', 'scene_changed'})
 
-    Fresh check on each extension write avoids caching schema readiness across a
-    rolled-back transaction or a database configuration change. Normal events do
-    not need this check. The migration runner also applies the same saved SQL.
-    """
-    cursor = await connection.execute(
-        "SELECT pg_get_constraintdef(oid) FROM pg_constraint "
-        "WHERE conrelid = 'relay_events'::regclass "
-        "AND conname = 'relay_events_event_type_check'"
-    )
-    row = await cursor.fetchone()
-    if row and all(name in row[0] for name in ('companion_action', 'companion_ack', 'scene_changed')):
-        return
-    migration = (Path(__file__).parent / 'migrations' / '007_companion_relay_events.sql').read_text()
-    for statement in migration.split(';'):
-        if statement.strip():
-            await connection.execute(statement)
+
+def _storage_event(event_type: str, clean: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    # Existing production DB roles need not own the schema. Carry extensions
+    # in a versioned envelope using a type accepted by the original whitelist.
+    if event_type in COMPANION_EVENT_TYPES:
+        return 'collector_saved', {'_current_extension_v1': event_type, 'data': clean}
+    return event_type, clean
+
+
+def _display_event(event_type: str, payload: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    extension = payload.get('_current_extension_v1') if event_type == 'collector_saved' else None
+    if isinstance(extension, str) and extension in COMPANION_EVENT_TYPES and isinstance(payload.get('data'), dict):
+        try:
+            return extension, safe_payload(extension, payload['data'])
+        except ValueError:
+            return 'collector_saved', {}
+    return event_type, payload
 
 
 async def append_event(code: str, event_type: str, payload: dict[str, Any]) -> tuple[int | None, bool]:
@@ -190,8 +189,7 @@ async def append_event(code: str, event_type: str, payload: dict[str, Any]) -> t
     if database_url:
         try:
             async with await psycopg.AsyncConnection.connect(database_url) as connection:
-                if event_type in ('companion_action', 'companion_ack', 'scene_changed'):
-                    await _ensure_companion_schema(connection)
+                stored_type, stored_payload = _storage_event(event_type, clean)
                 cursor = await connection.execute(
                     """
                     INSERT INTO relay_events (session_code, event_type, payload)
@@ -251,8 +249,8 @@ async def read_events(code: str, after: int) -> tuple[list[dict[str, Any]] | Non
                 return [
                     {
                         "sequence": int(row[0]),
-                        "event_type": row[1],
-                        "payload": row[2],
+                        "event_type": _display_event(row[1], row[2])[0],
+                        "payload": _display_event(row[1], row[2])[1],
                         "created_at": row[3].isoformat(),
                     }
                     for row in rows

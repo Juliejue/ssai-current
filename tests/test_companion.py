@@ -89,3 +89,14 @@ def test_failed_durable_action_never_claims_success(monkeypatch):
     assert response.status_code == 503
     monkeypatch.delenv('DATABASE_URL')
     assert client.get(f'/api/v1/relay/{code}').json()['events'] == []
+
+
+def test_extension_transport_keeps_old_schema_and_checks_commands():
+    from backend_app.relay import _storage_event, _display_event, safe_payload
+    clean = safe_payload('companion_action', {'action':'quiet','origin':'desk','request_id':'demo','text':'private'})
+    stored_type, envelope = _storage_event('companion_action', clean)
+    assert stored_type == 'collector_saved'
+    assert _display_event(stored_type,envelope) == ('companion_action',clean)
+    assert 'text' not in envelope['data']
+    forged = {'_current_extension_v1':'companion_action','data':{'action':'delete_all','origin':'desk','request_id':'bad'}}
+    assert _display_event('collector_saved',forged) == ('collector_saved',{})
