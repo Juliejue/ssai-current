@@ -13,6 +13,12 @@ from datetime import datetime, timezone
 import httpx
 
 HOST = "tts.tencentcloudapi.com"
+class SpeechUnavailable(RuntimeError):
+    def __init__(self, message: str, code: str):
+        super().__init__(message)
+        self.provider_code = code
+
+
 VOICE_ID = 502001  # 智小柔：超自然聊天女声，不使用设备系统朗读。
 
 
@@ -53,11 +59,13 @@ async def synthesize(text: str, lang: str = "zh") -> bytes:
             result = response.json()["Response"]
         if "Error" in result:
             code = result["Error"].get("Code", "")
+            if "Signature" in code or "SecretId" in code:
+                raise SpeechUnavailable("自然声音验证失败，请检查服务端语音服务配置。", code)
             if "AuthFailure" in code or "UnauthorizedOperation" in code:
-                raise RuntimeError("自然声音暂无使用权限，请在腾讯云开通 TTS 并授权语音合成。")
+                raise SpeechUnavailable("自然声音暂无使用权限，请在腾讯云开通 TTS 并授权语音合成。", code)
             if "AppIdNotRegistered" in code or "Resource" in code or "FailedOperation" in code:
-                raise RuntimeError("自然声音暂不可用，请检查腾讯云 TTS 开通状态与音色额度。")
-            raise RuntimeError("自然声音生成失败，请稍后重试。")
+                raise SpeechUnavailable("自然声音暂不可用，请检查腾讯云 TTS 开通状态与音色额度。", code)
+            raise SpeechUnavailable("自然声音生成失败，请稍后重试。", code)
         audio = base64.b64decode(result["Audio"], validate=True)
         if not audio or len(audio) > 5_000_000:
             raise ValueError("invalid audio")

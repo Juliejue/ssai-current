@@ -11,7 +11,8 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from .companion import CompanionRequest, chat as companion_chat
-from .speech import configured as speech_configured, synthesize
+from .speech import configured as speech_configured, synthesize, SpeechUnavailable
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from .community import delete_contribution, list_approved_contributions, submit_contribution
 from .interpretation import interpret
@@ -371,6 +372,8 @@ async def speech_route(payload: SpeechRequest) -> Response:
         raise HTTPException(status_code=422, detail="请提供要朗读的文字。")
     try:
         audio = await synthesize(payload.text, payload.lang)
+    except SpeechUnavailable as error:
+        return JSONResponse({"detail": str(error), "provider_code": error.provider_code}, status_code=503)
     except RuntimeError as error:
         raise HTTPException(status_code=503, detail=str(error)) from error
     return Response(audio, media_type="audio/mpeg", headers={"Cache-Control": "no-store", "X-Voice": "xiaozai-soft"})
