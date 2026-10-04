@@ -100,3 +100,27 @@ def test_extension_transport_keeps_old_schema_and_checks_commands():
     assert 'text' not in envelope['data']
     forged = {'_current_extension_v1':'companion_action','data':{'action':'delete_all','origin':'desk','request_id':'bad'}}
     assert _display_event('collector_saved',forged) == ('collector_saved',{})
+
+
+def test_extension_write_works_with_original_database_whitelist(monkeypatch):
+    from backend_app import relay
+    original_types = {'interpreted','recommended','departed','arrived','feedback','collector_saved'}
+    stored = []
+    class Cursor:
+        async def fetchone(self):
+            return (101,)
+    class Connection:
+        async def __aenter__(self): return self
+        async def __aexit__(self, *args): return False
+        async def execute(self, sql, params):
+            if params[0] not in original_types:
+                raise relay.psycopg.errors.CheckViolation('original whitelist')
+            stored.append((params[0],json.loads(params[1])))
+            return Cursor()
+    async def connect(*args, **kwargs): return Connection()
+    monkeypatch.setenv('DATABASE_URL','postgresql://original-schema')
+    monkeypatch.setattr(relay.psycopg.AsyncConnection,'connect',connect)
+    response = client.post('/api/v1/relay/ABCD23/events',json={'event_type':'companion_action','payload':{'action':'change','origin':'desk','request_id':'compat'}})
+    assert response.status_code == 202
+    assert response.json()['durable'] is True
+    assert relay._display_event(*stored[0])[0] == 'companion_action'

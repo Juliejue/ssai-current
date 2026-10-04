@@ -198,7 +198,7 @@ async def append_event(code: str, event_type: str, payload: dict[str, Any]) -> t
                     WHERE code = %s AND expires_at > now()
                     RETURNING sequence
                     """,
-                    (event_type, json.dumps(clean, ensure_ascii=False), code),
+                    (stored_type, json.dumps(stored_payload, ensure_ascii=False), code),
                 )
                 row = await cursor.fetchone()
                 if row:
