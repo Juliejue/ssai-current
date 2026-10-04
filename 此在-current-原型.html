@@ -22,6 +22,7 @@
 </script>
 <script src="/reach-policy.js"></script>
 <script src="/current-client.js"></script>
+<script src="/xiaozai-voice.js"></script>
 <script src="/mood-card.js"></script>
 <script src="/place-photos.js"></script>
 <script src="/current-moments.js"></script>
@@ -2412,7 +2413,7 @@ function renderSafe(){
 
 /* ---------- 路由 ---------- */
 function go(hash){
-  if (hash !== state.route) CurrentAI.cancelVoice();
+  if (hash !== state.route) { CurrentAI.cancelVoice(); if (window.XiaozaiVoice) window.XiaozaiVoice.stop(); }
   if (hash !== state.route && window.speechSynthesis) window.speechSynthesis.cancel();
   if (hash === "#/talk" && state.route !== "#/talk") {
     state.talkText = "";
@@ -2424,19 +2425,25 @@ function go(hash){
   const sc = document.querySelector(".screen");
   if (sc) sc.scrollTop = 0;
 }
+const companionStartedAt = Date.now();
+const companionHandled = new Set();
 function isRelayDesk(){
   return CurrentAI.deviceRole() === "desk" && Boolean(CurrentAI.relayState());
 }
 window.addEventListener("current-relay-event", event => {
   if (!event.detail) return;
+  if (state.relayEvents.some(item => item.sequence === event.detail.sequence)) return;
   state.relayEvents = state.relayEvents.concat(event.detail).slice(-30);
+  if (event.detail.event_type === 'scene_changed') state.glassesScene = event.detail.payload.scene;
+  if (event.detail.event_type === 'companion_action' && CurrentAI.deviceRole() === 'phone' && event.detail.payload.origin === 'desk' && Date.parse(event.detail.created_at) >= companionStartedAt) applyCompanionAction(event.detail.payload);
+  if (event.detail.event_type === 'companion_ack') state.companionNote = companionAckCopy(event.detail.payload);
   if (CurrentAI.deviceRole() === "desk" && state.route !== "#/connect") go("#/connect");
   else if (state.route === "#/connect") render();
 });
 window.addEventListener("hashchange", () => {
   const h = location.hash || "#/talk";
   if (h !== state.route){
-    CurrentAI.cancelVoice();
+    CurrentAI.cancelVoice(); if (window.XiaozaiVoice) window.XiaozaiVoice.stop();
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (h === "#/talk") { state.talkText = ""; state.talkTyping = false; }
     state.route = h; render();
@@ -3393,7 +3400,7 @@ function voiceGlyph(){
 function zaiGuide(prompt, mood){
   return '<div class="reflect-guide"><span class="spirit" aria-hidden="true">' + cloudSVG(mood || 'look') + '</span>' +
     '<div class="prompt">' + escapeHTML(prompt) +
-    (window.speechSynthesis ? '<button class="pet-play" data-zai-speak="' + escapeHTML(prompt) + '">' + uiCopy('听小在说', 'Listen to Xiaozai') + '</button>' : '') +
+    (window.XiaozaiVoice ? '<button class="pet-play" data-zai-speak="' + escapeHTML(prompt) + '">' + uiCopy('听小在说', 'Listen to Xiaozai') + '</button>' : '') +
     '</div></div>';
 }
 function keyboardSVG(){
@@ -3616,6 +3623,9 @@ function relayEventCopy(event){
     title:uiCopy("这一趟回来了", "Back from the visit"),
     line:[p.place_name, typeof p.change_score === "number" ? signed(p.change_score) : "", (p.factors || []).join("、")].filter(Boolean).join(" · ")
   };
+  if (event.event_type === "companion_ack") return {title:uiCopy("两端已接续", "Devices updated"), line:companionAckCopy(p)};
+  if (event.event_type === "companion_action") return {title:uiCopy("收到调整请求", "Adjustment requested"), line:({accept:'接受推荐',change:'换一个',quiet:'安静一点',near:'近一点'})[p.action] || ''};
+  if (event.event_type === "scene_changed") return {title:uiCopy("场景已切换", "Scene updated"), line:({quiet:'呼吸陪伴',run:'运动陪伴',cafe:'探索向导'})[p.scene] || ''};
   if (event.event_type === "collector_saved") return {title:uiCopy("留下一条匿名线索", "Anonymous signal saved"), line:p.place_name || ""};
   return {title:uiCopy("接住了一个新状态", "A new update arrived"), line:""};
 }
@@ -3642,16 +3652,138 @@ function publishRelayRecommendation(recommendation){
   }).catch(() => {});
 }
 
+function companionRecommendation(){
+  if (CurrentAI.deviceRole() === 'phone' && state.offer && state.offer.length) return state.offer[0];
+  const latest = (state.relayEvents || []).slice().reverse().find(event => event.event_type === 'recommended');
+  return latest ? latest.payload : null;
+}
+function companionAckCopy(payload){
+  if (payload.status === 'needs_phone') return uiCopy('请在手机开启位置，并先告诉小在你想去什么地方。', 'Enable location and start a recommendation on the phone.');
+  if (payload.status === 'failed') return uiCopy('这次调整没有完成，保留原推荐。可以再试一次。', 'The adjustment failed. Your previous recommendation is kept.');
+  return payload.action === 'accept' ? uiCopy('已接受：', 'Accepted: ') + (payload.place_name || '') : uiCopy('推荐已更新：', 'Updated: ') + (payload.place_name || '');
+}
+async function applyCompanionAction(payload){
+  if (companionHandled.has(payload.request_id)) return;
+  companionHandled.add(payload.request_id);
+  if (state.companionActionBusy) {
+    await CurrentAI.publishRelay('companion_ack', {action:payload.action, status:'failed', request_id:payload.request_id}).catch(() => {});
+    return;
+  }
+  state.companionActionBusy = true;
+  let status = 'done', selected = companionRecommendation();
+  try {
+    if (!selected || !state.read || !state.read.state || !CurrentAI.hasLocation()) status = 'needs_phone';
+    else if (payload.place_id && payload.place_id !== selected.place_id) status = 'failed';
+    else if (payload.action === 'accept') {
+      CurrentAI.track('recommendation_accepted', {place_id:selected.place_id, recommendation_id:selected.recommendation_id});
+      state.offerNote = uiCopy('你接受了这个推荐。准备好后可以在手机打开地图。', 'Accepted. Open directions on the phone when you’re ready.');
+    } else {
+      const revised = JSON.parse(JSON.stringify(state.read.state));
+      const rejected = (state.rejected || []).slice();
+      if (payload.action === 'change') rejected.push(selected.place_id);
+      if (payload.action === 'quiet') {
+        revised.self_report = Object.assign({}, revised.self_report || {}, {stimulus:'less'});
+        revised.need_keys = (revised.need_keys || []).filter(key => key !== 'loud').slice(0,6);
+        revised.avoid_tags = Array.from(new Set((revised.avoid_tags || []).concat('loud'))).slice(-8);
+      }
+      if (payload.action === 'near') revised.max_travel_minutes = Math.min(revised.max_travel_minutes || 15, 15);
+      const result = await CurrentAI.recommendFor(revised, rejected.slice(-20));
+      if (result.blocked_by_safety || !(result.recommendations || []).length) status = 'failed';
+      else {
+        state.read.state = revised; state.rejected = rejected.slice(-20);
+        state.offer = result.recommendations; state.cardIndex = 0;
+        state.aiPlaceOrder = state.offer.map(item => item.place_id);
+        state.aiRecommendations = {};
+        state.offer.forEach(item => { state.aiRecommendations[item.place_id] = item; });
+        selected = state.offer[0];
+        publishRelayRecommendation(selected);
+      }
+    }
+  } catch (_) { status = 'failed'; }
+  const ack = {action:payload.action, status:status, request_id:payload.request_id, place_name:selected && selected.place_name || ''};
+  state.companionActionBusy = false;
+  state.companionNote = companionAckCopy(ack);
+  await CurrentAI.publishRelay('companion_ack', ack).catch(error => { state.companionNote = error.message; });
+  render();
+}
+async function requestCompanionAction(action){
+  if (!CurrentAI.relayState()) { state.companionNote = uiCopy('先连接手机与眼镜伴随界面。', 'Connect the phone and companion first.'); render(); return; }
+  const recommendation = companionRecommendation();
+  const payload = {action:action, origin:CurrentAI.deviceRole(), request_id:crypto.randomUUID(), place_id:recommendation && recommendation.place_id || ''};
+  state.companionNote = uiCopy('请求已发出，正在等手机处理…', 'Request sent. Waiting for the phone…');
+  render();
+  try {
+    const result = await CurrentAI.publishRelay('companion_action', payload);
+    if (!result.accepted) throw new Error(uiCopy('连接已断开，请重新配对。', 'Reconnect the devices.'));
+    if (payload.origin === 'phone') await applyCompanionAction(payload);
+  } catch (error) { state.companionNote = error.message; render(); }
+}
+function renderCompanionChat(){
+  const recommendation = companionRecommendation();
+  let h = '<section class="companion-chat"><h3>' + uiCopy('和小在继续聊', 'Keep talking with Xiaozai') + '</h3>';
+  if (recommendation) h += '<p class="companion-status">' + uiCopy('当前推荐：', 'Current recommendation: ') + escapeHTML(recommendation.place_name || '') + '</p>';
+  h += '<p class="companion-status">' + uiCopy('文字和语音都可以。只同步推荐与操作，聊天原文不进入配对记录。', 'Type or speak. Only recommendations and actions are shared; chat text stays out of the pairing record.') + '</p>';
+  (state.companionHistory || []).forEach(turn => {
+    h += '<div class="companion-turn ' + (turn.role === 'user' ? 'user' : '') + '"><span class="tag">' + (turn.role === 'user' ? uiCopy('你','You') : uiCopy('小在','Xiaozai')) + '</span><p>' + escapeHTML(turn.content) + '</p>' + (turn.role === 'assistant' ? '<button class="btn-text" data-zai-speak="' + escapeHTML(turn.content) + '">' + uiCopy('听小在说', 'Listen to Xiaozai') + '</button>' : '') + '</div>';
+  });
+  h += '<textarea id="companion-input" maxlength="300" aria-label="' + uiCopy('和小在说话', 'Talk to Xiaozai') + '" placeholder="' + uiCopy('这里太吵了，想换个安静的地方…', 'It’s too noisy here. Can we find somewhere quieter?') + '">' + escapeHTML(state.companionText || '') + '</textarea>';
+  h += '<div class="companion-actions"><button id="companion-mic" aria-pressed="' + CurrentAI.voiceIsActive() + '">' + uiCopy(CurrentAI.voiceIsActive() ? '说完了' : '说话', CurrentAI.voiceIsActive() ? 'Done' : 'Speak') + '</button><button class="primary" id="companion-send"' + (state.companionBusy ? ' disabled' : '') + '>' + uiCopy(state.companionBusy ? '正在回复…' : '发送', state.companionBusy ? 'Replying…' : 'Send') + '</button></div>';
+  h += '<p class="companion-status" id="companion-status" role="status" aria-live="polite">' + escapeHTML(state.companionNote || '') + '</p>';
+  h += '<div class="companion-actions">';
+  [['accept',uiCopy('接受推荐','Accept')],['change',uiCopy('换一个','Another place')],['quiet',uiCopy('安静一点','Quieter')],['near',uiCopy('近一点','Closer')]].forEach(([action,label]) => {
+    h += '<button data-companion-action="' + action + '"' + (!CurrentAI.relayState() || state.companionActionBusy || state.companionUrgent ? ' disabled' : '') + '>' + label + '</button>';
+  });
+  return h + '</div><small class="companion-status">' + uiCopy('小在的柔和声音由 AI 生成。', 'Xiaozai’s soft voice is AI-generated.') + '</small></section>';
+}
+function bindCompanionChat(root){
+  const input = root.querySelector('#companion-input');
+  if (input) input.oninput = () => { state.companionText = input.value; };
+  async function submit(){
+    const text = ((input && input.value) || state.companionText || '').trim();
+    if (!text || state.companionBusy) return;
+    state.companionText = text; state.companionBusy = true; state.companionNote = uiCopy('我在听…', 'I’m listening…'); render();
+    const recommendation = companionRecommendation();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 18000);
+    try {
+      const result = await CurrentAI.api('/companion/chat', {method:'POST', signal:controller.signal, body:JSON.stringify({text:text, history:(state.companionHistory || []).slice(-8), scene:state.glassesScene || 'quiet', place_name:recommendation && recommendation.place_name || '', state_label:((state.relayEvents || []).slice().reverse().find(event => event.event_type === 'interpreted') || {payload:{}}).payload.state_label || '', need_labels:((state.relayEvents || []).slice().reverse().find(event => event.event_type === 'interpreted') || {payload:{}}).payload.need_labels || [], lang:currentLang()})});
+      state.companionHistory = (state.companionHistory || []).concat({role:'user',content:text},{role:'assistant',content:result.reply}).slice(-8);
+      state.companionText = ''; state.companionNote = result.source === 'rules' ? uiCopy('当前使用基础回应；下方按钮仍可调整推荐。', 'Basic reply mode. Use the buttons to adjust your recommendation.') : '';
+      state.companionUrgent = Boolean(result.urgent);
+      // Only explicit user commands trigger changes. Generated prose has no authority.
+      if (!result.urgent && /^(?:请|帮我)?(?:换一个|换个地方|换一批)[。！!\s]*$/.test(text)) await requestCompanionAction('change');
+      else if (!result.urgent && /^(?:请|帮我)?(?:安静一点|找个安静的地方)[。！!\s]*$/.test(text)) await requestCompanionAction('quiet');
+      else if (!result.urgent && /^(?:请|帮我)?近一点[。！!\s]*$/.test(text)) await requestCompanionAction('near');
+      else if (!result.urgent && /^(?:接受推荐|就去这里)[。！!\s]*$/.test(text)) await requestCompanionAction('accept');
+    } catch (error) { state.companionNote = error.name === 'AbortError' ? uiCopy('刚才等待太久，文字保留了，可以重试。', 'That took too long. Your text is kept for retry.') : error.message; }
+    finally { clearTimeout(timeout); state.companionBusy = false; render(); }
+  }
+  const send = root.querySelector('#companion-send'); if (send) send.onclick = submit;
+  if (input) input.onkeydown = event => { if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); submit(); } };
+  const mic = root.querySelector('#companion-mic');
+  if (mic) mic.onclick = () => {
+    if (window.XiaozaiVoice) window.XiaozaiVoice.stop();
+    CurrentAI.toggleVoice({
+      onStatus: message => { state.companionNote = message; const cap = document.getElementById('companion-status'); if (cap) cap.textContent = message; },
+      onState: phase => { const button = document.getElementById('companion-mic'); if (button) { button.setAttribute('aria-pressed', String(phase !== 'idle')); button.textContent = uiCopy(phase === 'listening' ? '说完了' : phase === 'idle' ? '说话' : '请稍等', phase === 'listening' ? 'Done' : phase === 'idle' ? 'Speak' : 'One moment'); } },
+      onPartial: () => {},
+      onText: text => { state.companionText = text.slice(0,300); state.companionNote = uiCopy('已整理成文字，点发送后我会回复。', 'Ready. Send when you’re happy with the text.'); render(); },
+      onError: message => { state.companionNote = message; render(); }
+    }).catch(error => { state.companionNote = error.message; render(); });
+  };
+  root.querySelectorAll('[data-companion-action]').forEach(button => button.onclick = () => requestCompanionAction(button.dataset.companionAction));
+}
+
 function renderGlassesCompanion(){
   const scene = state.glassesScene || 'quiet';
-  const scenes = {quiet:['安静空间 · 呼吸陪伴','如果你愿意，停下来做一分钟自然呼吸；不舒服就停止。'],run:['河边 / 跑道 · 运动陪伴','先慢走热身，按自己的节奏开始；想停就停。'],cafe:['咖啡馆 / 博物馆 · 探索向导','你想了解眼前什么？回到手机告诉我，我会继续陪你探索。']};
+  const scenes = {quiet:['安静空间 · 呼吸陪伴','如果你愿意，停下来做一分钟自然呼吸；不舒服就停止。'],run:['河边 / 跑道 · 运动陪伴','先慢走热身，按自己的节奏开始；想停就停。'],cafe:['咖啡馆 / 博物馆 · 探索向导','你想了解眼前什么？告诉我，我会继续陪你探索。']};
   const latest = (state.relayEvents || []).slice().reverse().find(e => e.event_type === 'recommended');
   const place = latest && latest.payload.place_name;
-  let h = '<section class="relay-panel" style="background:#123d35;color:#eaffef"><span class="moment-badge">GLASSES · 网页演示</span><div class="say">' + cloudSVG('look') + '<h3>小在 · ' + escapeHTML(place || '此刻的空间') + '</h3></div>';
+  let h = '<section class="relay-panel glasses-companion"><span class="moment-badge">GLASSES · 网页演示</span><div class="companion-heading"><span class="companion-cloud">' + cloudSVG('look') + '</span><h3>小在 · ' + escapeHTML(place || '此刻的空间') + '</h3></div>';
   h += '<p>场景由你选择，尚未接入视觉识别。导航以手机地图为准。</p><div class="relay-role">';
-  Object.keys(scenes).forEach(key => { h += '<button class="btn ghost sm" data-glasses-scene="' + key + '">' + scenes[key][0] + '</button>'; });
+  Object.keys(scenes).forEach(key => { h += '<button class="btn ghost sm' + (key === scene ? ' on' : '') + '" aria-pressed="' + (key === scene) + '" data-glasses-scene="' + key + '">' + scenes[key][0] + '</button>'; });
   h += '</div><h3>' + scenes[scene][0] + '</h3><p>' + scenes[scene][1] + '</p><button class="btn ghost sm" data-zai-speak="' + escapeHTML(scenes[scene][1]) + '">听小在说</button>';
-  h += '<p style="margin-top:18px">空间深层信息：到访人数、眼镜推荐到访占比、心情变化汇总暂无可靠数据，暂不展示数值。</p><p>只同步结构化进度；不上传环境照片、原始音频或私密原话。社交邀请需双方主动同意，当前尚未开放。</p></section>';
+  h += '<p style="margin-top:18px">空间深层信息：到访人数、眼镜推荐到访占比、心情变化汇总暂无可靠数据，暂不展示数值。</p><p>只同步结构化进度；聊天原文只在当前设备用于本轮回复，不进入配对记录；录音不保存。社交邀请需双方主动同意，当前尚未开放。</p></section>';
   return h;
 }
 
@@ -3688,12 +3820,14 @@ function renderConnect(){
   }
   if (state.relayNote) h += '<p class="moment-status">' + escapeHTML(state.relayNote) + '</p>';
   if (role === 'desk') h += renderGlassesCompanion();
+  h += renderCompanionChat();
   if (relay && role === 'desk') {
-    h += '<h2 style="margin-top:26px">' + uiCopy('手机上的进度', 'Progress from the phone') + '</h2>';
+    h += '<details class="relay-panel"><summary>' + uiCopy('查看两端的进度', 'Device progress') + '</summary>';
     h += state.relayEvents.length ? state.relayEvents.slice().reverse().map(event => {
       const copy = relayEventCopy(event);
       return '<div class="relay-event"><b>' + escapeHTML(copy.title) + '</b><p>' + escapeHTML(copy.line) + '</p></div>';
     }).join('') : '<div class="moment-card"><p>' + uiCopy('连接成功。现在请在手机上说出需求；小在的理解、推荐、出发与抵达进度会自动出现在这里。', 'Connected. Speak on the phone now; Xiaozai’s understanding, recommendation, departure, and arrival will appear here.') + '</p></div>';
+    h += '</details>';
   }
   h += '</div></div>';
   return h;
@@ -4931,18 +5065,19 @@ function bind(){
   }
 
   root.querySelectorAll('[data-zai-speak]').forEach(button => button.onclick = () => {
-    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
     CurrentAI.cancelVoice();
-    window.speechSynthesis.cancel();
-    const utterance = new window.SpeechSynthesisUtterance(button.dataset.zaiSpeak);
-    utterance.lang = currentLang() === 'en' ? 'en-US' : 'zh-CN';
-    utterance.rate = .94;
-    const guide = button.closest('.reflect-guide');
-    const finished = () => { if (guide) guide.classList.remove('is-speaking'); };
-    utterance.onend = finished;
-    utterance.onerror = finished;
-    if (guide) guide.classList.add('is-speaking');
-    window.speechSynthesis.speak(utterance);
+    const original = button.textContent;
+    let status = button.nextElementSibling;
+    if (!status || !status.classList.contains('voice-status')) {
+      status = document.createElement('span'); status.className = 'voice-status'; status.setAttribute('role', 'status');
+      button.after(status);
+    }
+    XiaozaiVoice.speak(button.dataset.zaiSpeak, currentLang(), (phase, message) => {
+      button.textContent = phase === 'loading' ? uiCopy('准备声音…', 'Preparing voice…') : phase === 'speaking' ? uiCopy('小在正在说…', 'Xiaozai is speaking…') : original;
+      status.textContent = message || (phase === 'speaking' ? uiCopy('小在 · 柔和声音（AI 生成）', 'Xiaozai · soft AI voice') : '');
+      const guide = button.closest('.reflect-guide');
+      if (guide) guide.classList.toggle('is-speaking', phase === 'speaking');
+    });
   });
 
   /* 一句话 → 这次到访的结构化反馈。模型没接住就退回自己选，绝不替他猜一个分数。 */
@@ -5100,6 +5235,7 @@ function bind(){
   }
   if (naturalSubmit) naturalSubmit.onclick = () => submitNatural();
   if (voiceInput) voiceInput.onclick = () => {
+    if (window.XiaozaiVoice) window.XiaozaiVoice.stop();
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     setNaturalStatus(uiCopy("正在请求麦克风权限…", "Requesting microphone access…"));
     CurrentAI.toggleVoice({
@@ -5501,7 +5637,12 @@ function bind(){
     go("#/reflect/" + el.dataset.reflect);
   });
 
-  root.querySelectorAll("[data-glasses-scene]").forEach(button => button.onclick = () => { state.glassesScene = button.dataset.glassesScene; render(); });
+  root.querySelectorAll("[data-glasses-scene]").forEach(button => button.onclick = () => {
+    state.glassesScene = button.dataset.glassesScene;
+    CurrentAI.publishRelay('scene_changed', {scene:state.glassesScene, origin:CurrentAI.deviceRole()}).catch(error => { state.companionNote = error.message; render(); });
+    render();
+  });
+  bindCompanionChat(root);
   const reflectType = root.querySelector("#reflect-type");
   if (reflectType) reflectType.onclick = () => {
     state.reflectTyping = true; render();
@@ -5522,6 +5663,7 @@ function bind(){
 
   const reflectMic = root.querySelector("#reflect-mic");
   if (reflectMic) reflectMic.onclick = () => {
+    if (window.XiaozaiVoice) window.XiaozaiVoice.stop();
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     CurrentAI.toggleVoice({
       onStatus: m => { state.reflectNote = m; setReflectCap(m); },

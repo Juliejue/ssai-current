@@ -10,6 +10,9 @@ import uuid
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
+from .companion import CompanionRequest, chat as companion_chat
+from .speech import configured as speech_configured, synthesize
+from pydantic import BaseModel, Field
 from .community import delete_contribution, list_approved_contributions, submit_contribution
 from .interpretation import interpret
 from .i18n import ui
@@ -350,3 +353,31 @@ async def outcome_delete(payload: OutcomeDeleteRequest) -> dict[str, bool]:
     logger.info(json.dumps({"event": "outcome_deleted", "session_id": payload.session_id, "recommendation_id": payload.recommendation_id}, ensure_ascii=False))
     deleted = await delete_outcome(payload)
     return {"accepted": True, "deleted": deleted}
+
+
+class SpeechRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=150)
+    lang: str = Field(default="zh", pattern="^(zh|en)$")
+
+
+@app.get("/api/v1/speech/capabilities")
+async def speech_capabilities() -> dict:
+    return {"configured": speech_configured(), "voice": "xiaozai-soft", "ai_generated": True}
+
+
+@app.post("/api/v1/speech")
+async def speech_route(payload: SpeechRequest) -> Response:
+    if not payload.text.strip():
+        raise HTTPException(status_code=422, detail="请提供要朗读的文字。")
+    try:
+        audio = await synthesize(payload.text, payload.lang)
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    return Response(audio, media_type="audio/mpeg", headers={"Cache-Control": "no-store", "X-Voice": "xiaozai-soft"})
+
+
+@app.post("/api/v1/companion/chat")
+async def companion_chat_route(payload: CompanionRequest) -> dict:
+    if not payload.text.strip():
+        raise HTTPException(status_code=422, detail="说一句就好。")
+    return await companion_chat(payload)

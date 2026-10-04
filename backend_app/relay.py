@@ -43,6 +43,9 @@ EVENT_FIELDS: dict[str, dict[str, type | tuple[type, ...]]] = {
         "factors": list,
     },
     "collector_saved": {"place_name": str, "kind": str},
+    "companion_action": {"action": str, "origin": str, "request_id": str, "place_id": str},
+    "companion_ack": {"action": str, "status": str, "request_id": str, "place_name": str},
+    "scene_changed": {"scene": str, "origin": str},
 }
 
 _memory_lock = asyncio.Lock()
@@ -65,6 +68,17 @@ def safe_payload(event_type: str, payload: dict[str, Any]) -> dict[str, Any]:
     allowed = EVENT_FIELDS.get(event_type)
     if allowed is None:
         raise ValueError("unsupported relay event")
+    if event_type in ("companion_action", "companion_ack"):
+        if payload.get("action") not in ("accept", "change", "quiet", "near"):
+            raise ValueError("unsupported companion action")
+        if not isinstance(payload.get("request_id"), str) or not 1 <= len(payload["request_id"]) <= 80:
+            raise ValueError("invalid request id")
+    if event_type == "companion_action" and payload.get("origin") not in ("phone", "desk"):
+        raise ValueError("invalid origin")
+    if event_type == "companion_ack" and payload.get("status") not in ("done", "needs_phone", "failed"):
+        raise ValueError("invalid status")
+    if event_type == "scene_changed" and (payload.get("scene") not in ("quiet", "run", "cafe") or payload.get("origin") not in ("phone", "desk")):
+        raise ValueError("invalid scene")
     output: dict[str, Any] = {}
     for key, expected in allowed.items():
         value = payload.get(key)

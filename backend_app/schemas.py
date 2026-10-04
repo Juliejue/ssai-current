@@ -339,7 +339,7 @@ class OutcomeRequest(BaseModel):
 
 
 RelayEventType = Literal[
-    "interpreted", "recommended", "departed", "arrived", "feedback", "collector_saved"
+    "interpreted", "recommended", "departed", "arrived", "feedback", "collector_saved", "companion_action", "companion_ack", "scene_changed"
 ]
 
 

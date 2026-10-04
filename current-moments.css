@@ -48,3 +48,27 @@
 @keyframes cloud-breathe{50%{transform:translateY(-3px)}}
 @media(prefers-reduced-motion:reduce){.cloud-heavy,.cloud-rainbow{animation:none}.cloud-body,.cloud-colour{transition:none}}
 @media(max-width:380px){.moment-card{padding:15px}.moment-card h3{font-size:21px}}
+
+/* Xiaozai companion uses the same brand tokens in light and dark modes. */
+.glasses-companion{background:var(--water-wash);color:var(--ink);border-color:var(--line-2)}
+.glasses-companion .companion-heading{display:flex;align-items:center;gap:14px;margin:16px 0}
+.glasses-companion .companion-cloud{width:76px;height:46px;flex:none;color:var(--ink)}
+.glasses-companion .companion-heading h3{margin:0;font:600 21px/1.4 var(--sans)}
+.glasses-companion .cloud-body{fill:var(--water-wash);stroke:var(--ink)}
+.glasses-companion .relay-role{flex-wrap:wrap}
+.glasses-companion .relay-role button{flex:1 1 100px;min-height:48px;padding:10px 12px;white-space:normal;line-height:1.5;color:var(--ink);background:var(--card);border-color:var(--line-2)}
+.glasses-companion .relay-role button.on{background:var(--water);color:var(--paper);border-color:var(--water)}
+.glasses-companion p{color:var(--ink);line-height:1.75}
+.companion-chat{margin:18px 0;padding:18px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.companion-chat h3{font:600 19px/1.4 var(--sans);margin:0 0 12px}
+.companion-chat textarea{width:100%;min-height:80px;border:1px solid var(--line-2);border-radius:12px;padding:12px;font:15px/1.6 var(--sans);color:var(--ink);background:var(--paper)}
+.companion-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.companion-actions button{flex:1 1 100px;min-height:44px;padding:10px;border-radius:22px;font:500 13px/1.4 var(--sans);color:var(--ink);border:1px solid var(--line-2);background:var(--water-wash)}
+.companion-actions .primary{background:var(--ink);color:var(--paper)}
+.companion-turn{padding:10px 12px;margin:9px 0;background:var(--water-wash);border-radius:12px;font:14px/1.75 var(--sans);overflow-wrap:anywhere}
+.companion-turn.user{margin-left:24px;background:var(--paper)}
+.companion-turn .tag{display:block;color:var(--ink-dim);font:11px var(--sans);margin-bottom:5px}
+.companion-turn p{margin:0}
+.companion-status,.voice-status{display:block;margin:8px 0;color:var(--ink-dim);font:12px/1.7 var(--sans)}
+.voice-status:empty{display:none}
+.companion-chat button:disabled{opacity:.55}
