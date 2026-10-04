@@ -559,3 +559,34 @@ if (fs.existsSync(path.join(out, '12-experience-qr.png'))) {
   s += finish();
   save('architecture-simple.svg', s);
 }
+
+// D · Real phone and companion screens. Keep only device labels.
+{
+  const w = 1320, h = 760;
+  const phone = dataUri('04-recommendation-raw.jpg', 'image/jpeg');
+  const companion = dataUri('09-glasses-companion-raw.jpg', 'image/jpeg');
+  let s = svgStart(w, h, '手机与跨设备伴侣端', '手机负责推荐确认，伴侣端接续结构化进度与受限操作。');
+  s += rect(0, 0, w, h, 0, C.paper);
+
+  // Phone screenshot: useful content sits in the left half of the raw capture.
+  s += rect(150, 34, 330, 650, 48, '#0B1719', '#233C40', 'filter="url(#softShadow)"');
+  s += rect(162, 48, 306, 622, 38, '#F4F6F5');
+  s += `<defs><clipPath id="crossPhoneClip"><rect x="170" y="76" width="290" height="576" rx="30"/></clipPath></defs>`;
+  s += `<g clip-path="url(#crossPhoneClip)"><image href="${phone}" x="170" y="76" width="580" height="1256" preserveAspectRatio="none"/></g>`;
+  s += `<rect x="272" y="56" width="86" height="19" rx="10" fill="#0B1719"/>`;
+  s += text(315, 728, '手机', 'label', 'middle');
+
+  s += `<path d="M520 350 H760" stroke="${C.teal2}" stroke-width="5" stroke-dasharray="11 12"/>`;
+  s += `<path d="M742 336 l18 14 -18 14" fill="none" stroke="${C.teal2}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  s += `<text x="640" y="320" font-family="${font}" font-size="17" text-anchor="middle" fill="${C.muted}">6 位临时码</text>`;
+
+  // Companion capture: enlarge the left half of the original browser capture.
+  s += rect(810, 74, 360, 570, 42, '#243235', '#243235', 'filter="url(#softShadow)"');
+  s += rect(822, 88, 336, 542, 32, '#F6F8F7');
+  s += `<defs><clipPath id="crossCompanionClip"><rect x="830" y="96" width="320" height="526" rx="26"/></clipPath></defs>`;
+  s += `<g clip-path="url(#crossCompanionClip)"><image href="${companion}" x="510" y="96" width="1862" height="1330" preserveAspectRatio="none"/></g>`;
+  s += text(990, 688, '伴侣端', 'label', 'middle');
+
+  s += finish();
+  save('cross-device-simple.svg', s);
+}
