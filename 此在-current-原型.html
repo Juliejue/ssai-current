@@ -2494,7 +2494,7 @@ function topbar(title, kicker, backTo){
   const relay = CurrentAI.relayState();
   return '<div class="top"><div class="lead">' +
     (backTo ? '<button class="back" data-go="' + backTo + '" aria-label="' + uiCopy("返回", "Back") + '">←</button>' : '') +
-    '<div><div class="k">' + kicker + '</div></div><h2>' + title + '</h2></div>' +
+    (kicker ? '<div><div class="k">' + kicker + '</div></div>' : '') + '<h2>' + title + '</h2></div>' +
     '<div class="topright">' + langToggle() +
     '<button class="topnav" data-go="#/connect">' + (relay ? uiCopy("已连接", "Connected") : uiCopy("连接", "Connect")) + '</button>' +
     '<button class="topnav" data-go="#/talk">' + uiCopy("首页", "Home") + '</button>' +
@@ -3814,7 +3814,7 @@ function renderConnect(){
   const relay = CurrentAI.relayState();
   const role = CurrentAI.deviceRole();
   const pending = CurrentAI.relayPendingCode();
-  let h = topbar(uiCopy('手机与智能眼镜，让小在一路陪你', 'Phone + smart glasses'), uiCopy('跨设备（智能眼镜）', 'Smart glasses'), '#/talk');
+  let h = topbar(uiCopy('跨设备', 'Cross-device'), '', '#/talk');
   h += '<div class="screen"><div class="pad moment-wrap">';
   h += '<div class="relay-role"><button class="btn ghost sm' + (role === 'phone' ? ' on' : '') + '" data-role="phone">' + uiCopy('从这台手机发起', 'Start on this phone') + '</button>' +
     '<button class="btn ghost sm' + (role === 'desk' ? ' on' : '') + '" data-role="desk">' + uiCopy('眼镜伴随模式（演示）', 'Glasses companion (demo)') + '</button></div>';
