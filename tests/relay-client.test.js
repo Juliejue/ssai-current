@@ -66,7 +66,7 @@ test('phone creates a short-lived relay and publishes only through the relay API
   assert.equal(app.current.deviceRole(), 'phone');
   const relay = await app.current.createRelaySession();
   assert.equal(relay.code, '7K9MNP');
-  assert.equal(app.current.relayShareUrl(), 'https://current.test/current/?relay=7K9MNP#/connect');
+  assert.equal(app.current.relayShareUrl(), 'https://current.test/current/?role=desk&relay=7K9MNP#/connect');
 
   await app.current.publishRelay('departed', {place_id:'liangmahe', place_name:'亮马河'});
   const request = app.requests.find(item => item.url.includes('/relay/7K9MNP/events'));

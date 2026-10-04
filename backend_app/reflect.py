@@ -34,8 +34,8 @@ from .security import checked_model_base_url
 
 logger = logging.getLogger("current.reflect")
 
-REFLECT_TIMEOUT_SECONDS = 14
-REFLECT_ATTEMPTS = 3
+REFLECT_TIMEOUT_SECONDS = 10
+REFLECT_ATTEMPTS = 2
 REFLECT_MAX_TOKENS = 240
 MAX_ACK_CHARS = 46
 MAX_ACK_CHARS_EN = 110
@@ -45,10 +45,12 @@ STAGES = ("none", "state", "need", "constraint", "place")
 
 SYSTEM_PROMPT = """你是「小在」。用户刚从一个地方离开，说了一句话描述这趟怎么样。
 把它变成 JSON，并且用一句话回应他。
+输入可能包含前面几轮用户与小在的对话。回应最后一轮，记住前文，不重复已问过的问题。
+用户继续聊天或提问时也要自然回应；不足以判断变化时 change_score 可为 null，不强行评分。
 
 只输出 JSON：
 {
-  "change_score": -3 到 3 的整数,
+  "change_score": -3 到 3 的整数或 null,
   "factors": ["只能从我给你的选项原文里挑，最多 3 个"],
   "mismatch_stage": "none|state|need|constraint|place",
   "acknowledgement": "小在对他说的一句话，不超过 46 字"

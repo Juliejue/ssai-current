@@ -278,7 +278,7 @@
   function relayShareUrl() {
     var relay = loadRelay();
     if (!relay) return '';
-    return location.origin + location.pathname + '?relay=' + encodeURIComponent(relay.code) + '#/connect';
+    return location.origin + location.pathname + '?role=desk&relay=' + encodeURIComponent(relay.code) + '#/connect';
   }
 
   async function api(path, options) {
@@ -333,7 +333,10 @@
   /* 离开之后说的那一句话 → 这次到访的结构化反馈。
      原话不入库，只把结果存下来（守则 6）。 */
   function reflectOn(text, context) {
+    var controller = new AbortController();
+    var timeout = setTimeout(function () { controller.abort(); }, 25000);
     return api('/reflect', {
+      signal: controller.signal,
       method: 'POST',
       body: JSON.stringify({
         text: text,
@@ -342,7 +345,7 @@
         options: context.options || [],
         lang: lang()
       })
-    });
+    }).finally(function () { clearTimeout(timeout); });
   }
 
   // FR-12：删除是个承诺，不能只在本地抹掉、服务端还留着。

@@ -1934,7 +1934,7 @@ const state = {
   navigationReturn: null,
   locationHelp: false,
   arrivedToast: null, arrivedTimer: null,
-  reflect: null, reflectTyping: false, reflectText: "", reflectNote: null, reflectHistory: [],
+  reflect: null, reflectSending: false, reflectTyping: false, reflectText: "", reflectNote: null, reflectHistory: [],
   pendingDelete: null,
   reach: null,
   reachNote: null,
@@ -2760,7 +2760,7 @@ function renderReflect(id){
       '" placeholder="' + uiCopy('想到什么就说什么…', 'What’s on your mind?') + '">' + escapeHTML(state.reflectText || '') + '</textarea>' +
       '<button class="send" id="reflect-submit">' + uiCopy('发送', 'Send') + '</button></div>';
   }
-  if (r){
+  if (r && r.change_score !== null){
     if (r.change_score < 0 && state.read) h += '<button class="btn ghost sm" id="reflect-retry" style="margin-top:12px">' +
       uiCopy('换个地方，我重新找', 'Find somewhere else') + '</button>';
     h += '<div class="actions"><button class="btn" id="reflect-save">' + uiCopy('记下这次', 'Save this visit') + ' <span>→</span></button>' +
@@ -3642,38 +3642,52 @@ function publishRelayRecommendation(recommendation){
   }).catch(() => {});
 }
 
+function renderGlassesCompanion(){
+  const scene = state.glassesScene || 'quiet';
+  const scenes = {quiet:['安静空间 · 呼吸陪伴','如果你愿意，停下来做一分钟自然呼吸；不舒服就停止。'],run:['河边 / 跑道 · 运动陪伴','先慢走热身，按自己的节奏开始；想停就停。'],cafe:['咖啡馆 / 博物馆 · 探索向导','你想了解眼前什么？回到手机告诉我，我会继续陪你探索。']};
+  const latest = (state.relayEvents || []).slice().reverse().find(e => e.event_type === 'recommended');
+  const place = latest && latest.payload.place_name;
+  let h = '<section class="relay-panel" style="background:#123d35;color:#eaffef"><span class="moment-badge">GLASSES · 网页演示</span><div class="say">' + cloudSVG('look') + '<h3>小在 · ' + escapeHTML(place || '此刻的空间') + '</h3></div>';
+  h += '<p>场景由你选择，尚未接入视觉识别。导航以手机地图为准。</p><div class="relay-role">';
+  Object.keys(scenes).forEach(key => { h += '<button class="btn ghost sm" data-glasses-scene="' + key + '">' + scenes[key][0] + '</button>'; });
+  h += '</div><h3>' + scenes[scene][0] + '</h3><p>' + scenes[scene][1] + '</p><button class="btn ghost sm" data-zai-speak="' + escapeHTML(scenes[scene][1]) + '">听小在说</button>';
+  h += '<p style="margin-top:18px">空间深层信息：到访人数、眼镜推荐到访占比、心情变化汇总暂无可靠数据，暂不展示数值。</p><p>只同步结构化进度；不上传环境照片、原始音频或私密原话。社交邀请需双方主动同意，当前尚未开放。</p></section>';
+  return h;
+}
+
 function renderConnect(){
   const relay = CurrentAI.relayState();
   const role = CurrentAI.deviceRole();
   const pending = CurrentAI.relayPendingCode();
-  let h = topbar(uiCopy('把这一趟带到电脑', 'Continue on another device'), uiCopy('跨设备接续', 'Cross-device'), '#/talk');
+  let h = topbar(uiCopy('手机与智能眼镜，让小在一路陪你', 'Phone + smart glasses'), uiCopy('跨设备（智能眼镜）', 'Smart glasses'), '#/talk');
   h += '<div class="screen"><div class="pad moment-wrap">';
-  h += '<p class="lead">' + uiCopy('手机负责说话和定位，电脑同步显示小在的理解、推荐和行动进度。无需账号，连接 12 小时后自动结束。',
-    'Speak and share location on the phone while the desktop follows Xiaozai’s understanding, recommendation, and progress. No account; the link ends after 12 hours.') + '</p>';
+  h += '<p class="lead">' + uiCopy('手机负责文字、网络和记录，眼镜伴随界面接收小在的理解、推荐与行动进度。连接 12 小时后自动结束。',
+    'Phone handles text, network and records; the glasses companion receives structured progress. The link ends after 12 hours.') + '</p>';
   h += '<div class="location-help" style="margin:0 0 18px;max-width:none"><strong>' + uiCopy('什么时候有用？', 'When is this useful?') + '</strong><p>' +
-    uiCopy('在电脑前想看清路线和推荐、又要拿手机出门时使用。现在电脑端只能同步查看进度，不能替手机修改推荐；不连接也能完整使用 App。',
-      'Use it to review the recommendation on a larger screen while your phone stays ready for the trip. The desktop currently follows progress only; it cannot change the phone’s recommendation. The app works without connecting.') +
+    uiCopy('当前支持两台设备之间的网页协同演示，尚未接入眼镜硬件 SDK。眼镜端看即时提示，手机端保留私密输入、情绪轨迹与社群分享。',
+      'Two-device web demo; no glasses hardware SDK connected yet. Private input, mood history and sharing stay on the phone.') +
     '</p></div>';
-  h += '<div class="relay-steps"><div class="relay-step"><b>1</b>' + uiCopy('手机生成码','Create on phone') + '</div><div class="relay-step"><b>2</b>' + uiCopy('电脑输入码','Enter on desktop') + '</div><div class="relay-step"><b>3</b>' + uiCopy('电脑看，手机走','Review on desktop') + '</div></div>';
+  h += '<div class="relay-steps"><div class="relay-step"><b>1</b>' + uiCopy('手机生成码','Create on phone') + '</div><div class="relay-step"><b>2</b>' + uiCopy('眼镜端输入码','Enter on glasses') + '</div><div class="relay-step"><b>3</b>' + uiCopy('眼镜伴随，手机记录','Glasses companion') + '</div></div>';
   h += '<div class="relay-role"><button class="btn ghost sm' + (role === 'phone' ? ' on' : '') + '" data-role="phone">' + uiCopy('从这台手机发起', 'Start on this phone') + '</button>' +
-    '<button class="btn ghost sm' + (role === 'desk' ? ' on' : '') + '" data-role="desk">' + uiCopy('在这台电脑接收', 'Receive on this desktop') + '</button></div>';
+    '<button class="btn ghost sm' + (role === 'desk' ? ' on' : '') + '" data-role="desk">' + uiCopy('眼镜伴随模式（演示）', 'Glasses companion (demo)') + '</button></div>';
   if (!relay && role === 'phone') {
-    h += '<div class="relay-panel"><h3>' + uiCopy('连接一台电脑', 'Connect a desktop') + '</h3><p>' +
-      uiCopy('生成一个临时配对码，再去电脑输入。', 'Create a temporary pairing code, then enter it on the desktop.') +
+    h += '<div class="relay-panel"><h3>' + uiCopy('连接智能眼镜伴随界面', 'Connect glasses companion') + '</h3><p>' +
+      uiCopy('生成临时配对码，在第二台设备的眼镜伴随模式输入。', 'Create a pairing code, then enter it in the glasses companion.') +
       '</p><button class="btn sm" id="relay-create">' + uiCopy('生成配对码', 'Create pairing code') + '</button></div>';
   } else if (!relay) {
     h += '<div class="relay-panel"><h3>' + uiCopy('输入手机显示的 6 位码', 'Enter the six-character phone code') + '</h3>' +
       '<form class="relay-join" id="relay-join"><input name="code" maxlength="6" autocomplete="one-time-code" value="' + escapeHTML(pending) + '" placeholder="ABC234" required>' +
       '<button class="btn sm" type="submit">' + uiCopy('连接', 'Connect') + '</button></form></div>';
   } else {
-    h += '<div class="relay-panel"><span class="moment-badge">' + uiCopy(role === 'phone' ? '手机已准备好' : '电脑已连接', role === 'phone' ? 'PHONE READY' : 'DESKTOP CONNECTED') + '</span>' +
+    h += '<div class="relay-panel"><span class="moment-badge">' + uiCopy(role === 'phone' ? '手机已准备好' : '眼镜伴随界面已连接', role === 'phone' ? 'PHONE READY' : 'GLASSES COMPANION') + '</span>' +
       '<p>' + uiCopy('临时配对码', 'Temporary pairing code') + '</p>' +
       '<div class="relay-code">' + escapeHTML(relay.code) + '</div><p>' +
       uiCopy(relay.durable ? '两台设备只同步小在的理解、推荐与行动状态。' : '当前是本地测试连接，服务重启后会结束。', relay.durable ? 'The devices share only Xiaozai’s understanding, recommendation, and action state.' : 'This is a local test link and ends when the service restarts.') + '</p>' +
-      (role === 'phone' ? '<button class="btn ghost sm" id="relay-copy">' + uiCopy('复制电脑连接链接', 'Copy desktop link') + '</button>' : '') +
+      (role === 'phone' ? '<button class="btn ghost sm" id="relay-copy">' + uiCopy('复制眼镜伴随链接', 'Copy glasses companion link') + '</button>' : '') +
       '<button class="btn-text" id="relay-leave">' + uiCopy('断开这次接续', 'Disconnect') + '</button></div>';
   }
   if (state.relayNote) h += '<p class="moment-status">' + escapeHTML(state.relayNote) + '</p>';
+  if (role === 'desk') h += renderGlassesCompanion();
   if (relay && role === 'desk') {
     h += '<h2 style="margin-top:26px">' + uiCopy('手机上的进度', 'Progress from the phone') + '</h2>';
     h += state.relayEvents.length ? state.relayEvents.slice().reverse().map(event => {
@@ -3891,7 +3905,7 @@ function renderOffer(){
   h += '<div class="actions" style="margin-top:14px">';
   const mainHasMaps = main.map_links && Object.keys(main.map_links).length > 0;
   h += isRelayDesk()
-    ? '<div class="sample-note">' + uiCopy('这一趟已接到电脑上。请在手机上打开导航并出发。', 'This outing is on the desktop. Start directions from the phone.') + '</div>'
+    ? '<div class="sample-note">' + uiCopy('眼镜伴随界面正在接收这趟进度。请在手机上打开导航并出发。', 'The glasses companion receives your progress. Start directions on the phone.') + '</div>'
     : '<button class="btn" data-depart="' + escapeHTML(main.place_id) + '">' +
        (mainHasMaps ? uiCopy('导航', 'Directions') : uiCopy('带我去', 'Take me there')) + ' <span>→</span></button>';
   if (!isRelayDesk()) h += '<div class="btn-row" style="margin-top:10px">' +
@@ -4615,7 +4629,7 @@ function bind(){
     relayCreate.disabled = true;
     state.relayNote = uiCopy("正在生成临时会话…", "Creating a temporary session…");
     CurrentAI.createRelaySession().then(() => {
-      state.relayNote = uiCopy("已生成。在电脑上输入这个码。", "Ready. Enter this code on the desktop.");
+      state.relayNote = uiCopy("已生成。在眼镜伴随界面输入这个码。", "Ready. Enter this code in the glasses companion.");
       render();
     }).catch(error => { state.relayNote = error.message; render(); });
   };
@@ -4639,7 +4653,7 @@ function bind(){
   const relayCopy = root.querySelector("#relay-copy");
   if (relayCopy) relayCopy.onclick = () => {
     const url = CurrentAI.relayShareUrl();
-    const done = () => { state.relayNote = uiCopy("电脑加入链接已复制。", "Desktop link copied."); render(); };
+    const done = () => { state.relayNote = uiCopy("眼镜伴随链接已复制。", "Glasses companion link copied."); render(); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(() => {});
     else { state.relayNote = url; render(); }
   };
@@ -4933,22 +4947,29 @@ function bind(){
 
   /* 一句话 → 这次到访的结构化反馈。模型没接住就退回自己选，绝不替他猜一个分数。 */
   function submitReflect(text){
-    const said = (text || state.reflectText || "").trim();
+    if (state.reflectSending) return;
+    const input = document.getElementById("reflect-input");
+    const said = (text || (input ? input.value : state.reflectText) || "").trim();
     if (!said) return;
-    const previous = (state.reflectHistory || []).map(turn => turn.text).join('。');
+    state.reflectSending = true;
+    state.reflectText = said;
+    const previous = (state.reflectHistory || []).map(turn => "用户：" + turn.text + "；小在：" + turn.reply).join('。');
     const combined = (previous ? previous + '。' : '') + said;
     const p = placeById(state.draft.placeId);
     setReflectCap(uiCopy("我在听你刚才说的…", "Working on what you said…"));
     showVoiceState(null, 'processing');
     const submit = document.getElementById("reflect-submit");
-    if (submit) submit.disabled = true;
+    if (submit) { submit.disabled = true; submit.textContent = uiCopy("正在回复…", "Replying…"); }
     CurrentAI.reflectOn(combined.slice(-500), {
       placeName: p.placeName,
       preMood: moodById(state.mood).name,
       options: (p.factorOptions || []).map(o => o.label)
     }).then(result => {
-      if (result && result.change_score !== null && result.acknowledgement){
-        state.reflect = result;
+      state.reflectSending = false;
+      if (result && result.acknowledgement){
+        const previousScore = state.reflect && state.reflect.change_score;
+        state.reflect = Object.assign({}, state.reflect || {}, result);
+        if (result.change_score === null && previousScore !== null && previousScore !== undefined) state.reflect.change_score = previousScore;
         state.reflectHistory = (state.reflectHistory || []).concat({text:said, reply:result.acknowledgement}).slice(-6);
         state.reflectText = "";
         state.reflectNote = null;
@@ -4960,6 +4981,7 @@ function bind(){
       state.reflectTyping = true;
       render();
     }).catch(() => {
+      state.reflectSending = false;
       state.reflectNote = uiCopy("刚才没接住，可以再说一次。", "That didn’t work. You can try again.");
       state.reflectTyping = true;
       render();
@@ -5479,6 +5501,7 @@ function bind(){
     go("#/reflect/" + el.dataset.reflect);
   });
 
+  root.querySelectorAll("[data-glasses-scene]").forEach(button => button.onclick = () => { state.glassesScene = button.dataset.glassesScene; render(); });
   const reflectType = root.querySelector("#reflect-type");
   if (reflectType) reflectType.onclick = () => {
     state.reflectTyping = true; render();
@@ -5488,7 +5511,14 @@ function bind(){
   const reflectInput = root.querySelector("#reflect-input");
   if (reflectInput) reflectInput.oninput = () => { state.reflectText = reflectInput.value; };
   const reflectSubmit = root.querySelector("#reflect-submit");
-  if (reflectSubmit) reflectSubmit.onclick = () => submitReflect();
+  if (reflectSubmit) {
+    reflectSubmit.disabled = Boolean(state.reflectSending);
+    reflectSubmit.textContent = state.reflectSending ? uiCopy("正在回复…", "Replying…") : uiCopy("发送", "Send");
+    reflectSubmit.onclick = () => submitReflect(reflectInput ? reflectInput.value : state.reflectText);
+  }
+  if (reflectInput) reflectInput.onkeydown = event => {
+    if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); submitReflect(reflectInput.value); }
+  };
 
   const reflectMic = root.querySelector("#reflect-mic");
   if (reflectMic) reflectMic.onclick = () => {
@@ -5497,7 +5527,7 @@ function bind(){
       onStatus: m => { state.reflectNote = m; setReflectCap(m); },
       onState: phase => showVoiceState(reflectMic, phase),
       onPartial: () => setReflectCap(uiCopy("正在听…", "Listening…")),
-      onText: t => { reflectMic.classList.remove("listening"); state.reflectText = t; state.reflectTyping = true; render(); },
+      onText: t => { reflectMic.classList.remove("listening"); state.reflectText = t; state.reflectTyping = true; state.reflectNote = uiCopy('文字已整理好，点发送后小在会回复；你可以继续说或打字。', 'Ready to send. You can keep talking or typing after the reply.'); render(); },
       // 语音坏了不能是死路——和第一屏一样，直接把打字框推到他面前。
       onError: m => { reflectMic.classList.remove("listening"); state.reflectTyping = true; state.reflectNote = m; render();
                       const box = document.getElementById("reflect-input"); if (box) box.focus(); }
