@@ -50,11 +50,11 @@
 @media(max-width:380px){.moment-card{padding:15px}.moment-card h3{font-size:21px}}
 
 /* Xiaozai companion uses the same brand tokens in light and dark modes. */
-.glasses-companion{background:var(--water-wash);color:var(--ink);border-color:var(--line-2)}
+.glasses-companion{background:var(--paper);color:var(--ink);border-color:var(--line-2)}
 .glasses-companion .companion-heading{display:flex;align-items:center;gap:14px;margin:16px 0}
 .glasses-companion .companion-cloud{width:76px;height:46px;flex:none;color:var(--ink)}
 .glasses-companion .companion-heading h3{margin:0;font:600 21px/1.4 var(--sans)}
-.glasses-companion .cloud-body{fill:var(--water-wash);stroke:var(--ink)}
+.glasses-companion .cloud-body{fill:var(--paper);stroke:var(--ink)}
 .glasses-companion .relay-role{flex-wrap:wrap}
 .glasses-companion .relay-role button{flex:1 1 100px;min-height:48px;padding:10px 12px;white-space:normal;line-height:1.5;color:var(--ink);background:var(--card);border-color:var(--line-2)}
 .glasses-companion .relay-role button.on{background:var(--water);color:var(--paper);border-color:var(--water)}
@@ -72,3 +72,17 @@
 .companion-status,.voice-status{display:block;margin:8px 0;color:var(--ink-dim);font:12px/1.7 var(--sans)}
 .voice-status:empty{display:none}
 .companion-chat button:disabled{opacity:.55}
+
+.companion-caption-option{display:flex;align-items:center;gap:8px;margin:12px 0;color:var(--ink-dim);font:13px var(--sans)}
+.companion-caption-option input{width:18px;height:18px;accent-color:var(--water)}
+.companion-transcript[hidden]{display:none}
+.companion-experience{height:180px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--water);margin:18px 0}
+.breathing i{position:absolute;width:70px;height:70px;border:1px solid var(--water);border-radius:50%;animation:companion-ripple 8s infinite;opacity:0}
+.breathing i:nth-child(2){animation-delay:2.6s}.breathing i:nth-child(3){animation-delay:5.2s}
+.breathing span{font-size:36px;animation:companion-breathe 8s ease-in-out infinite}
+.moving{gap:22px}.moving time{font:500 32px var(--sans);font-variant-numeric:tabular-nums}.movement-pulse{font-size:56px;animation:companion-stride 1.2s ease-in-out infinite}
+.exploring span{font-size:72px;animation:companion-breathe 6s ease-in-out infinite}
+@keyframes companion-ripple{0%{transform:scale(.6);opacity:0}15%{opacity:.35}100%{transform:scale(4);opacity:0}}
+@keyframes companion-breathe{50%{transform:scale(1.25);opacity:.65}}
+@keyframes companion-stride{50%{transform:translateY(-9px)}}
+@media(prefers-reduced-motion:reduce){.companion-experience *{animation:none!important}.breathing i{opacity:.15}}

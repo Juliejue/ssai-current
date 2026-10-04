@@ -3722,10 +3722,12 @@ function renderCompanionChat(){
   const recommendation = companionRecommendation();
   let h = '<section class="companion-chat"><h3>' + uiCopy('和小在继续聊', 'Keep talking with Xiaozai') + '</h3>';
   if (recommendation) h += '<p class="companion-status">' + uiCopy('当前推荐：', 'Current recommendation: ') + escapeHTML(recommendation.place_name || '') + '</p>';
-  h += '<p class="companion-status">' + uiCopy('文字和语音都可以。只同步推荐与操作，聊天原文不进入配对记录。', 'Type or speak. Only recommendations and actions are shared; chat text stays out of the pairing record.') + '</p>';
+  h += '<label class="companion-caption-option"><input id="companion-captions" type="checkbox"' + (localStorage.getItem('xiaozai-captions') !== 'off' ? ' checked' : '') + '> ' + uiCopy('显示对话文字', 'Show conversation text') + '</label>';
+  h += '<div class="companion-transcript"' + (localStorage.getItem('xiaozai-captions') === 'off' ? ' hidden' : '') + '>';
   (state.companionHistory || []).forEach(turn => {
     h += '<div class="companion-turn ' + (turn.role === 'user' ? 'user' : '') + '"><span class="tag">' + (turn.role === 'user' ? uiCopy('你','You') : uiCopy('小在','Xiaozai')) + '</span><p>' + escapeHTML(turn.content) + '</p>' + (turn.role === 'assistant' ? '<button class="btn-text" data-zai-speak="' + escapeHTML(turn.content) + '">' + uiCopy('听小在说', 'Listen to Xiaozai') + '</button>' : '') + '</div>';
   });
+  h += '</div>';
   h += '<textarea id="companion-input" maxlength="300" aria-label="' + uiCopy('和小在说话', 'Talk to Xiaozai') + '" placeholder="' + uiCopy('这里太吵了，想换个安静的地方…', 'It’s too noisy here. Can we find somewhere quieter?') + '">' + escapeHTML(state.companionText || '') + '</textarea>';
   h += '<div class="companion-actions"><button id="companion-mic" aria-pressed="' + CurrentAI.voiceIsActive() + '">' + uiCopy(CurrentAI.voiceIsActive() ? '说完了' : '说话', CurrentAI.voiceIsActive() ? 'Done' : 'Speak') + '</button><button class="primary" id="companion-send"' + (state.companionBusy ? ' disabled' : '') + '>' + uiCopy(state.companionBusy ? '正在回复…' : '发送', state.companionBusy ? 'Replying…' : 'Send') + '</button></div>';
   h += '<p class="companion-status" id="companion-status" role="status" aria-live="polite">' + escapeHTML(state.companionNote || '') + '</p>';
@@ -3733,14 +3735,18 @@ function renderCompanionChat(){
   [['accept',uiCopy('接受推荐','Accept')],['change',uiCopy('换一个','Another place')],['quiet',uiCopy('安静一点','Quieter')],['near',uiCopy('近一点','Closer')]].forEach(([action,label]) => {
     h += '<button data-companion-action="' + action + '"' + (!CurrentAI.relayState() || state.companionActionBusy || state.companionUrgent ? ' disabled' : '') + '>' + label + '</button>';
   });
-  return h + '</div><small class="companion-status">' + uiCopy('小在的柔和声音由 AI 生成。', 'Xiaozai’s soft voice is AI-generated.') + '</small></section>';
+  return h + '</div></section>';
 }
 function bindCompanionChat(root){
+  const captions = root.querySelector('#companion-captions');
+  if (captions) captions.onchange = () => { localStorage.setItem('xiaozai-captions', captions.checked ? 'on' : 'off'); render(); };
   const input = root.querySelector('#companion-input');
   if (input) input.oninput = () => { state.companionText = input.value; };
   async function submit(){
     const text = ((input && input.value) || state.companionText || '').trim();
     if (!text || state.companionBusy) return;
+    const requestedScene = Object.keys(companionScenes).find(key => text.includes(companionScenes[key].label));
+    if (requestedScene) { state.companionText = ''; startCompanionScene(requestedScene); return; }
     state.companionText = text; state.companionBusy = true; state.companionNote = uiCopy('我在听…', 'I’m listening…'); render();
     const recommendation = companionRecommendation();
     const controller = new AbortController();
@@ -3748,7 +3754,8 @@ function bindCompanionChat(root){
     try {
       const result = await CurrentAI.api('/companion/chat', {method:'POST', signal:controller.signal, body:JSON.stringify({text:text, history:(state.companionHistory || []).slice(-8), scene:state.glassesScene || 'quiet', place_name:recommendation && recommendation.place_name || '', state_label:((state.relayEvents || []).slice().reverse().find(event => event.event_type === 'interpreted') || {payload:{}}).payload.state_label || '', need_labels:((state.relayEvents || []).slice().reverse().find(event => event.event_type === 'interpreted') || {payload:{}}).payload.need_labels || [], lang:currentLang()})});
       state.companionHistory = (state.companionHistory || []).concat({role:'user',content:text},{role:'assistant',content:result.reply}).slice(-8);
-      state.companionText = ''; state.companionNote = result.source === 'rules' ? uiCopy('当前使用基础回应；下方按钮仍可调整推荐。', 'Basic reply mode. Use the buttons to adjust your recommendation.') : '';
+      state.companionText = ''; state.companionNote = '';
+      XiaozaiVoice.speak(result.reply, currentLang(), () => {});
       state.companionUrgent = Boolean(result.urgent);
       // Only explicit user commands trigger changes. Generated prose has no authority.
       if (!result.urgent && /^(?:请|帮我)?(?:换一个|换个地方|换一批)[。！!\s]*$/.test(text)) await requestCompanionAction('change');
@@ -3774,18 +3781,34 @@ function bindCompanionChat(root){
   root.querySelectorAll('[data-companion-action]').forEach(button => button.onclick = () => requestCompanionAction(button.dataset.companionAction));
 }
 
-function renderGlassesCompanion(){
-  const scene = state.glassesScene || 'quiet';
-  const scenes = {quiet:['安静空间 · 呼吸陪伴','如果你愿意，停下来做一分钟自然呼吸；不舒服就停止。'],run:['河边 / 跑道 · 运动陪伴','先慢走热身，按自己的节奏开始；想停就停。'],cafe:['咖啡馆 / 博物馆 · 探索向导','你想了解眼前什么？告诉我，我会继续陪你探索。']};
-  const latest = (state.relayEvents || []).slice().reverse().find(e => e.event_type === 'recommended');
-  const place = latest && latest.payload.place_name;
-  let h = '<section class="relay-panel glasses-companion"><span class="moment-badge">GLASSES · 网页演示</span><div class="companion-heading"><span class="companion-cloud">' + cloudSVG('look') + '</span><h3>小在 · ' + escapeHTML(place || '此刻的空间') + '</h3></div>';
-  h += '<p>场景由你选择，尚未接入视觉识别。导航以手机地图为准。</p><div class="relay-role">';
-  Object.keys(scenes).forEach(key => { h += '<button class="btn ghost sm' + (key === scene ? ' on' : '') + '" aria-pressed="' + (key === scene) + '" data-glasses-scene="' + key + '">' + scenes[key][0] + '</button>'; });
-  h += '</div><h3>' + scenes[scene][0] + '</h3><p>' + scenes[scene][1] + '</p><button class="btn ghost sm" data-zai-speak="' + escapeHTML(scenes[scene][1]) + '">听小在说</button>';
-  h += '<p style="margin-top:18px">空间深层信息：到访人数、眼镜推荐到访占比、心情变化汇总暂无可靠数据，暂不展示数值。</p><p>只同步结构化进度；聊天原文只在当前设备用于本轮回复，不进入配对记录；录音不保存。社交邀请需双方主动同意，当前尚未开放。</p></section>';
-  return h;
+const companionScenes = {
+  quiet: {label:'呼吸陪伴', reply:'我陪你，慢慢呼吸。'},
+  run: {label:'运动陪伴', reply:'我们开始吧，按你的节奏，先慢慢走起来。'},
+  cafe: {label:'探索向导', reply:'想探索什么？我陪你一起看看。'}
+};
+function startCompanionScene(scene){
+  if (!companionScenes[scene]) return;
+  state.glassesScene = scene; state.companionStartedAt = Date.now();
+  state.companionHistory = (state.companionHistory || []).concat({role:'assistant', content:companionScenes[scene].reply}).slice(-8);
+  if (CurrentAI.relayState()) CurrentAI.publishRelay('scene_changed', {scene:scene, origin:CurrentAI.deviceRole()}).catch(error => { state.companionNote = error.message; render(); });
+  render(); XiaozaiVoice.speak(companionScenes[scene].reply, currentLang(), () => {});
 }
+function renderGlassesCompanion(){
+  const scene = state.glassesScene;
+  let h = '<section class="relay-panel glasses-companion"><div class="companion-heading"><span class="companion-cloud">' + cloudSVG('look') + '</span><h3>小在</h3></div><div class="relay-role">';
+  Object.keys(companionScenes).forEach(key => { h += '<button class="btn ghost sm' + (key === scene ? ' on' : '') + '" aria-pressed="' + (key === scene) + '" data-glasses-scene="' + key + '">' + companionScenes[key].label + '</button>'; });
+  h += '</div>';
+  if (scene === 'quiet') h += '<div class="companion-experience breathing" aria-label="呼吸陪伴"><i></i><i></i><i></i><span>☁</span></div>';
+  if (scene === 'run') h += '<div class="companion-experience moving"><span class="movement-pulse">↟</span><time id="movement-time">' + movementTime() + '</time></div>';
+  if (scene === 'cafe') h += '<div class="companion-experience exploring" aria-label="探索向导"><span>✧</span></div>';
+  if (scene) h += '<button class="btn-text" id="companion-stop">结束陪伴</button>';
+  return h + '</section>';
+}
+function movementTime(){
+  const seconds = Math.max(0, Math.floor((Date.now() - (state.companionStartedAt || Date.now())) / 1000));
+  return String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
+}
+setInterval(() => { const timer = document.getElementById('movement-time'); if (timer) timer.textContent = movementTime(); }, 1000);
 
 function renderConnect(){
   const relay = CurrentAI.relayState();
@@ -3793,13 +3816,6 @@ function renderConnect(){
   const pending = CurrentAI.relayPendingCode();
   let h = topbar(uiCopy('手机与智能眼镜，让小在一路陪你', 'Phone + smart glasses'), uiCopy('跨设备（智能眼镜）', 'Smart glasses'), '#/talk');
   h += '<div class="screen"><div class="pad moment-wrap">';
-  h += '<p class="lead">' + uiCopy('手机负责文字、网络和记录，眼镜伴随界面接收小在的理解、推荐与行动进度。连接 12 小时后自动结束。',
-    'Phone handles text, network and records; the glasses companion receives structured progress. The link ends after 12 hours.') + '</p>';
-  h += '<div class="location-help" style="margin:0 0 18px;max-width:none"><strong>' + uiCopy('什么时候有用？', 'When is this useful?') + '</strong><p>' +
-    uiCopy('当前支持两台设备之间的网页协同演示，尚未接入眼镜硬件 SDK。眼镜端看即时提示，手机端保留私密输入、情绪轨迹与社群分享。',
-      'Two-device web demo; no glasses hardware SDK connected yet. Private input, mood history and sharing stay on the phone.') +
-    '</p></div>';
-  h += '<div class="relay-steps"><div class="relay-step"><b>1</b>' + uiCopy('手机生成码','Create on phone') + '</div><div class="relay-step"><b>2</b>' + uiCopy('眼镜端输入码','Enter on glasses') + '</div><div class="relay-step"><b>3</b>' + uiCopy('眼镜伴随，手机记录','Glasses companion') + '</div></div>';
   h += '<div class="relay-role"><button class="btn ghost sm' + (role === 'phone' ? ' on' : '') + '" data-role="phone">' + uiCopy('从这台手机发起', 'Start on this phone') + '</button>' +
     '<button class="btn ghost sm' + (role === 'desk' ? ' on' : '') + '" data-role="desk">' + uiCopy('眼镜伴随模式（演示）', 'Glasses companion (demo)') + '</button></div>';
   if (!relay && role === 'phone') {
@@ -3811,12 +3827,13 @@ function renderConnect(){
       '<form class="relay-join" id="relay-join"><input name="code" maxlength="6" autocomplete="one-time-code" value="' + escapeHTML(pending) + '" placeholder="ABC234" required>' +
       '<button class="btn sm" type="submit">' + uiCopy('连接', 'Connect') + '</button></form></div>';
   } else {
+    if (role === 'desk') h += '<details class="companion-connection"><summary>连接设置</summary>';
     h += '<div class="relay-panel"><span class="moment-badge">' + uiCopy(role === 'phone' ? '手机已准备好' : '眼镜伴随界面已连接', role === 'phone' ? 'PHONE READY' : 'GLASSES COMPANION') + '</span>' +
       '<p>' + uiCopy('临时配对码', 'Temporary pairing code') + '</p>' +
-      '<div class="relay-code">' + escapeHTML(relay.code) + '</div><p>' +
-      uiCopy(relay.durable ? '两台设备只同步小在的理解、推荐与行动状态。' : '当前是本地测试连接，服务重启后会结束。', relay.durable ? 'The devices share only Xiaozai’s understanding, recommendation, and action state.' : 'This is a local test link and ends when the service restarts.') + '</p>' +
+      '<div class="relay-code">' + escapeHTML(relay.code) + '</div>' +
       (role === 'phone' ? '<button class="btn ghost sm" id="relay-copy">' + uiCopy('复制眼镜伴随链接', 'Copy glasses companion link') + '</button>' : '') +
       '<button class="btn-text" id="relay-leave">' + uiCopy('断开这次接续', 'Disconnect') + '</button></div>';
+    if (role === 'desk') h += '</details>';
   }
   if (state.relayNote) h += '<p class="moment-status">' + escapeHTML(state.relayNote) + '</p>';
   if (role === 'desk') h += renderGlassesCompanion();
@@ -5090,7 +5107,7 @@ function bind(){
     }
     XiaozaiVoice.speak(button.dataset.zaiSpeak, currentLang(), (phase, message) => {
       button.textContent = phase === 'loading' ? uiCopy('准备声音…', 'Preparing voice…') : phase === 'speaking' ? uiCopy('小在正在说…', 'Xiaozai is speaking…') : original;
-      status.textContent = message || (phase === 'speaking' ? uiCopy('小在 · 柔和声音（AI 生成）', 'Xiaozai · soft AI voice') : '');
+      status.textContent = message || '';
       const guide = button.closest('.reflect-guide');
       if (guide) guide.classList.toggle('is-speaking', phase === 'speaking');
     });
@@ -5653,11 +5670,9 @@ function bind(){
     go("#/reflect/" + el.dataset.reflect);
   });
 
-  root.querySelectorAll("[data-glasses-scene]").forEach(button => button.onclick = () => {
-    state.glassesScene = button.dataset.glassesScene;
-    CurrentAI.publishRelay('scene_changed', {scene:state.glassesScene, origin:CurrentAI.deviceRole()}).catch(error => { state.companionNote = error.message; render(); });
-    render();
-  });
+  root.querySelectorAll('[data-glasses-scene]').forEach(button => button.onclick = () => startCompanionScene(button.dataset.glassesScene));
+  const stopCompanion = root.querySelector('#companion-stop');
+  if (stopCompanion) stopCompanion.onclick = () => { state.glassesScene = null; state.companionStartedAt = null; XiaozaiVoice.stop(); render(); };
   bindCompanionChat(root);
   const reflectType = root.querySelector("#reflect-type");
   if (reflectType) reflectType.onclick = () => {
