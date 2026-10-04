@@ -4544,6 +4544,13 @@ function applyLang(root){
 
 function render(){
   const root = document.getElementById("root");
+  const preserveCompanion = state.route === '#/connect' && root.dataset.renderedRoute === '#/connect';
+  const oldScreen = preserveCompanion && root.querySelector('.screen');
+  const oldScroll = oldScreen ? oldScreen.scrollTop : 0;
+  const activeInput = preserveCompanion && document.activeElement && document.activeElement.id === 'companion-input' ? document.activeElement : null;
+  const selection = activeInput ? [activeInput.selectionStart, activeInput.selectionEnd] : null;
+  const oldProgress = preserveCompanion && root.querySelector('details.relay-panel');
+  const progressOpen = oldProgress && oldProgress.open;
   if (state.showSplash){
     root.innerHTML = '<div class="stage"><div class="phone"><div class="launch"><div class="launch-cloud">' + cloudSVG("withyou") + '</div><div class="launch-name">此在 · Current</div><button class="launch-skip" id="launch-skip" aria-label="' + uiCopy('进入','Enter') + '">' + uiCopy('进入','Enter') + '</button></div></div></div>';
     const skip = root.querySelector("#launch-skip");
@@ -4600,6 +4607,15 @@ function render(){
   applyLang(root);
   syncPresenceWatch();
   bind();
+  root.dataset.renderedRoute = state.route;
+  if (preserveCompanion) {
+    const progress = root.querySelector('details.relay-panel');
+    if (progress && progressOpen) progress.open = true;
+    const input = root.querySelector('#companion-input');
+    if (input && selection) { input.focus({preventScroll:true}); input.setSelectionRange(selection[0], selection[1]); }
+    const screen = root.querySelector('.screen');
+    if (screen) screen.scrollTop = oldScroll;
+  }
 }
 function scaleMinis(){
   document.querySelectorAll(".mini").forEach(m => {
