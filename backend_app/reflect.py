@@ -25,6 +25,7 @@ import logging
 import os
 import re
 from typing import Any
+from urllib.parse import urlsplit
 
 import httpx
 
@@ -123,7 +124,12 @@ async def reflect(
 
     base_url = checked_model_base_url(os.getenv("LLM_BASE_URL") or os.getenv("base_url"))
     if not base_url:
-        return _fallback(options, "configuration_invalid")
+        result = _fallback(options, "configuration_invalid")
+        try:
+            result["failure_host"] = urlsplit(os.getenv("LLM_BASE_URL") or os.getenv("base_url") or "").hostname
+        except ValueError:
+            pass
+        return result
     model = os.getenv("LLM_MODEL") or os.getenv("model") or "glm-4.7-flash"
 
     user_prompt = (
