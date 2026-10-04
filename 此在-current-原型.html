@@ -5144,13 +5144,13 @@ function bind(){
         render();
         return;
       }
-      // 没听清就直说，然后把选择题给他——不猜。
-      state.reflectNote = uiCopy("这句我没听准，你可以再说一次。", "I didn’t catch that. You can try again.");
+      // 转写已完成；回复服务失败不能误报为没听清，也不能清空用户文字。
+      state.reflectNote = uiCopy("文字已收到，但小在暂时没能生成回复。点发送重试，或自己选。", "Your text is ready, but the reply failed. Send again or choose instead.");
       state.reflectTyping = true;
       render();
     }).catch(() => {
       state.reflectSending = false;
-      state.reflectNote = uiCopy("刚才没接住，可以再说一次。", "That didn’t work. You can try again.");
+      state.reflectNote = uiCopy("回复暂时连接不上，文字还在。点发送重试，或自己选。", "The reply service is unavailable. Your text is kept; send again or choose instead.");
       state.reflectTyping = true;
       render();
     });

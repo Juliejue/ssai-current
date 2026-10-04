@@ -215,6 +215,7 @@ class ReflectRequest(BaseModel):
 
 
 class ReflectResponse(BaseModel):
+    status: Literal["ok", "unavailable"] = "ok"
     change_score: int | None = Field(default=None, ge=-3, le=3)
     factors: list[str] = Field(default_factory=list, max_length=3)
     mismatch_stage: Literal["none", "state", "need", "constraint", "place"] = "none"
