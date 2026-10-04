@@ -15,6 +15,10 @@ import psycopg
 
 logger = logging.getLogger("current.relay")
 
+
+class RelayUnavailable(RuntimeError):
+    pass
+
 CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
 CODE_LENGTH = 6
 SESSION_TTL = timedelta(hours=12)
@@ -205,6 +209,8 @@ async def append_event(code: str, event_type: str, payload: dict[str, Any]) -> t
                 return None, True
         except psycopg.Error:
             logger.exception("failed to append durable relay event")
+            if event_type in ('companion_action', 'companion_ack', 'scene_changed'):
+                raise RelayUnavailable("跨设备同步暂时不可用，请稍后重试。")
     return await _memory_append(code, event_type, clean), False
 
 

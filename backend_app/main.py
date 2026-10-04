@@ -20,7 +20,7 @@ from .i18n import ui
 from .map_provider import AmapClient, MapProviderError, static_map_png
 from .realtime_asr import build_asr_connect_url, is_configured as realtime_asr_is_configured
 from .presence import verify as verify_presence
-from .relay import append_event, create_session, normalize_code, read_events, safe_payload, valid_code
+from .relay import append_event, create_session, normalize_code, read_events, safe_payload, valid_code, RelayUnavailable
 from .reflect import reflect_quietly
 from .recommender import load_catalog, recommend_with_live_context, warm_discovery
 from .schemas import (
@@ -160,7 +160,10 @@ async def relay_event(code: str, payload: RelayEventRequest) -> dict[str, bool |
         safe_payload(payload.event_type, payload.payload)
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
-    sequence, durable = await append_event(code, payload.event_type, payload.payload)
+    try:
+        sequence, durable = await append_event(code, payload.event_type, payload.payload)
+    except RelayUnavailable as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
     if sequence is None:
         raise HTTPException(status_code=404, detail="会话不存在或已经结束")
     return {"accepted": True, "sequence": sequence, "durable": durable}

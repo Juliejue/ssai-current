@@ -75,3 +75,17 @@ def test_tts_permission_error_is_actionable(monkeypatch):
     response = client.post('/api/v1/speech',json={'text':'我在。'})
     assert response.status_code == 503
     assert '开通' in response.json()['detail']
+
+
+def test_failed_durable_action_never_claims_success(monkeypatch):
+    from backend_app import relay
+    monkeypatch.delenv('DATABASE_URL', raising=False)
+    code = client.post('/api/v1/relay/sessions').json()['code']
+    monkeypatch.setenv('DATABASE_URL', 'postgresql://not-connected')
+    async def fail(*args, **kwargs):
+        raise relay.psycopg.OperationalError('database unavailable')
+    monkeypatch.setattr(relay.psycopg.AsyncConnection, 'connect', fail)
+    response = client.post(f'/api/v1/relay/{code}/events', json={'event_type':'companion_action','payload':{'action':'change','origin':'desk','request_id':'failure'}})
+    assert response.status_code == 503
+    monkeypatch.delenv('DATABASE_URL')
+    assert client.get(f'/api/v1/relay/{code}').json()['events'] == []
